@@ -1,0 +1,53 @@
+    1 # Node.js
+    2 node_modules/
+    3 npm-debug.log*
+    4 yarn-debug.log*
+    5 yarn-error.log*
+    6
+    7 # Environment variables
+    8 .env
+    9 .env.local
+   10 .env.development.local
+   11 .env.test.local
+   12 .env.production.local
+   13
+   14 # OS generated files
+   15 .DS_Store
+   16 .DS_Store?
+   17 ._*
+   18 .Spotlight-V100
+   19 .Trashes
+   20 ehthumbs.db
+   21 Thumbs.db
+   22
+   23 # Logs
+   24 logs
+   25 *.log
+   26
+   27 # Runtime data
+   28 pids
+   29 *.pid
+   30 *.seed
+   31 *.pid.lock
+   32
+   33 # Coverage directory used by tools like istanbul
+   34 coverage/
+   35 *.lcov
+   36
+   37 # Temporary folders
+   38 tmp/
+   39 temp/
+   40
+   41 # Database
+   42 *.db
+   43 *.db-journal
+   44
+   45 # IDE files
+   46 .vscode/
+   47 .idea/
+   48 *.swp
+   49 *.swo
+   50
+   51 # Build outputs
+   52 dist/
+   53 build/
