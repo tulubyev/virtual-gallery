@@ -9,7 +9,7 @@ export const imageProcessingService = {
     formData.append('image', file);
     formData.append('uploaded_by', userId.toString());
 
-    const response = await api.post('/artworks/upload', formData, {
+    const response = await api.post('/api/artworks/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -65,6 +65,15 @@ export const imageProcessingService = {
   // Запросить повторный анализ изображения
   async reanalyzeImage(uploadId: number): Promise<ImageAnalysisResult> {
     const response = await api.post(`/artworks/${uploadId}/reanalyze`);
+    return response.data;
+  },
+
+  // Сгенерировать NFT для произведения искусства
+  async generateNFT(artworkId: number, ownerInfo: any): Promise<any> {
+    const response = await api.post('/artworks/generate-nft', {
+      artworkId,
+      ownerInfo
+    });
     return response.data;
   }
 };

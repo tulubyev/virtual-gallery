@@ -12,6 +12,7 @@ const artworkRoutes = require('./src/backend/routes/artworkRoutes');
 const galleryRoutes = require('./src/backend/routes/galleryRoutes');
 const userRoutes = require('./src/backend/routes/userRoutes');
 const aiRoutes = require('./src/backend/routes/aiRoutes');
+const iotRoutes = require('./src/backend/routes/iotRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -40,6 +41,7 @@ app.use('/api/artworks', artworkRoutes);
 app.use('/api/galleries', galleryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/iot', iotRoutes);
 
 console.log('Маршруты загружены');
 

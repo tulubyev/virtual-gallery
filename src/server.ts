@@ -12,6 +12,7 @@ import { galleryRoutes } from './routes/galleryRoutes';
 import { userRoutes } from './routes/userRoutes';
 import { aiRoutes } from './routes/aiRoutes';
 import { userManagementRoutes } from './routes/userManagementRoutes';
+import artworkUploadRoutes from './routes/artworkUploadRoutes';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -41,6 +42,7 @@ app.use('/api/galleries', galleryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin/users', userManagementRoutes);
+app.use('/api/artworks', artworkUploadRoutes);
 
 // Serve frontend
 app.get('/', (req: Request, res: Response) => {

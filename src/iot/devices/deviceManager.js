@@ -1,208 +1,380 @@
-// IoT Device Manager for Virtual Art Gallery
-// Handles communication with physical sensors and devices
+// src/iot/devices/deviceManager.js
+// Module for managing IoT devices in the virtual art gallery
 
-class IoTDeviceManager {
+const sensorProcessor = require('../sensors/sensorProcessor');
+
+class DeviceManager {
     constructor() {
-        this.devices = new Map(); // Store connected devices
-        this.sensors = new Map(); // Store sensor readings
-        this.isConnected = false;
+        this.devices = new Map(); // Store registered IoT devices
+        this.connectionStatus = new Map(); // Track connection status
+        this.deviceCallbacks = new Map(); // Store callbacks for device events
     }
 
-    // Initialize IoT connections
-    async initialize() {
-        console.log('Initializing IoT device manager...');
-        
-        // In a real implementation, this would connect to:
-        // - Audio sensors for detecting applause/clapping
-        // - Motion sensors for tracking visitor movement
-        // - Environmental sensors for monitoring conditions
-        
-        // Mock initialization
-        this.devices.set('audio_sensor_1', { type: 'audio', location: 'main_hall' });
-        this.devices.set('motion_sensor_1', { type: 'motion', location: 'entrance' });
-        this.devices.set('proximity_sensor_1', { type: 'proximity', location: 'featured_artwork' });
-        
-        this.isConnected = true;
-        console.log('IoT device manager initialized');
-    }
-
-    // Get sensor readings
-    async getSensorReadings(sensorId) {
-        // In a real implementation, this would fetch real-time data from physical sensors
-        if (!this.isConnected) {
-            throw new Error('IoT device manager not initialized');
-        }
-
-        // Mock sensor data
-        switch (sensorId) {
-            case 'audio_sensor_1':
-                return {
-                    timestamp: new Date(),
-                    sound_level: Math.random() * 100, // 0-100 dB
-                    clap_detected: Math.random() > 0.95, // 5% chance of clap
-                    speech_detected: Math.random() > 0.8 // 20% chance of speech
-                };
-            case 'motion_sensor_1':
-                return {
-                    timestamp: new Date(),
-                    movement_detected: Math.random() > 0.7, // 30% chance of movement
-                    visitor_count: Math.floor(Math.random() * 10) // 0-9 visitors
-                };
-            case 'proximity_sensor_1':
-                return {
-                    timestamp: new Date(),
-                    proximity_level: Math.random() * 100, // 0-100% proximity
-                    object_detected: Math.random() > 0.5 // 50% chance of detection
-                };
-            default:
-                throw new Error(`Unknown sensor ID: ${sensorId}`);
-        }
-    }
-
-    // Get all sensor readings
-    async getAllSensorReadings() {
-        if (!this.isConnected) {
-            throw new Error('IoT device manager not initialized');
-        }
-
-        const readings = {};
-        for (const [sensorId] of this.devices) {
-            try {
-                readings[sensorId] = await this.getSensorReadings(sensorId);
-            } catch (error) {
-                console.error(`Error reading sensor ${sensorId}:`, error);
-            }
-        }
-        return readings;
-    }
-
-    // Process sensor data for insights
-    async processSensorData() {
-        const readings = await this.getAllSensorReadings();
-        
-        // Analyze the data for patterns
-        const insights = {
-            crowd_density: this.calculateCrowdDensity(readings),
-            engagement_level: this.calculateEngagementLevel(readings),
-            popular_areas: this.identifyPopularAreas(readings),
-            feedback_summary: this.summarizeFeedback(readings)
-        };
-        
-        return insights;
-    }
-
-    // Calculate crowd density based on sensor data
-    calculateCrowdDensity(readings) {
-        let totalVisitors = 0;
-        let activeSensors = 0;
-        
-        for (const [sensorId, data] of Object.entries(readings)) {
-            if (this.devices.get(sensorId).type === 'motion' && data.movement_detected) {
-                totalVisitors += data.visitor_count;
-                activeSensors++;
-            }
-        }
-        
-        return activeSensors > 0 ? totalVisitors / activeSensors : 0;
-    }
-
-    // Calculate engagement level based on sensor data
-    calculateEngagementLevel(readings) {
-        let engagementScore = 0;
-        let sensorCount = 0;
-        
-        for (const [sensorId, data] of Object.entries(readings)) {
-            if (this.devices.get(sensorId).type === 'audio') {
-                // Higher sound levels and clapping indicate engagement
-                engagementScore += data.sound_level / 100;
-                if (data.clap_detected) engagementScore += 0.5;
-                if (data.speech_detected) engagementScore += 0.3;
-                sensorCount++;
-            } else if (this.devices.get(sensorId).type === 'proximity') {
-                // Longer proximity indicates interest
-                engagementScore += data.proximity_level / 100;
-                sensorCount++;
-            }
-        }
-        
-        return sensorCount > 0 ? engagementScore / sensorCount : 0;
-    }
-
-    // Identify popular areas based on sensor activity
-    identifyPopularAreas(readings) {
-        const areaActivity = new Map();
-        
-        for (const [sensorId, data] of Object.entries(readings)) {
-            const device = this.devices.get(sensorId);
-            const location = device.location;
-            
-            if (!areaActivity.has(location)) {
-                areaActivity.set(location, { activity: 0, sensors: 0 });
-            }
-            
-            const area = areaActivity.get(location);
-            if (device.type === 'motion' && data.movement_detected) {
-                area.activity += data.visitor_count;
-            } else if (device.type === 'proximity' && data.object_detected) {
-                area.activity += 1;
-            }
-            area.sensors += 1;
-        }
-        
-        // Convert to sorted array
-        return Array.from(areaActivity.entries())
-            .map(([location, data]) => ({
-                location,
-                average_activity: data.activity / data.sensors
-            }))
-            .sort((a, b) => b.average_activity - a.average_activity);
-    }
-
-    // Summarize feedback from sensors
-    summarizeFeedback(readings) {
-        let applauseCount = 0;
-        let positiveIndicators = 0;
-        
-        for (const [sensorId, data] of Object.entries(readings)) {
-            if (this.devices.get(sensorId).type === 'audio') {
-                if (data.clap_detected) applauseCount++;
-                if (data.speech_detected || data.sound_level > 50) positiveIndicators++;
-            }
-        }
-        
-        return {
-            applause_events: applauseCount,
-            positive_indicators: positiveIndicators,
-            overall_sentiment: positiveIndicators > applauseCount ? 'positive' : 'neutral'
-        };
-    }
-
-    // Send command to IoT devices
-    async sendCommand(deviceId, command, params = {}) {
-        if (!this.isConnected) {
-            throw new Error('IoT device manager not initialized');
-        }
-
-        // In a real implementation, this would send commands to physical devices
-        console.log(`Sending command ${command} to device ${deviceId}`, params);
-        
-        // Mock response
-        return {
-            success: true,
+    // Register a new IoT device
+    registerDevice(deviceId, deviceType, galleryId, roomId, config = {}) {
+        this.devices.set(deviceId, {
             deviceId,
-            command,
-            timestamp: new Date()
-        };
+            deviceType,
+            galleryId,
+            roomId,
+            config,
+            registeredAt: new Date(),
+            lastHeartbeat: new Date(),
+            status: 'registered'
+        });
+
+        this.connectionStatus.set(deviceId, {
+            isConnected: false,
+            lastSeen: null,
+            connectionAttempts: 0
+        });
+
+        console.log(`Device registered: ${deviceId} (${deviceType}) in gallery ${galleryId}, room ${roomId}`);
+
+        // If it's a sensor device, register with sensor processor
+        if (deviceType.includes('sensor')) {
+            sensorProcessor.registerSensor(deviceId, deviceType, galleryId, roomId);
+        }
+
+        return { success: true, deviceId };
     }
 
-    // Close connections
-    async disconnect() {
-        console.log('Disconnecting IoT devices...');
-        this.isConnected = false;
-        this.devices.clear();
-        this.sensors.clear();
-        console.log('IoT devices disconnected');
+    // Connect a device
+    connectDevice(deviceId) {
+        const device = this.devices.get(deviceId);
+        if (!device) {
+            return { success: false, error: `Device not found: ${deviceId}` };
+        }
+
+        // Update device status
+        device.status = 'connected';
+        device.lastHeartbeat = new Date();
+
+        // Update connection status
+        this.connectionStatus.set(deviceId, {
+            isConnected: true,
+            lastSeen: new Date(),
+            connectionAttempts: 0
+        });
+
+        console.log(`Device connected: ${deviceId}`);
+
+        // Trigger connection callback if exists
+        if (this.deviceCallbacks.has(deviceId)) {
+            this.deviceCallbacks.get(deviceId).onConnect && 
+                this.deviceCallbacks.get(deviceId).onConnect(device);
+        }
+
+        return { success: true, message: `Device ${deviceId} connected` };
+    }
+
+    // Disconnect a device
+    disconnectDevice(deviceId) {
+        const device = this.devices.get(deviceId);
+        if (!device) {
+            return { success: false, error: `Device not found: ${deviceId}` };
+        }
+
+        // Update device status
+        device.status = 'disconnected';
+
+        // Update connection status
+        const status = this.connectionStatus.get(deviceId);
+        if (status) {
+            status.isConnected = false;
+        }
+
+        console.log(`Device disconnected: ${deviceId}`);
+
+        // Trigger disconnection callback if exists
+        if (this.deviceCallbacks.has(deviceId)) {
+            this.deviceCallbacks.get(deviceId).onDisconnect && 
+                this.deviceCallbacks.get(deviceId).onDisconnect(device);
+        }
+
+        return { success: true, message: `Device ${deviceId} disconnected` };
+    }
+
+    // Handle incoming data from a device
+    async handleDeviceData(deviceId, data) {
+        const device = this.devices.get(deviceId);
+        if (!device) {
+            return { success: false, error: `Device not found: ${deviceId}` };
+        }
+
+        // Update last heartbeat
+        device.lastHeartbeat = new Date();
+        const status = this.connectionStatus.get(deviceId);
+        if (status) {
+            status.lastSeen = new Date();
+        }
+
+        // Process the data based on device type
+        switch (device.deviceType) {
+            case 'audio_sensor':
+                return await this.processAudioData(deviceId, data);
+            case 'motion_sensor':
+                return await this.processMotionData(deviceId, data);
+            case 'proximity_sensor':
+                return await this.processProximityData(deviceId, data);
+            case 'environment_sensor':
+                return await this.processEnvironmentData(deviceId, data);
+            case 'display_controller':
+                return await this.processDisplayCommand(deviceId, data);
+            case 'lighting_controller':
+                return await this.processLightingCommand(deviceId, data);
+            default:
+                console.warn(`Unknown device type: ${device.deviceType}`);
+                return { success: false, error: `Unknown device type: ${device.deviceType}` };
+        }
+    }
+
+    // Process audio sensor data
+    async processAudioData(deviceId, data) {
+        // Validate audio data
+        if (!data.volume_level || !data.frequency_analysis) {
+            return { success: false, error: 'Invalid audio data format' };
+        }
+
+        // Send to sensor processor
+        return await sensorProcessor.processSensorData(deviceId, {
+            type: 'audio',
+            timestamp: new Date(),
+            ...data
+        });
+    }
+
+    // Process motion sensor data
+    async processMotionData(deviceId, data) {
+        // Validate motion data
+        if (!data.visitor_count && !data.movement_patterns) {
+            return { success: false, error: 'Invalid motion data format' };
+        }
+
+        // Send to sensor processor
+        return await sensorProcessor.processSensorData(deviceId, {
+            type: 'motion',
+            timestamp: new Date(),
+            ...data
+        });
+    }
+
+    // Process proximity sensor data
+    async processProximityData(deviceId, data) {
+        // Validate proximity data
+        if (!data.proximity_events) {
+            return { success: false, error: 'Invalid proximity data format' };
+        }
+
+        // Send to sensor processor
+        return await sensorProcessor.processSensorData(deviceId, {
+            type: 'proximity',
+            timestamp: new Date(),
+            ...data
+        });
+    }
+
+    // Process environment sensor data
+    async processEnvironmentData(deviceId, data) {
+        // Validate environment data
+        if (!data.temperature && !data.humidity && !data.lighting_level) {
+            return { success: false, error: 'Invalid environment data format' };
+        }
+
+        // Send to sensor processor
+        return await sensorProcessor.processSensorData(deviceId, {
+            type: 'environment',
+            timestamp: new Date(),
+            ...data
+        });
+    }
+
+    // Process display command
+    async processDisplayCommand(deviceId, command) {
+        // Validate command
+        if (!command.action) {
+            return { success: false, error: 'Invalid display command format' };
+        }
+
+        // Execute display command
+        switch (command.action) {
+            case 'show_content':
+                return await this.executeShowContent(deviceId, command);
+            case 'change_brightness':
+                return await this.executeChangeBrightness(deviceId, command);
+            case 'show_message':
+                return await this.executeShowMessage(deviceId, command);
+            default:
+                return { success: false, error: `Unknown display command: ${command.action}` };
+        }
+    }
+
+    // Process lighting command
+    async processLightingCommand(deviceId, command) {
+        // Validate command
+        if (!command.action) {
+            return { success: false, error: 'Invalid lighting command format' };
+        }
+
+        // Execute lighting command
+        switch (command.action) {
+            case 'adjust_intensity':
+                return await this.executeAdjustIntensity(deviceId, command);
+            case 'change_color':
+                return await this.executeChangeColor(deviceId, command);
+            case 'toggle':
+                return await this.executeToggleLight(deviceId, command);
+            default:
+                return { success: false, error: `Unknown lighting command: ${command.action}` };
+        }
+    }
+
+    // Execute show content command
+    async executeShowContent(deviceId, command) {
+        console.log(`Display ${deviceId} showing content: ${command.contentId}`);
+        // In a real implementation, this would send the command to the display device
+        return { success: true, message: `Content ${command.contentId} shown on display ${deviceId}` };
+    }
+
+    // Execute change brightness command
+    async executeChangeBrightness(deviceId, command) {
+        console.log(`Display ${deviceId} brightness changed to: ${command.level}`);
+        // In a real implementation, this would send the command to the display device
+        return { success: true, message: `Brightness set to ${command.level} on display ${deviceId}` };
+    }
+
+    // Execute show message command
+    async executeShowMessage(deviceId, command) {
+        console.log(`Display ${deviceId} showing message: ${command.message}`);
+        // In a real implementation, this would send the command to the display device
+        return { success: true, message: `Message displayed on ${deviceId}` };
+    }
+
+    // Execute adjust intensity command
+    async executeAdjustIntensity(deviceId, command) {
+        console.log(`Light ${deviceId} intensity adjusted to: ${command.level}`);
+        // In a real implementation, this would send the command to the lighting device
+        return { success: true, message: `Intensity set to ${command.level} on light ${deviceId}` };
+    }
+
+    // Execute change color command
+    async executeChangeColor(deviceId, command) {
+        console.log(`Light ${deviceId} color changed to: ${command.color}`);
+        // In a real implementation, this would send the command to the lighting device
+        return { success: true, message: `Color set to ${command.color} on light ${deviceId}` };
+    }
+
+    // Execute toggle light command
+    async executeToggleLight(deviceId, command) {
+        console.log(`Light ${deviceId} toggled: ${command.state}`);
+        // In a real implementation, this would send the command to the lighting device
+        return { success: true, message: `Light ${deviceId} set to ${command.state}` };
+    }
+
+    // Send command to a device
+    sendCommandToDevice(deviceId, command) {
+        const device = this.devices.get(deviceId);
+        if (!device) {
+            return { success: false, error: `Device not found: ${deviceId}` };
+        }
+
+        // In a real implementation, this would send the command to the actual device
+        // For simulation, we'll just log the command
+        console.log(`Sending command to device ${deviceId}:`, command);
+
+        // Trigger command callback if exists
+        if (this.deviceCallbacks.has(deviceId)) {
+            this.deviceCallbacks.get(deviceId).onCommand && 
+                this.deviceCallbacks.get(deviceId).onCommand(deviceId, command);
+        }
+
+        return { success: true, message: `Command sent to device ${deviceId}` };
+    }
+
+    // Get status of all devices
+    getDevicesStatus() {
+        const status = [];
+        for (const [deviceId, device] of this.devices) {
+            const connectionStatus = this.connectionStatus.get(deviceId) || {};
+            status.push({
+                deviceId: device.deviceId,
+                deviceType: device.deviceType,
+                galleryId: device.galleryId,
+                roomId: device.roomId,
+                status: device.status,
+                lastHeartbeat: device.lastHeartbeat,
+                isConnected: connectionStatus.isConnected,
+                lastSeen: connectionStatus.lastSeen
+            });
+        }
+        return status;
+    }
+
+    // Get device by ID
+    getDevice(deviceId) {
+        return this.devices.get(deviceId) || null;
+    }
+
+    // Register a callback for device events
+    registerCallback(deviceId, callbacks) {
+        this.deviceCallbacks.set(deviceId, callbacks);
+    }
+
+    // Simulate device heartbeat
+    simulateHeartbeat(deviceId) {
+        const device = this.devices.get(deviceId);
+        if (!device) {
+            return { success: false, error: `Device not found: ${deviceId}` };
+        }
+
+        device.lastHeartbeat = new Date();
+        const status = this.connectionStatus.get(deviceId);
+        if (status) {
+            status.lastSeen = new Date();
+        }
+
+        return { success: true, message: `Heartbeat received from ${deviceId}` };
+    }
+
+    // Monitor device health and detect offline devices
+    monitorDeviceHealth() {
+        const now = new Date();
+        const timeoutThreshold = 5 * 60 * 1000; // 5 minutes
+
+        for (const [deviceId, status] of this.connectionStatus) {
+            const device = this.devices.get(deviceId);
+            if (!device) continue;
+
+            const timeSinceLastHeartbeat = now - device.lastHeartbeat;
+            if (timeSinceLastHeartbeat > timeoutThreshold && status.isConnected) {
+                console.warn(`Device ${deviceId} appears to be offline`);
+                
+                // Update status
+                status.isConnected = false;
+                device.status = 'offline';
+                
+                // Trigger offline callback if exists
+                if (this.deviceCallbacks.has(deviceId)) {
+                    this.deviceCallbacks.get(deviceId).onOffline && 
+                        this.deviceCallbacks.get(deviceId).onOffline(device);
+                }
+            }
+        }
+    }
+
+    // Initialize the device manager
+    async initialize() {
+        console.log('Initializing IoT Device Manager...');
+        
+        // Set up periodic health monitoring
+        setInterval(() => {
+            this.monitorDeviceHealth();
+        }, 60000); // Check every minute
+
+        console.log('IoT Device Manager initialized');
     }
 }
 
-module.exports = new IoTDeviceManager();
+// Export singleton instance
+const deviceManager = new DeviceManager();
+module.exports = deviceManager;

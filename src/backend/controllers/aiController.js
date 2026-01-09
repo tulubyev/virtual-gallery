@@ -2,6 +2,10 @@
 const path = require('path');
 const fs = require('fs').promises;
 const db = require('../models/db');
+const recommendationService = require('../../../src/ai-ml/services/recommendationService');
+
+// Initialize the recommendation service
+recommendationService.initialize().catch(console.error);
 
 // Mock AI/ML implementations for development
 // In a real application, this would use TensorFlow.js, Python scripts, etc.
@@ -10,21 +14,26 @@ const aiController = {
     // Get AI-generated recommendations for a user
     getRecommendations: async (req, res) => {
         try {
-            // In a real implementation, this would analyze user preferences and history
+            // Use the enhanced recommendation service
             const userId = req.userId; // From JWT token
             const count = parseInt(req.query.count) || 5;
+            const filters = req.query.filters ? JSON.parse(req.query.filters) : {};
 
-            // For now, return a few random artworks
-            const artworks = await db.getAllArtworks();
-            const shuffled = [...artworks].sort(() => 0.5 - Math.random());
-            const recommendations = shuffled.slice(0, count).map(artwork => ({
+            const recommendations = await recommendationService.getRecommendations(userId, count, filters);
+
+            // Format the response
+            const formattedRecommendations = recommendations.map(artwork => ({
                 artwork_id: artwork.artwork_id,
                 title: artwork.title,
                 artist_name: artwork.artist_name,
-                reason: 'Selected based on our AI algorithm'
+                reason: artwork.reason || 'Selected based on your preferences and similar users',
+                score: artwork.score || artwork.combinedScore || artwork.similarity,
+                tags: artwork.tags,
+                style: artwork.style,
+                image_url: artwork.image_url
             }));
 
-            res.json(recommendations);
+            res.json(formattedRecommendations);
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
@@ -113,31 +122,23 @@ const aiController = {
         try {
             const { artworkId } = req.params;
             const count = parseInt(req.query.count) || 5;
+            const userId = req.userId; // From JWT token
 
-            // In a real implementation, this would use image similarity algorithms
-            const allArtworks = await db.getAllArtworks();
-            const currentArtwork = allArtworks.find(a => a.artwork_id == artworkId);
+            // Use the enhanced recommendation service
+            const similarArtworks = await recommendationService.getSimilarArtworks(artworkId, count, userId);
 
-            if (!currentArtwork) {
-                return res.status(404).json({ error: 'Artwork not found' });
-            }
+            // Format the response
+            const formattedSimilarArtworks = similarArtworks.map(artwork => ({
+                artwork_id: artwork.artwork_id,
+                title: artwork.title,
+                artist_name: artwork.artist_name,
+                similarity_score: artwork.similarity || artwork.score,
+                tags: artwork.tags,
+                style: artwork.style,
+                image_url: artwork.image_url
+            }));
 
-            // For demo purposes, return artworks with similar tags or style
-            const similarArtworks = allArtworks
-                .filter(artwork =>
-                    artwork.artwork_id != artworkId &&
-                    (artwork.style === currentArtwork.style ||
-                     artwork.tags.some(tag => currentArtwork.tags.includes(tag)))
-                )
-                .slice(0, count)
-                .map(artwork => ({
-                    artwork_id: artwork.artwork_id,
-                    title: artwork.title,
-                    artist_name: artwork.artist_name,
-                    similarity_score: Math.random() * 0.3 + 0.7 // Random score between 0.7 and 1.0
-                }));
-
-            res.json(similarArtworks);
+            res.json(formattedSimilarArtworks);
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
@@ -246,6 +247,37 @@ const aiController = {
             predictions.sort((a, b) => b.predicted_engagement_score - a.predicted_engagement_score);
 
             res.json(predictions);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // Update recommendation model with new interaction data
+    updateModelWithInteraction: async (req, res) => {
+        try {
+            const userId = req.userId; // From JWT token
+            const { artworkId, interactionType, rating } = req.body;
+
+            // Validate required fields
+            if (!artworkId || !interactionType) {
+                return res.status(400).json({ error: 'artworkId and interactionType are required' });
+            }
+
+            // Update the recommendation model with this interaction
+            await recommendationService.updateModelWithInteraction(
+                userId,
+                artworkId,
+                interactionType,
+                rating
+            );
+
+            res.json({
+                message: 'Model updated with interaction data',
+                userId,
+                artworkId,
+                interactionType,
+                rating
+            });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }

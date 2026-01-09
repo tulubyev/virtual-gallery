@@ -20,10 +20,14 @@ class AIModel {
         // In a real implementation, this would use computer vision
         // to extract features from the artwork image
         return {
+            tags: this.generateTags(imagePath),
             style: this.predictStyle(imagePath),
-            colors: this.extractColors(imagePath),
-            composition: this.analyzeComposition(imagePath),
-            tags: this.generateTags(imagePath)
+            dominant_colors: this.extractColors(imagePath),
+            composition_elements: this.analyzeCompositionElements(imagePath),
+            estimated_period: this.estimatePeriod(imagePath),
+            confidence: this.calculateConfidence(imagePath),
+            detected_objects: this.detectObjects(imagePath),
+            image_quality: this.evaluateImageQuality(imagePath)
         };
     }
 
@@ -42,13 +46,59 @@ class AIModel {
     }
 
     // Analyze composition elements
-    analyzeComposition(imagePath) {
+    analyzeCompositionElements(imagePath) {
+        // Mock implementation
+        const elements = [];
+        if (Math.random() > 0.5) elements.push('rule_of_thirds');
+        if (Math.random() > 0.5) elements.push('symmetry');
+        if (Math.random() > 0.5) elements.push('leading_lines');
+        if (Math.random() > 0.5) elements.push('golden_ratio');
+        if (Math.random() > 0.5) elements.push('balance');
+
+        return elements;
+    }
+
+    // Estimate the period of creation
+    estimatePeriod(imagePath) {
+        // Mock implementation
+        const periods = [
+            '16th century', '17th century', '18th century', '19th century',
+            'early 20th century', 'mid 20th century', 'late 20th century', '21st century'
+        ];
+        return periods[Math.floor(Math.random() * periods.length)];
+    }
+
+    // Calculate confidence of the analysis
+    calculateConfidence(imagePath) {
+        // Mock implementation
+        return Math.random() * 0.3 + 0.7; // Return value between 0.7 and 1.0
+    }
+
+    // Detect objects in the image
+    detectObjects(imagePath) {
+        // Mock implementation
+        const possibleObjects = [
+            { name: 'person', confidence: Math.random(), bounding_box: { x: Math.random(), y: Math.random(), width: Math.random(), height: Math.random() } },
+            { name: 'tree', confidence: Math.random(), bounding_box: { x: Math.random(), y: Math.random(), width: Math.random(), height: Math.random() } },
+            { name: 'building', confidence: Math.random(), bounding_box: { x: Math.random(), y: Math.random(), width: Math.random(), height: Math.random() } },
+            { name: 'animal', confidence: Math.random(), bounding_box: { x: Math.random(), y: Math.random(), width: Math.random(), height: Math.random() } },
+            { name: 'water', confidence: Math.random(), bounding_box: { x: Math.random(), y: Math.random(), width: Math.random(), height: Math.random() } }
+        ];
+
+        // Return 1-3 random objects
+        const numObjects = Math.floor(Math.random() * 3) + 1;
+        return possibleObjects.sort(() => 0.5 - Math.random()).slice(0, numObjects);
+    }
+
+    // Evaluate image quality
+    evaluateImageQuality(imagePath) {
         // Mock implementation
         return {
-            rule_of_thirds: Math.random() > 0.5,
-            symmetry: Math.random() > 0.5,
-            leading_lines: Math.random() > 0.5,
-            focal_point: { x: 0.5, y: 0.5 } // Center of the image
+            brightness: Math.random(),
+            contrast: Math.random(),
+            sharpness: Math.random(),
+            resolution: { width: 1920, height: 1080 }, // Standard HD
+            compression_artifacts: Math.random() * 0.2 // 0-20% artifacts
         };
     }
 
