@@ -1,101 +1,13 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Виртуальная галерея искусств</title>
-    <link rel="stylesheet" href="/assets/main.css">
-</head>
-<body>
-    <header>
-        <nav class="navbar">
-            <div class="nav-brand">Виртуальная галерея</div>
-            <ul class="nav-menu">
-                <li><a href="#" class="nav-link active">Главная</a></li>
-                <li><a href="#" class="nav-link">Экспонаты</a></li>
-                <li><a href="#" class="nav-link">Коллекции</a></li>
-                <li><a href="#" class="nav-link">О нас</a></li>
-                <li><a href="#" class="nav-link auth-link" id="loginLink">Вход</a></li>
-                <li><a href="#" class="nav-link auth-link" id="registerLink" style="display:none;">Регистрация</a></li>
-                <li><a href="#" class="nav-link auth-link" id="logoutLink" style="display:none;">Выход</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Добро пожаловать в виртуальную галерею искусств</h1>
-                <p>Исследуйте мировые шедевры искусства в уникальной интерактивной среде</p>
-                <button class="btn btn-primary" id="exploreBtn">Начать исследование</button>
-            </div>
-        </section>
-
-        <section class="featured-artworks">
-            <h2>Популярные экспонаты</h2>
-            <div class="artworks-grid" id="featuredArtworks">
-                <!-- Здесь будут отображаться произведения искусства -->
-                <div class="loading">Загрузка произведений искусства...</div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2026 Виртуальная галерея искусств. Все права защищены.</p>
-    </footer>
-
-    <!-- Модальное окно для регистрации -->
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Регистрация</h2>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="regUsername">Имя пользователя:</label>
-                    <input type="text" id="regUsername" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="regEmail">Email:</label>
-                    <input type="email" id="regEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPassword">Пароль:</label>
-                    <input type="password" id="regPassword" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="regRole">Роль (необязательно):</label>
-                    <select id="regRole" name="role">
-                        <option value="user">Обычный пользователь</option>
-                        <option value="tour_guide">Организатор туров</option>
-                        <option value="auction_participant">Участник аукционов</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Модальное окно для входа -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close-login">&times;</span>
-            <h2>Вход</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email:</label>
-                    <input type="email" id="loginEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Пароль:</label>
-                    <input type="password" id="loginPassword" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Войти</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/assets/main.js"></script>
-    <script src="/assets/artwork-detail-component.js"></script>
-</body>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

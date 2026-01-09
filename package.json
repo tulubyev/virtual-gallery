@@ -5,8 +5,12 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon --exec ts-node src/server.ts",
-    "build": "tsc",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon --exec ts-node src/server.ts",
+    "dev:client": "cd src/frontend && npm run dev",
+    "build": "tsc && cd src/frontend && npm run build",
+    "build:server": "tsc",
+    "build:client": "cd src/frontend && npm run build",
     "init-db": "ts-node src/database/init.ts"
   },
   "keywords": [
@@ -18,22 +22,23 @@
   "author": "Virtual Art Gallery Team",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
-    "dotenv": "^16.3.1",
-    "bcrypt": "^5.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.7.2",
-    "redis": "^4.6.10",
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.10.2",
-    "@types/bcrypt": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.5"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.0.1",
     "ts-node": "^10.9.2",
-    "nodemon": "^3.0.1"
+    "typescript": "^5.3.3"
   }
 }
