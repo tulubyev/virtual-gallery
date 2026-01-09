@@ -101,6 +101,17 @@ CREATE TABLE ai_models (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- IoT sensor data table
+CREATE TABLE iot_sensor_data (
+    sensor_data_id SERIAL PRIMARY KEY,
+    sensor_id VARCHAR(100) NOT NULL, -- ID of the specific sensor
+    sensor_type VARCHAR(50) NOT NULL, -- e.g., 'audio', 'motion', 'proximity', 'environment'
+    gallery_id INTEGER REFERENCES galleries(gallery_id),
+    room_id INTEGER, -- ID of the room where sensor is located
+    data_payload JSONB, -- Sensor-specific data in JSON format
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX idx_artworks_tags ON artworks USING GIN(tags);
 CREATE INDEX idx_artworks_style ON artworks(style);
@@ -109,3 +120,6 @@ CREATE INDEX idx_user_interactions_user ON user_interactions(user_id);
 CREATE INDEX idx_user_interactions_artwork ON user_interactions(artwork_id);
 CREATE INDEX idx_artwork_tags_artwork ON artwork_tags(artwork_id);
 CREATE INDEX idx_artwork_tags_tag ON artwork_tags(tag_id);
+CREATE INDEX idx_iot_sensor_data_gallery ON iot_sensor_data(gallery_id);
+CREATE INDEX idx_iot_sensor_data_recorded_at ON iot_sensor_data(recorded_at);
+CREATE INDEX idx_iot_sensor_data_type ON iot_sensor_data(sensor_type);

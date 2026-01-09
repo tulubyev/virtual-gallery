@@ -1,4 +1,5 @@
 // Backend server for Virtual Art Gallery
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -6,6 +7,7 @@ const path = require('path');
 const cors = require('cors');
 
 // Import routes
+const authRoutes = require('./routes/authRoutes');
 const artworkRoutes = require('./routes/artworkRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -29,6 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/galleries', galleryRoutes);
 app.use('/api/users', userRoutes);

@@ -1,19 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Art Gallery</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <title>Виртуальная галерея искусств</title>
+    <link rel="stylesheet" href="/assets/main.css">
 </head>
 <body>
-    <div id="root">
-        <div id="loading-screen">
-            <h1>Loading Virtual Gallery...</h1>
-            <div class="spinner"></div>
-        </div>
-        <canvas id="gallery-canvas"></canvas>
-    </div>
-    <script src="bundle.js"></script>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">Виртуальная галерея</div>
+            <ul class="nav-menu">
+                <li><a href="#" class="nav-link active">Главная</a></li>
+                <li><a href="#" class="nav-link">Экспонаты</a></li>
+                <li><a href="#" class="nav-link">Коллекции</a></li>
+                <li><a href="#" class="nav-link">О нас</a></li>
+                <li><a href="#" class="nav-link auth-link" id="loginLink">Вход</a></li>
+                <li><a href="#" class="nav-link auth-link" id="registerLink" style="display:none;">Регистрация</a></li>
+                <li><a href="#" class="nav-link auth-link" id="logoutLink" style="display:none;">Выход</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Добро пожаловать в виртуальную галерею искусств</h1>
+                <p>Исследуйте мировые шедевры искусства в уникальной интерактивной среде</p>
+                <button class="btn btn-primary" id="exploreBtn">Начать исследование</button>
+            </div>
+        </section>
+
+        <section class="featured-artworks">
+            <h2>Популярные экспонаты</h2>
+            <div class="artworks-grid" id="featuredArtworks">
+                <!-- Здесь будут отображаться произведения искусства -->
+                <div class="loading">Загрузка произведений искусства...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Виртуальная галерея искусств. Все права защищены.</p>
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/main.js"></script>
+    <script src="/assets/artwork-detail-component.js"></script>
 </body>
 </html>

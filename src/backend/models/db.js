@@ -1,189 +1,257 @@
-// Mock database operations for development
-// In a real application, this would connect to PostgreSQL
+// Database module for Virtual Art Gallery
+// Uses PostgreSQL with connection pooling
 
-class Database {
-    constructor() {
-        // Initialize with mock data
-        this.users = [
-            { user_id: 1, username: 'art_lover', email: 'art@example.com', preferences: { favorite_styles: ['impressionism', 'abstract'] } }
-        ];
-        
-        this.artworks = [
-            { 
-                artwork_id: 1, 
-                title: 'Starry Night', 
-                artist_name: 'Vincent van Gogh', 
-                year_created: 1889, 
-                medium: 'Oil on canvas',
-                dimensions: '73.7 cm × 92.1 cm',
-                style: 'Post-Impressionism',
-                description: 'A swirling night sky over a small town.',
-                image_url: '/assets/artworks/starry-night.jpg',
-                thumbnail_url: '/assets/artworks/starry-night-thumb.jpg',
-                location_in_gallery: { x: 5, y: 3, z: 0, rotation: 0 },
-                tags: ['night', 'sky', 'stars', 'landscape', 'post-impressionism']
-            },
-            { 
-                artwork_id: 2, 
-                title: 'Mona Lisa', 
-                artist_name: 'Leonardo da Vinci', 
-                year_created: 1503, 
-                medium: 'Oil on poplar panel',
-                dimensions: '77 cm × 53 cm',
-                style: 'Renaissance',
-                description: 'A half-length portrait of a woman with an enigmatic smile.',
-                image_url: '/assets/artworks/mona-lisa.jpg',
-                thumbnail_url: '/assets/artworks/mona-lisa-thumb.jpg',
-                location_in_gallery: { x: -5, y: 3, z: 0, rotation: Math.PI },
-                tags: ['portrait', 'renaissance', 'smile', 'classic']
-            }
-        ];
-        
-        this.galleries = [
-            { 
-                gallery_id: 1, 
-                name: 'Main Hall', 
-                description: 'The central gallery space featuring masterpieces',
-                three_d_model_path: '/assets/models/main-hall.gltf',
-                layout_algorithm: 'thematic_grouping'
-            }
-        ];
-        
-        this.collections = [
-            { 
-                collection_id: 1, 
-                name: 'Impressionist Favorites', 
-                description: 'Popular impressionist works',
-                curator_id: 1,
-                is_ai_generated: false
-            }
-        ];
-        
-        this.userInteractions = [];
-        this.tags = [
-            { tag_id: 1, tag_name: 'landscape', tag_category: 'subject' },
-            { tag_id: 2, tag_name: 'portrait', tag_category: 'subject' },
-            { tag_id: 3, tag_name: 'abstract', tag_category: 'style' },
-            { tag_id: 4, tag_name: 'impressionism', tag_category: 'style' },
-            { tag_id: 5, tag_name: 'post-impressionism', tag_category: 'style' }
-        ];
-    }
+const { Pool } = require('pg');
+require('dotenv').config();
 
-    // Artwork operations
-    async getAllArtworks() {
-        return this.artworks;
+// Create a connection pool
+const pool = new Pool({
+    connectionString: process.env.DB_STRING || 'postgres://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/virtual_gallery_db',
+    ssl: {
+        rejectUnauthorized: false // Required for many hosted PostgreSQL services
     }
+});
 
-    async getArtworkById(id) {
-        return this.artworks.find(artwork => artwork.artwork_id === parseInt(id));
+// Test the connection
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('Database connection error:', err.stack);
+    } else {
+        console.log('Connected to PostgreSQL database successfully');
     }
+});
 
-    async searchArtworks(query) {
-        const lowerQuery = query.toLowerCase();
-        return this.artworks.filter(artwork => 
-            artwork.title.toLowerCase().includes(lowerQuery) || 
-            artwork.artist_name.toLowerCase().includes(lowerQuery) ||
-            artwork.description.toLowerCase().includes(lowerQuery)
-        );
-    }
-
-    async filterArtworksByTags(tags) {
-        return this.artworks.filter(artwork => 
-            tags.every(tag => artwork.tags.includes(tag))
-        );
-    }
-
-    async createArtwork(artworkData) {
-        const newArtwork = {
-            artwork_id: this.artworks.length + 1,
-            ...artworkData
-        };
-        this.artworks.push(newArtwork);
-        return newArtwork;
-    }
-
-    async updateArtwork(id, artworkData) {
-        const index = this.artworks.findIndex(artwork => artwork.artwork_id === parseInt(id));
-        if (index !== -1) {
-            this.artworks[index] = { ...this.artworks[index], ...artworkData };
-            return this.artworks[index];
-        }
-        return null;
-    }
-
-    async deleteArtwork(id) {
-        const index = this.artworks.findIndex(artwork => artwork.artwork_id === parseInt(id));
-        if (index !== -1) {
-            this.artworks.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-
-    // Gallery operations
-    async getAllGalleries() {
-        return this.galleries;
-    }
-
-    async getGalleryById(id) {
-        return this.galleries.find(gallery => gallery.gallery_id === parseInt(id));
-    }
-
-    async getGalleryRooms(id) {
-        // In a real implementation, this would return rooms in a specific gallery
-        return [
-            { room_id: 1, name: 'Room A', description: 'North wing' },
-            { room_id: 2, name: 'Room B', description: 'South wing' }
-        ];
-    }
-
-    async createGallery(galleryData) {
-        const newGallery = {
-            gallery_id: this.galleries.length + 1,
-            ...galleryData
-        };
-        this.galleries.push(newGallery);
-        return newGallery;
-    }
-
-    async updateGallery(id, galleryData) {
-        const index = this.galleries.findIndex(gallery => gallery.gallery_id === parseInt(id));
-        if (index !== -1) {
-            this.galleries[index] = { ...this.galleries[index], ...galleryData };
-            return this.galleries[index];
-        }
-        return null;
-    }
-
-    async deleteGallery(id) {
-        const index = this.galleries.findIndex(gallery => gallery.gallery_id === parseInt(id));
-        if (index !== -1) {
-            this.galleries.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-
-    async getRecommendedArtworks(galleryId) {
-        // In a real implementation, this would use AI to recommend artworks
-        return this.artworks.slice(0, 3); // Return first 3 artworks as example
-    }
-
-    // User operations
-    async getUserById(id) {
-        return this.users.find(user => user.user_id === parseInt(id));
-    }
-
-    // Interaction operations
-    async addUserInteraction(interactionData) {
-        const newInteraction = {
-            interaction_id: this.userInteractions.length + 1,
-            timestamp: new Date(),
-            ...interactionData
-        };
-        this.userInteractions.push(newInteraction);
-        return newInteraction;
-    }
+// Artwork operations
+async function getAllArtworks() {
+    const result = await pool.query(`
+        SELECT * FROM artworks ORDER BY artwork_id
+    `);
+    return result.rows;
 }
 
-module.exports = new Database();
+async function getArtworkById(id) {
+    const result = await pool.query(`
+        SELECT * FROM artworks WHERE artwork_id = $1
+    `, [id]);
+    return result.rows[0];
+}
+
+async function searchArtworks(query) {
+    const result = await pool.query(`
+        SELECT * FROM artworks 
+        WHERE title ILIKE $1 OR artist_name ILIKE $1 OR description ILIKE $1
+    `, [`%${query}%`]);
+    return result.rows;
+}
+
+async function filterArtworksByTags(tags) {
+    // Convert tags array to a format suitable for SQL query
+    const tagsArray = `{${tags.map(t => `"${t}"`).join(',')}}`;
+    const result = await pool.query(`
+        SELECT * FROM artworks 
+        WHERE tags && $1  -- Using PostgreSQL's array overlap operator
+    `, [tagsArray]);
+    return result.rows;
+}
+
+async function createArtwork(artworkData) {
+    const {
+        title, artist_name, year_created, medium, dimensions, 
+        style, description, image_url, thumbnail_url, location_in_gallery, tags
+    } = artworkData;
+    
+    const result = await pool.query(`
+        INSERT INTO artworks 
+        (title, artist_name, year_created, medium, dimensions, style, 
+         description, image_url, thumbnail_url, location_in_gallery, tags)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+    `, [
+        title, artist_name, year_created, medium, dimensions, 
+        style, description, image_url, thumbnail_url, 
+        JSON.stringify(location_in_gallery), tags
+    ]);
+    return result.rows[0];
+}
+
+async function updateArtwork(id, artworkData) {
+    const fields = [];
+    const values = [];
+    let query = 'UPDATE artworks SET ';
+    
+    let paramCount = 1;
+    for (const [key, value] of Object.entries(artworkData)) {
+        if (key !== 'artwork_id') { // Don't allow updating the ID
+            fields.push(`${key} = $${paramCount}`);
+            values.push(key === 'location_in_gallery' ? JSON.stringify(value) : value);
+            paramCount++;
+        }
+    }
+    
+    query += fields.join(', ') + ` WHERE artwork_id = $${paramCount} RETURNING *`;
+    values.push(id);
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+async function deleteArtwork(id) {
+    const result = await pool.query(`
+        DELETE FROM artworks WHERE artwork_id = $1 RETURNING artwork_id
+    `, [id]);
+    return result.rowCount > 0;
+}
+
+// Gallery operations
+async function getAllGalleries() {
+    const result = await pool.query(`
+        SELECT * FROM galleries ORDER BY gallery_id
+    `);
+    return result.rows;
+}
+
+async function getGalleryById(id) {
+    const result = await pool.query(`
+        SELECT * FROM galleries WHERE gallery_id = $1
+    `, [id]);
+    return result.rows[0];
+}
+
+async function getGalleryRooms(id) {
+    // In a real implementation, this would return rooms in a specific gallery
+    // For now, returning mock data
+    return [
+        { room_id: 1, name: 'Room A', description: 'North wing' },
+        { room_id: 2, name: 'Room B', description: 'South wing' }
+    ];
+}
+
+async function createGallery(galleryData) {
+    const { name, description, three_d_model_path, layout_algorithm } = galleryData;
+    
+    const result = await pool.query(`
+        INSERT INTO galleries 
+        (name, description, three_d_model_path, layout_algorithm)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+    `, [name, description, three_d_model_path, layout_algorithm]);
+    return result.rows[0];
+}
+
+async function updateGallery(id, galleryData) {
+    const fields = [];
+    const values = [];
+    let query = 'UPDATE galleries SET ';
+    
+    let paramCount = 1;
+    for (const [key, value] of Object.entries(galleryData)) {
+        if (key !== 'gallery_id') { // Don't allow updating the ID
+            fields.push(`${key} = $${paramCount}`);
+            values.push(value);
+            paramCount++;
+        }
+    }
+    
+    query += fields.join(', ') + ` WHERE gallery_id = $${paramCount} RETURNING *`;
+    values.push(id);
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+async function deleteGallery(id) {
+    const result = await pool.query(`
+        DELETE FROM galleries WHERE gallery_id = $1 RETURNING gallery_id
+    `, [id]);
+    return result.rowCount > 0;
+}
+
+async function getRecommendedArtworks(galleryId) {
+    // In a real implementation, this would use AI to recommend artworks
+    // For now, returning some sample artworks
+    const result = await pool.query(`
+        SELECT * FROM artworks LIMIT 3
+    `);
+    return result.rows;
+}
+
+// User operations
+async function getUserById(id) {
+    const result = await pool.query(`
+        SELECT user_id, username, email, preferences FROM users WHERE user_id = $1
+    `, [id]);
+    return result.rows[0];
+}
+
+async function getUserByEmail(email) {
+    const result = await pool.query(`
+        SELECT * FROM users WHERE email = $1
+    `, [email]);
+    return result.rows[0];
+}
+
+async function createUser(userData) {
+    const { username, email, password_hash } = userData;
+
+    const result = await pool.query(`
+        INSERT INTO users
+        (username, email, password_hash)
+        VALUES ($1, $2, $3)
+        RETURNING user_id, username, email
+    `, [username, email, password_hash]);
+    return result.rows[0];
+}
+
+async function updateUser(id, updateData) {
+    const fields = [];
+    const values = [];
+    let query = 'UPDATE users SET ';
+
+    let paramCount = 1;
+    for (const [key, value] of Object.entries(updateData)) {
+        fields.push(`${key} = $${paramCount}`);
+        values.push(key === 'preferences' ? JSON.stringify(value) : value);
+        paramCount++;
+    }
+
+    query += fields.join(', ') + ` WHERE user_id = $${paramCount} RETURNING user_id, username, email, preferences`;
+    values.push(id);
+
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+// Interaction operations
+async function addUserInteraction(interactionData) {
+    const { user_id, artwork_id, interaction_type, duration } = interactionData;
+
+    const result = await pool.query(`
+        INSERT INTO user_interactions
+        (user_id, artwork_id, interaction_type, duration)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+    `, [user_id, artwork_id, interaction_type, duration]);
+    return result.rows[0];
+}
+
+module.exports = {
+    getAllArtworks,
+    getArtworkById,
+    searchArtworks,
+    filterArtworksByTags,
+    createArtwork,
+    updateArtwork,
+    deleteArtwork,
+    getAllGalleries,
+    getGalleryById,
+    getGalleryRooms,
+    createGallery,
+    updateGallery,
+    deleteGallery,
+    getRecommendedArtworks,
+    getUserById,
+    getUserByEmail,
+    createUser,
+    updateUser,
+    addUserInteraction
+};
