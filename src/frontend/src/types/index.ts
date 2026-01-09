@@ -28,13 +28,85 @@ export interface Artwork {
   in_collection?: boolean;
 }
 
+export interface RoomLayoutSettings {
+  background_color: string;
+  lighting_settings: LightingSettings;
+  wall_configurations: WallConfiguration[];
+  navigation_points: NavigationPoint[];
+}
+
+export interface LightingSettings {
+  ambient_intensity: number;
+  directional_intensity: number;
+  color_temperature: number; // in Kelvin
+}
+
+export interface WallConfiguration {
+  wall_id: string;
+  position: { x: number; y: number; z: number };
+  rotation: { x: number; y: number; z: number };
+  artworks: PositionedArtwork[];
+}
+
+export interface PositionedArtwork {
+  artwork_id: number;
+  position: { x: number; y: number; z: number };
+  rotation: { x: number; y: number; z: number };
+  scale: { x: number; y: number; z: number };
+}
+
+export interface NavigationPoint {
+  point_id: string;
+  position: { x: number; y: number; z: number };
+  connected_rooms: string[]; // IDs of connected rooms
+  description: string;
+}
+
+export interface Room {
+  room_id: number;
+  name: string;
+  description?: string;
+  theme: string; // 'impressionism', 'sculpture', 'renaissance', etc.
+  region?: string; // 'european', 'asian', 'american', etc.
+  author?: string; // Specific author if room is dedicated to one
+  tags: string[]; // Additional tags for categorization
+  layout_settings: RoomLayoutSettings;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Exhibition {
+  exhibition_id: number;
+  name: string;
+  description?: string;
+  curator_id: number;
+  start_date: Date;
+  end_date: Date;
+  rooms: Room[];
+  is_virtual_tour_available: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface VirtualTourRoute {
+  route_id: number;
+  name: string;
+  description?: string;
+  room_sequence: number[]; // Sequence of room IDs
+  estimated_duration: number; // in minutes
+  created_by: number; // curator/admin user ID
+  created_at: Date;
+}
+
 export interface Gallery {
   gallery_id: number;
   name: string;
   description?: string;
-  three_d_model_path?: string;
-  layout_algorithm?: string;
+  rooms: Room[];
+  exhibitions: Exhibition[];
+  virtual_tour_routes: VirtualTourRoute[];
   created_at: Date;
+  updated_at: Date;
 }
 
 export interface Collection {

@@ -15,6 +15,9 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ArtworkDetailPage from './pages/ArtworkDetailPage';
 import VrGalleryPage from './pages/VrGalleryPage';
+import GalleryPage from './pages/GalleryPage';
+import RoomManagementPage from './pages/RoomManagementPage';
+import RoomPage from './pages/RoomPage';
 
 // Компоненты
 import Header from './components/Header';
@@ -76,6 +79,10 @@ const App: React.FC = () => {
             <Route path="/artworks" element={<ArtworksPage />} />
             <Route path="/artworks/:id" element={<ArtworkDetailPage />} />
             <Route path="/vr-gallery" element={<VrGalleryPage />} />
+            <Route path="/galleries" element={<GalleriesListPage />} />
+            <Route path="/galleries/:id" element={<GalleryPage />} />
+            <Route path="/rooms/:id" element={<RoomPage />} />
+            <Route path="/galleries/:galleryId/rooms/manage" element={currentUser?.role === 'curator' || currentUser?.role === 'admin' ? <RoomManagementPage /> : <Navigate to="/login" />} />
             <Route
               path="/admin"
               element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}

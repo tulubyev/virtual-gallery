@@ -3,3 +3,4 @@ export * from './api';
 export * from './userService';
 export * from './artworkService';
 export * from './aiService';
+export * from './galleryService';

@@ -61,6 +61,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
         <NavLink to="/">Главная</NavLink>
         <NavLink to="/artworks">Экспонаты</NavLink>
         <NavLink to="/collections">Коллекции</NavLink>
+        <NavLink to="/galleries">Галереи</NavLink>
         <NavLink to="/tours">Туры</NavLink>
         <NavLink to="/vr-gallery">VR-галерея</NavLink>
       </Nav>
