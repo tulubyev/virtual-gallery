@@ -47,16 +47,16 @@ const VRButton = styled.button`
   }
 `;
 
-const VRScene: React.FC<{ 
-  artworks: Artwork[], 
+const VRScene: React.FC<{
+  artworks: Artwork[],
   onArtworkSelect: (artwork: Artwork) => void,
-  onExitVR: () => void 
+  onExitVR: () => void
 }> = ({ artworks, onArtworkSelect, onExitVR }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVRSupported, setIsVRSupported] = useState(false);
   const [isInVRMode, setIsInVRMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Three.js objects
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -74,7 +74,7 @@ const VRScene: React.FC<{
       const state = webXRService.getState();
       setIsVRSupported(state.isSupported);
     };
-    
+
     checkSupport();
 
     // Initialize Three.js scene
@@ -130,11 +130,11 @@ const VRScene: React.FC<{
     // Animation loop
     const animate = () => {
       frameIdRef.current = requestAnimationFrame(animate);
-      
+
       if (controls && !renderer.xr.isPresenting) {
         controls.update();
       }
-      
+
       if (renderer) {
         renderer.render(scene, camera);
       }
@@ -147,15 +147,15 @@ const VRScene: React.FC<{
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
-      
+
       if (frameIdRef.current) {
         cancelAnimationFrame(frameIdRef.current);
       }
-      
+
       if (containerRef.current && renderer?.domElement) {
         containerRef.current.removeChild(renderer.domElement);
       }
-      
+
       if (renderer) {
         renderer.dispose();
       }
@@ -175,14 +175,20 @@ const VRScene: React.FC<{
     scene.add(directionalLight);
 
     // Spotlight for artworks
-    const spotLight = new THREE.SpotLight(0xffffff, 0.8);
-    spotLight.position.set(0, 10, 0);
-    spotLight.castShadow = true;
-    spotLight.angle = Math.PI / 4;
-    spotLight.penumbra = 0.1;
-    spotLight.decay = 2;
-    spotLight.distance = 200;
-    scene.add(spotLight);
+    artworks.forEach((artwork, index) => {
+      const spotlight = new THREE.SpotLight(0xffffff, 0.8);
+      spotlight.position.set(
+        -6 + (index % 4) * 4,
+        4,
+        -8 + Math.floor(index / 4) * -4
+      );
+      spotlight.castShadow = true;
+      spotlight.angle = Math.PI / 6;
+      spotlight.penumbra = 0.2;
+      spotlight.decay = 2;
+      spotlight.distance = 200;
+      scene.add(spotlight);
+    });
   };
 
   // Create gallery environment
@@ -245,6 +251,30 @@ const VRScene: React.FC<{
     ceiling.position.y = 8;
     ceiling.castShadow = false;
     scene.add(ceiling);
+
+    // Add decorative elements
+    addDecorativeElements(scene);
+  };
+
+  // Add decorative elements to the gallery
+  const addDecorativeElements = (scene: THREE.Scene) => {
+    // Columns
+    const pillarGeometry = new THREE.CylinderGeometry(0.5, 0.5, 8, 16);
+    const pillarMaterial = new THREE.MeshStandardMaterial({
+      color: 0x888888,
+      roughness: 0.6,
+      metalness: 0.2
+    });
+
+    for (let i = 0; i < 4; i++) {
+      const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+      pillar.position.x = -15 + i * 10;
+      pillar.position.z = -18;
+      pillar.position.y = 4;
+      pillar.castShadow = true;
+      pillar.receiveShadow = true;
+      scene.add(pillar);
+    }
   };
 
   // Add artworks to the scene
@@ -269,7 +299,7 @@ const VRScene: React.FC<{
 
       // Create artwork frame
       const frameGeometry = new THREE.BoxGeometry(2.5, 2.5, 0.1);
-      const frameMaterial = new THREE.MeshStandardMaterial({ 
+      const frameMaterial = new THREE.MeshStandardMaterial({
         color: 0x8B4513, // Brown frame
         metalness: 0.3,
         roughness: 0.7
@@ -319,7 +349,7 @@ const VRScene: React.FC<{
       if (success && rendererRef.current) {
         // Enable VR mode in the renderer
         rendererRef.current.xr.enabled = true;
-        
+
         // Set up the WebXR frame callback
         webXRService.setFrameCallback((frame, deltaTime) => {
           // In a real implementation, we would update the scene based on the XR frame
@@ -348,11 +378,11 @@ const VRScene: React.FC<{
     if (webXRService.getSession()) {
       await webXRService.exitSession();
     }
-    
+
     if (rendererRef.current) {
       rendererRef.current.xr.enabled = false;
     }
-    
+
     setIsInVRMode(false);
     console.log('Exited VR mode');
   };
@@ -362,17 +392,17 @@ const VRScene: React.FC<{
       {isLoading && (
         <div>Loading VR Gallery...</div>
       )}
-      
+
       <VRUIOverlay>
         <div>
           <h3>Virtual Gallery</h3>
           <p>{isInVRMode ? 'In VR Mode' : 'In Desktop Mode'} • {artworks.length} artworks displayed</p>
         </div>
-        
+
         <div>
           {!isInVRMode ? (
-            <VRButton 
-              onClick={enterVR} 
+            <VRButton
+              onClick={enterVR}
               disabled={!isVRSupported}
             >
               {isVRSupported ? 'Enter VR Mode' : 'VR Not Supported'}
@@ -382,7 +412,7 @@ const VRScene: React.FC<{
               Exit VR Mode
             </VRButton>
           )}
-          
+
           <VRButton onClick={onExitVR}>
             Back to Gallery
           </VRButton>
