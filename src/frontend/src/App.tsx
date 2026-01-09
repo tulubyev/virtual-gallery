@@ -18,6 +18,8 @@ import VrGalleryPage from './pages/VrGalleryPage';
 import GalleryPage from './pages/GalleryPage';
 import RoomManagementPage from './pages/RoomManagementPage';
 import RoomPage from './pages/RoomPage';
+import StaffDashboardPage from './pages/StaffDashboardPage';
+import CuratorReviewPage from './pages/CuratorReviewPage';
 
 // Компоненты
 import Header from './components/Header';
@@ -83,6 +85,8 @@ const App: React.FC = () => {
             <Route path="/galleries/:id" element={<GalleryPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
             <Route path="/galleries/:galleryId/rooms/manage" element={currentUser?.role === 'curator' || currentUser?.role === 'admin' ? <RoomManagementPage /> : <Navigate to="/login" />} />
+            <Route path="/staff-dashboard" element={currentUser?.role === 'staff' || currentUser?.role === 'admin' ? <StaffDashboardPage /> : <Navigate to="/login" />} />
+            <Route path="/curator-review" element={currentUser?.role === 'curator' || currentUser?.role === 'admin' ? <CuratorReviewPage /> : <Navigate to="/login" />} />
             <Route
               path="/admin"
               element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}

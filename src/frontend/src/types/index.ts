@@ -140,3 +140,52 @@ export interface Bid {
   timestamp: Date;
   is_winning: boolean;
 }
+
+export interface ImageAnalysisResult {
+  tags: string[];
+  style: string;
+  dominant_colors: string[];
+  composition_elements: string[];
+  estimated_period: string;
+  confidence: number;
+  detected_objects: DetectedObject[];
+  image_quality: ImageQualityMetrics;
+}
+
+export interface DetectedObject {
+  name: string;
+  confidence: number;
+  bounding_box: { x: number; y: number; width: number; height: number };
+}
+
+export interface ImageQualityMetrics {
+  brightness: number;
+  contrast: number;
+  sharpness: number;
+  resolution: { width: number; height: number };
+  compression_artifacts: number;
+}
+
+export interface ArtworkUpload {
+  file: File;
+  filename: string;
+  original_name: string;
+  size: number;
+  mime_type: string;
+  upload_date: Date;
+  uploaded_by: number;
+  status: 'uploaded' | 'analyzing' | 'analyzed' | 'review_pending' | 'published' | 'rejected';
+  analysis_result?: ImageAnalysisResult;
+  artwork_data?: Partial<Artwork>;
+}
+
+export interface ArtworkSubmission {
+  submission_id: number;
+  artwork_upload: ArtworkUpload;
+  submitted_by: number;
+  submitted_at: Date;
+  reviewed_by?: number;
+  reviewed_at?: Date;
+  status: 'pending' | 'approved' | 'rejected' | 'needs_revision';
+  reviewer_notes?: string;
+}

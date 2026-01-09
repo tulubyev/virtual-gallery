@@ -75,8 +75,11 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
             {currentUser.role === 'curator' && (
               <NavLink to="/curator">Панель куратора</NavLink>
             )}
+            {currentUser.role === 'curator' && (
+              <NavLink to="/curator-review">Проверка карточек</NavLink>
+            )}
             {currentUser.role === 'staff' && (
-              <NavLink to="/staff">Панель сотрудника</NavLink>
+              <NavLink to="/staff-dashboard">Дашборд сотрудника</NavLink>
             )}
             {currentUser.role === 'tour_guide' && (
               <NavLink to="/tour-guide">Организатор туров</NavLink>
