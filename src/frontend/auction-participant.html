@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет участника аукциона - Виртуальная галерея</title>
+    <link rel="stylesheet" href="/assets/auction-participant.css">
+</head>
+<body>
+    <div class="auction-participant-container">
+        <header class="auction-participant-header">
+            <h1>Кабинет участника аукциона</h1>
+            <nav class="auction-participant-nav">
+                <button class="nav-btn active" data-tab="dashboard">Главная</button>
+                <button class="nav-btn" data-tab="auctions">Аукционы</button>
+                <button class="nav-btn" data-tab="bids">Мои ставки</button>
+                <button class="nav-btn" data-tab="watchlist">Наблюдение</button>
+                <button class="nav-btn" data-tab="transactions">Транзакции</button>
+                <button class="nav-btn" id="logoutBtn">Выход</button>
+            </nav>
+        </header>
+
+        <main class="auction-participant-main">
+            <!-- Главная панель -->
+            <section id="dashboard" class="tab-content active">
+                <h2>Панель управления участника аукциона</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Баланс</h3>
+                        <p id="balance" class="stat-number">0 ₽</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Активные ставки</h3>
+                        <p id="activeBids" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Выиграно лотов</h3>
+                        <p id="wonLots" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Участие в аукционах</h3>
+                        <p id="participatedAuctions" class="stat-number">0</p>
+                    </div>
+                </div>
+                
+                <div class="upcoming-auctions">
+                    <h3>Предстоящие аукционы</h3>
+                    <div class="auctions-list" id="upcomingAuctionsList">
+                        <!-- Аукционы будут загружены динамически -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Аукционы -->
+            <section id="auctions" class="tab-content">
+                <h2>Доступные аукционы</h2>
+                <div class="controls-row">
+                    <input type="text" id="auctionSearch" placeholder="Поиск аукционов...">
+                    <select id="auctionFilter">
+                        <option value="">Все категории</option>
+                        <option value="paintings">Живопись</option>
+                        <option value="sculptures">Скульптура</option>
+                        <option value="photography">Фотография</option>
+                        <option value="antiques">Антиквариат</option>
+                    </select>
+                </div>
+                <div class="auctions-grid" id="auctionsGrid">
+                    <!-- Аукционы будут загружены динамически -->
+                </div>
+            </section>
+
+            <!-- Мои ставки -->
+            <section id="bids" class="tab-content">
+                <h2>Мои ставки</h2>
+                <div class="table-container">
+                    <table id="bidsTable">
+                        <thead>
+                            <tr>
+                                <th>Лот</th>
+                                <th>Экспонат</th>
+                                <th>Текущая ставка</th>
+                                <th>Моя ставка</th>
+                                <th>Статус</th>
+                                <th>Дата ставки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bidsTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Наблюдение -->
+            <section id="watchlist" class="tab-content">
+                <h2>Список наблюдения</h2>
+                <div class="table-container">
+                    <table id="watchlistTable">
+                        <thead>
+                            <tr>
+                                <th>Лот</th>
+                                <th>Экспонат</th>
+                                <th>Текущая ставка</th>
+                                <th>Аукцион</th>
+                                <th>До окончания</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="watchlistTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Транзакции -->
+            <section id="transactions" class="tab-content">
+                <h2>История транзакций</h2>
+                <div class="table-container">
+                    <table id="transactionsTable">
+                        <thead>
+                            <tr>
+                                <th>ID транзакции</th>
+                                <th>Тип</th>
+                                <th>Сумма</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                                <th>Детали</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно для подтверждения ставки -->
+    <div id="bidModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Сделать ставку</h2>
+            <form id="bidForm">
+                <input type="hidden" id="lotId">
+                <div class="form-group">
+                    <label for="bidAmount">Сумма ставки:</label>
+                    <input type="number" id="bidAmount" min="1" required>
+                    <p class="info-text">Минимальная следующая ставка: <span id="minBidAmount">0</span> ₽</p>
+                </div>
+                <button type="submit" class="btn btn-primary">Сделать ставку</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/auction-participant.js"></script>
+</body>
+</html>

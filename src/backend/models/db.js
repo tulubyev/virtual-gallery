@@ -178,9 +178,16 @@ async function getRecommendedArtworks(galleryId) {
 // User operations
 async function getUserById(id) {
     const result = await pool.query(`
-        SELECT user_id, username, email, preferences FROM users WHERE user_id = $1
+        SELECT user_id, username, email, role, preferences FROM users WHERE user_id = $1
     `, [id]);
     return result.rows[0];
+}
+
+async function getAllUsers() {
+    const result = await pool.query(`
+        SELECT user_id, username, email, role, created_at FROM users ORDER BY user_id
+    `);
+    return result.rows;
 }
 
 async function getUserByEmail(email) {
@@ -191,14 +198,14 @@ async function getUserByEmail(email) {
 }
 
 async function createUser(userData) {
-    const { username, email, password_hash } = userData;
+    const { username, email, password_hash, role = 'user' } = userData;
 
     const result = await pool.query(`
         INSERT INTO users
-        (username, email, password_hash)
-        VALUES ($1, $2, $3)
-        RETURNING user_id, username, email
-    `, [username, email, password_hash]);
+        (username, email, password_hash, role)
+        VALUES ($1, $2, $3, $4)
+        RETURNING user_id, username, email, role
+    `, [username, email, password_hash, role]);
     return result.rows[0];
 }
 
@@ -214,11 +221,19 @@ async function updateUser(id, updateData) {
         paramCount++;
     }
 
-    query += fields.join(', ') + ` WHERE user_id = $${paramCount} RETURNING user_id, username, email, preferences`;
+    query += fields.join(', ') + ` WHERE user_id = $${paramCount} RETURNING user_id, username, email, role, preferences`;
     values.push(id);
 
     const result = await pool.query(query, values);
     return result.rows[0];
+}
+
+// Get user by role
+async function getUsersByRole(role) {
+    const result = await pool.query(`
+        SELECT user_id, username, email, role, created_at FROM users WHERE role = $1
+    `, [role]);
+    return result.rows;
 }
 
 // Interaction operations

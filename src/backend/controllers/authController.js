@@ -26,11 +26,12 @@ const authController = {
             // Hash the password
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Create the user in the database
+            // Create the user in the database with default role
             const newUser = await db.createUser({
                 username,
                 email,
-                password_hash: hashedPassword
+                password_hash: hashedPassword,
+                role: 'user'  // Default role for new users
             });
 
             // Generate JWT token

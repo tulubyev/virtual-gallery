@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель организатора туров - Виртуальная галерея</title>
+    <link rel="stylesheet" href="/assets/tour-guide.css">
+</head>
+<body>
+    <div class="tour-guide-container">
+        <header class="tour-guide-header">
+            <h1>Панель организатора виртуальных туров</h1>
+            <nav class="tour-guide-nav">
+                <button class="nav-btn active" data-tab="dashboard">Главная</button>
+                <button class="nav-btn" data-tab="tours">Мои туры</button>
+                <button class="nav-btn" data-tab="schedule">Расписание</button>
+                <button class="nav-btn" data-tab="participants">Участники</button>
+                <button class="nav-btn" data-tab="analytics">Аналитика</button>
+                <button class="nav-btn" id="logoutBtn">Выход</button>
+            </nav>
+        </header>
+
+        <main class="tour-guide-main">
+            <!-- Главная панель -->
+            <section id="dashboard" class="tab-content active">
+                <h2>Панель управления организатора туров</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Активных туров</h3>
+                        <p id="activeTours" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Запланированных туров</h3>
+                        <p id="scheduledTours" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Всего участников</h3>
+                        <p id="totalParticipants" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Средняя оценка</h3>
+                        <p id="averageRating" class="stat-number">0.0</p>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <h3>Быстрые действия</h3>
+                    <div class="actions-grid">
+                        <button class="action-btn" id="createTourBtn">
+                            <i class="icon">🧭</i>
+                            <span>Создать тур</span>
+                        </button>
+                        <button class="action-btn" id="scheduleTourBtn">
+                            <i class="icon">📅</i>
+                            <span>Назначить тур</span>
+                        </button>
+                        <button class="action-btn" id="manageRoutesBtn">
+                            <i class="icon">🗺️</i>
+                            <span>Маршруты</span>
+                        </button>
+                        <button class="action-btn" id="viewFeedbackBtn">
+                            <i class="icon">💬</i>
+                            <span>Отзывы</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Мои туры -->
+            <section id="tours" class="tab-content">
+                <h2>Мои виртуальные туры</h2>
+                <div class="controls-row">
+                    <input type="text" id="tourSearch" placeholder="Поиск туров...">
+                    <button class="btn btn-primary" id="newTourBtn">Новый тур</button>
+                </div>
+                <div class="tours-grid" id="toursGrid">
+                    <!-- Туры будут загружены динамически -->
+                </div>
+            </section>
+
+            <!-- Расписание -->
+            <section id="schedule" class="tab-content">
+                <h2>Расписание туров</h2>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prevMonth">&lt; Месяц</button>
+                        <h3 id="currentMonthYear">Май 2023</h3>
+                        <button id="nextMonth">Месяц &gt;</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Календарь будет сгенерирован динамически -->
+                    </div>
+                </div>
+                <div class="scheduled-tours-list">
+                    <h3>Запланированные туры на сегодня</h3>
+                    <ul id="todaysTours">
+                        <!-- Тур на сегодня будет загружен динамически -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Участники -->
+            <section id="participants" class="tab-content">
+                <h2>Участники туров</h2>
+                <div class="controls-row">
+                    <input type="text" id="participantSearch" placeholder="Поиск участников...">
+                    <select id="tourFilter">
+                        <option value="">Все туры</option>
+                        <!-- Опции будут загружены динамически -->
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="participantsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Email</th>
+                                <th>Тур</th>
+                                <th>Дата регистрации</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Аналитика -->
+            <section id="analytics" class="tab-content">
+                <h2>Аналитика туров</h2>
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <h3>Посещаемость по месяцам</h3>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Популярные маршруты</h3>
+                        <canvas id="popularRoutesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Оценки участников</h3>
+                        <canvas id="ratingsChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Обратная связь</h3>
+                        <div id="feedbackContainer">
+                            <!-- Отзывы будут загружены динамически -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно для создания тура -->
+    <div id="tourModal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close">&times;</span>
+            <h2>Создать новый виртуальный тур</h2>
+            <form id="tourForm">
+                <div class="form-group">
+                    <label for="tourName">Название тура *</label>
+                    <input type="text" id="tourName" required>
+                </div>
+                <div class="form-group">
+                    <label for="tourDescription">Описание тура</label>
+                    <textarea id="tourDescription" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="tourDuration">Продолжительность (минуты)</label>
+                        <input type="number" id="tourDuration" min="10" max="300" value="60">
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="tourLanguage">Язык тура</label>
+                        <select id="tourLanguage">
+                            <option value="ru">Русский</option>
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tourRoute">Маршрут тура</label>
+                    <select id="tourRoute">
+                        <option value="">Выберите маршрут</option>
+                        <option value="impressionism">Тур по импрессионистам</option>
+                        <option value="modern">Тур по современному искусству</option>
+                        <option value="classical">Классический тур</option>
+                        <option value="custom">Пользовательский маршрут</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tourMaxParticipants">Максимум участников</label>
+                    <input type="number" id="tourMaxParticipants" min="1" max="100" value="20">
+                </div>
+                <div class="form-group">
+                    <label for="tourDifficulty">Сложность</label>
+                    <select id="tourDifficulty">
+                        <option value="easy">Легкий</option>
+                        <option value="medium">Средний</option>
+                        <option value="hard">Сложный</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Создать тур</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/assets/tour-guide.js"></script>
+</body>
+</html>

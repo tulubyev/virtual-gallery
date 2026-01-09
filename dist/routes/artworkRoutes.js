@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.artworkRoutes = void 0;
+const express_1 = require("express");
+const controllers_1 = require("../controllers");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+exports.artworkRoutes = router;
+router.get('/', controllers_1.ArtworkController.getAllArtworks);
+router.get('/:id', controllers_1.ArtworkController.getArtworkById);
+router.get('/search/:query', controllers_1.ArtworkController.searchArtworks);
+router.get('/filter/:tags', controllers_1.ArtworkController.filterArtworksByTags);
+router.post('/', auth_1.authenticateToken, controllers_1.ArtworkController.createArtwork);
+router.put('/:id', auth_1.authenticateToken, controllers_1.ArtworkController.updateArtwork);
+router.delete('/:id', auth_1.authenticateToken, controllers_1.ArtworkController.deleteArtwork);
+router.get('/recommendations', auth_1.authenticateToken, controllers_1.ArtworkController.getRecommendedArtworks);
+router.get('/:id/similar', controllers_1.ArtworkController.getSimilarArtworks);
+router.post('/:artworkId/collections/:collectionId', auth_1.authenticateToken, controllers_1.ArtworkController.addToCollection);
+router.get('/:id/analytics', controllers_1.ArtworkController.getArtworkAnalytics);
+//# sourceMappingURL=artworkRoutes.js.map

@@ -37,7 +37,9 @@ src/
    Note: If you encounter issues with the installation, make sure you have Node.js and npm installed correctly.
    If the webxr package causes issues, it has been removed from dependencies as it was causing installation problems.
 
-2. Set up environment variables in a `.env` file:
+2. Install TypeScript globally: `npm install -g typescript ts-node`
+
+3. Set up environment variables in a `.env` file:
    ```
    DB_HOST=your_host
    DB_PORT=5432
@@ -47,8 +49,15 @@ src/
    DB_STRING=postgres://your_username:your_password@your_host:5432/virtual_gallery_db
    JWT_SECRET=your-super-secret-jwt-key
    ```
-3. Initialize the database: `npm run init-db`
-4. Run the application: `npm start`
+4. Initialize the database: `npm run init-db`
+5. Build the project: `npm run build`
+6. Run the application: `npm start`
+
+## Development
+
+For development mode: `npm run dev`
+
+This will start the server in development mode with automatic reloading.
 
 ## Database Initialization
 

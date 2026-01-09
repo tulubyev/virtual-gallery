@@ -12,6 +12,7 @@ const artworkRoutes = require('./src/backend/routes/artworkRoutes');
 const galleryRoutes = require('./src/backend/routes/galleryRoutes');
 const userRoutes = require('./src/backend/routes/userRoutes');
 const aiRoutes = require('./src/backend/routes/aiRoutes');
+const userManagementRoutes = require('./src/backend/routes/userManagementRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -40,12 +41,38 @@ app.use('/api/artworks', artworkRoutes);
 app.use('/api/galleries', galleryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/admin/users', userManagementRoutes);
 
 console.log('Маршруты загружены');
 
 // Serve frontend
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './src/frontend/index.html'));
+});
+
+// Serve admin panel
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, './src/frontend/admin.html'));
+});
+
+// Serve curator panel
+app.get('/curator', (req, res) => {
+    res.sendFile(path.join(__dirname, './src/frontend/curator.html'));
+});
+
+// Serve staff panel
+app.get('/staff', (req, res) => {
+    res.sendFile(path.join(__dirname, './src/frontend/staff.html'));
+});
+
+// Serve tour guide panel
+app.get('/tour-guide', (req, res) => {
+    res.sendFile(path.join(__dirname, './src/frontend/tour-guide.html'));
+});
+
+// Serve auction participant panel
+app.get('/auction-participant', (req, res) => {
+    res.sendFile(path.join(__dirname, './src/frontend/auction-participant.html'));
 });
 
 console.log('Главная страница настроена');

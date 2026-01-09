@@ -20,6 +20,134 @@ document.addEventListener('DOMContentLoaded', function() {
         registerLink.style.display = 'block';
         logoutLink.style.display = 'none';
     }
+
+    // Получаем элементы модальных окон
+    const registerModal = document.getElementById('registerModal');
+    const loginModal = document.getElementById('loginModal');
+    const closeRegister = document.querySelector('.close');
+    const closeLogin = document.querySelector('.close-login');
+    const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+
+    // Обработчики открытия модальных окон
+    loginLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        loginModal.style.display = 'block';
+    });
+
+    registerLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        registerModal.style.display = 'block';
+    });
+
+    // Обработчики закрытия модальных окон
+    closeRegister.addEventListener('click', () => {
+        registerModal.style.display = 'none';
+    });
+
+    closeLogin.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+
+    // Закрытие модальных окон при клике вне их области
+    window.addEventListener('click', (event) => {
+        if (event.target === registerModal) {
+            registerModal.style.display = 'none';
+        }
+        if (event.target === loginModal) {
+            loginModal.style.display = 'none';
+        }
+    });
+
+    // Обработчик формы регистрации
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(registerForm);
+        const userData = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            role: formData.get('role') || 'user'  // По умолчанию обычный пользователь
+        };
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Сохраняем токен и роль в localStorage
+                localStorage.setItem('authToken', result.token);
+                localStorage.setItem('userRole', result.role || userData.role);
+
+                // Обновляем UI
+                loginLink.style.display = 'none';
+                registerLink.style.display = 'none';
+                logoutLink.style.display = 'block';
+
+                // Закрываем модальное окно
+                registerModal.style.display = 'none';
+
+                alert('Регистрация прошла успешно!');
+            } else {
+                alert(`Ошибка регистрации: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Ошибка при регистрации:', error);
+            alert('Ошибка при регистрации');
+        }
+    });
+
+    // Обработчик формы входа
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(loginForm);
+        const loginData = {
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Сохраняем токен и роль в localStorage
+                localStorage.setItem('authToken', result.token);
+                localStorage.setItem('userRole', result.role);
+
+                // Обновляем UI
+                loginLink.style.display = 'none';
+                registerLink.style.display = 'none';
+                logoutLink.style.display = 'block';
+
+                // Закрываем модальное окно
+                loginModal.style.display = 'none';
+
+                alert('Вход выполнен успешно!');
+            } else {
+                alert(`Ошибка входа: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Ошибка при входе:', error);
+            alert('Ошибка при входе');
+        }
+    });
     
     // Функция для получения токена из localStorage
     function getAuthToken() {
