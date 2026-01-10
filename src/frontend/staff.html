@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель сотрудника - Добавление экспонатов</title>
+    <link rel="stylesheet" href="/assets/staff.css">
+</head>
+<body>
+    <div class="staff-container">
+        <header class="staff-header">
+            <h1>Панель сотрудника - Добавление экспонатов</h1>
+            <nav class="staff-nav">
+                <button class="nav-btn active" data-tab="dashboard">Главная</button>
+                <button class="nav-btn" data-tab="add-artwork">Добавить экспонат</button>
+                <button class="nav-btn" data-tab="my-artworks">Мои экспонаты</button>
+                <button class="nav-btn" data-tab="pending">На модерации</button>
+                <button class="nav-btn" id="logoutBtn">Выход</button>
+            </nav>
+        </header>
+
+        <main class="staff-main">
+            <!-- Главная панель -->
+            <section id="dashboard" class="tab-content active">
+                <h2>Панель управления сотрудника</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Добавлено экспонатов</h3>
+                        <p id="addedArtworks" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>На модерации</h3>
+                        <p id="pendingArtworks" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Одобренных</h3>
+                        <p id="approvedArtworks" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Отклоненных</h3>
+                        <p id="rejectedArtworks" class="stat-number">0</p>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h3>Недавняя активность</h3>
+                    <ul id="activityList">
+                        <!-- Активность будет загружаться динамически -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Добавление экспоната -->
+            <section id="add-artwork" class="tab-content">
+                <h2>Добавить новый экспонат</h2>
+                <form id="artworkForm" class="artwork-form">
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="title">Название *</label>
+                            <input type="text" id="title" name="title" required>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="artistName">Имя художника *</label>
+                            <input type="text" id="artistName" name="artistName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group third-width">
+                            <label for="yearCreated">Год создания</label>
+                            <input type="number" id="yearCreated" name="yearCreated" min="1000" max="2026">
+                        </div>
+                        <div class="form-group third-width">
+                            <label for="medium">Техника</label>
+                            <input type="text" id="medium" name="medium" placeholder="Масло, холст и т.д.">
+                        </div>
+                        <div class="form-group third-width">
+                            <label for="dimensions">Размеры</label>
+                            <input type="text" id="dimensions" name="dimensions" placeholder="Ш×В×Г см">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="style">Стиль</label>
+                            <input type="text" id="style" name="style" placeholder="Импрессионизм, абстракция и т.д.">
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="location">Расположение в галерее</label>
+                            <input type="text" id="location" name="location" placeholder="Координаты в 3D-галерее">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Подробное описание экспоната"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tags">Теги</label>
+                        <input type="text" id="tags" name="tags" placeholder="Теги через запятую">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imageUpload">Изображение экспоната</label>
+                        <input type="file" id="imageUpload" name="image" accept="image/*">
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Статус</label>
+                        <select id="status" name="status">
+                            <option value="draft">Черновик</option>
+                            <option value="pending">На модерации</option>
+                            <option value="published">Опубликован</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Сохранить экспонат</button>
+                </form>
+            </section>
+
+            <!-- Мои экспонаты -->
+            <section id="my-artworks" class="tab-content">
+                <h2>Мои экспонаты</h2>
+                <div class="controls-row">
+                    <input type="text" id="myArtworksSearch" placeholder="Поиск моих экспонатов...">
+                    <select id="myArtworksFilter">
+                        <option value="">Все статусы</option>
+                        <option value="draft">Черновик</option>
+                        <option value="pending">На модерации</option>
+                        <option value="published">Опубликован</option>
+                        <option value="rejected">Отклонен</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="myArtworksTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Автор</th>
+                                <th>Год создания</th>
+                                <th>Статус</th>
+                                <th>Дата добавления</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myArtworksTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Экспонаты на модерации -->
+            <section id="pending" class="tab-content">
+                <h2>Экспонаты на модерации</h2>
+                <div class="table-container">
+                    <table id="pendingTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Автор</th>
+                                <th>Добавил</th>
+                                <th>Дата добавления</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                            <!-- Данные будут загружены динамически -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно для редактирования экспоната -->
+    <div id="editModal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close">&times;</span>
+            <h2>Редактировать экспонат</h2>
+            <form id="editArtworkForm" class="artwork-form">
+                <input type="hidden" id="editArtworkId">
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="editTitle">Название *</label>
+                        <input type="text" id="editTitle" name="title" required>
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="editArtistName">Имя художника *</label>
+                        <input type="text" id="editArtistName" name="artistName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group third-width">
+                        <label for="editYearCreated">Год создания</label>
+                        <input type="number" id="editYearCreated" name="yearCreated" min="1000" max="2026">
+                    </div>
+                    <div class="form-group third-width">
+                        <label for="editMedium">Техника</label>
+                        <input type="text" id="editMedium" name="medium" placeholder="Масло, холст и т.д.">
+                    </div>
+                    <div class="form-group third-width">
+                        <label for="editDimensions">Размеры</label>
+                        <input type="text" id="editDimensions" name="dimensions" placeholder="Ш×В×Г см">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="editStyle">Стиль</label>
+                        <input type="text" id="editStyle" name="style" placeholder="Импрессионизм, абстракция и т.д.">
+                    </div>
+                    <div class="form-group half-width">
+                        <label for="editLocation">Расположение в галерее</label>
+                        <input type="text" id="editLocation" name="location" placeholder="Координаты в 3D-галерее">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDescription">Описание</label>
+                    <textarea id="editDescription" name="description" rows="4" placeholder="Подробное описание экспоната"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editTags">Теги</label>
+                    <input type="text" id="editTags" name="tags" placeholder="Теги через запятую">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStatus">Статус</label>
+                    <select id="editStatus" name="status">
+                        <option value="draft">Черновик</option>
+                        <option value="pending">На модерации</option>
+                        <option value="published">Опубликован</option>
+                        <option value="rejected">Отклонен</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/staff.js"></script>
+</body>
+</html>
