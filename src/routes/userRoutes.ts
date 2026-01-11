@@ -1,11 +1,9 @@
 // routes/userRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
+import userController from '../controllers/UserController';
 
 const router = Router();
-
-// Import user controller
-const userController = require('../backend/controllers/userController');
 
 // Register new user
 router.post('/register', userController.registerUser);

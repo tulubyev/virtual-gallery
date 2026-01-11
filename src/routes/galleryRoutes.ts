@@ -1,11 +1,9 @@
 // routes/galleryRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
+import galleryController from '../controllers/GalleryController';
 
 const router = Router();
-
-// Import gallery controller
-const galleryController = require('../backend/controllers/galleryController');
 
 // Get all galleries
 router.get('/', galleryController.getAllGalleries);

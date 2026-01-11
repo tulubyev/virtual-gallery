@@ -1,5 +1,5 @@
 // src/frontend/src/components/ArtworkUploadForm.tsx
-import React, { useState, useRef, ChangeEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageProcessingService } from '../services/imageProcessingService';
 import { ArtworkUpload } from '../types';
@@ -97,14 +97,22 @@ const StatusMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
   border-radius: 4px;
   margin: 1rem 0;
   text-align: center;
-  background-color: ${props => 
-    props.type === 'success' ? '#d4edda' : 
+  background-color: ${props =>
+    props.type === 'success' ? '#d4edda' :
     props.type === 'error' ? '#f8d7da' : '#d1ecf1'
   };
-  color: ${props => 
-    props.type === 'success' ? '#155724' : 
+  color: ${props =>
+    props.type === 'success' ? '#155724' :
     props.type === 'error' ? '#721c24' : '#0c5460'
   };
+`;
+
+const CacheInfo = styled.div`
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #e8f4fd;
+  border-radius: 4px;
+  font-size: 0.9rem;
 `;
 
 const ArtworkUploadForm: React.FC = () => {
@@ -120,8 +128,18 @@ const ArtworkUploadForm: React.FC = () => {
   const [uploadMethod, setUploadMethod] = useState<'drag' | 'archive' | 'url'>('drag');
   const [urlInput, setUrlInput] = useState('');
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [cacheInfo, setCacheInfo] = useState(imageProcessingService.getCacheInfo());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Обновляем информацию о кэше каждые 5 секунд
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCacheInfo(imageProcessingService.getCacheInfo());
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -346,6 +364,11 @@ const ArtworkUploadForm: React.FC = () => {
     setUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  const clearCache = () => {
+    imageProcessingService.clearCache();
+    setStatusMessage({ type: 'success', message: 'Кэш изображений очищен' });
+  };
+
   return (
     <UploadContainer>
       <UploadTitle>Загрузка изображений экспонатов</UploadTitle>
@@ -505,6 +528,26 @@ const ArtworkUploadForm: React.FC = () => {
           {statusMessage.message}
         </StatusMessage>
       )}
+
+      <CacheInfo>
+        <div>Кэш изображений: {(cacheInfo.size / 1024 / 1024).toFixed(2)} MB / {(cacheInfo.maxSize / 1024 / 1024).toFixed(0)} MB</div>
+        <div>Количество закэшированных изображений: {cacheInfo.count}</div>
+        <button
+          onClick={clearCache}
+          style={{
+            marginTop: '0.5rem',
+            padding: '0.25rem 0.5rem',
+            backgroundColor: '#f39c12',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '0.8rem'
+          }}
+        >
+          Очистить кэш
+        </button>
+      </CacheInfo>
 
       <div style={{ textAlign: 'center' }}>
         <UploadButton

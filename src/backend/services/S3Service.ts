@@ -1,0 +1,209 @@
+// src/backend/services/S3Service.ts
+import AWS from 'aws-sdk';
+import { Readable } from 'stream';
+import path from 'path';
+import fs from 'fs';
+import s3Config from '../config/s3Config';
+
+// Настройка AWS SDK для работы с S3-совместимым хранилищем beget
+const s3 = new AWS.S3({
+  accessKeyId: s3Config.accessKeyId,
+  secretAccessKey: s3Config.secretAccessKey,
+  region: s3Config.region,
+  endpoint: s3Config.endpoint, // Для beget S3
+  s3ForcePathStyle: true, // Необходимо для некоторых S3-совместимых сервисов
+});
+
+interface UploadResult {
+  success: boolean;
+  url: string;
+  key: string;
+  etag: string;
+}
+
+interface S3File {
+  Body?: Buffer | Uint8Array | Blob | string | Readable;
+  ContentType?: string;
+  Metadata?: {
+    [key: string]: string;
+  };
+}
+
+class S3Service {
+  private bucket: string;
+
+  constructor() {
+    this.bucket = s3Config.bucket;
+  }
+
+  // Загрузка файла в S3
+  async uploadFile(localFilePath: string, s3Key: string, options: { contentType?: string; originalFilename?: string } = {}): Promise<UploadResult> {
+    try {
+      const fileContent = fs.readFileSync(localFilePath);
+
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key,
+        Body: fileContent,
+        ContentType: options.contentType || 'application/octet-stream',
+        Metadata: {
+          'uploaded-at': new Date().toISOString(),
+          'original-filename': options.originalFilename || ''
+        }
+      };
+
+      const result = await s3.upload(params).promise();
+      return {
+        success: true,
+        url: result.Location,
+        key: result.Key,
+        etag: result.ETag
+      };
+    } catch (error: any) {
+      console.error('Ошибка при загрузке файла в S3:', error);
+      throw error;
+    }
+  }
+
+  // Загрузка буфера в S3
+  async uploadBuffer(buffer: Buffer, s3Key: string, contentType = 'application/octet-stream', originalFilename = ''): Promise<UploadResult> {
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key,
+        Body: buffer,
+        ContentType: contentType,
+        Metadata: {
+          'uploaded-at': new Date().toISOString(),
+          'original-filename': originalFilename
+        }
+      };
+
+      const result = await s3.upload(params).promise();
+      return {
+        success: true,
+        url: result.Location,
+        key: result.Key,
+        etag: result.ETag
+      };
+    } catch (error: any) {
+      console.error('Ошибка при загрузке буфера в S3:', error);
+      throw error;
+    }
+  }
+
+  // Загрузка потока в S3
+  async uploadStream(stream: Readable, s3Key: string, contentType = 'application/octet-stream', originalFilename = ''): Promise<UploadResult> {
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key,
+        Body: stream,
+        ContentType: contentType,
+        Metadata: {
+          'uploaded-at': new Date().toISOString(),
+          'original-filename': originalFilename
+        }
+      };
+
+      const result = await s3.upload(params).promise();
+      return {
+        success: true,
+        url: result.Location,
+        key: result.Key,
+        etag: result.ETag
+      };
+    } catch (error: any) {
+      console.error('Ошибка при загрузке потока в S3:', error);
+      throw error;
+    }
+  }
+
+  // Получение файла из S3
+  async getFile(s3Key: string): Promise<AWS.S3.GetObjectOutput> {
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key
+      };
+
+      return await s3.getObject(params).promise();
+    } catch (error: any) {
+      console.error('Ошибка при получении файла из S3:', error);
+      throw error;
+    }
+  }
+
+  // Получение URL файла из S3 (подписанный URL для ограниченного доступа)
+  async getFileUrl(s3Key: string, expiresIn = 3600): Promise<string> { // по умолчанию срок действия 1 час
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key,
+        Expires: expiresIn
+      };
+
+      return s3.getSignedUrlPromise('getObject', params);
+    } catch (error: any) {
+      console.error('Ошибка при получении URL файла из S3:', error);
+      throw error;
+    }
+  }
+
+  // Удаление файла из S3
+  async deleteFile(s3Key: string): Promise<{ success: boolean }> {
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key
+      };
+
+      await s3.deleteObject(params).promise();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Ошибка при удалении файла из S3:', error);
+      throw error;
+    }
+  }
+
+  // Проверка существования файла в S3
+  async fileExists(s3Key: string): Promise<boolean> {
+    try {
+      const params = {
+        Bucket: this.bucket,
+        Key: s3Key
+      };
+
+      await s3.headObject(params).promise();
+      return true;
+    } catch (error: any) {
+      if (error.code === 'NotFound') {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  // Создание уникального ключа для файла в S3
+  generateS3Key(originalFilename: string, userId: string | number, artworkId: string | number, prefix = 'artworks'): string {
+    const timestamp = Date.now();
+    const extension = originalFilename.split('.').pop();
+    const filenameWithoutExt = originalFilename.substring(0, originalFilename.lastIndexOf('.'));
+
+    // Формат: artworks/userId/artworkId/filename_timestamp.extension
+    return `${prefix}/${userId}/${artworkId}/${filenameWithoutExt}_${timestamp}.${extension}`;
+  }
+
+  // Создание ключа для миниатюры
+  generateThumbnailS3Key(originalS3Key: string, size: string): string {
+    const parts = originalS3Key.split('/');
+    const filename = parts.pop()!;
+    const extension = filename.split('.').pop();
+    const filenameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+
+    // Вставляем размер в название файла
+    return `${parts.join('/')}/${filenameWithoutExt}_thumb_${size}.${extension}`;
+  }
+}
+
+export default new S3Service();

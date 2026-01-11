@@ -1,31 +1,29 @@
 // routes/aiRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
+import aiController from '../controllers/AiController';
 
 const router = Router();
 
-// Import AI controller
-const aiController = require('../backend/controllers/aiController');
-
-// Get AI-generated recommendations (requires authentication)
+// Получить ИИ-рекомендации (требует аутентификации)
 router.get('/recommendations', authenticateToken, aiController.getRecommendations);
 
-// Get AI-generated collection (requires authentication)
+// Сгенерировать ИИ-коллекцию (требует аутентификации)
 router.get('/collections/generate', authenticateToken, aiController.generateCollection);
 
-// Analyze artwork image (requires authentication)
+// Анализировать изображение экспоната (требует аутентификации)
 router.post('/analyze-image', authenticateToken, aiController.analyzeImage);
 
-// Get similar artworks
+// Получить похожие экспонаты
 router.get('/similar/:artworkId', aiController.getSimilarArtworks);
 
-// Train recommendation model (requires authentication)
+// Обучить модель рекомендаций (требует аутентификации)
 router.post('/train-model', authenticateToken, aiController.trainModel);
 
-// Personalize gallery route based on user preferences (requires authentication)
+// Персонализировать маршрут галереи на основе предпочтений пользователя (требует аутентификации)
 router.get('/personalize-route', authenticateToken, aiController.personalizeGalleryRoute);
 
-// Predict user engagement with artworks (requires authentication)
+// Прогнозировать вовлеченность пользователя с экспонатами (требует аутентификации)
 router.post('/predict-engagement', authenticateToken, aiController.predictEngagement);
 
 export { router as aiRoutes };

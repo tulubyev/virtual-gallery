@@ -27,11 +27,25 @@ export class UserService extends BaseService<User> {
     });
   }
 
+  // Метод для получения пользователя по ID (для совместимости с AuthController)
+  static async getUserById(id: string): Promise<User> {
+    // В реальной реализации этот метод будет использовать бэкенд API
+    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
+    throw new Error('getUserById should be implemented on the backend');
+  }
+
   async create(user: Partial<User>): Promise<User> {
     return this.request('/', {
       method: 'POST',
       body: JSON.stringify(user)
     });
+  }
+
+  // Метод для создания пользователя (для совместимости с AuthController)
+  static async createUser(userData: Partial<User>): Promise<User> {
+    // В реальной реализации этот метод будет использовать бэкенд API
+    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
+    throw new Error('createUser should be implemented on the backend');
   }
 
   async update(id: string, user: Partial<User>): Promise<User> {
@@ -55,6 +69,13 @@ export class UserService extends BaseService<User> {
         'Authorization': `Bearer ${token}`
       }
     });
+  }
+
+  // Метод для получения пользователя по email (для совместимости с AuthController)
+  static async getUserByEmail(email: string): Promise<User | null> {
+    // В реальной реализации этот метод будет использовать бэкенд API
+    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
+    throw new Error('getUserByEmail should be implemented on the backend');
   }
 
   async register(userData: Partial<User>): Promise<User> {

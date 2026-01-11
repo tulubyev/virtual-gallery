@@ -1,11 +1,9 @@
 // routes/artworkRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
+import artworkController from '../controllers/ArtworkController';
 
 const router = Router();
-
-// Import artwork controller
-const artworkController = require('../backend/controllers/artworkController');
 
 // Get all artworks
 router.get('/', artworkController.getAllArtworks);
