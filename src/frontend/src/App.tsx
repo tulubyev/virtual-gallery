@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import styled from 'styled-components';
 
 // Страницы
 import HomePage from './pages/HomePage';
@@ -24,6 +23,8 @@ import ArtworkUploadPage from './pages/ArtworkUploadPage';
 import VirtualGalleryPage from './pages/VirtualGalleryPage';
 import ArtworksPage from './pages/ArtworksPage';
 import GalleriesListPage from './pages/GalleriesListPage';
+import ToursPage from './pages/ToursPage';
+import CollectionsPage from './pages/CollectionsPage';
 
 // Компоненты
 import Header from './components/Header';
@@ -31,17 +32,6 @@ import Footer from './components/Footer';
 
 // Типы
 import { User } from './types';
-
-const AppContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-`;
-
-const MainContent = styled.main`
-  flex: 1;
-  padding: 20px;
-`;
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -77,9 +67,9 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <AppContainer>
+      <div className="flex flex-col min-h-screen">
         <Header currentUser={currentUser} onLogout={logout} />
-        <MainContent>
+        <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/artworks" element={<ArtworksPage />} />
@@ -88,11 +78,41 @@ const App: React.FC = () => {
             <Route path="/galleries" element={<GalleriesListPage />} />
             <Route path="/galleries/:id" element={<GalleryPage />} />
             <Route path="/rooms/:id" element={<RoomPage />} />
-            <Route path="/galleries/:galleryId/rooms/manage" element={currentUser?.role === 'curator' || currentUser?.role === 'admin' ? <RoomManagementPage /> : <Navigate to="/login" />} />
-            <Route path="/staff-dashboard" element={currentUser?.role === 'staff' || currentUser?.role === 'admin' ? <StaffDashboardPage /> : <Navigate to="/login" />} />
-            <Route path="/curator-review" element={currentUser?.role === 'curator' || currentUser?.role === 'admin' ? <CuratorReviewPage /> : <Navigate to="/login" />} />
-            <Route path="/artwork-upload" element={currentUser?.role === 'admin' || currentUser?.role === 'curator' ? <ArtworkUploadPage /> : <Navigate to="/login" />} />
+            <Route
+              path="/galleries/:galleryId/rooms/manage"
+              element={
+                currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
+                <RoomManagementPage /> :
+                <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/staff-dashboard"
+              element={
+                currentUser?.role === 'staff' || currentUser?.role === 'admin' ?
+                <StaffDashboardPage /> :
+                <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/curator-review"
+              element={
+                currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
+                <CuratorReviewPage /> :
+                <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/artwork-upload"
+              element={
+                currentUser?.role === 'admin' || currentUser?.role === 'curator' ?
+                <ArtworkUploadPage /> :
+                <Navigate to="/login" />
+              }
+            />
             <Route path="/virtual-gallery" element={<VirtualGalleryPage />} />
+            <Route path="/tours" element={<ToursPage />} />
+            <Route path="/collections" element={<CollectionsPage />} />
             <Route
               path="/admin"
               element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}
@@ -122,9 +142,9 @@ const App: React.FC = () => {
               element={!currentUser ? <RegisterPage onRegister={login} /> : <Navigate to="/" />}
             />
           </Routes>
-        </MainContent>
+        </main>
         <Footer />
-      </AppContainer>
+      </div>
     </Router>
   );
 };

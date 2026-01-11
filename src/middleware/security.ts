@@ -44,23 +44,30 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
 
 // Миддлвар для генерации CSRF токена
 export const generateCsrfToken = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session) {
+  // Проверяем, есть ли сессия
+  if (req.session) {
+    // Если используются сессии, сохраняем токен в сессии
+    if (!(req.session as any).csrfToken) {
+      (req.session as any).csrfToken = crypto.randomBytes(32).toString('hex');
+    }
+    (res.locals as any).csrfToken = (req.session as any).csrfToken;
+  } else {
     // Если сессии не используются, создаем токен на основе случайных данных
     const csrfToken = crypto.randomBytes(32).toString('hex');
     (res.locals as any).csrfToken = csrfToken;
-    next();
-  } else {
-    // Если используются сессии, сохраняем токен в сессии
-    if (!req.session.csrfToken) {
-      req.session.csrfToken = crypto.randomBytes(32).toString('hex');
-    }
-    (res.locals as any).csrfToken = req.session.csrfToken;
-    next();
   }
+  next();
 };
 
 // Миддлвар для проверки CSRF токена
 export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  // Исключаем определенные маршруты из проверки CSRF
+  // req.originalUrl содержит полный путь, включая префиксы
+  const excludedPaths = ['/api/auth/login', '/api/auth/register'];
+  if (excludedPaths.some(path => req.originalUrl.startsWith(path))) {
+    return next();
+  }
+
   // Проверяем, является ли запрос безопасным методом
   const safeMethods = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
   if (safeMethods.includes(req.method)) {

@@ -1,6 +1,7 @@
 // src/frontend/src/services/imageProcessingService.ts
 import api from './api';
 import { ImageAnalysisResult, ArtworkUpload, ArtworkSubmission } from '../types';
+import { imageCacheService } from './ImageCacheService';
 
 export const imageProcessingService = {
   // Загрузить изображение для обработки
@@ -75,5 +76,30 @@ export const imageProcessingService = {
       ownerInfo
     });
     return response.data;
+  },
+
+  // Загрузить и закэшировать изображение
+  async loadAndCacheImage(url: string): Promise<string> {
+    return await imageCacheService.loadImage(url);
+  },
+
+  // Загрузить и закэшировать несколько изображений
+  async loadAndCacheImages(urls: string[]): Promise<(string | Error)[]> {
+    return await imageCacheService.loadImages(urls);
+  },
+
+  // Предзагрузить изображения для улучшения производительности
+  async preloadImages(urls: string[], callback?: (loaded: number, total: number) => void): Promise<void> {
+    return await imageCacheService.preloadImages(urls, callback);
+  },
+
+  // Получить информацию о состоянии кэша
+  getCacheInfo() {
+    return imageCacheService.getCacheInfo();
+  },
+
+  // Очистить кэш изображений
+  clearCache(): void {
+    imageCacheService.clearCache();
   }
 };

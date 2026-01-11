@@ -1,165 +1,225 @@
-// src/frontend/src/pages/GalleryPage.tsx
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Gallery, Room } from '../types';
-import { galleryService } from '../services';
-import RoomDisplay from '../components/RoomDisplay';
-import Gallery3DNavigator from '../components/Gallery3DNavigator';
+import { useParams } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search, Filter, MapPin, Clock, Users } from 'lucide-react';
 
-const GalleryContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-`;
+interface Artwork {
+  id: string;
+  title: string;
+  artist: string;
+  year: number;
+  description: string;
+  imageUrl: string;
+  tags: string[];
+}
 
-const GalleryHeader = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const GalleryTitle = styled.h1`
-  color: #333;
-  margin: 0 0 0.5rem 0;
-`;
-
-const GalleryDescription = styled.p`
-  color: #666;
-  margin: 0;
-`;
-
-const RoomsContainer = styled.div`
-  margin-top: 2rem;
-`;
-
-const FiltersContainer = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-`;
-
-const FilterButton = styled.button<{ active: boolean }>`
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background-color: ${({ active }) => active ? '#6200ee' : 'white'};
-  color: ${({ active }) => active ? 'white' : '#333'};
-  border-radius: 20px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
-`;
+interface Gallery {
+  id: string;
+  name: string;
+  description: string;
+  location: string;
+  openingHours: string;
+  visitorCount: number;
+  artworks: Artwork[];
+}
 
 const GalleryPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [gallery, setGallery] = useState<Gallery | null>(null);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('all');
-  
-  // Уникальные темы для фильтров
-  const [themes, setThemes] = useState<string[]>([]);
+  const [filteredArtworks, setFilteredArtworks] = useState<Artwork[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterTag, setFilterTag] = useState('all');
 
+  // Моковые данные для демонстрации
   useEffect(() => {
-    const fetchGalleryData = async () => {
-      try {
-        if (id) {
-          const galleryData = await galleryService.getGalleryById(parseInt(id));
-          setGallery(galleryData);
-          
-          // Получаем залы галереи
-          const roomsData = await galleryService.getRooms(parseInt(id));
-          setRooms(roomsData);
-          setFilteredRooms(roomsData);
-          
-          // Извлекаем уникальные темы для фильтров
-          const uniqueThemes = [...new Set(roomsData.map(room => room.theme))];
-          setThemes(uniqueThemes);
-        }
-      } catch (error) {
-        console.error('Ошибка при загрузке данных галереи:', error);
-      } finally {
-        setLoading(false);
-      }
+    // В реальном приложении здесь будет запрос к API
+    const mockGallery: Gallery = {
+      id: '1',
+      name: 'Галерея современного искусства',
+      description: 'Коллекция современных произведений искусства от ведущих художников 21 века.',
+      location: 'Центральный район, ул. Искусств, 15',
+      openingHours: 'Ежедневно 10:00-20:00',
+      visitorCount: 12500,
+      artworks: [
+        {
+          id: '1',
+          title: 'Абстрактная композиция №1',
+          artist: 'Александр Петров',
+          year: 2020,
+          description: 'Экспериментальная работа, исследующая взаимодействие цвета и формы.',
+          imageUrl: '/placeholder-artwork.jpg',
+          tags: ['абстракция', 'современное', 'краски'],
+        },
+        {
+          id: '2',
+          title: 'Городской пейзаж',
+          artist: 'Мария Иванова',
+          year: 2022,
+          description: 'Реалистичное изображение городской архитектуры в вечернем свете.',
+          imageUrl: '/placeholder-artwork.jpg',
+          tags: ['пейзаж', 'реализм', 'город'],
+        },
+        {
+          id: '3',
+          title: 'Цифровая инсталляция',
+          artist: 'Анна Смирнова',
+          year: 2023,
+          description: 'Интерактивная инсталляция, реагирующая на движения посетителей.',
+          imageUrl: '/placeholder-artwork.jpg',
+          tags: ['цифровое', 'инсталляция', 'интерактив'],
+        },
+      ],
     };
-
-    fetchGalleryData();
+    
+    setGallery(mockGallery);
+    setFilteredArtworks(mockGallery.artworks);
   }, [id]);
 
+  // Фильтрация экспонатов
   useEffect(() => {
-    if (activeFilter === 'all') {
-      setFilteredRooms(rooms);
-    } else {
-      setFilteredRooms(rooms.filter(room => room.theme === activeFilter));
+    if (!gallery) return;
+    
+    let result = gallery.artworks;
+    
+    // Поиск по названию и автору
+    if (searchTerm) {
+      result = result.filter(artwork => 
+        artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        artwork.artist.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
-  }, [activeFilter, rooms]);
-
-  if (loading) {
-    return <GalleryContainer>Загрузка галереи...</GalleryContainer>;
-  }
+    
+    // Фильтрация по тегам
+    if (filterTag !== 'all') {
+      result = result.filter(artwork => 
+        artwork.tags.includes(filterTag)
+      );
+    }
+    
+    setFilteredArtworks(result);
+  }, [searchTerm, filterTag, gallery]);
 
   if (!gallery) {
-    return <GalleryContainer>Галерея не найдена</GalleryContainer>;
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center h-64">
+        <p className="text-lg">Загрузка галереи...</p>
+      </div>
+    );
   }
 
-  const navigate = useNavigate();
-
-  const handleRoomSelect = (roomId: number) => {
-    // В реальной реализации можно перейти к конкретному залу или открыть его в VR
-    navigate(`/rooms/${roomId}`);
-  };
+  // Получаем уникальные теги для фильтра
+  const allTags = Array.from(
+    new Set(gallery.artworks.flatMap(artwork => artwork.tags))
+  );
 
   return (
-    <GalleryContainer>
-      <GalleryHeader>
-        <GalleryTitle>{gallery.name}</GalleryTitle>
-        {gallery.description && <GalleryDescription>{gallery.description}</GalleryDescription>}
-      </GalleryHeader>
-
-      <FiltersContainer>
-        <FilterButton
-          active={activeFilter === 'all'}
-          onClick={() => setActiveFilter('all')}
-        >
-          Все залы
-        </FilterButton>
-        {themes.map(theme => (
-          <FilterButton
-            key={theme}
-            active={activeFilter === theme}
-            onClick={() => setActiveFilter(theme)}
-          >
-            {theme}
-          </FilterButton>
-        ))}
-      </FiltersContainer>
-
-      {/* 3D навигатор по галерее */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h3>Навигация по галерее</h3>
-        <Gallery3DNavigator
-          rooms={rooms.map((room, index) => ({
-            id: room.room_id,
-            name: room.name,
-            position: { x: index * 6, y: 0, z: 0 }, // Располагаем залы в ряд
-            color: `hsl(${index * 60}, 70%, 60%)` // Разные цвета для визуального различия
-          }))}
-          onRoomSelect={handleRoomSelect}
-        />
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-4">{gallery.name}</h1>
+        <p className="text-lg text-muted-foreground mb-6">{gallery.description}</p>
+        
+        <div className="flex flex-wrap gap-6 mb-6">
+          <div className="flex items-center">
+            <MapPin className="h-5 w-5 mr-2 text-primary" />
+            <span>{gallery.location}</span>
+          </div>
+          <div className="flex items-center">
+            <Clock className="h-5 w-5 mr-2 text-primary" />
+            <span>{gallery.openingHours}</span>
+          </div>
+          <div className="flex items-center">
+            <Users className="h-5 w-5 mr-2 text-primary" />
+            <span>{gallery.visitorCount.toLocaleString()} посетителей</span>
+          </div>
+        </div>
       </div>
 
-      <RoomsContainer>
-        {filteredRooms.length > 0 ? (
-          filteredRooms.map(room => (
-            <RoomDisplay key={room.room_id} room={room} />
-          ))
-        ) : (
-          <p>Нет залов, соответствующих выбранному фильтру</p>
-        )}
-      </RoomsContainer>
-    </GalleryContainer>
+      <div className="flex flex-col md:flex-row gap-6 mb-8">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Поиск экспонатов..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          <Select value={filterTag} onValueChange={setFilterTag}>
+            <SelectTrigger className="w-[180px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Фильтр" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все теги</SelectItem>
+              {allTags.map(tag => (
+                <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Button>Сортировать</Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredArtworks.map(artwork => (
+          <Card key={artwork.id} className="overflow-hidden">
+            <img 
+              src={artwork.imageUrl} 
+              alt={artwork.title} 
+              className="w-full h-48 object-cover"
+            />
+            <CardHeader>
+              <CardTitle>{artwork.title}</CardTitle>
+              <CardDescription>Автор: {artwork.artist}, {artwork.year}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">{artwork.description}</p>
+              <div className="flex flex-wrap gap-2">
+                {artwork.tags.map(tag => (
+                  <span 
+                    key={tag} 
+                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <Button className="w-full mt-4">Подробнее</Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredArtworks.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">Не найдено экспонатов по заданным критериям</p>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => {
+              setSearchTerm('');
+              setFilterTag('all');
+            }}
+          >
+            Сбросить фильтры
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

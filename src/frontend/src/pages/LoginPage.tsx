@@ -1,50 +1,8 @@
 // src/pages/LoginPage.tsx
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
-
-const LoginContainer = styled.div`
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const Input = styled.input`
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-`;
-
-const Button = styled.button`
-  padding: 0.75rem;
-  background-color: #6200ee;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #3700b3;
-  }
-`;
-
-const ErrorMessage = styled.p`
-  color: red;
-  text-align: center;
-`;
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
@@ -66,13 +24,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       });
 
       const { token, ...userData } = response.data;
-      
+
       // Сохраняем токен в localStorage
       localStorage.setItem('authToken', token);
-      
+
       // Вызываем callback для обновления состояния пользователя
       onLogin(userData);
-      
+
       // Перенаправляем на главную страницу
       navigate('/');
     } catch (err: any) {
@@ -81,34 +39,44 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <LoginContainer>
-      <h2>Вход в аккаунт</h2>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
-      <Form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto my-8 p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 text-center">Вход в аккаунт</h2>
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Input
+          <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
         <div>
-          <Input
+          <input
             type="password"
             placeholder="Пароль"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
-        <Button type="submit">Войти</Button>
-      </Form>
-      <p>
-        Нет аккаунта? <a href="/register">Зарегистрируйтесь</a>
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          Войти
+        </button>
+      </form>
+      <p className="mt-4 text-center">
+        Нет аккаунта?{' '}
+        <a href="/register" className="text-blue-500 hover:underline">
+          Зарегистрируйтесь
+        </a>
       </p>
-    </LoginContainer>
+    </div>
   );
 };
 

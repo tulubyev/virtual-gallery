@@ -1,141 +1,149 @@
-// src/pages/HomePage.tsx
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import axios from 'axios';
-import { Artwork } from '../types';
-
-const HomePageContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-`;
-
-const HeroSection = styled.section`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 4rem 2rem;
-  text-align: center;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #333;
-`;
-
-const ArtworksGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-`;
-
-const ArtworkCard = styled.div`
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-`;
-
-const ArtworkImage = styled.div`
-  height: 200px;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-style: italic;
-`;
-
-const ArtworkInfo = styled.div`
-  padding: 1rem;
-`;
-
-const ArtworkTitle = styled.h3`
-  margin: 0 0 0.5rem 0;
-  font-size: 1.2rem;
-  color: #333;
-`;
-
-const ArtworkArtist = styled.p`
-  margin: 0 0 0.5rem 0;
-  color: #666;
-  font-weight: 500;
-`;
-
-const ArtworkDescription = styled.p`
-  margin: 0;
-  color: #888;
-  font-size: 0.9rem;
-  line-height: 1.4;
-`;
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { GalleryVerticalEnd, Users, Eye, Star } from 'lucide-react';
 
 const HomePage: React.FC = () => {
-  const [featuredArtworks, setFeaturedArtworks] = useState<Artwork[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchArtworks = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/artworks');
-        // Берем первые 6 экспонатов как "избранные"
-        setFeaturedArtworks(response.data.slice(0, 6));
-      } catch (error) {
-        console.error('Ошибка при загрузке экспонатов:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtworks();
-  }, []);
-
   return (
-    <HomePageContainer>
-      <HeroSection>
-        <h1>Добро пожаловать в виртуальную галерею искусств</h1>
-        <p>Исследуйте мировые шедевры искусства в уникальной интерактивной среде</p>
-      </HeroSection>
+    <div className="container mx-auto px-4 py-8">
+      <section className="text-center mb-16 mt-8">
+        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          Добро пожаловать в <span className="text-primary">виртуальную галерею</span> искусств
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          Исследуйте коллекции мирового искусства в immersive 3D-окружении, 
+          используя VR-технологии и ИИ-рекомендации.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link to="/galleries">
+            <Button size="lg">Начать исследование</Button>
+          </Link>
+          <Link to="/vr-gallery">
+            <Button variant="outline" size="lg">Виртуальная экскурсия</Button>
+          </Link>
+        </div>
+      </section>
 
-      <Section>
-        <SectionTitle>Популярные экспонаты</SectionTitle>
-        {loading ? (
-          <p>Загрузка экспонатов...</p>
-        ) : (
-          <ArtworksGrid>
-            {featuredArtworks.map((artwork) => (
-              <ArtworkCard key={artwork.artwork_id}>
-                <ArtworkImage>
-                  {artwork.image_url ? (
-                    <img 
-                      src={artwork.image_url} 
-                      alt={artwork.title} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    />
-                  ) : (
-                    <span>Изображение недоступно</span>
-                  )}
-                </ArtworkImage>
-                <ArtworkInfo>
-                  <ArtworkTitle>{artwork.title}</ArtworkTitle>
-                  <ArtworkArtist>Автор: {artwork.artist_name}</ArtworkArtist>
-                  <ArtworkDescription>
-                    {artwork.description?.substring(0, 100) + '...'}
-                  </ArtworkDescription>
-                </ArtworkInfo>
-              </ArtworkCard>
-            ))}
-          </ArtworksGrid>
-        )}
-      </Section>
-    </HomePageContainer>
+      <section className="mb-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Возможности платформы</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card>
+            <CardHeader>
+              <GalleryVerticalEnd className="h-10 w-10 text-primary mb-4" />
+              <CardTitle>3D-галереи</CardTitle>
+              <CardDescription>
+                Исследуйте виртуальные галереи с реалистичной графикой
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              Наша платформа предоставляет возможность перемещаться по виртуальным галереям, 
+              как если бы вы были там physically. Используйте VR-устройства для максимального эффекта присутствия.
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <Star className="h-10 w-10 text-primary mb-4" />
+              <CardTitle>ИИ-рекомендации</CardTitle>
+              <CardDescription>
+                Персонализированные подборки на основе ваших интересов
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              Наши алгоритмы машинного обучения анализируют ваши предпочтения и 
+              предлагают персонализированные коллекции экспонатов, которые могут вас заинтересовать.
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <Eye className="h-10 w-10 text-primary mb-4" />
+              <CardTitle>Интерактивные экспонаты</CardTitle>
+              <CardDescription>
+                Подробная информация и увеличение деталей
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              Кликайте на экспонаты, чтобы получить подробную информацию, 
+              увеличить изображение до высокого разрешения и узнать историю создания.
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="mb-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Для разных пользователей</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link to="/login" className="block">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <Users className="h-8 w-8 text-primary mb-2" />
+                <CardTitle>Посетители</CardTitle>
+              </CardHeader>
+              <CardContent>
+                Исследуйте экспонаты, создавайте списки избранного, 
+                участвуйте в виртуальных турах.
+              </CardContent>
+            </Card>
+          </Link>
+          
+          <Link to="/curator" className="block">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <GalleryVerticalEnd className="h-8 w-8 text-primary mb-2" />
+                <CardTitle>Кураторы</CardTitle>
+              </CardHeader>
+              <CardContent>
+                Создавайте коллекции, организуйте выставки, 
+                используйте ИИ для подбора экспонатов.
+              </CardContent>
+            </Card>
+          </Link>
+          
+          <Link to="/staff" className="block">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <Users className="h-8 w-8 text-primary mb-2" />
+                <CardTitle>Сотрудники</CardTitle>
+              </CardHeader>
+              <CardContent>
+                Добавляйте экспонаты, управляйте метаданными, 
+                модерируйте материалы.
+              </CardContent>
+            </Card>
+          </Link>
+          
+          <Link to="/admin" className="block">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <Users className="h-8 w-8 text-primary mb-2" />
+                <CardTitle>Администраторы</CardTitle>
+              </CardHeader>
+              <CardContent>
+                Управляйте пользователями, настраивайте систему, 
+                анализируйте статистику.
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </section>
+
+      <section className="bg-muted rounded-xl p-8 text-center">
+        <h2 className="text-3xl font-bold mb-4">Готовы начать исследование?</h2>
+        <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+          Присоединяйтесь к сообществу любителей искусства сегодня
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link to="/register">
+            <Button size="lg">Создать аккаунт</Button>
+          </Link>
+          <Link to="/galleries">
+            <Button variant="outline" size="lg">Исследовать галереи</Button>
+          </Link>
+        </div>
+      </section>
+    </div>
   );
 };
 

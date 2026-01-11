@@ -142,8 +142,8 @@ src/
 
 ### Adding New Sensors
 1. Create sensor handlers in `src/iot/sensors/`
-2. Register new devices in `src/iot/devices/deviceManager.js`
-3. Implement data processing in `src/iot/sensors/sensorProcessor.js`
+2. Register new devices in `src/iot/devices/DeviceManager.ts`
+3. Implement data processing in `src/iot/sensors/SensorProcessor.ts`
 4. Add visualization or response logic in the frontend
 
 ### Testing IoT Components

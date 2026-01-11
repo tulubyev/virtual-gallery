@@ -1,12 +1,12 @@
 // controllers/ArtworkController.ts
 import { Request, Response } from 'express';
-import { ArtworkService } from '../services';
+import ArtworkBackendService from '../backend/services/ArtworkBackendService';
 import { CreateArtworkInput, UpdateArtworkInput } from '../models';
 
 class ArtworkController {
   async getAllArtworks(req: Request, res: Response): Promise<void> {
     try {
-      const artworks = await ArtworkService.getAllArtworks();
+      const artworks = await ArtworkBackendService.getAllArtworks();
       res.json(artworks);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -16,7 +16,7 @@ class ArtworkController {
   async getArtworkById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const artwork = await ArtworkService.getArtworkById(Number(id));
+      const artwork = await ArtworkBackendService.getArtworkById(id);
 
       if (!artwork) {
         res.status(404).json({ error: 'Artwork not found' });
@@ -32,7 +32,7 @@ class ArtworkController {
   async searchArtworks(req: Request, res: Response): Promise<void> {
     try {
       const { query } = req.params;
-      const artworks = await ArtworkService.searchArtworks(query);
+      const artworks = await ArtworkBackendService.searchArtworks(query);
       res.json(artworks);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -43,7 +43,7 @@ class ArtworkController {
     try {
       const { tags } = req.params;
       const tagArray = tags.split(',');
-      const artworks = await ArtworkService.filterArtworksByTags(tagArray);
+      const artworks = await ArtworkBackendService.filterArtworksByTags(tagArray);
       res.json(artworks);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -53,7 +53,7 @@ class ArtworkController {
   async createArtwork(req: Request, res: Response): Promise<void> {
     try {
       const artworkData = req.body as CreateArtworkInput;
-      const newArtwork = await ArtworkService.createArtwork(artworkData);
+      const newArtwork = await ArtworkBackendService.createArtwork(artworkData);
       res.status(201).json(newArtwork);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -64,7 +64,7 @@ class ArtworkController {
     try {
       const { id } = req.params;
       const artworkData = req.body as UpdateArtworkInput;
-      const updatedArtwork = await ArtworkService.updateArtwork(Number(id), artworkData);
+      const updatedArtwork = await ArtworkBackendService.updateArtwork(id, artworkData);
 
       if (!updatedArtwork) {
         res.status(404).json({ error: 'Artwork not found' });
@@ -80,7 +80,7 @@ class ArtworkController {
   async deleteArtwork(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const deleted = await ArtworkService.deleteArtwork(Number(id));
+      const deleted = await ArtworkBackendService.deleteArtwork(id);
 
       if (!deleted) {
         res.status(404).json({ error: 'Artwork not found' });
@@ -101,7 +101,7 @@ class ArtworkController {
       const count = parseInt(req.query.count as string) || 5;
 
       // For now, return a few random artworks
-      const artworks = await ArtworkService.getAllArtworks();
+      const artworks = await ArtworkBackendService.getAllArtworks();
       const shuffled = [...artworks].sort(() => 0.5 - Math.random());
       const recommendations = shuffled.slice(0, count);
 
@@ -118,7 +118,7 @@ class ArtworkController {
 
       // В реальной реализации это будет использовать алгоритмы визуального сходства
       // For now, return some random artworks
-      const artworks = await ArtworkService.getAllArtworks();
+      const artworks = await ArtworkBackendService.getAllArtworks();
       const shuffled = [...artworks].sort(() => 0.5 - Math.random());
       const similarArtworks = shuffled.slice(0, count);
 
@@ -134,7 +134,8 @@ class ArtworkController {
 
       // В реальной реализации это будет добавлять произведение в указанную коллекцию
       // For now, returning success
-      res.json({ message: 'Artwork added to collection successfully' });
+      const result = await ArtworkBackendService.addToCollection(Number(artworkId), Number(collectionId));
+      res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -146,14 +147,7 @@ class ArtworkController {
 
       // В реальной реализации это будет извлекать аналитические данные для произведения
       // such as views, engagement metrics, etc.
-      const analytics = {
-        artwork_id: Number(id),
-        total_views: 1250,
-        avg_view_duration: 45, // in seconds
-        likes: 120,
-        shares: 45,
-        related_interactions: 320
-      };
+      const analytics = await ArtworkBackendService.getArtworkAnalytics(Number(id));
 
       res.json(analytics);
     } catch (error: any) {

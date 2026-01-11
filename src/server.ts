@@ -19,9 +19,19 @@ import iotRoutes from './routes/iotRoutes';
 // Импортируем миддлвары безопасности
 import { xssProtection, limiter, sanitizeInput, csrfProtection, generateCsrfToken } from './middleware/security';
 
+// Импортируем типы для Socket.IO
+import {
+  TypedServer,
+  TypedSocket,
+  NavigationData,
+  ArtworkInteractionData,
+  UserPositionUpdate,
+  GalleryChatMessage
+} from './types/socket-events';
+
 const app: Application = express();
 const server = http.createServer(app);
-const io: Server = new Server(server, {
+const io: TypedServer = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
@@ -45,6 +55,16 @@ app.use(generateCsrfToken); // Генерация CSRF токена
 app.use(csrfProtection); // Защита от CSRF
 
 console.log('Middleware загружены');
+
+// Инициализация сервиса рекомендаций
+(async () => {
+  try {
+    const { default: aiController } = await import('./controllers/AiController');
+    await aiController.initializeRecommendationService();
+  } catch (error) {
+    console.error('Ошибка при инициализации сервиса рекомендаций:', error);
+  }
+})();
 
 // Serve static files
 app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
@@ -94,21 +114,77 @@ app.get('/auction-participant', (req: Request, res: Response) => {
 console.log('Маршруты загружены');
 
 // Socket.IO connection handling
-io.on('connection', (socket) => {
+io.on('connection', (socket: TypedSocket) => {
     console.log('Пользователь подключен:', socket.id);
+
+    // Пример установки данных сокета (в реальном приложении это будет происходить при аутентификации)
+    socket.data = {
+        userId: socket.id,
+        username: `User_${socket.id.substring(0, 8)}`,
+        role: 'visitor',
+        lastSeen: new Date()
+    };
 
     socket.on('disconnect', () => {
         console.log('Пользователь отключен:', socket.id);
     });
 
     // Handle gallery navigation events
-    socket.on('navigate', (data) => {
+    socket.on('navigate', (data: NavigationData) => {
+        // Валидация данных навигации
+        if (!data.userId || !data.position) {
+            console.error('Некорректные данные навигации:', data);
+            return;
+        }
+
+        // Отправляем обновленные данные всем остальным пользователям
         socket.broadcast.emit('userNavigate', data);
     });
 
     // Handle artwork interaction events
-    socket.on('artworkInteraction', (data) => {
+    socket.on('artworkInteraction', (data: ArtworkInteractionData) => {
+        // Валидация данных взаимодействия
+        if (!data.userId || !data.artworkId || !data.interactionType) {
+            console.error('Некорректные данные взаимодействия с экспонатом:', data);
+            return;
+        }
+
+        // Отправляем данные взаимодействия всем остальным пользователям
         socket.broadcast.emit('artworkInteractionBroadcast', data);
+    });
+
+    // Обработка обновления позиции пользователя
+    socket.on('updatePosition', (data: UserPositionUpdate) => {
+        if (!data.userId || !data.position || !data.roomId) {
+            console.error('Некорректные данные обновления позиции:', data);
+            return;
+        }
+
+        // Отправляем обновленную позицию всем пользователям в той же комнате
+        socket.to(data.roomId).emit('userPositionUpdate', data);
+    });
+
+    // Обработка сообщений чата
+    socket.on('sendChatMessage', (data: GalleryChatMessage) => {
+        if (!data.userId || !data.message || !data.roomId) {
+            console.error('Некорректные данные сообщения чата:', data);
+            return;
+        }
+
+        // Добавляем отметку времени
+        data.timestamp = new Date();
+
+        // Отправляем сообщение всем пользователям в той же комнате
+        socket.to(data.roomId).emit('newChatMessage', data);
+    });
+
+    // Обработка данных от IoT устройств
+    socket.on('sendIoTData', (data: any) => {
+        // В реальной системе здесь будет валидация и обработка данных от IoT устройств
+        console.log('Получены данные от IoT устройства:', data);
+
+        // Транслируем данные всем заинтересованным клиентам
+        socket.broadcast.emit('iotFeedback', data);
     });
 });
 

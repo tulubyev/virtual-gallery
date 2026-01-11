@@ -46,8 +46,8 @@ The AI system provides artwork recommendations, collection curation, and image a
 The IoT system connects to physical sensors in public installations to gather feedback and adjust the experience based on real-world interactions.
 
 **Key Components:**
-- `deviceManager.js` - Manages connections to IoT devices
-- `sensorProcessor.js` - Processes raw sensor data into insights
+- `DeviceManager.ts` - Manages connections to IoT devices
+- `SensorProcessor.ts` - Processes raw sensor data into insights
 
 ## Data Flow
 

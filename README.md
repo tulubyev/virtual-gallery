@@ -9,7 +9,51 @@ src/
 ├── frontend/
 │   ├── assets/
 │   ├── components/
-│   └── utils/
+│   │   ├── ui/              # shadcn/ui components
+│   │   │   ├── alert.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── sheet.tsx
+│   │   │   └── sidebar.tsx
+│   │   ├── Header.tsx       # Updated header component
+│   │   └── Footer.tsx       # Updated footer component
+│   ├── lib/
+│   │   └── utils.ts         # Utility functions
+│   ├── pages/
+│   │   ├── AdminPanel.tsx
+│   │   ├── ArtworkDetailPage.tsx
+│   │   ├── ArtworksPage.tsx
+│   │   ├── CollectionsPage.tsx
+│   │   ├── CuratorPanel.tsx
+│   │   ├── GalleriesListPage.tsx
+│   │   ├── GalleryPage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── RegisterPage.tsx
+│   │   ├── RoomManagementPage.tsx
+│   │   ├── RoomPage.tsx
+│   │   ├── StaffDashboardPage.tsx
+│   │   ├── StaffPanel.tsx
+│   │   ├── ToursPage.tsx
+│   │   ├── TourGuidePanel.tsx
+│   │   ├── VrGalleryPage.tsx
+│   │   ├── VirtualGalleryPage.tsx
+│   │   └── AuctionParticipantPanel.tsx
+│   ├── services/
+│   ├── styles/
+│   │   ├── globals.css      # Global styles and CSS variables
+│   │   └── main.css         # Main styles for 3D gallery
+│   ├── types/
+│   │   └── index.ts         # Type definitions
+│   ├── App.tsx              # Main application component
+│   ├── index.css            # Main styles
+│   └── main.tsx             # Entry point
 ├── backend/
 │   ├── controllers/
 │   ├── models/
@@ -52,6 +96,20 @@ src/
 4. Initialize the database: `npm run init-db`
 5. Build the project: `npm run build`
 6. Run the application: `npm start`
+
+## Frontend Development
+
+The frontend now uses shadcn/ui components for a consistent and accessible UI:
+
+1. Install additional dependencies for shadcn/ui:
+   ```bash
+   npm install class-variance-authority clsx tailwind-merge lucide-react tailwindcss-animate
+   npm install @radix-ui/react-slot @radix-ui/react-dialog @radix-ui/react-select @radix-ui/react-dropdown-menu
+   ```
+
+2. The UI components are located in `src/components/ui/`
+3. Components are built with accessibility in mind using Radix UI primitives
+4. Responsive design is implemented using Tailwind CSS utility classes
 
 ## Development
 

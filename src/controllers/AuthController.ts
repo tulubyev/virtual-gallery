@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserService } from '../services';
+import UserBackendService from '../backend/services/UserBackendService';
 import { CreateUserInput } from '../models';
 
 class AuthController {
@@ -17,7 +17,7 @@ class AuthController {
       }
 
       // Проверка, существует ли пользователь с таким email
-      const existingUser = await UserService.getUserByEmail(email);
+      const existingUser = await UserBackendService.getUserByEmail(email);
       if (existingUser) {
         res.status(409).json({ error: 'User with this email already exists' });
         return;
@@ -27,7 +27,7 @@ class AuthController {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Создание пользователя
-      const newUser = await UserService.createUser({
+      const newUser = await UserBackendService.createUser({
         username,
         email,
         password: hashedPassword
@@ -63,7 +63,7 @@ class AuthController {
       }
 
       // Поиск пользователя по email
-      const user = await UserService.getUserByEmail(email);
+      const user = await UserBackendService.getUserByEmail(email);
       if (!user) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
@@ -99,7 +99,7 @@ class AuthController {
     try {
       // В реальной реализации это будет обновлять JWT токен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await UserService.getUserById(userId);
+      const user = await UserBackendService.getUserById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -138,7 +138,7 @@ class AuthController {
       // Этот метод будет защищен middleware аутентификации
       // Так что если мы дошли до сюда, токен действителен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await UserService.getUserById(userId);
+      const user = await UserBackendService.getUserById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });

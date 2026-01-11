@@ -1,7 +1,20 @@
 // src/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../types/User';
+
+// Тип для пользователя
+interface User {
+  user_id: number;
+  username: string;
+  email: string;
+  role: string;
+  created_at: Date;
+  updated_at: Date;
+  preferences?: Record<string, any>;
+  first_name?: string;
+  last_name?: string;
+  is_active?: boolean;
+}
 
 // Тип для расширенного запроса с пользователем
 export interface AuthenticatedRequest extends Request {
@@ -30,11 +43,8 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
 
   const secret = process.env.JWT_SECRET || 'fallback_secret_key';
 
-  jwt.verify(token, secret, (err, decoded: any) => {
-    if (err) {
-      console.error('Token verification error:', err);
-      return res.status(403).json({ error: 'Invalid or expired token' });
-    }
+  try {
+    const decoded = jwt.verify(token, secret) as any;
 
     // Добавляем информацию о пользователе в запрос
     req.user = {
@@ -44,14 +54,18 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       username: decoded.username || '',
       first_name: decoded.firstName || '',
       last_name: decoded.lastName || '',
-      created_at: decoded.createdAt || new Date(),
-      updated_at: decoded.updatedAt || new Date(),
+      created_at: decoded.createdAt ? new Date(decoded.createdAt) : new Date(),
+      updated_at: decoded.updatedAt ? new Date(decoded.updatedAt) : new Date(),
       preferences: decoded.preferences || {},
       is_active: decoded.isActive !== undefined ? decoded.isActive : true
     };
 
     next();
-  });
+    return; // Явно возвращаем, чтобы удовлетворить TS7030
+  } catch (err) {
+    console.error('Token verification error:', err);
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
 };
 
 // Миддлвар для проверки роли администратора
@@ -65,6 +79,7 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 
   next();
+  return; // Явно возвращаем, чтобы удовлетворить TS7030
 };
 
 // Миддлвар для проверки роли куратора или администратора
@@ -78,6 +93,7 @@ export const requireCuratorOrAdmin = (req: AuthenticatedRequest, res: Response, 
   }
 
   next();
+  return; // Явно возвращаем, чтобы удовлетворить TS7030
 };
 
 // Миддлвар для проверки роли сотрудника, куратора или администратора
@@ -91,6 +107,7 @@ export const requireStaffOrHigher = (req: AuthenticatedRequest, res: Response, n
   }
 
   next();
+  return; // Явно возвращаем, чтобы удовлетворить TS7030
 };
 
 // Миддлвар для проверки конкретной роли
@@ -105,5 +122,6 @@ export const requireRole = (roles: string[]) => {
     }
 
     next();
+    return; // Явно возвращаем, чтобы удовлетворить TS7030
   };
 };
