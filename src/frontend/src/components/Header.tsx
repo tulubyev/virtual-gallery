@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Sheet, 
-  SheetContent, 
+import {
+  Sheet,
+  SheetContent,
   SheetTrigger,
-  SheetClose
 } from '@/components/ui/sheet';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarGroup, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuItem,
-  SidebarMenuButton
-} from '@/components/ui/sidebar';
-import { Menu, Home, GalleryVerticalEnd, Users, Settings, LogOut } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  Bell,
+  CircleUser,
+  Home,
+  GalleryVerticalEnd,
+  Users,
+  Settings,
+  LogOut,
+  Menu,
+  Palette,
+  LayoutDashboard,
+  Image,
+  Map,
+  Ticket,
+  Star
+} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { User } from '@/types';
 
 interface HeaderProps {
@@ -26,12 +30,16 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
-  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const handleLogout = () => {
     onLogout();
-    navigate('/');
+    setIsMenuOpen(false);
   };
+
+  // Определяем активный маршрут для подсветки
+  const isActive = (path: string) => location.pathname === path;
 
   // Определяем доступные ссылки в зависимости от роли пользователя
   const getNavigationLinks = () => {
@@ -39,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
       return [
         { title: 'Главная', path: '/', icon: Home },
         { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-        { title: 'Войти', path: '/login', icon: Users },
+        { title: 'Экспонаты', path: '/artworks', icon: Image },
       ];
     }
 
@@ -48,40 +56,50 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Админ-панель', path: '/admin', icon: Settings },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
           { title: 'Пользователи', path: '/admin/users', icon: Users },
+          { title: 'Админ-панель', path: '/admin', icon: Settings },
+          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
         ];
       case 'curator':
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Куратор', path: '/curator', icon: GalleryVerticalEnd },
-          { title: 'Загрузка', path: '/artwork-upload', icon: GalleryVerticalEnd },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
+          { title: 'Куратор', path: '/curator', icon: Star },
+          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
+          { title: 'Рецензии', path: '/curator-review', icon: Settings },
         ];
       case 'staff':
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
           { title: 'Сотрудник', path: '/staff', icon: Users },
-          { title: 'Загрузка', path: '/artwork-upload', icon: GalleryVerticalEnd },
+          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
+          { title: 'Дашборд', path: '/staff-dashboard', icon: LayoutDashboard },
         ];
       case 'tour_guide':
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Организатор туров', path: '/tour-guide', icon: Users },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
+          { title: 'Организатор туров', path: '/tour-guide', icon: Map },
+          { title: 'Туры', path: '/tours', icon: Map },
         ];
       case 'auction_participant':
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Участник аукциона', path: '/auction-participant', icon: Users },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
+          { title: 'Участник аукциона', path: '/auction-participant', icon: Ticket },
         ];
       default:
         return [
           { title: 'Главная', path: '/', icon: Home },
           { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: GalleryVerticalEnd },
+          { title: 'Экспонаты', path: '/artworks', icon: Image },
+          { title: 'Коллекции', path: '/collections', icon: Palette },
         ];
     }
   };
@@ -89,38 +107,91 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
   const navLinks = getNavigationLinks();
 
   return (
-    <header className="border-b">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Link to="/" className="flex items-center space-x-2">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+      <div className="container flex h-16 items-center">
+        <div className="flex items-center gap-4">
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Переключить меню</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64">
+              <div className="flex items-center gap-2 py-4">
+                <GalleryVerticalEnd className="h-6 w-6" />
+                <span className="text-xl font-bold">Виртуальная галерея</span>
+              </div>
+              
+              <nav className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive(link.path)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.title}
+                  </Link>
+                ))}
+                
+                {currentUser && (
+                  <>
+                    <div className="my-2 h-px bg-border" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Выйти
+                    </button>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
+          
+          <Link to="/" className="flex items-center gap-2">
             <GalleryVerticalEnd className="h-6 w-6" />
-            <span className="text-xl font-bold">Виртуальная галерея</span>
+            <span className="text-xl font-bold hidden sm:block">Виртуальная галерея</span>
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.path} 
+        <nav className="mx-6 hidden md:flex items-center gap-2">
+          {navLinks.slice(0, 5).map((link) => (
+            <Link
+              key={link.path}
               to={link.path}
-              className="text-sm font-medium transition-colors hover:text-primary flex items-center space-x-1"
+              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive(link.path)
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-accent hover:text-accent-foreground'
+              }`}
             >
               <link.icon className="h-4 w-4" />
-              <span>{link.title}</span>
+              <span className="hidden sm:inline">{link.title}</span>
             </Link>
           ))}
-          
+        </nav>
+
+        <div className="flex flex-1 items-center justify-end gap-4">
           {currentUser ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm">Привет, {currentUser.username}</span>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline text-sm font-medium">
+                Привет, {currentUser.username}
+              </span>
               <Button onClick={handleLogout} variant="outline" size="sm">
-                <LogOut className="h-4 w-4 mr-2" />
-                Выйти
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Выйти</span>
               </Button>
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Link to="/login">
                 <Button variant="outline" size="sm">Войти</Button>
               </Link>
@@ -129,83 +200,18 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
               </Link>
             </div>
           )}
-        </nav>
-
-        {/* Mobile Navigation */}
-        <div className="md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <Sidebar>
-                <SidebarHeader>
-                  <div className="flex items-center space-x-2">
-                    <GalleryVerticalEnd className="h-6 w-6" />
-                    <span className="text-xl font-bold">Галерея</span>
-                  </div>
-                </SidebarHeader>
-                
-                <SidebarContent>
-                  <SidebarGroup>
-                    <SidebarMenu>
-                      {navLinks.map((link) => (
-                        <SidebarMenuItem key={link.path}>
-                          <Link to={link.path}>
-                            <SidebarMenuButton>
-                              <link.icon className="mr-2 h-4 w-4" />
-                              {link.title}
-                            </SidebarMenuButton>
-                          </Link>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroup>
-                  
-                  {currentUser && (
-                    <SidebarGroup>
-                      <SidebarMenu>
-                        <SidebarMenuItem>
-                          <SidebarMenuButton>
-                            Привет, {currentUser.username}
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                          <SheetClose asChild>
-                            <SidebarMenuButton onClick={handleLogout}>
-                              <LogOut className="mr-2 h-4 w-4" />
-                              Выйти
-                            </SidebarMenuButton>
-                          </SheetClose>
-                        </SidebarMenuItem>
-                      </SidebarMenu>
-                    </SidebarGroup>
-                  )}
-                </SidebarContent>
-                
-                <SidebarFooter>
-                  {!currentUser && (
-                    <SidebarGroup>
-                      <SidebarMenu>
-                        <SidebarMenuItem>
-                          <Link to="/login">
-                            <SidebarMenuButton>Войти</SidebarMenuButton>
-                          </Link>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                          <Link to="/register">
-                            <SidebarMenuButton>Регистрация</SidebarMenuButton>
-                          </Link>
-                        </SidebarMenuItem>
-                      </SidebarMenu>
-                    </SidebarGroup>
-                  )}
-                </SidebarFooter>
-              </Sidebar>
-            </SheetContent>
-          </Sheet>
+          
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs text-white">
+              3
+            </span>
+          </Button>
+          
+          <Button variant="secondary" size="icon" className="rounded-full">
+            <CircleUser className="h-5 w-5" />
+            <span className="sr-only">Профиль</span>
+          </Button>
         </div>
       </div>
     </header>

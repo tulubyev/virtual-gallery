@@ -1,440 +1,356 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Plus, Search, Filter, Settings, BarChart3, Users, Image, Eye } from 'lucide-react';
+  Users, 
+  Eye, 
+  Heart, 
+  Calendar, 
+  TrendingUp, 
+  GalleryVerticalEnd, 
+  Image, 
+  Star,
+  Activity,
+  BarChart3,
+  DollarSign
+} from 'lucide-react';
 
-// Типы данных
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  registrationDate: string;
-}
-
-interface Artwork {
-  id: string;
+interface StatCardProps {
   title: string;
-  author: string;
-  creationYear: number;
-  status: string;
+  value: string;
+  change: string;
+  icon: React.ReactNode;
+  trend: 'up' | 'down';
 }
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend }) => {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="p-2 bg-primary/10 rounded-lg text-primary">
+          {icon}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className={`text-xs ${trend === 'up' ? 'text-green-500' : 'text-red-500'} flex items-center`}>
+          {trend === 'up' ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingUp className="h-3 w-3 mr-1 rotate-180" />}
+          {change}
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
 
 const AdminPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [users, setUsers] = useState<User[]>([
-    { id: '1', username: 'ivanov', email: 'ivanov@example.com', role: 'user', registrationDate: '2023-01-15' },
-    { id: '2', username: 'petrov', email: 'petrov@example.com', role: 'curator', registrationDate: '2023-02-20' },
-    { id: '3', username: 'sidorov', email: 'sidorov@example.com', role: 'staff', registrationDate: '2023-03-10' },
-  ]);
-  
-  const [artworks, setArtworks] = useState<Artwork[]>([
-    { id: '1', title: 'Абстрактная композиция', author: 'Петров А.С.', creationYear: 2020, status: 'published' },
-    { id: '2', title: 'Городской пейзаж', author: 'Иванова М.В.', creationYear: 2022, status: 'pending' },
-    { id: '3', title: 'Цифровая инсталляция', author: 'Сидоров К.Л.', creationYear: 2023, status: 'rejected' },
-  ]);
+  const [activeTab, setActiveTab] = useState('overview');
 
+  // Mock data for statistics
   const stats = [
-    { title: 'Всего пользователей', value: '1,250', change: '+12%' },
-    { title: 'Активных пользователей', value: '842', change: '+8%' },
-    { title: 'Всего экспонатов', value: '3,420', change: '+22%' },
-    { title: 'Новые за сегодня', value: '24', change: '+5%' },
+    {
+      title: 'Всего пользователей',
+      value: '12,361',
+      change: '+18.2% с прошлого месяца',
+      icon: <Users className="h-4 w-4" />,
+      trend: 'up' as const
+    },
+    {
+      title: 'Просмотров экспонатов',
+      value: '1.2M',
+      change: '+22.5% с прошлого месяца',
+      icon: <Eye className="h-4 w-4" />,
+      trend: 'up' as const
+    },
+    {
+      title: 'Лайков',
+      value: '45.2K',
+      change: '+12.3% с прошлого месяца',
+      icon: <Heart className="h-4 w-4" />,
+      trend: 'up' as const
+    },
+    {
+      title: 'Экспонатов',
+      value: '8,421',
+      change: '+5.7% с прошлого месяца',
+      icon: <Image className="h-4 w-4" />,
+      trend: 'up' as const
+    }
+  ];
+
+  // Mock data for recent activities
+  const recentActivities = [
+    { id: 1, user: 'Александр Петров', action: 'Добавил новый экспонат', time: '2 минуты назад', type: 'add' },
+    { id: 2, user: 'Мария Иванова', action: 'Оставил отзыв', time: '15 минут назад', type: 'review' },
+    { id: 3, user: 'Дмитрий Сидоров', action: 'Создал коллекцию', time: '1 час назад', type: 'collection' },
+    { id: 4, user: 'Елена Козлова', action: 'Присоединился к платформе', time: '2 часа назад', type: 'join' },
+    { id: 5, user: 'Сергей Новиков', action: 'Оценил экспонат', time: '3 часа назад', type: 'rate' },
+  ];
+
+  // Mock data for top artworks
+  const topArtworks = [
+    { id: 1, title: 'Абстрактная композиция №1', artist: 'Александр Петров', likes: 1240, views: 12400 },
+    { id: 2, title: 'Городской пейзаж', artist: 'Мария Иванова', likes: 980, views: 9800 },
+    { id: 3, title: 'Цифровая инсталляция', artist: 'Анна Смирнова', likes: 2100, views: 21000 },
+    { id: 4, title: 'Портрет женщины', artist: 'Дмитрий Козлов', likes: 1560, views: 15600 },
+    { id: 5, title: 'Морской пейзаж', artist: 'Елена Васильева', likes: 780, views: 7800 },
   ];
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Административная панель</h1>
-        <p className="text-muted-foreground">Управление системой виртуальной галереи</p>
+    <div className="container mx-auto py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Админ-панель</h1>
+        <p className="text-muted-foreground">Управление платформой виртуальной галереи</p>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <Button 
-          variant={activeTab === 'dashboard' ? 'default' : 'outline'} 
-          onClick={() => setActiveTab('dashboard')}
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <StatCard
+            key={index}
+            title={stat.title}
+            value={stat.value}
+            change={stat.change}
+            icon={stat.icon}
+            trend={stat.trend}
+          />
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-6 border-b">
+        <button
+          className={`pb-3 px-1 ${activeTab === 'overview' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+          onClick={() => setActiveTab('overview')}
         >
-          <BarChart3 className="h-4 w-4 mr-2" />
-          Панель управления
-        </Button>
-        <Button 
-          variant={activeTab === 'users' ? 'default' : 'outline'} 
+          Обзор
+        </button>
+        <button
+          className={`pb-3 px-1 ${activeTab === 'users' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('users')}
         >
-          <Users className="h-4 w-4 mr-2" />
           Пользователи
-        </Button>
-        <Button 
-          variant={activeTab === 'artworks' ? 'default' : 'outline'} 
+        </button>
+        <button
+          className={`pb-3 px-1 ${activeTab === 'artworks' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('artworks')}
         >
-          <Image className="h-4 w-4 mr-2" />
           Экспонаты
-        </Button>
-        <Button 
-          variant={activeTab === 'analytics' ? 'default' : 'outline'} 
+        </button>
+        <button
+          className={`pb-3 px-1 ${activeTab === 'analytics' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
           onClick={() => setActiveTab('analytics')}
         >
-          <BarChart3 className="h-4 w-4 mr-2" />
           Аналитика
-        </Button>
-        <Button 
-          variant={activeTab === 'settings' ? 'default' : 'outline'} 
-          onClick={() => setActiveTab('settings')}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          Настройки
-        </Button>
+        </button>
       </div>
 
-      {/* Панель управления */}
-      {activeTab === 'dashboard' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <Card key={index}>
-                <CardHeader className="pb-2">
-                  <CardDescription>{stat.title}</CardDescription>
-                  <CardTitle className="text-2xl">{stat.value}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">↑ {stat.change} с прошлого месяца</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Content based on active tab */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activities */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Недавние действия</CardTitle>
+                <Button variant="outline" size="sm">Просмотреть все</Button>
+              </div>
+              <CardDescription>Последние действия пользователей на платформе</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivities.map(activity => (
+                  <div key={activity.id} className="flex items-start space-x-4">
+                    <div className={`p-2 rounded-full ${
+                      activity.type === 'add' ? 'bg-blue-100 text-blue-600' :
+                      activity.type === 'review' ? 'bg-green-100 text-green-600' :
+                      activity.type === 'collection' ? 'bg-purple-100 text-purple-600' :
+                      activity.type === 'join' ? 'bg-orange-100 text-orange-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {activity.type === 'add' ? <GalleryVerticalEnd className="h-4 w-4" /> :
+                       activity.type === 'review' ? <Star className="h-4 w-4" /> :
+                       activity.type === 'collection' ? <BarChart3 className="h-4 w-4" /> :
+                       activity.type === 'join' ? <Users className="h-4 w-4" /> :
+                       <Heart className="h-4 w-4" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{activity.user}</p>
+                      <p className="text-sm text-muted-foreground">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Последние пользователи</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Имя пользователя</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Роль</TableHead>
-                      <TableHead>Дата регистрации</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.slice(0, 5).map(user => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                            user.role === 'curator' ? 'bg-blue-100 text-blue-800' :
-                            user.role === 'staff' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {user.role}
-                          </span>
-                        </TableCell>
-                        <TableCell>{user.registrationDate}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Последние экспонаты</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Название</TableHead>
-                      <TableHead>Автор</TableHead>
-                      <TableHead>Год</TableHead>
-                      <TableHead>Статус</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {artworks.slice(0, 5).map(artwork => (
-                      <TableRow key={artwork.id}>
-                        <TableCell className="font-medium">{artwork.title}</TableCell>
-                        <TableCell>{artwork.author}</TableCell>
-                        <TableCell>{artwork.creationYear}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            artwork.status === 'published' ? 'bg-green-100 text-green-800' :
-                            artwork.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {artwork.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Top Artworks */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Топ экспонатов</CardTitle>
+                <Button variant="outline" size="sm">Просмотреть все</Button>
+              </div>
+              <CardDescription>Самые популярные экспонаты за последний месяц</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {topArtworks.map(artwork => (
+                  <div key={artwork.id} className="flex items-center space-x-4">
+                    <div className="bg-muted rounded-lg p-2">
+                      <Image className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{artwork.title}</p>
+                      <p className="text-xs text-muted-foreground">{artwork.artist}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">{artwork.likes} лайков</p>
+                      <p className="text-xs text-muted-foreground">{artwork.views} просмотров</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {/* Управление пользователями */}
       {activeTab === 'users' && (
         <Card>
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <CardTitle>Управление пользователями</CardTitle>
-                <CardDescription>Просмотр и управление учетными записями пользователей</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Поиск пользователей..." className="pl-8" />
-                </div>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-[180px]">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Фильтр по роли" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все роли</SelectItem>
-                    <SelectItem value="user">Пользователь</SelectItem>
-                    <SelectItem value="admin">Администратор</SelectItem>
-                    <SelectItem value="curator">Куратор</SelectItem>
-                    <SelectItem value="staff">Сотрудник</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <CardTitle>Управление пользователями</CardTitle>
+            <CardDescription>Просмотр и управление аккаунтами пользователей</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Имя пользователя</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Роль</TableHead>
-                  <TableHead>Дата регистрации</TableHead>
-                  <TableHead>Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map(user => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.id}</TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Select value={user.role}>
-                        <SelectTrigger className="w-[140px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">Пользователь</SelectItem>
-                          <SelectItem value="admin">Администратор</SelectItem>
-                          <SelectItem value="curator">Куратор</SelectItem>
-                          <SelectItem value="staff">Сотрудник</SelectItem>
-                          <SelectItem value="tour_guide">Организатор туров</SelectItem>
-                          <SelectItem value="auction_participant">Участник аукциона</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>{user.registrationDate}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Редактировать</DropdownMenuItem>
-                          <DropdownMenuItem>Сбросить пароль</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">Удалить</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Список пользователей</h3>
+              <Button>Добавить пользователя</Button>
+            </div>
+            
+            <div className="border rounded-lg">
+              <table className="w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-left p-4">Пользователь</th>
+                    <th className="text-left p-4">Роль</th>
+                    <th className="text-left p-4">Дата регистрации</th>
+                    <th className="text-left p-4">Статус</th>
+                    <th className="text-left p-4">Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map(item => (
+                    <tr key={item} className="border-b hover:bg-muted/50">
+                      <td className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="bg-primary/10 p-2 rounded-full">
+                            <Users className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">Пользователь {item}</p>
+                            <p className="text-sm text-muted-foreground">user{item}@example.com</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant="outline">{item === 1 ? 'admin' : item === 2 ? 'curator' : 'user'}</Badge>
+                      </td>
+                      <td className="p-4">15.{item}.2023</td>
+                      <td className="p-4">
+                        <Badge variant={item % 2 === 0 ? 'default' : 'secondary'}>
+                          {item % 2 === 0 ? 'Активен' : 'Неактивен'}
+                        </Badge>
+                      </td>
+                      <td className="p-4">
+                        <Button variant="outline" size="sm">Редактировать</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Управление экспонатами */}
       {activeTab === 'artworks' && (
         <Card>
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <CardTitle>Управление экспонатами</CardTitle>
-                <CardDescription>Просмотр и модерация произведений искусства</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Добавить экспонат
-                </Button>
-              </div>
-            </div>
+            <CardTitle>Управление экспонатами</CardTitle>
+            <CardDescription>Просмотр и управление экспонатами галереи</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Название</TableHead>
-                  <TableHead>Автор</TableHead>
-                  <TableHead>Год создания</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {artworks.map(artwork => (
-                  <TableRow key={artwork.id}>
-                    <TableCell className="font-medium">{artwork.id}</TableCell>
-                    <TableCell>{artwork.title}</TableCell>
-                    <TableCell>{artwork.author}</TableCell>
-                    <TableCell>{artwork.creationYear}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        artwork.status === 'published' ? 'bg-green-100 text-green-800' :
-                        artwork.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {artwork.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Просмотр
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Редактировать</DropdownMenuItem>
-                            <DropdownMenuItem>Одобрить</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">Отклонить</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Список экспонатов</h3>
+              <Button>Добавить экспонат</Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(item => (
+                <Card key={item} className="overflow-hidden">
+                  <div className="bg-muted aspect-video flex items-center justify-center">
+                    <Image className="h-12 w-12 text-primary/20" />
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Экспонат {item}</CardTitle>
+                    <CardDescription>Художник {item}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center">
+                      <Badge variant="outline">Категория {item}</Badge>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Heart className="h-4 w-4 mr-1" />
+                        <span>{Math.floor(Math.random() * 1000)}</span>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                    <div className="mt-4 flex space-x-2">
+                      <Button variant="outline" size="sm" className="flex-1">Просмотр</Button>
+                      <Button size="sm">Редактировать</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Аналитика */}
       {activeTab === 'analytics' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Посещаемость по дням</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80 flex items-center justify-center bg-muted rounded-md">
-                <p className="text-muted-foreground">График посещаемости</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Популярные экспонаты</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80 flex items-center justify-center bg-muted rounded-md">
-                <p className="text-muted-foreground">График популярности экспонатов</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Настройки */}
-      {activeTab === 'settings' && (
         <Card>
           <CardHeader>
-            <CardTitle>Настройки системы</CardTitle>
-            <CardDescription>Настройка параметров виртуальной галереи</CardDescription>
+            <CardTitle>Аналитика платформы</CardTitle>
+            <CardDescription>Статистика использования и взаимодействия пользователей</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="galleryName" className="block text-sm font-medium mb-1">
-                    Название галереи
-                  </label>
-                  <Input id="galleryName" defaultValue="Виртуальная галерея искусств" />
-                </div>
-                <div>
-                  <label htmlFor="maxFileSize" className="block text-sm font-medium mb-1">
-                    Максимальный размер файла (MB)
-                  </label>
-                  <Input id="maxFileSize" type="number" defaultValue="10" />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Посещаемость</CardTitle>
+                  <CardDescription>Посетители за последние 30 дней</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
+                    <Activity className="h-12 w-12 text-primary/20" />
+                    <p className="ml-4 text-muted-foreground">График посещаемости</p>
+                  </div>
+                </CardContent>
+              </Card>
               
-              <div>
-                <label className="flex items-center space-x-2">
-                  <input type="checkbox" className="rounded" defaultChecked />
-                  <span>Автоматическая модерация</span>
-                </label>
-              </div>
-              
-              <div className="pt-4">
-                <Button>Сохранить настройки</Button>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Популярность экспонатов</CardTitle>
+                  <CardDescription>Топ-10 самых просматриваемых экспонатов</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
+                    <BarChart3 className="h-12 w-12 text-primary/20" />
+                    <p className="ml-4 text-muted-foreground">График популярности</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </CardContent>
         </Card>
