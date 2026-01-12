@@ -1,11 +1,16 @@
 // Компонент для отображения деталей произведения искусства
 class ArtworkDetailComponent {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
+    container: HTMLElement;
+    isVisible: boolean;
+    artwork: any;
+
+    constructor(containerId: string) {
+        this.container = document.getElementById(containerId) as HTMLElement;
         this.isVisible = false;
+        this.artwork = null;
     }
 
-    show(artwork) {
+    show(artwork: any) {
         this.artwork = artwork;
         this.render();
         this.container.style.display = 'block';
@@ -29,8 +34,8 @@ class ArtworkDetailComponent {
                     </div>
                     <div class="modal-body">
                         <div class="artwork-detail-image">
-                            ${this.artwork.image_url ? 
-                              `<img src="${this.artwork.image_url}" alt="${this.artwork.title}">` : 
+                            ${this.artwork.image_url ?
+                              `<img src="${this.artwork.image_url}" alt="${this.artwork.title}">` :
                               `<div class="no-image">Изображение недоступно</div>`}
                         </div>
                         <div class="artwork-detail-info">
@@ -40,14 +45,14 @@ class ArtworkDetailComponent {
                             <p><strong>Размеры:</strong> ${this.artwork.dimensions || 'Неизвестны'}</p>
                             <p><strong>Стиль:</strong> ${this.artwork.style || 'Неизвестно'}</p>
                             <p><strong>Описание:</strong> ${this.artwork.description || 'Описание отсутствует'}</p>
-                            
+
                             <div class="artwork-tags">
                                 <strong>Теги:</strong>
-                                ${(this.artwork.tags && this.artwork.tags.length > 0) ? 
-                                  this.artwork.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ') : 
+                                ${(this.artwork.tags && this.artwork.tags.length > 0) ?
+                                  this.artwork.tags.map((tag: string) => `<span class="tag">${tag}</span>`).join(' ') :
                                   '<span class="no-tags">Теги отсутствуют</span>'}
                             </div>
-                            
+
                             <div class="artwork-actions">
                                 <button class="btn btn-secondary" onclick="artworkDetail.addToFavorites(${this.artwork.artwork_id})">Добавить в избранное</button>
                                 <button class="btn btn-tertiary" onclick="artworkDetail.shareArtwork(${this.artwork.artwork_id})">Поделиться</button>
@@ -59,13 +64,13 @@ class ArtworkDetailComponent {
         `;
     }
 
-    addToFavorites(artworkId) {
+    addToFavorites(artworkId: number) {
         console.log(`Добавление произведения ${artworkId} в избранное`);
         // Здесь будет вызов API для добавления в избранное
         alert('Произведение добавлено в избранное!');
     }
 
-    shareArtwork(artworkId) {
+    shareArtwork(artworkId: number) {
         console.log(`Поделиться произведением ${artworkId}`);
         // Здесь будет реализация функции "поделиться"
         if (navigator.share) {
@@ -229,7 +234,14 @@ styleSheet.innerText = modalStyles;
 document.head.appendChild(styleSheet);
 
 // Глобальная переменная для компонента деталей произведения
-let artworkDetail;
+declare global {
+    interface Window {
+        artworkDetail: ArtworkDetailComponent;
+        createArtworkCard: (artwork: any) => HTMLElement;
+    }
+}
+
+let artworkDetail: ArtworkDetailComponent;
 
 // Инициализация компонента после загрузки DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -238,18 +250,19 @@ document.addEventListener('DOMContentLoaded', function() {
     modalContainer.id = 'artworkModal';
     modalContainer.style.display = 'none';
     document.body.appendChild(modalContainer);
-    
+
     // Инициализируем компонент
     artworkDetail = new ArtworkDetailComponent('artworkModal');
-    
+    window.artworkDetail = artworkDetail;
+
     // Обновляем функцию createArtworkCard в основном скрипте, чтобы добавить возможность просмотра деталей
-    const originalCreateArtworkCard = window.createArtworkCard || function(artwork) {
+    const originalCreateArtworkCard = window.createArtworkCard || function(artwork: any) {
         const card = document.createElement('div');
         card.className = 'artwork-card';
-        
+
         card.innerHTML = `
             <div class="artwork-image">
-                ${artwork.image_url ? `<img src="${artwork.image_url}" alt="${artwork.title}" style="width:100%;height:100%;object-fit:cover;">` : 
+                ${artwork.image_url ? `<img src="${artwork.image_url}" alt="${artwork.title}" style="width:100%;height:100%;object-fit:cover;">` :
                   `<span>Изображение недоступно</span>`}
             </div>
             <div class="artwork-info">
@@ -263,25 +276,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="btn-view-details" onclick="artworkDetail.show(${JSON.stringify(artwork).replace(/"/g, '&quot;')})">Подробнее</button>
             </div>
         `;
-        
+
         return card;
     };
-    
+
     // Обновляем глобальную функцию
-    window.createArtworkCard = function(artwork) {
+    window.createArtworkCard = function(artwork: any) {
         const card = originalCreateArtworkCard(artwork);
-        
+
         // Находим кнопку "Подробнее" и добавляем обработчик
         const button = card.querySelector('.btn-view-details');
         if (!button) {
-            const infoDiv = card.querySelector('.artwork-info');
+            const infoDiv = card.querySelector('.artwork-info') as HTMLElement;
             const buttonHTML = '<button class="btn btn-secondary btn-view-details" style="width:100%; margin-top: 1rem;">Подробнее</button>';
             infoDiv.insertAdjacentHTML('beforeend', buttonHTML);
-            
-            const newButton = card.querySelector('.btn-view-details');
+
+            const newButton = card.querySelector('.btn-view-details') as HTMLElement;
             newButton.onclick = () => artworkDetail.show(artwork);
         }
-        
+
         return card;
     };
 });

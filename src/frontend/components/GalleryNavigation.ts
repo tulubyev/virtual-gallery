@@ -1,13 +1,18 @@
 // GalleryNavigation component
 export class GalleryNavigation {
-    constructor(container) {
+    container: HTMLElement;
+    element: HTMLElement;
+    currentRoom: number;
+    rooms: any[];
+
+    constructor(container: HTMLElement) {
         this.container = container;
         this.element = this.createElement();
         this.currentRoom = 0;
         this.rooms = [];
     }
 
-    createElement() {
+    createElement(): HTMLElement {
         const nav = document.createElement('div');
         nav.className = 'info-panel';
         nav.innerHTML = `
@@ -22,38 +27,38 @@ export class GalleryNavigation {
                 <button id="search-btn" class="control-btn">🔍</button>
             </div>
         `;
-        
+
         // Add event listeners
-        document.getElementById('prev-room').addEventListener('click', () => {
+        (document.getElementById('prev-room') as HTMLElement).addEventListener('click', () => {
             this.switchRoom(this.currentRoom - 1);
         });
-        
-        document.getElementById('next-room').addEventListener('click', () => {
+
+        (document.getElementById('next-room') as HTMLElement).addEventListener('click', () => {
             this.switchRoom(this.currentRoom + 1);
         });
-        
-        document.getElementById('search-btn').addEventListener('click', () => {
+
+        (document.getElementById('search-btn') as HTMLElement).addEventListener('click', () => {
             this.performSearch();
         });
-        
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
+
+        (document.getElementById('search-input') as HTMLInputElement).addEventListener('keypress', (e: KeyboardEvent) => {
             if (e.key === 'Enter') {
                 this.performSearch();
             }
         });
-        
+
         return nav;
     }
 
-    switchRoom(roomIndex) {
+    switchRoom(roomIndex: number) {
         // In a real implementation, this would load a different room
         console.log(`Switching to room ${roomIndex}`);
         this.currentRoom = roomIndex;
-        document.getElementById('current-location').textContent = `Current Room: Room ${roomIndex + 1}`;
+        (document.getElementById('current-location') as HTMLElement).textContent = `Current Room: Room ${roomIndex + 1}`;
     }
 
     performSearch() {
-        const searchTerm = document.getElementById('search-input').value;
+        const searchTerm = (document.getElementById('search-input') as HTMLInputElement).value;
         console.log(`Searching for: ${searchTerm}`);
         // In a real implementation, this would filter artworks
     }

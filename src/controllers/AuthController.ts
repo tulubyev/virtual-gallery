@@ -2,10 +2,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import UserBackendService from '../backend/services/UserBackendService';
+import { UserService } from '../services/UserService';
 import { CreateUserInput } from '../models';
 
 class AuthController {
+  private userService = new UserService();
+
   async register(req: Request, res: Response): Promise<void> {
     try {
       const { username, email, password } = req.body as CreateUserInput;
@@ -17,7 +19,7 @@ class AuthController {
       }
 
       // Проверка, существует ли пользователь с таким email
-      const existingUser = await UserBackendService.getUserByEmail(email);
+      const existingUser = await this.userService.getByEmail(email);
       if (existingUser) {
         res.status(409).json({ error: 'User with this email already exists' });
         return;
@@ -27,10 +29,10 @@ class AuthController {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Создание пользователя
-      const newUser = await UserBackendService.createUser({
+      const newUser = await this.userService.create({
         username,
         email,
-        password: hashedPassword
+        password_hash: hashedPassword
       });
 
       // Генерация JWT токена
@@ -63,7 +65,7 @@ class AuthController {
       }
 
       // Поиск пользователя по email
-      const user = await UserBackendService.getUserByEmail(email);
+      const user = await this.userService.getByEmail(email);
       if (!user) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
@@ -99,7 +101,7 @@ class AuthController {
     try {
       // В реальной реализации это будет обновлять JWT токен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await UserBackendService.getUserById(userId);
+      const user = await this.userService.getById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -138,7 +140,7 @@ class AuthController {
       // Этот метод будет защищен middleware аутентификации
       // Так что если мы дошли до сюда, токен действителен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await UserBackendService.getUserById(userId);
+      const user = await this.userService.getById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });

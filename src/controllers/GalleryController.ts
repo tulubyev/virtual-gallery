@@ -1,11 +1,13 @@
 // src/controllers/GalleryController.ts
 import { Request, Response } from 'express';
-import GalleryBackendService from '../backend/services/GalleryBackendService';
+import { GalleryService } from '../services/GalleryService';
 
 class GalleryController {
+  private galleryService = new GalleryService();
+
   async getAllGalleries(req: Request, res: Response): Promise<void> {
     try {
-      const galleries = await GalleryBackendService.getAllGalleries();
+      const galleries = await this.galleryService.getAll();
       res.json(galleries);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -15,7 +17,7 @@ class GalleryController {
   async getGalleryById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const gallery = await GalleryBackendService.getGalleryById(id);
+      const gallery = await this.galleryService.getById(id);
 
       if (!gallery) {
         res.status(404).json({ error: 'Gallery not found' });
@@ -31,7 +33,7 @@ class GalleryController {
   async getGalleryRooms(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const rooms = await GalleryBackendService.getGalleryRooms(id);
+      const rooms = await this.galleryService.getRooms(id);
       res.json(rooms);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -41,7 +43,7 @@ class GalleryController {
   async createGallery(req: Request, res: Response): Promise<void> {
     try {
       const galleryData = req.body;
-      const newGallery = await GalleryBackendService.createGallery(galleryData);
+      const newGallery = await this.galleryService.create(galleryData);
       res.status(201).json(newGallery);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -52,7 +54,7 @@ class GalleryController {
     try {
       const { id } = req.params;
       const galleryData = req.body;
-      const updatedGallery = await GalleryBackendService.updateGallery(id, galleryData);
+      const updatedGallery = await this.galleryService.update(id, galleryData);
 
       if (!updatedGallery) {
         res.status(404).json({ error: 'Gallery not found' });
@@ -68,7 +70,7 @@ class GalleryController {
   async deleteGallery(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const deleted = await GalleryBackendService.deleteGallery(id);
+      const deleted = await this.galleryService.delete(id);
 
       if (!deleted) {
         res.status(404).json({ error: 'Gallery not found' });
@@ -84,7 +86,7 @@ class GalleryController {
   async getRecommendedArtworks(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const recommendations = await GalleryBackendService.getRecommendedArtworks(id);
+      const recommendations = await this.galleryService.getRecommendedArtworks(id);
       res.json(recommendations);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

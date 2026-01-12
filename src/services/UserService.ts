@@ -1,180 +1,208 @@
 // src/services/UserService.ts
 import { BaseService } from './BaseService';
-import { User } from '../types/User';
+
+export interface User {
+  user_id?: string;
+  username: string;
+  email: string;
+  password_hash?: string;
+  role?: string;
+  preferences?: any;
+  created_at?: Date;
+}
 
 export class UserService extends BaseService<User> {
-  constructor() {
-    super('http://localhost:5000/api/users');
-  }
-
   async getAll(): Promise<User[]> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/', {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users ORDER BY created_at DESC');
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getById(id: string): Promise<User | null> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE user_id = $1', [id]);
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getByEmail(email: string): Promise<User | null> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async create(userData: Partial<User>): Promise<User> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *',
+        [userData.username, userData.email, userData.password_hash]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async update(id: string, updateData: Partial<User>): Promise<User | null> {
+    const client = await this.pool.connect();
+    try {
+      // Формируем динамический SQL запрос в зависимости от того, какие поля нужно обновить
+      const updateFields = [];
+      const values = [];
+      let paramIndex = 2; // Начинаем с 2, потому что 1 - это id
+
+      if (updateData.username) {
+        updateFields.push(`username = $${paramIndex}`);
+        values.push(updateData.username);
+        paramIndex++;
       }
-    });
-  }
 
-  async getById(id: string): Promise<User> {
-    const token = localStorage.getItem('authToken');
-    return this.request(`/${id}`, {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+      if (updateData.email) {
+        updateFields.push(`email = $${paramIndex}`);
+        values.push(updateData.email);
+        paramIndex++;
       }
-    });
-  }
 
-  // Метод для получения пользователя по ID (для совместимости с AuthController)
-  static async getUserById(id: string): Promise<User> {
-    // В реальной реализации этот метод будет использовать бэкенд API
-    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
-    throw new Error('getUserById should be implemented on the backend');
-  }
-
-  async create(user: Partial<User>): Promise<User> {
-    return this.request('/', {
-      method: 'POST',
-      body: JSON.stringify(user)
-    });
-  }
-
-  // Метод для создания пользователя (для совместимости с AuthController)
-  static async createUser(userData: Partial<User>): Promise<User> {
-    // В реальной реализации этот метод будет использовать бэкенд API
-    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
-    throw new Error('createUser should be implemented on the backend');
-  }
-
-  async update(id: string, user: Partial<User>): Promise<User> {
-    const token = localStorage.getItem('authToken');
-    return this.request(`/${id}`, {
-      method: 'PUT',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(user)
-    });
-  }
-
-  async delete(id: string): Promise<void> {
-    const token = localStorage.getItem('authToken');
-    await this.request(`/${id}`, {
-      method: 'DELETE',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+      if (updateData.password_hash) {
+        updateFields.push(`password_hash = $${paramIndex}`);
+        values.push(updateData.password_hash);
+        paramIndex++;
       }
-    });
-  }
 
-  // Метод для получения пользователя по email (для совместимости с AuthController)
-  static async getUserByEmail(email: string): Promise<User | null> {
-    // В реальной реализации этот метод будет использовать бэкенд API
-    // Здесь мы возвращаем заглушку, так как в браузере нет доступа к базе данных
-    throw new Error('getUserByEmail should be implemented on the backend');
-  }
-
-  async register(userData: Partial<User>): Promise<User> {
-    return this.request('/register', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    });
-  }
-
-  async login(credentials: { email: string; password: string }): Promise<{ user: User; token: string }> {
-    return this.request('/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials)
-    });
-  }
-
-  async getProfile(): Promise<User> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/profile', {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+      if (updateData.role) {
+        updateFields.push(`role = $${paramIndex}`);
+        values.push(updateData.role);
+        paramIndex++;
       }
-    });
-  }
 
-  async updateProfile(profileData: Partial<User>): Promise<User> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/profile', {
-      method: 'PUT',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(profileData)
-    });
-  }
-
-  async getPreferences(): Promise<any> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/preferences', {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+      if (updateData.preferences) {
+        updateFields.push(`preferences = $${paramIndex}`);
+        values.push(updateData.preferences);
+        paramIndex++;
       }
-    });
-  }
 
-  async updatePreferences(preferences: any): Promise<any> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/preferences', {
-      method: 'PUT',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(preferences)
-    });
-  }
+      // Добавляем id в конец значений
+      values.push(id);
 
-  async getFavorites(): Promise<any[]> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/favorites', {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
+      if (updateFields.length === 0) {
+        // Если нет полей для обновления, просто возвращаем пользователя
+        return await this.getById(id);
       }
-    });
+
+      const query = `UPDATE users SET ${updateFields.join(', ')} WHERE user_id = $${paramIndex} RETURNING *`;
+      const result = await client.query(query, values);
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } finally {
+      client.release();
+    }
   }
 
-  async addFavorite(artworkId: string): Promise<void> {
-    const token = localStorage.getItem('authToken');
-    await this.request(`/favorites/${artworkId}`, {
-      method: 'POST',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      }
-    });
+  async delete(id: string): Promise<boolean> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('DELETE FROM users WHERE user_id = $1 RETURNING user_id', [id]);
+      return result.rows.length > 0;
+    } finally {
+      client.release();
+    }
   }
 
-  async removeFavorite(artworkId: string): Promise<void> {
-    const token = localStorage.getItem('authToken');
-    await this.request(`/favorites/${artworkId}`, {
-      method: 'DELETE',
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      }
-    });
+  async getUsersByRole(role: string): Promise<User[]> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE role = $1 ORDER BY created_at DESC', [role]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
   }
 
-  async getHistory(): Promise<any[]> {
-    const token = localStorage.getItem('authToken');
-    return this.request('/history', {
-      headers: {
-        ...this.headers,
-        'Authorization': `Bearer ${token}`
-      }
-    });
+  async updateRole(userId: string, newRole: string): Promise<User | null> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE users SET role = $1 WHERE user_id = $2 RETURNING *',
+        [newRole, userId]
+      );
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getStats(): Promise<any> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT
+          COUNT(*) as total_users,
+          COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_count,
+          COUNT(CASE WHEN role = 'curator' THEN 1 END) as curator_count,
+          COUNT(CASE WHEN role = 'staff' THEN 1 END) as staff_count,
+          COUNT(CASE WHEN role = 'tour_guide' THEN 1 END) as tour_guide_count,
+          COUNT(CASE WHEN role = 'auction_participant' THEN 1 END) as auction_participant_count
+        FROM users
+      `);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getFavorites(userId: string): Promise<any[]> {
+    const client = await this.pool.connect();
+    try {
+      // В реальной реализации это будет извлекать избранные произведения пользователя
+      // For now, returning empty array
+      return [];
+    } finally {
+      client.release();
+    }
+  }
+
+  async addFavorite(userId: string, artworkId: string): Promise<{ message: string; userId: string; artworkId: string }> {
+    const client = await this.pool.connect();
+    try {
+      // В реальной реализации это будет добавлять произведение в избранное пользователя
+      // For now, returning success
+      return { message: 'Added to favorites', userId, artworkId };
+    } finally {
+      client.release();
+    }
+  }
+
+  async removeFavorite(userId: string, artworkId: string): Promise<{ message: string; userId: string; artworkId: string }> {
+    const client = await this.pool.connect();
+    try {
+      // В реальной реализации это будет удалять произведение из избранного пользователя
+      // For now, returning success
+      return { message: 'Removed from favorites', userId, artworkId };
+    } finally {
+      client.release();
+    }
+  }
+
+  async getHistory(userId: string): Promise<any[]> {
+    const client = await this.pool.connect();
+    try {
+      // В реальной реализации это будет извлекать историю взаимодействий пользователя
+      // For now, returning empty array
+      return [];
+    } finally {
+      client.release();
+    }
   }
 }

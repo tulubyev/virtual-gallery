@@ -1,8 +1,8 @@
-// services/DatabaseService.ts
+// src/services/DatabaseService.ts
 import { Pool, PoolClient } from 'pg';
 import 'dotenv/config';
 
-class DatabaseService {
+export class DatabaseService {
   private pool: Pool;
 
   constructor() {

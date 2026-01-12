@@ -1,9 +1,11 @@
 // controllers/UserController.ts
 import { Request, Response } from 'express';
-import UserBackendService from '../backend/services/UserBackendService';
+import { UserService } from '../services/UserService';
 import { UpdateUserInput } from '../models';
 
 class UserController {
+  private userService = new UserService();
+
   async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const { username, email, password } = req.body;
@@ -15,7 +17,7 @@ class UserController {
       }
 
       // Проверка, существует ли пользователь с таким email
-      const existingUser = await UserBackendService.getUserByEmail(email);
+      const existingUser = await this.userService.getByEmail(email);
       if (existingUser) {
         res.status(409).json({ error: 'User with this email already exists' });
         return;
@@ -26,10 +28,10 @@ class UserController {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Создание пользователя
-      const newUser = await UserBackendService.createUser({
+      const newUser = await this.userService.create({
         username,
         email,
-        password: hashedPassword
+        password_hash: hashedPassword
       });
 
       // Генерация JWT токена
@@ -63,7 +65,7 @@ class UserController {
       }
 
       // Поиск пользователя по email
-      const user = await UserBackendService.getUserByEmail(email);
+      const user = await this.userService.getByEmail(email);
       if (!user) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
@@ -102,7 +104,7 @@ class UserController {
       // userId должен поступать из JWT токена (через middleware аутентификации)
       const userId = (req as any).userId;
 
-      const user = await UserBackendService.getUserById(userId);
+      const user = await this.userService.getById(userId);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -124,7 +126,7 @@ class UserController {
         delete (updateData as any).password;
       }
 
-      const updatedUser = await UserBackendService.updateUser(userId, updateData);
+      const updatedUser = await this.userService.update(userId, updateData);
       if (!updatedUser) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -140,7 +142,7 @@ class UserController {
     try {
       const userId = (req as any).userId; // From JWT token
 
-      const user = await UserBackendService.getUserById(userId);
+      const user = await this.userService.getById(userId);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -157,7 +159,7 @@ class UserController {
       const userId = (req as any).userId; // From JWT token
       const preferences = req.body;
 
-      const updatedUser = await UserBackendService.updateUser(userId, { preferences });
+      const updatedUser = await this.userService.update(userId, { preferences });
       if (!updatedUser) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -175,7 +177,7 @@ class UserController {
 
       // В реальной реализации это будет извлекать избранные произведения пользователя
       // For now, returning empty array
-      const favorites = await UserBackendService.getUserFavorites(userId);
+      const favorites = await this.userService.getFavorites(userId);
       res.json(favorites || []);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -188,7 +190,7 @@ class UserController {
       const { artworkId } = req.params;
 
       // В реальной реализации это будет добавлять произведение в избранное
-      const result = await UserBackendService.addFavorite(userId, artworkId);
+      const result = await this.userService.addFavorite(userId, artworkId);
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -201,7 +203,7 @@ class UserController {
       const { artworkId } = req.params;
 
       // В реальной реализации это будет удалять произведение из избранного
-      const result = await UserBackendService.removeFavorite(userId, artworkId);
+      const result = await this.userService.removeFavorite(userId, artworkId);
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -213,7 +215,7 @@ class UserController {
       const userId = (req as any).userId; // From JWT token
 
       // В реальной реализации это будет извлекать историю взаимодействий пользователя
-      const history = await UserBackendService.getUserHistory(userId);
+      const history = await this.userService.getHistory(userId);
       res.json(history || []);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -222,7 +224,7 @@ class UserController {
 
   async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await UserBackendService.getAllUsers();
+      const users = await this.userService.getAll();
       res.json(users);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -232,7 +234,7 @@ class UserController {
   async getUsersByRole(req: Request, res: Response): Promise<void> {
     try {
       const { role } = req.params;
-      const users = await UserBackendService.getUsersByRole(role);
+      const users = await this.userService.getUsersByRole(role);
       res.json(users);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -244,7 +246,7 @@ class UserController {
       const { userId } = req.params;
       const { role } = req.body;
 
-      const updatedUser = await UserBackendService.updateUserRole(userId, role);
+      const updatedUser = await this.userService.updateRole(userId, role);
       if (!updatedUser) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -259,7 +261,7 @@ class UserController {
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
-      const deleted = await UserBackendService.deleteUser(userId);
+      const deleted = await this.userService.delete(userId);
 
       if (!deleted) {
         res.status(404).json({ error: 'User not found' });
@@ -274,7 +276,7 @@ class UserController {
 
   async getUserStats(req: Request, res: Response): Promise<void> {
     try {
-      const stats = await UserBackendService.getUserStats();
+      const stats = await this.userService.getStats();
       res.json(stats);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

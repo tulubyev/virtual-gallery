@@ -1,12 +1,16 @@
 // ArtworkCard component
 export class ArtworkCard {
-    constructor(container) {
+    container: HTMLElement;
+    element: HTMLElement;
+    visible: boolean;
+
+    constructor(container: HTMLElement) {
         this.container = container;
         this.element = this.createElement();
         this.visible = false;
     }
 
-    createElement() {
+    createElement(): HTMLElement {
         const card = document.createElement('div');
         card.className = 'artwork-card';
         card.innerHTML = `
@@ -17,27 +21,27 @@ export class ArtworkCard {
             <div id="artwork-tags" class="tags-container"></div>
             <button id="close-btn" class="control-btn">✕</button>
         `;
-        
+
         // Add close button functionality
-        const closeBtn = card.querySelector('#close-btn');
+        const closeBtn = card.querySelector('#close-btn') as HTMLElement;
         closeBtn.addEventListener('click', () => {
             this.hide();
         });
-        
+
         return card;
     }
 
-    show(artworkData) {
+    show(artworkData: any) {
         // Populate the card with artwork data
         this.container.appendChild(this.element);
-        
-        document.getElementById('artwork-title').textContent = artworkData.title || 'Untitled';
-        document.getElementById('artwork-artist').textContent = `Artist: ${artworkData.artist || 'Unknown'}`;
-        document.getElementById('artwork-year').textContent = `Year: ${artworkData.year || 'Unknown'}`;
-        document.getElementById('artwork-description').textContent = artworkData.description || 'No description available.';
-        
+
+        (document.getElementById('artwork-title') as HTMLElement).textContent = artworkData.title || 'Untitled';
+        (document.getElementById('artwork-artist') as HTMLElement).textContent = `Artist: ${artworkData.artist || 'Unknown'}`;
+        (document.getElementById('artwork-year') as HTMLElement).textContent = `Year: ${artworkData.year || 'Unknown'}`;
+        (document.getElementById('artwork-description') as HTMLElement).textContent = artworkData.description || 'No description available.';
+
         // Add tags
-        const tagsContainer = document.getElementById('artwork-tags');
+        const tagsContainer = document.getElementById('artwork-tags') as HTMLElement;
         tagsContainer.innerHTML = '';
         if (artworkData.tags && Array.isArray(artworkData.tags)) {
             artworkData.tags.forEach(tag => {
@@ -53,7 +57,7 @@ export class ArtworkCard {
                 tagsContainer.appendChild(tagSpan);
             });
         }
-        
+
         this.element.style.display = 'block';
         this.visible = true;
     }
@@ -63,7 +67,7 @@ export class ArtworkCard {
         this.visible = false;
     }
 
-    toggle(artworkData) {
+    toggle(artworkData: any) {
         if (this.visible) {
             this.hide();
         } else {

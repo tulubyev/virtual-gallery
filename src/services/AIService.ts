@@ -1,44 +1,52 @@
-// services/AIService.ts
-import { Artwork } from '../models';
+// src/services/AIService.ts
+import { Artwork } from '../types/index';
+import { ArtworkService } from './ArtworkService';
+import { RecommendationService } from './RecommendationService';
 
-class AIService {
-  // Моковая реализация для демонстрации
-  async getRecommendations(userId: number, count: number = 5): Promise<any[]> {
+export class AIService {
+  private artworkService: ArtworkService;
+  private recommendationService: RecommendationService;
+
+  constructor() {
+    this.artworkService = new ArtworkService();
+    this.recommendationService = new RecommendationService();
+  }
+
+  async getRecommendations(userId: string, count: number = 5): Promise<any[]> {
     // В реальной реализации это будет использовать ИИ-модель для генерации рекомендаций
     // на основе предпочтений пользователя и истории взаимодействия
-    
-    // Заглушка для демонстрации
-    return [
-      {
-        artwork_id: 3,
-        title: 'The Persistence of Memory',
-        artist_name: 'Salvador Dali',
-        reason: 'Based on your interest in surrealism'
-      },
-      {
-        artwork_id: 4,
-        title: 'The Scream',
-        artist_name: 'Edvard Munch',
-        reason: 'Artworks similar to ones you viewed recently'
-      }
-    ];
+
+    // Using the new RecommendationService
+    const recommendations = await this.recommendationService.getRecommendations({
+      userId,
+      count
+    });
+
+    return recommendations.map(artwork => ({
+      artwork_id: artwork.artwork_id,
+      title: artwork.title,
+      artist_name: artwork.artist_name,
+      reason: 'Based on your preferences and viewing history'
+    }));
   }
 
   async generateCollection(criteria: { theme: string; style?: string; artist?: string; count?: number }): Promise<any> {
     // В реальной реализации это будет использовать ИИ для курирования коллекции
     // на основе критериев, таких как стиль, тема, исторический период и т.д.
-    
+
     const { theme, style, artist, count = 5 } = criteria;
-    
-    // Заглушка для демонстрации
+
+    // Using the new RecommendationService
+    const collection = await this.recommendationService.getPersonalizedCollection(theme, 'default_user', count);
+
     return {
-      name: `AI Curated: ${theme}${style ? ` - ${style}` : ''}`,
-      description: `An AI-curated collection${style ? ` of ${style} artworks` : ''} around the theme "${theme}"`,
+      name: collection.name,
+      description: collection.description,
       curator: 'AI Curator',
-      artworks: [
-        { artwork_id: 1, title: 'Sample Artwork 1' },
-        { artwork_id: 2, title: 'Sample Artwork 2' }
-      ],
+      artworks: collection.artworks.map(artwork => ({
+        artwork_id: artwork.artwork_id,
+        title: artwork.title
+      })),
       is_ai_generated: true,
       created_for_public_display: false
     };
@@ -47,7 +55,7 @@ class AIService {
   async analyzeImage(imageBuffer: Buffer): Promise<any> {
     // В реальной реализации это будет использовать компьютерное зрение
     // для анализа изображения и извлечения признаков
-    
+
     // Заглушка для демонстрации
     return {
       tags: ['landscape', 'nature', 'trees', 'scenic'],
@@ -63,31 +71,25 @@ class AIService {
     };
   }
 
-  async getSimilarArtworks(artworkId: number, count: number = 5): Promise<any[]> {
+  async getSimilarArtworks(artworkId: string, count: number = 5): Promise<any[]> {
     // В реальной реализации это будет использовать алгоритмы
     // визуального сходства для поиска похожих произведений
-    
-    // Заглушка для демонстрации
-    return [
-      {
-        artwork_id: 5,
-        title: 'Similar Artwork 1',
-        artist_name: 'Artist 1',
-        similarity_score: 0.92
-      },
-      {
-        artwork_id: 6,
-        title: 'Similar Artwork 2',
-        artist_name: 'Artist 2',
-        similarity_score: 0.87
-      }
-    ];
+
+    // Using the new RecommendationService
+    const similarArtworks = await this.recommendationService.getSimilarArtworks(artworkId, count);
+
+    return similarArtworks.map(artwork => ({
+      artwork_id: artwork.artwork_id,
+      title: artwork.title,
+      artist_name: artwork.artist_name,
+      similarity_score: Math.random() // Random similarity for demo
+    }));
   }
 
   async trainModel(): Promise<any> {
     // В реальной реализации это будет переобучать модель рекомендаций
     // с новыми данными о взаимодействии пользователей
-    
+
     // Заглушка для демонстрации
     return {
       model_version: '1.2.3',
@@ -96,12 +98,12 @@ class AIService {
     };
   }
 
-  async personalizeGalleryRoute(userId: number, options: { duration?: number; themes?: string[]; exclude?: number[] }): Promise<any> {
+  async personalizeGalleryRoute(userId: string, options: { duration?: number; themes?: string[]; exclude?: string[] }): Promise<any> {
     // В реальной реализации это будет создавать персонализированный маршрут
     // по галерее на основе предпочтений пользователя и истории взаимодействия
-    
+
     const { duration = 30, themes = [], exclude = [] } = options;
-    
+
     // Заглушка для демонстрации
     return {
       name: `Personalized Route for ${duration} minutes`,
@@ -114,10 +116,10 @@ class AIService {
     };
   }
 
-  async predictEngagement(userId: number, artworkIds: number[]): Promise<any[]> {
+  async predictEngagement(userId: string, artworkIds: string[]): Promise<any[]> {
     // В реальной реализации это будет использовать обученную модель
     // для предсказания вовлеченности пользователя с каждым произведением
-    
+
     // Заглушка для демонстрации
     return artworkIds.map(artworkId => ({
       artwork_id: artworkId,
@@ -128,5 +130,3 @@ class AIService {
     })).sort((a, b) => b.predicted_engagement_score - a.predicted_engagement_score);
   }
 }
-
-export default new AIService();

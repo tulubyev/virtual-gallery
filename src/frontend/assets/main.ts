@@ -1,12 +1,12 @@
 // Основной JavaScript файл для виртуальной галереи
 document.addEventListener('DOMContentLoaded', function() {
     // Получаем элементы DOM
-    const exploreBtn = document.getElementById('exploreBtn');
-    const featuredArtworksContainer = document.getElementById('featuredArtworks');
-    const loginLink = document.getElementById('loginLink');
-    const registerLink = document.getElementById('registerLink');
-    const logoutLink = document.getElementById('logoutLink');
-    
+    const exploreBtn = document.getElementById('exploreBtn') as HTMLElement;
+    const featuredArtworksContainer = document.getElementById('featuredArtworks') as HTMLElement;
+    const loginLink = document.getElementById('loginLink') as HTMLElement;
+    const registerLink = document.getElementById('registerLink') as HTMLElement;
+    const logoutLink = document.getElementById('logoutLink') as HTMLElement;
+
     // Проверяем, есть ли токен в localStorage
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -22,12 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Получаем элементы модальных окон
-    const registerModal = document.getElementById('registerModal');
-    const loginModal = document.getElementById('loginModal');
-    const closeRegister = document.querySelector('.close');
-    const closeLogin = document.querySelector('.close-login');
-    const registerForm = document.getElementById('registerForm');
-    const loginForm = document.getElementById('loginForm');
+    const registerModal = document.getElementById('registerModal') as HTMLElement;
+    const loginModal = document.getElementById('loginModal') as HTMLElement;
+    const closeRegister = document.querySelector('.close') as HTMLElement;
+    const closeLogin = document.querySelector('.close-login') as HTMLElement;
+    const registerForm = document.getElementById('registerForm') as HTMLFormElement;
+    const loginForm = document.getElementById('loginForm') as HTMLFormElement;
 
     // Обработчики открытия модальных окон
     loginLink.addEventListener('click', function(e) {
@@ -65,10 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(registerForm);
         const userData = {
-            username: formData.get('username'),
-            email: formData.get('email'),
-            password: formData.get('password'),
-            role: formData.get('role') || 'user'  // По умолчанию обычный пользователь
+            username: formData.get('username') as string,
+            email: formData.get('email') as string,
+            password: formData.get('password') as string,
+            role: formData.get('role') as string || 'user'  // По умолчанию обычный пользователь
         };
 
         try {
@@ -111,8 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(loginForm);
         const loginData = {
-            email: formData.get('email'),
-            password: formData.get('password')
+            email: formData.get('email') as string,
+            password: formData.get('password') as string
         };
 
         try {
@@ -148,43 +148,43 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Ошибка при входе');
         }
     });
-    
+
     // Функция для получения токена из localStorage
-    function getAuthToken() {
+    function getAuthToken(): string | null {
         return localStorage.getItem('authToken');
     }
-    
+
     // Функция для установки токена в localStorage
-    function setAuthToken(token) {
+    function setAuthToken(token: string): void {
         localStorage.setItem('authToken', token);
     }
-    
+
     // Функция для удаления токена из localStorage
-    function removeAuthToken() {
+    function removeAuthToken(): void {
         localStorage.removeItem('authToken');
     }
-    
+
     // Функция для выполнения API запросов
-    async function apiRequest(endpoint, options = {}) {
+    async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
         const url = `/api${endpoint}`;
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers
         };
-        
+
         const authToken = getAuthToken();
         if (authToken) {
-            headers['Authorization'] = `Bearer ${authToken}`;
+            (headers as any)['Authorization'] = `Bearer ${authToken}`;
         }
-        
+
         const config = {
             ...options,
             headers
         };
-        
+
         try {
             const response = await fetch(url, config);
-            
+
             if (!response.ok) {
                 if (response.status === 401) {
                     // Если получили 401 ошибку, удаляем токен и обновляем UI
@@ -193,16 +193,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('API request error:', error);
             throw error;
         }
     }
-    
+
     // Функция для обновления UI аутентификации
-    function updateAuthUI() {
+    function updateAuthUI(): void {
         const token = getAuthToken();
         if (token) {
             loginLink.style.display = 'none';
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
             logoutLink.style.display = 'none';
         }
     }
-    
+
     // Обработчик кнопки "Начать исследование"
     exploreBtn.addEventListener('click', async function() {
         try {
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Ошибка при загрузке произведений искусства');
         }
     });
-    
+
     // Обработчик ссылки "Выход"
     logoutLink.addEventListener('click', function(e) {
         e.preventDefault();
@@ -233,19 +233,19 @@ document.addEventListener('DOMContentLoaded', function() {
         updateAuthUI();
         alert('Вы успешно вышли из системы');
     });
-    
+
     // Функция для загрузки произведений искусства
-    async function loadArtworks() {
+    async function loadArtworks(): Promise<void> {
         try {
             // Показываем индикатор загрузки
             featuredArtworksContainer.innerHTML = '<div class="loading">Загрузка произведений искусства...</div>';
-            
+
             // Загружаем произведения искусства с API
             const artworks = await apiRequest('/artworks');
-            
+
             // Очищаем контейнер
             featuredArtworksContainer.innerHTML = '';
-            
+
             // Если произведения есть, отображаем их
             if (artworks && artworks.length > 0) {
                 artworks.forEach(artwork => {
@@ -261,15 +261,15 @@ document.addEventListener('DOMContentLoaded', function() {
             featuredArtworksContainer.innerHTML = '<div class="loading">Ошибка при загрузке произведений искусства</div>';
         }
     }
-    
+
     // Функция для создания карточки произведения искусства
-    function createArtworkCard(artwork) {
+    function createArtworkCard(artwork: any): HTMLElement {
         const card = document.createElement('div');
         card.className = 'artwork-card';
-        
+
         card.innerHTML = `
             <div class="artwork-image">
-                ${artwork.image_url ? `<img src="${artwork.image_url}" alt="${artwork.title}" style="width:100%;height:100%;object-fit:cover;">` : 
+                ${artwork.image_url ? `<img src="${artwork.image_url}" alt="${artwork.title}" style="width:100%;height:100%;object-fit:cover;">` :
                   `<span>Изображение недоступно</span>`}
             </div>
             <div class="artwork-info">
@@ -282,26 +282,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
+
         return card;
     }
-    
+
     // Инициализация: загружаем популярные произведения при загрузке страницы
     loadArtworks();
-    
+
     // Инициализация Socket.IO
+    // @ts-ignore - socket.io is loaded from CDN
     const socket = io();
-    
+
     socket.on('connect', function() {
         console.log('Подключено к серверу');
     });
-    
+
     socket.on('disconnect', function() {
         console.log('Отключено от сервера');
     });
-    
+
     // Обработка событий взаимодействия с произведениями искусства
-    socket.on('artworkInteractionBroadcast', function(data) {
+    socket.on('artworkInteractionBroadcast', function(data: any) {
         console.log('Взаимодействие с произведением искусства:', data);
         // Здесь можно добавить обновление интерфейса в реальном времени
     });

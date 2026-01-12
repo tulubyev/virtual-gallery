@@ -1,89 +1,126 @@
-# Virtual Art Gallery - Project Structure
+# Структура проекта Virtual Gallery
 
-## Directory Structure
+## Обзор
+
+Проект Virtual Gallery представляет собой веб-приложение для виртуальной галереи искусств с использованием современных технологий и архитектурных подходов. Проект разделен на клиентскую и серверную части с использованием TypeScript для обеспечения безопасности типов.
+
+## Структура каталогов
+
 ```
-virtual-art-gallery/
-├── package.json                 # Project dependencies and scripts
-├── README.md                   # Project overview
-├── QWEN.md                     # Original requirements document
-├── src/
-│   ├── frontend/
-│   │   ├── index.html          # Main HTML file
-│   │   ├── main.js             # Main application logic
-│   │   ├── styles/
-│   │   │   └── main.css        # Main stylesheet
-│   │   ├── assets/             # Images, 3D models, etc.
-│   │   └── components/
-│   │       ├── ArtworkCard.js  # Artwork detail component
-│   │       └── GalleryNavigation.js # Navigation component
-│   ├── backend/
-│   │   ├── server.js           # Main server file
-│   │   ├── routes/
-│   │   │   ├── artworkRoutes.js
-│   │   │   ├── galleryRoutes.js
-│   │   │   ├── userRoutes.js
-│   │   │   └── aiRoutes.js
-│   │   ├── controllers/
-│   │   │   ├── artworkController.js
-│   │   │   ├── galleryController.js
-│   │   │   ├── userController.js
-│   │   │   └── aiController.js
-│   │   └── models/
-│   │       └── db.js           # Database abstraction
-│   ├── database/
-│   │   └── schema.sql          # Database schema
-│   ├── ai-ml/
-│   │   ├── models/
-│   │   │   └── artworkAnalyzer.js # AI model for artwork analysis
-│   │   └── utils/
-│   │       └── dataPreprocessing.js # Data preprocessing utilities
-│   ├── iot/
-│   │   ├── devices/
-│   │   │   └── deviceManager.js # IoT device management
-│   │   └── sensors/
-│   │       └── sensorProcessor.js # Sensor data processing
-│   └── docs/
-│       ├── api/
-│       │   └── api-docs.md     # API documentation
-│       ├── architecture/
-│       │   └── architecture.md # System architecture
-│       └── development-guide.md # Development guidelines
+vg/
+├── dist/                 # Скомпилированные файлы
+├── docs/                 # Документация проекта
+├── node_modules/         # Зависимости проекта
+├── scripts/              # Скрипты для инициализации и обслуживания
+├── src/                  # Исходный код проекта
+│   ├── ai-ml/            # Модули искусственного интеллекта и машинного обучения
+│   │   ├── models/       # Модели ИИ
+│   │   ├── services/     # Сервисы ИИ
+│   │   └── utils/        # Утилиты ИИ
+│   ├── backend/          # Серверная часть
+│   │   ├── config/       # Конфигурационные файлы
+│   │   ├── middleware/   # Middleware
+│   │   ├── routes/       # Маршруты
+│   │   └── services/     # Серверные сервисы (устаревшие, объединены с основными)
+│   ├── controllers/      # Контроллеры Express
+│   ├── database/         # Скрипты инициализации базы данных
+│   ├── frontend/         # Клиентская часть
+│   │   ├── assets/       # Скрипты для различных ролей пользователей
+│   │   ├── components/   # Компоненты интерфейса
+│   │   ├── src/          # Исходный код клиентской части
+│   │   └── types/        # Типы TypeScript
+│   ├── iot/              # Модули IoT устройств
+│   ├── middleware/       # Общие middleware
+│   ├── models/           # Модели данных
+│   ├── routes/           # Маршруты Express
+│   ├── services/         # Бизнес-логика и сервисы
+│   ├── types/            # Общие типы TypeScript
+│   └── uploads/          # Загруженные файлы
+├── tmp/                  # Временные файлы
+├── uploads/              # Загрузки
+├── .env.example          # Пример файла переменных окружения
+├── .gitignore            # Файлы игнорируемые Git
+├── package.json          # Зависимости и скрипты проекта
+├── README.md             # Основное описание проекта
+├── tailwind.config.ts    # Конфигурация Tailwind CSS
+├── tsconfig.json         # Конфигурация TypeScript (сервер)
+├── vite.config.ts        # Конфигурация Vite (клиент)
+└── webpack.config.ts     # Конфигурация Webpack
 ```
 
-## Key Files and Their Purpose
+## Основные модули
 
-### Frontend
-- `src/frontend/main.js`: Initializes the 3D gallery using Three.js
-- `src/frontend/components/ArtworkCard.js`: Displays detailed information about artworks
-- `src/frontend/styles/main.css`: Styles for the gallery interface
+### 1. AI/ML модуль (`src/ai-ml/`)
+Содержит компоненты для искусственного интеллекта и машинного обучения:
+- `models/` - Модели анализа изображений и рекомендаций
+- `services/` - Сервисы ИИ для генерации описаний, туров и т.д.
+- `utils/` - Утилиты для предобработки данных
 
-### Backend
-- `src/backend/server.js`: Express server with Socket.IO integration
-- `src/backend/routes/artworkRoutes.js`: API endpoints for artwork management
-- `src/backend/controllers/artworkController.js`: Business logic for artwork operations
+### 2. Backend (`src/backend/`)
+Серверная часть приложения:
+- `config/` - Конфигурации (S3, базы данных и т.д.)
+- `services/` - Серверные сервисы (теперь объединены с основными сервисами)
 
-### Database
-- `src/database/schema.sql`: PostgreSQL schema for all tables
-- `src/backend/models/db.js`: Mock database implementation for development
+### 3. Frontend (`src/frontend/`)
+Клиентская часть приложения:
+- `assets/` - Скрипты для различных ролей пользователей (админ, куратор, гид и т.д.)
+- `components/` - Переиспользуемые компоненты интерфейса
+- `src/` - Основной исходный код клиентской части
 
-### AI/ML
-- `src/ai-ml/models/artworkAnalyzer.js`: AI model for analyzing artworks
-- `src/ai-ml/utils/dataPreprocessing.js`: Utilities for preparing data for ML models
+### 4. Services (`src/services/`)
+Бизнес-логика приложения:
+- `BaseService.ts` - Базовый класс для всех сервисов
+- `IService.ts` - Интерфейс для унифицированного доступа к сервисам
+- `ArtworkService.ts` - Сервис для работы с произведениями искусства
+- `GalleryService.ts` - Сервис для работы с галереями
+- `UserService.ts` - Сервис для работы с пользователями
+- `AIService.ts` - Сервис для ИИ-функций
+- `RecommendationService.ts` - Сервис для рекомендаций
 
-### IoT
-- `src/iot/devices/deviceManager.js`: Manages connections to IoT devices
-- `src/iot/sensors/sensorProcessor.js`: Processes sensor data into meaningful insights
+### 5. Controllers (`src/controllers/`)
+Контроллеры для обработки HTTP-запросов:
+- `ArtworkController.ts` - Управление произведениями искусства
+- `AuthController.ts` - Аутентификация и авторизация
+- `GalleryController.ts` - Управление галереями
+- `UserController.ts` - Управление пользователями
+- `AiController.ts` - Контроллер для ИИ-функций
 
-### Documentation
-- `src/docs/api/api-docs.md`: Comprehensive API documentation
-- `src/docs/architecture/architecture.md`: System architecture overview
-- `src/docs/development-guide.md`: Instructions for developers
+## Конфигурационные файлы
 
-## Getting Started
+### tsconfig.json
+Конфигурация TypeScript для серверной части:
+- Целевая версия ES2020
+- Модуль CommonJS
+- Строгая проверка типов
+- Псевдонимы путей для удобства импорта
 
-1. Install dependencies: `npm install`
-2. Set up environment variables in a `.env` file
-3. Initialize the database with the schema
-4. Run the application: `npm run dev`
+### vite.config.ts
+Конфигурация Vite для клиентской части:
+- Плагин React
+- Проксирование API запросов на сервер
+- Псевдонимы путей
 
-For detailed instructions, see the development guide in `src/docs/development-guide.md`.
+### webpack.config.ts
+Конфигурация Webpack для сборки клиентской части:
+- Входная точка: src/frontend/main.ts
+- Поддержка TypeScript
+- Проксирование API запросов
+
+## Зависимости
+
+Проект использует следующие основные зависимости:
+- **Express** - Веб-фреймворк для серверной части
+- **React** - Библиотека для построения пользовательских интерфейсов
+- **TypeScript** - Язык программирования с типизацией
+- **Tailwind CSS** - Фреймворк для стилей
+- **PostgreSQL** - Реляционная база данных
+- **Socket.IO** - Для реального времени взаимодействия
+- **AWS SDK** - Для работы с облачным хранилищем
+
+## Скрипты
+
+- `npm start` - Запуск сервера
+- `npm run dev` - Запуск в режиме разработки
+- `npm run build` - Сборка проекта
+- `npm test` - Запуск тестов
+- `npm run init-db` - Инициализация базы данных

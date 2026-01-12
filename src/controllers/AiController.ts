@@ -1,6 +1,6 @@
 // src/controllers/AiController.ts
 import { Request, Response } from 'express';
-import { analyzeArtworkImage } from '../ai-ml/models/artworkAnalyzer';
+import artworkAnalyzer from '../ai-ml/models/artworkAnalyzer';
 import { generatePersonalizedTour } from '../ai-ml/services/tourService';
 import { generateArtworkDescription } from '../ai-ml/services/descriptionService';
 import { generateEducationalContent } from '../ai-ml/services/educationalService';
@@ -71,7 +71,13 @@ class AiController {
         return;
       }
 
-      const analysis = await analyzeArtworkImage(artworkId, imageUrl);
+      // Initialize the artwork analyzer if not already done
+      if (!artworkAnalyzer['isTrained']) {
+        await artworkAnalyzer.initialize();
+      }
+
+      // Use the new analyzeArtwork method
+      const analysis = await artworkAnalyzer.analyzeArtwork(imageUrl);
 
       res.json(analysis);
     } catch (error: any) {

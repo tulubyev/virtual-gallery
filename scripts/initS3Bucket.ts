@@ -1,6 +1,6 @@
-// scripts/initS3Bucket.js
-const AWS = require('aws-sdk');
-const s3Config = require('../src/backend/config/s3Config');
+// scripts/initS3Bucket.ts
+import AWS from 'aws-sdk';
+import s3Config from '../src/backend/config/s3Config';
 
 // Настройка AWS SDK для работы с S3-совместимым хранилищем beget
 const s3 = new AWS.S3({
@@ -11,20 +11,20 @@ const s3 = new AWS.S3({
   s3ForcePathStyle: true,
 });
 
-async function createBucketIfNotExists() {
+async function createBucketIfNotExists(): Promise<void> {
   try {
     // Проверяем, существует ли бакет
     await s3.headBucket({ Bucket: s3Config.bucket }).promise();
     console.log(`Бакет ${s3Config.bucket} уже существует`);
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'NotFound') {
       // Создаем бакет, если он не существует
       console.log(`Создание бакета ${s3Config.bucket}...`);
-      
+
       await s3.createBucket({
         Bucket: s3Config.bucket,
       }).promise();
-      
+
       console.log(`Бакет ${s3Config.bucket} успешно создан`);
     } else {
       console.error('Ошибка при проверке существования бакета:', error);

@@ -1,15 +1,27 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import * as path from 'path';
+import { Configuration } from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-module.exports = {
-  entry: './src/frontend/main.js',
+const config: Configuration = {
+  entry: './src/frontend/main.ts', // Changed to .ts extension
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
     clean: true,
   },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx'], // Added TypeScript extensions
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/, // Added rule for TypeScript files
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
@@ -39,10 +51,12 @@ module.exports = {
     open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:5000', // Updated to match backend port
         changeOrigin: true,
       },
     },
   },
   mode: 'development',
 };
+
+export default config;
