@@ -30,3 +30,29 @@ body {
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
 }
+
+/* Smooth transitions for interactive elements */
+* {
+  transition: background-color, border-color, color, fill, stroke 150ms ease-in-out;
+}
+
+/* Scrollbar styling */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary)/0.2) transparent;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Custom highlight color */
+::selection {
+  background-color: hsl(var(--primary)/0.1);
+}
