@@ -1,15 +1,14 @@
 // src/services/GalleryService.ts
+import { Pool } from 'pg';
 import { BaseService } from './BaseService';
-
-export interface Gallery {
-  gallery_id?: string;
-  name: string;
-  description: string;
-  location?: string;
-  opening_hours?: string;
-  image_url?: string;
-  created_at?: Date;
-}
+import {
+  IGalleryService,
+  Gallery,
+  GalleryFilters,
+  CreateGalleryDto,
+  UpdateGalleryDto
+} from '../types/artwork';
+import { ILogger, ICacheable } from '../types/interfaces';
 
 export interface Room {
   room_id?: string;
@@ -20,28 +19,69 @@ export interface Room {
   created_at?: Date;
 }
 
-export class GalleryService extends BaseService<Gallery> {
-  async getAll(): Promise<Gallery[]> {
+export class GalleryService extends BaseService implements IGalleryService {
+  private pool: Pool;
+
+  constructor(
+    pool: Pool,
+    logger: ILogger,
+    cache?: ICacheable
+  ) {
+    super(logger, cache);
+    this.pool = pool;
+  }
+  async getById(id: string): Promise<Gallery | null> {
+    return this.withCache(
+      `gallery:${id}`,
+      async () => {
+        const client = await this.pool.connect();
+        try {
+          const result = await client.query('SELECT * FROM galleries WHERE gallery_id = $1', [id]);
+          return result.rows.length > 0 ? result.rows[0] : null;
+        } finally {
+          client.release();
+        }
+      },
+      3600 // 1 hour
+    );
+  }
+
+  async getAll(filters?: GalleryFilters): Promise<Gallery[]> {
     const client = await this.pool.connect();
     try {
-      const result = await client.query('SELECT * FROM galleries ORDER BY created_at DESC');
+      let query = 'SELECT * FROM galleries';
+      const params: any[] = [];
+      let paramIndex = 1;
+
+      if (filters) {
+        // Add sorting
+        const sortBy = filters.sortBy || 'created_at';
+        const sortOrder = filters.sortOrder || 'DESC';
+        query += ` ORDER BY ${sortBy} ${sortOrder}`;
+
+        // Add pagination
+        if (filters.limit) {
+          query += ` LIMIT $${paramIndex}`;
+          params.push(filters.limit);
+          paramIndex++;
+
+          if (filters.offset) {
+            query += ` OFFSET $${paramIndex}`;
+            params.push(filters.offset);
+          }
+        }
+      } else {
+        query += ' ORDER BY created_at DESC';
+      }
+
+      const result = await client.query(query, params);
       return result.rows;
     } finally {
       client.release();
     }
   }
 
-  async getById(id: string): Promise<Gallery | null> {
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query('SELECT * FROM galleries WHERE gallery_id = $1', [id]);
-      return result.rows.length > 0 ? result.rows[0] : null;
-    } finally {
-      client.release();
-    }
-  }
-
-  async create(galleryData: Partial<Gallery>): Promise<Gallery> {
+  async create(gallery: CreateGalleryDto): Promise<Gallery> {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
@@ -50,97 +90,116 @@ export class GalleryService extends BaseService<Gallery> {
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
         [
-          galleryData.name,
-          galleryData.description,
-          galleryData.location,
-          galleryData.opening_hours,
-          galleryData.image_url
+          gallery.name,
+          gallery.description,
+          gallery.location,
+          gallery.opening_hours,
+          gallery.image_url
         ]
       );
-      return result.rows[0];
+
+      const newGallery = result.rows[0];
+
+      // Invalidate cache
+      if (this.cache) {
+        await this.cache.delete('galleries:all');
+      }
+
+      this.logger.info('Gallery created', { galleryId: newGallery.gallery_id });
+      return newGallery;
     } finally {
       client.release();
     }
   }
 
-  async update(id: string, updateData: Partial<Gallery>): Promise<Gallery | null> {
+  async update(id: string, updates: UpdateGalleryDto): Promise<Gallery> {
     const client = await this.pool.connect();
     try {
-      // Формируем динамический SQL запрос в зависимости от того, какие поля нужно обновить
-      const updateFields = [];
-      const values = [];
-      let paramIndex = 2; // Начинаем с 2, потому что 1 - это id
+      // Build dynamic SQL query based on fields to update
+      const updateFields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 2; // Start with 2 because 1 is the id
 
-      if (updateData.name) {
+      if (updates.name !== undefined) {
         updateFields.push(`name = $${paramIndex}`);
-        values.push(updateData.name);
+        values.push(updates.name);
         paramIndex++;
       }
 
-      if (updateData.description) {
+      if (updates.description !== undefined) {
         updateFields.push(`description = $${paramIndex}`);
-        values.push(updateData.description);
+        values.push(updates.description);
         paramIndex++;
       }
 
-      if (updateData.location !== undefined) {
+      if (updates.location !== undefined) {
         updateFields.push(`location = $${paramIndex}`);
-        values.push(updateData.location);
+        values.push(updates.location);
         paramIndex++;
       }
 
-      if (updateData.opening_hours !== undefined) {
+      if (updates.opening_hours !== undefined) {
         updateFields.push(`opening_hours = $${paramIndex}`);
-        values.push(updateData.opening_hours);
+        values.push(updates.opening_hours);
         paramIndex++;
       }
 
-      if (updateData.image_url !== undefined) {
+      if (updates.image_url !== undefined) {
         updateFields.push(`image_url = $${paramIndex}`);
-        values.push(updateData.image_url);
+        values.push(updates.image_url);
         paramIndex++;
       }
 
-      // Добавляем id в конец значений
+      // Add id to the end of values
       values.push(id);
 
       if (updateFields.length === 0) {
-        // Если нет полей для обновления, просто возвращаем галерею
-        return await this.getById(id);
+        // If no fields to update, just return the gallery
+        const existing = await this.getById(id);
+        if (!existing) {
+          throw new Error(`Gallery with ID ${id} not found`);
+        }
+        return existing;
       }
 
       const query = `UPDATE galleries SET ${updateFields.join(', ')} WHERE gallery_id = $${paramIndex} RETURNING *`;
       const result = await client.query(query, values);
 
-      return result.rows.length > 0 ? result.rows[0] : null;
+      if (result.rows.length === 0) {
+        throw new Error(`Gallery with ID ${id} not found`);
+      }
+
+      const updatedGallery = result.rows[0];
+
+      // Invalidate cache
+      if (this.cache) {
+        await this.cache.delete(`gallery:${id}`);
+        await this.cache.delete('galleries:all');
+      }
+
+      this.logger.info('Gallery updated', { galleryId: updatedGallery.gallery_id });
+      return updatedGallery;
     } finally {
       client.release();
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const client = await this.pool.connect();
     try {
       const result = await client.query('DELETE FROM galleries WHERE gallery_id = $1 RETURNING gallery_id', [id]);
-      return result.rows.length > 0;
-    } finally {
-      client.release();
-    }
-  }
 
-  async getRecommendedArtworks(galleryId: string): Promise<any[]> {
-    const client = await this.pool.connect();
-    try {
-      // В реальной реализации это будет использовать ИИ для рекомендаций
-      // For now, returning some random artworks associated with the gallery
-      const result = await client.query(
-        `SELECT * FROM artworks
-         WHERE gallery_id = $1
-         ORDER BY RANDOM()
-         LIMIT 5`,
-        [galleryId]
-      );
-      return result.rows;
+      if (result.rows.length === 0) {
+        throw new Error(`Gallery with ID ${id} not found`);
+      }
+
+      // Invalidate cache
+      if (this.cache) {
+        await this.cache.delete(`gallery:${id}`);
+        await this.cache.delete('galleries:all');
+      }
+
+      this.logger.info('Gallery deleted', { galleryId: id });
     } finally {
       client.release();
     }
@@ -157,5 +216,15 @@ export class GalleryService extends BaseService<Gallery> {
     } finally {
       client.release();
     }
+  }
+
+  async initialize(): Promise<void> {
+    await super.initialize();
+    this.logger.info('GalleryService initialized');
+  }
+
+  async dispose(): Promise<void> {
+    this.logger.info('GalleryService disposed');
+    await super.dispose();
   }
 }

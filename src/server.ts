@@ -6,6 +6,12 @@ import session from 'express-session';
 import path from 'path';
 import 'dotenv/config';
 
+// Импортируем сервисы и контроллеры
+import { container } from './container';
+import { ControllerFactory } from './controllers';
+import { IArtworkService, IGalleryService, IUserService } from './types/artwork';
+import { ILogger } from './types/interfaces';
+
 // Импортируем маршруты
 import { authRoutes } from './routes/authRoutes';
 import { artworkRoutes } from './routes/artworkRoutes';
@@ -28,6 +34,26 @@ import {
   UserPositionUpdate,
   GalleryChatMessage
 } from './types/socket-events';
+
+// Получаем сервисы из контейнера
+const artworkService = container.get<IArtworkService>('artworkService');
+const galleryService = container.get<IGalleryService>('galleryService');
+const userService = container.get<IUserService>('userService');
+const logger = container.get<ILogger>('logger');
+
+// Создаем фабрику контроллеров
+const controllerFactory = new ControllerFactory(
+  artworkService,
+  galleryService,
+  userService,
+  logger
+);
+
+// Создаем контроллеры
+const artworkController = controllerFactory.createArtworkController();
+const galleryController = controllerFactory.createGalleryController();
+const userController = controllerFactory.createUserController();
+const authController = controllerFactory.createAuthController();
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -56,10 +82,22 @@ app.use(csrfProtection); // Защита от CSRF
 
 console.log('Middleware загружены');
 
+// Инициализация сервисов
+(async () => {
+  try {
+    await artworkService.initialize();
+    await galleryService.initialize();
+    await userService.initialize();
+    console.log('Сервисы инициализированы');
+  } catch (error) {
+    console.error('Ошибка при инициализации сервисов:', error);
+  }
+})();
+
 // Инициализация сервиса рекомендаций
 (async () => {
   try {
-    const { default: aiController } = await import('./controllers/AiController');
+    const aiController = container.get('aiController');
     await aiController.initializeRecommendationService();
   } catch (error) {
     console.error('Ошибка при инициализации сервиса рекомендаций:', error);

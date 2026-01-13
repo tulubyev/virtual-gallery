@@ -1,7 +1,39 @@
-// controllers/index.ts
-export { default as AuthController } from './AuthController';
-export { default as UserController } from './UserController';
-export { default as ArtworkController } from './ArtworkController';
-export { default as GalleryController } from './GalleryController';
-export { IoTController } from './IoTController';
-// Добавьте другие контроллеры по мере их создания
+// src/controllers/index.ts
+import { IArtworkService, IGalleryService, IUserService } from '../types/artwork';
+import { ILogger } from '../types/interfaces';
+import ArtworkController from './ArtworkController';
+import GalleryController from './GalleryController';
+import UserController from './UserController';
+import AuthController from './AuthController';
+
+export interface IControllerFactory {
+  createArtworkController(): ArtworkController;
+  createGalleryController(): GalleryController;
+  createUserController(): UserController;
+  createAuthController(): AuthController;
+}
+
+export class ControllerFactory implements IControllerFactory {
+  constructor(
+    private artworkService: IArtworkService,
+    private galleryService: IGalleryService,
+    private userService: IUserService,
+    private logger: ILogger
+  ) {}
+
+  createArtworkController(): ArtworkController {
+    return new ArtworkController(this.artworkService, this.logger);
+  }
+
+  createGalleryController(): GalleryController {
+    return new GalleryController(this.galleryService, this.logger);
+  }
+
+  createUserController(): UserController {
+    return new UserController(this.userService, this.logger);
+  }
+
+  createAuthController(): AuthController {
+    return new AuthController(this.userService, this.logger);
+  }
+}

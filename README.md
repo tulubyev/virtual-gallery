@@ -1,138 +1,137 @@
-# Virtual Art Gallery
+# Virtual Gallery - Enhanced Version
 
-This is a virtual art gallery with VR support, AI curation, and IoT integration.
+A virtual art gallery with VR support, AI curation, and IoT integration. This project has been enhanced with TypeScript, interfaces, dependency injection, and comprehensive testing.
+
+## Features
+
+- **Virtual Reality Support**: Immersive 3D gallery experience
+- **AI-Powered Curation**: Intelligent artwork recommendations
+- **IoT Integration**: Real-time environmental monitoring
+- **Responsive Design**: Works on all devices
+- **Secure Authentication**: JWT-based user authentication
+- **Admin Panel**: Comprehensive management interface
+
+## Tech Stack
+
+- **Backend**: Node.js, Express, TypeScript
+- **Database**: PostgreSQL
+- **Frontend**: HTML, CSS, JavaScript (with TypeScript enhancements)
+- **AI/ML**: TensorFlow.js, Python integration
+- **IoT**: Raspberry Pi/Arduino integration
+- **VR**: WebXR, Three.js
+
+## Architecture Enhancements
+
+### 1. TypeScript Migration
+- All JavaScript files converted to TypeScript
+- Added comprehensive type definitions
+- Improved code reliability with static type checking
+
+### 2. Service Layer Abstraction
+- Introduced IService interface for all services
+- Created BaseService abstract class with common functionality
+- Implemented dependency injection for better testability
+
+### 3. Dependency Injection
+- Created a container for managing dependencies
+- Controllers now receive services through constructor injection
+- Improved testability with easier mocking capabilities
+
+### 4. Code Quality Tools
+- ESLint for code linting
+- Prettier for code formatting
+- Jest for unit/integration/end-to-end testing
+- SonarQube for code quality analysis
 
 ## Project Structure
 
 ```
 src/
-├── frontend/
-│   ├── assets/
-│   ├── components/
-│   │   ├── ui/              # shadcn/ui components
-│   │   │   ├── alert.tsx
-│   │   │   ├── badge.tsx
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   ├── dropdown-menu.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── label.tsx
-│   │   │   ├── select.tsx
-│   │   │   ├── sheet.tsx
-│   │   │   └── sidebar.tsx
-│   │   ├── Header.tsx       # Updated header component
-│   │   └── Footer.tsx       # Updated footer component
-│   ├── lib/
-│   │   └── utils.ts         # Utility functions
-│   ├── pages/
-│   │   ├── AdminPanel.tsx
-│   │   ├── ArtworkDetailPage.tsx
-│   │   ├── ArtworksPage.tsx
-│   │   ├── CollectionsPage.tsx
-│   │   ├── CuratorPanel.tsx
-│   │   ├── GalleriesListPage.tsx
-│   │   ├── GalleryPage.tsx
-│   │   ├── HomePage.tsx
-│   │   ├── LoginPage.tsx
-│   │   ├── RegisterPage.tsx
-│   │   ├── RoomManagementPage.tsx
-│   │   ├── RoomPage.tsx
-│   │   ├── StaffDashboardPage.tsx
-│   │   ├── StaffPanel.tsx
-│   │   ├── ToursPage.tsx
-│   │   ├── TourGuidePanel.tsx
-│   │   ├── VrGalleryPage.tsx
-│   │   ├── VirtualGalleryPage.tsx
-│   │   └── AuctionParticipantPanel.tsx
-│   ├── services/
-│   ├── styles/
-│   │   ├── globals.css      # Global styles and CSS variables
-│   │   └── main.css         # Main styles for 3D gallery
-│   ├── types/
-│   │   └── index.ts         # Type definitions
-│   ├── App.tsx              # Main application component
-│   ├── index.css            # Main styles
-│   └── main.tsx             # Entry point
-├── backend/
-│   ├── controllers/
-│   ├── models/
-│   └── routes/
-├── database/
-│   ├── schema.sql          # Database schema
-│   ├── initialize.js       # Database initialization script
-│   └── README.md           # Database setup documentation
-├── ai-ml/
-│   ├── models/
-│   ├── data/
-│   └── utils/
-├── iot/
-│   ├── sensors/
-│   └── devices/
-└── docs/
-    ├── api/
-    └── architecture/
+├── controllers/          # Request handlers
+├── services/             # Business logic (now with interfaces)
+├── models/               # Data models
+├── types/                # TypeScript definitions
+├── middleware/           # Express middleware
+├── database/             # Database utilities
+├── ai-ml/                # AI/ML components
+├── iot/                  # IoT device integrations
+├── utils/                # Utility functions
+└── server.ts             # Entry point
 ```
 
-## Setup
+## Getting Started
 
-1. Install dependencies: `npm install`
+### Prerequisites
 
-   Note: If you encounter issues with the installation, make sure you have Node.js and npm installed correctly.
-   If the webxr package causes issues, it has been removed from dependencies as it was causing installation problems.
+- Node.js 16+
+- PostgreSQL
+- Python (for AI/ML components)
 
-2. Install TypeScript globally: `npm install -g typescript ts-node`
+### Installation
 
-3. Set up environment variables in a `.env` file:
-   ```
-   DB_HOST=your_host
-   DB_PORT=5432
-   DB_NAME=virtual_gallery_db
-   DB_USER=your_username
-   DB_PASSWORD=your_password
-   DB_STRING=postgres://your_username:your_password@your_host:5432/virtual_gallery_db
-   JWT_SECRET=your-super-secret-jwt-key
-   ```
-4. Initialize the database: `npm run init-db`
-5. Build the project: `npm run build`
-6. Run the application: `npm start`
-
-## Frontend Development
-
-The frontend now uses shadcn/ui components for a consistent and accessible UI:
-
-1. Install additional dependencies for shadcn/ui:
-   ```bash
-   npm install class-variance-authority clsx tailwind-merge lucide-react tailwindcss-animate
-   npm install @radix-ui/react-slot @radix-ui/react-dialog @radix-ui/react-select @radix-ui/react-dropdown-menu
-   ```
-
-2. The UI components are located in `src/components/ui/`
-3. Components are built with accessibility in mind using Radix UI primitives
-4. Responsive design is implemented using Tailwind CSS utility classes
-
-## Development
-
-For development mode: `npm run dev`
-
-This will start the server in development mode with automatic reloading.
-
-## Database Initialization
-
-To initialize the database with all required tables, run:
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd virtual-gallery
 ```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Set up environment variables
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Initialize the database
+```bash
 npm run init-db
 ```
 
-This will create all necessary tables including:
-- Users and preferences
-- Artworks with metadata
-- Galleries and 3D models
-- Collections (human and AI-generated)
-- User interactions
-- AI models information
-- IoT sensor data
+5. Run the application
+```bash
+npm run dev
+```
 
-## Development
+## Testing
 
-For development mode: `npm run dev`
+The project includes a comprehensive test suite:
+
+- **Unit Tests**: Test individual functions and classes
+- **Integration Tests**: Test interactions between components
+- **End-to-End Tests**: Test complete user workflows
+
+To run tests:
+```bash
+npm test
+```
+
+To run tests with coverage:
+```bash
+npm run test:coverage
+```
+
+## Code Quality
+
+The project follows strict code quality standards:
+
+- All code is linted with ESLint
+- Code formatting is enforced with Prettier
+- Type checking is performed with TypeScript
+- Tests must pass before merging
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with proper TypeScript types
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## License
+
+MIT License - see the LICENSE file for details.

@@ -1,14 +1,17 @@
 // controllers/UserController.ts
 import { Request, Response } from 'express';
-import { UserService } from '../services/UserService';
-import { UpdateUserInput } from '../models';
+import { IUserService, CreateUserDto, UpdateUserDto } from '../types/artwork';
+import { ILogger } from '../types/interfaces';
 
 class UserController {
-  private userService = new UserService();
+  constructor(
+    private userService: IUserService,
+    private logger: ILogger
+  ) {}
 
   async registerUser(req: Request, res: Response): Promise<void> {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password, role } = req.body;
 
       // Валидация входных данных
       if (!username || !email || !password) {
@@ -17,21 +20,18 @@ class UserController {
       }
 
       // Проверка, существует ли пользователь с таким email
-      const existingUser = await this.userService.getByEmail(email);
+      const existingUser = await this.userService.getUserByEmail(email);
       if (existingUser) {
         res.status(409).json({ error: 'User with this email already exists' });
         return;
       }
 
-      // Хеширование пароля
-      const bcrypt = await import('bcrypt');
-      const hashedPassword = await bcrypt.hash(password, 10);
-
       // Создание пользователя
-      const newUser = await this.userService.create({
+      const newUser = await this.userService.createUser({
         username,
         email,
-        password_hash: hashedPassword
+        password,
+        role
       });
 
       // Генерация JWT токена
@@ -42,6 +42,7 @@ class UserController {
         { expiresIn: '24h' }
       );
 
+      this.logger.info('User registered', { userId: newUser.user_id, email: newUser.email });
       res.status(201).json({
         user_id: newUser.user_id,
         username: newUser.username,
@@ -50,6 +51,7 @@ class UserController {
         token
       });
     } catch (error: any) {
+      this.logger.error('Failed to register user', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -64,17 +66,9 @@ class UserController {
         return;
       }
 
-      // Поиск пользователя по email
-      const user = await this.userService.getByEmail(email);
+      // Аутентификация пользователя
+      const user = await this.userService.authenticate(email, password);
       if (!user) {
-        res.status(401).json({ error: 'Invalid email or password' });
-        return;
-      }
-
-      // Проверка пароля
-      const bcrypt = await import('bcrypt');
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
-      if (!isValidPassword) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
       }
@@ -87,6 +81,7 @@ class UserController {
         { expiresIn: '24h' }
       );
 
+      this.logger.info('User logged in', { userId: user.user_id, email: user.email });
       res.json({
         user_id: user.user_id,
         username: user.username,
@@ -95,6 +90,7 @@ class UserController {
         token
       });
     } catch (error: any) {
+      this.logger.error('Failed to login user', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -104,7 +100,7 @@ class UserController {
       // userId должен поступать из JWT токена (через middleware аутентификации)
       const userId = (req as any).userId;
 
-      const user = await this.userService.getById(userId);
+      const user = await this.userService.getUserById(userId);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -112,6 +108,7 @@ class UserController {
 
       res.json(user);
     } catch (error: any) {
+      this.logger.error('Failed to get user profile', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -119,21 +116,19 @@ class UserController {
   async updateUserProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).userId; // From JWT token
-      const updateData = req.body as UpdateUserInput;
+      const updateData = req.body;
 
       // Don't allow updating user ID or password through this endpoint
       if ((updateData as any).password) {
         delete (updateData as any).password;
       }
 
-      const updatedUser = await this.userService.update(userId, updateData);
-      if (!updatedUser) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
+      const updatedUser = await this.userService.updateUser(userId, updateData);
 
+      this.logger.info('User profile updated', { userId: updatedUser.user_id });
       res.json(updatedUser);
     } catch (error: any) {
+      this.logger.error(`Failed to update user with id ${userId}`, error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -142,7 +137,7 @@ class UserController {
     try {
       const userId = (req as any).userId; // From JWT token
 
-      const user = await this.userService.getById(userId);
+      const user = await this.userService.getUserById(userId);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
@@ -150,6 +145,7 @@ class UserController {
 
       res.json({ preferences: user.preferences || {} });
     } catch (error: any) {
+      this.logger.error(`Failed to get preferences for user with id ${userId}`, error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -159,65 +155,12 @@ class UserController {
       const userId = (req as any).userId; // From JWT token
       const preferences = req.body;
 
-      const updatedUser = await this.userService.update(userId, { preferences });
-      if (!updatedUser) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
+      const updatedUser = await this.userService.updateUser(userId, { preferences });
 
+      this.logger.info('User preferences updated', { userId: updatedUser.user_id });
       res.json({ preferences: updatedUser.preferences });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async getUserFavorites(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).userId; // From JWT token
-
-      // В реальной реализации это будет извлекать избранные произведения пользователя
-      // For now, returning empty array
-      const favorites = await this.userService.getFavorites(userId);
-      res.json(favorites || []);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async addFavorite(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).userId; // From JWT token
-      const { artworkId } = req.params;
-
-      // В реальной реализации это будет добавлять произведение в избранное
-      const result = await this.userService.addFavorite(userId, artworkId);
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async removeFavorite(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).userId; // From JWT token
-      const { artworkId } = req.params;
-
-      // В реальной реализации это будет удалять произведение из избранного
-      const result = await this.userService.removeFavorite(userId, artworkId);
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async getUserHistory(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).userId; // From JWT token
-
-      // В реальной реализации это будет извлекать историю взаимодействий пользователя
-      const history = await this.userService.getHistory(userId);
-      res.json(history || []);
-    } catch (error: any) {
+      this.logger.error(`Failed to update preferences for user with id ${userId}`, error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -227,33 +170,7 @@ class UserController {
       const users = await this.userService.getAll();
       res.json(users);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async getUsersByRole(req: Request, res: Response): Promise<void> {
-    try {
-      const { role } = req.params;
-      const users = await this.userService.getUsersByRole(role);
-      res.json(users);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async updateUserRole(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId } = req.params;
-      const { role } = req.body;
-
-      const updatedUser = await this.userService.updateRole(userId, role);
-      if (!updatedUser) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
-
-      res.json(updatedUser);
-    } catch (error: any) {
+      this.logger.error('Failed to get all users', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -261,27 +178,15 @@ class UserController {
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
-      const deleted = await this.userService.delete(userId);
+      await this.userService.deleteUser(userId);
 
-      if (!deleted) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
-
+      this.logger.info('User deleted', { userId });
       res.json({ message: 'User deleted successfully' });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async getUserStats(req: Request, res: Response): Promise<void> {
-    try {
-      const stats = await this.userService.getStats();
-      res.json(stats);
-    } catch (error: any) {
+      this.logger.error(`Failed to delete user with id ${userId}`, error);
       res.status(500).json({ error: error.message });
     }
   }
 }
 
-export default new UserController();
+export default UserController;

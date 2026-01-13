@@ -2,15 +2,18 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { UserService } from '../services/UserService';
-import { CreateUserInput } from '../models';
+import { IUserService, CreateUserDto } from '../types/artwork';
+import { ILogger } from '../types/interfaces';
 
 class AuthController {
-  private userService = new UserService();
+  constructor(
+    private userService: IUserService,
+    private logger: ILogger
+  ) {}
 
   async register(req: Request, res: Response): Promise<void> {
     try {
-      const { username, email, password } = req.body as CreateUserInput;
+      const { username, email, password, role } = req.body;
 
       // Валидация входных данных
       if (!username || !email || !password) {
@@ -19,20 +22,18 @@ class AuthController {
       }
 
       // Проверка, существует ли пользователь с таким email
-      const existingUser = await this.userService.getByEmail(email);
+      const existingUser = await this.userService.getUserByEmail(email);
       if (existingUser) {
         res.status(409).json({ error: 'User with this email already exists' });
         return;
       }
 
-      // Хеширование пароля
-      const hashedPassword = await bcrypt.hash(password, 10);
-
       // Создание пользователя
-      const newUser = await this.userService.create({
+      const newUser = await this.userService.createUser({
         username,
         email,
-        password_hash: hashedPassword
+        password,
+        role
       });
 
       // Генерация JWT токена
@@ -42,6 +43,7 @@ class AuthController {
         { expiresIn: '24h' }
       );
 
+      this.logger.info('User registered', { userId: newUser.user_id, email: newUser.email });
       res.status(201).json({
         user_id: newUser.user_id,
         username: newUser.username,
@@ -50,6 +52,7 @@ class AuthController {
         token
       });
     } catch (error: any) {
+      this.logger.error('Failed to register user', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -64,16 +67,9 @@ class AuthController {
         return;
       }
 
-      // Поиск пользователя по email
-      const user = await this.userService.getByEmail(email);
+      // Аутентификация пользователя
+      const user = await this.userService.authenticate(email, password);
       if (!user) {
-        res.status(401).json({ error: 'Invalid email or password' });
-        return;
-      }
-
-      // Проверка пароля
-      const isValidPassword = await bcrypt.compare(password, user.password_hash);
-      if (!isValidPassword) {
         res.status(401).json({ error: 'Invalid email or password' });
         return;
       }
@@ -85,6 +81,7 @@ class AuthController {
         { expiresIn: '24h' }
       );
 
+      this.logger.info('User logged in', { userId: user.user_id, email: user.email });
       res.json({
         user_id: user.user_id,
         username: user.username,
@@ -93,6 +90,7 @@ class AuthController {
         token
       });
     } catch (error: any) {
+      this.logger.error('Failed to login user', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -101,7 +99,7 @@ class AuthController {
     try {
       // В реальной реализации это будет обновлять JWT токен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await this.userService.getById(userId);
+      const user = await this.userService.getUserById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -122,6 +120,7 @@ class AuthController {
         token
       });
     } catch (error: any) {
+      this.logger.error('Failed to refresh token', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -129,8 +128,10 @@ class AuthController {
   async logout(req: Request, res: Response): Promise<void> {
     try {
       // В реальной реализации это может инвалидировать токен на сервере
+      this.logger.info('User logged out', { userId: (req as any).userId });
       res.json({ message: 'Logged out successfully' });
     } catch (error: any) {
+      this.logger.error('Failed to logout user', error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -140,13 +141,14 @@ class AuthController {
       // Этот метод будет защищен middleware аутентификации
       // Так что если мы дошли до сюда, токен действителен
       const userId = (req as any).userId; // Предполагается, что userId добавлен в middleware
-      const user = await this.userService.getById(userId);
+      const user = await this.userService.getUserById(userId);
 
       if (!user) {
         res.status(404).json({ error: 'User not found' });
         return;
       }
 
+      this.logger.info('Token verified', { userId: user.user_id });
       res.json({
         valid: true,
         user: {
@@ -157,9 +159,10 @@ class AuthController {
         }
       });
     } catch (error: any) {
+      this.logger.error('Failed to verify token', error);
       res.status(500).json({ error: error.message });
     }
   }
 }
 
-export default new AuthController();
+export default AuthController;

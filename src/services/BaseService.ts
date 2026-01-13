@@ -1,30 +1,39 @@
 // src/services/BaseService.ts
-import { Pool } from 'pg';
+import { IService, ILogger, ICacheable } from '../types/interfaces';
 
-export interface IService<T> {
-  getAll(): Promise<T[]>;
-  getById(id: string): Promise<T | null>;
-  create(item: Partial<T>): Promise<T>;
-  update(id: string, item: Partial<T>): Promise<T | null>;
-  delete(id: string): Promise<boolean>;
-}
+export abstract class BaseService implements IService {
+  protected logger: ILogger;
+  protected cache?: ICacheable;
 
-export abstract class BaseService<T> implements IService<T> {
-  protected pool: Pool;
-
-  constructor() {
-    this.pool = new Pool({
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT || '5432'),
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-    });
+  constructor(logger: ILogger, cache?: ICacheable) {
+    this.logger = logger;
+    this.cache = cache;
   }
 
-  abstract getAll(): Promise<T[]>;
-  abstract getById(id: string): Promise<T | null>;
-  abstract create(item: Partial<T>): Promise<T>;
-  abstract update(id: string, item: Partial<T>): Promise<T | null>;
-  abstract delete(id: string): Promise<boolean>;
+  async initialize(): Promise<void> {
+    this.logger.info(`${this.constructor.name} initialized`);
+  }
+
+  async dispose(): Promise<void> {
+    this.logger.info(`${this.constructor.name} disposed`);
+  }
+
+  protected async withCache<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl?: number
+  ): Promise<T> {
+    if (!this.cache) {
+      return fetcher();
+    }
+
+    const cached = await this.cache.get<T>(key);
+    if (cached !== null) {
+      return cached;
+    }
+
+    const result = await fetcher();
+    await this.cache.set(key, result, ttl);
+    return result;
+  }
 }
