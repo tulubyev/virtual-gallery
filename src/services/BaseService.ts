@@ -1,5 +1,6 @@
 // src/services/BaseService.ts
-import { IService, ILogger, ICacheable } from '../types/interfaces';
+import { ILogger, ICacheable } from '../types/interfaces';
+import { IService } from '../types/interfaces';
 
 export abstract class BaseService implements IService {
   protected logger: ILogger;

@@ -98,7 +98,7 @@ console.log('Middleware загружены');
 // Инициализация сервиса рекомендаций
 (async () => {
   try {
-    const aiController = container.get<AiController>('aiController');
+    const aiController = container.get('aiController');
     await aiController.initializeRecommendationService();
   } catch (error) {
     console.error('Ошибка при инициализации сервиса рекомендаций:', error);

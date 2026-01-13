@@ -58,7 +58,7 @@ export class Container {
         );
 
       case 'database':
-        return new DatabaseService().pool; // Access the pool property
+        return new DatabaseService().getPool(); // Access the pool property
 
       case 'logger':
         return this.createLogger();
@@ -67,7 +67,9 @@ export class Container {
         return this.createCache();
 
       case 'aiController':
-        return new AiController();
+        // Import the default instance of AiController
+        const aiControllerModule = require('./controllers/AiController');
+        return aiControllerModule.default;
 
       default:
         throw new Error(`Unknown service: ${serviceName}`);

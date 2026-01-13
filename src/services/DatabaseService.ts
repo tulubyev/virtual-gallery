@@ -41,6 +41,10 @@ export class DatabaseService {
   public async end(): Promise<void> {
     await this.pool.end();
   }
+
+  public getPool(): Pool {
+    return this.pool;
+  }
 }
 
 export default new DatabaseService();

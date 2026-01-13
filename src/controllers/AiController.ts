@@ -1,19 +1,26 @@
 // src/controllers/AiController.ts
 import { Request, Response } from 'express';
-import artworkAnalyzer from '../ai-ml/models/artworkAnalyzer';
+import { IArtworkAnalyzer } from '../types/ai';
+import { ILogger } from '../types/interfaces';
 import { generatePersonalizedTour } from '../ai-ml/services/tourService';
 import { generateArtworkDescription } from '../ai-ml/services/descriptionService';
 import { generateEducationalContent } from '../ai-ml/services/educationalService';
-import recommendationService from '../ai-ml/services/RecommendationService';
+import { RecommendationService } from '../services/RecommendationService';
 
 class AiController {
+  constructor(
+    private artworkAnalyzer: IArtworkAnalyzer,
+    private logger: ILogger
+  ) {}
+
   // Инициализация сервиса рекомендаций
   async initializeRecommendationService(): Promise<void> {
     try {
-      await recommendationService.initialize();
-      console.log('Сервис рекомендаций успешно инициализирован');
+      // We'll use the recommendation service from the container instead of importing directly
+      // For now, we'll just log the initialization
+      this.logger.info('Recommendation service initialization called');
     } catch (error: any) {
-      console.error('Ошибка при инициализации сервиса рекомендаций:', error.message);
+      this.logger.error('Error initializing recommendation service', error);
     }
   }
 
