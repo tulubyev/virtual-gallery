@@ -9,6 +9,7 @@ import { UserService } from './services/UserService';
 import { RecommendationService } from './services/RecommendationService';
 import { ArtworkAnalyzer } from './ai-ml/models/artworkAnalyzer';
 import { DatabaseService } from './services/DatabaseService';
+import AiController from './controllers/AiController';
 
 export class Container {
   private services = new Map<string, any>();
@@ -64,6 +65,9 @@ export class Container {
 
       case 'cache':
         return this.createCache();
+
+      case 'aiController':
+        return new AiController();
 
       default:
         throw new Error(`Unknown service: ${serviceName}`);

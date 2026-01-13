@@ -11,6 +11,7 @@ import { container } from './container';
 import { ControllerFactory } from './controllers';
 import { IArtworkService, IGalleryService, IUserService } from './types/artwork';
 import { ILogger } from './types/interfaces';
+import AiController from './controllers/AiController';
 
 // Импортируем маршруты
 import { authRoutes } from './routes/authRoutes';
@@ -97,7 +98,7 @@ console.log('Middleware загружены');
 // Инициализация сервиса рекомендаций
 (async () => {
   try {
-    const aiController = container.get('aiController');
+    const aiController = container.get<AiController>('aiController');
     await aiController.initializeRecommendationService();
   } catch (error) {
     console.error('Ошибка при инициализации сервиса рекомендаций:', error);
