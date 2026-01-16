@@ -12,6 +12,35 @@ CREATE TABLE users (
     preferences JSONB
 );
 
+-- Galleries table
+CREATE TABLE galleries (
+    gallery_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    location VARCHAR(255), -- Physical location of the gallery
+    opening_hours TEXT, -- Opening hours in JSON format
+    image_url TEXT, -- URL to the gallery's main image
+    three_d_model_path TEXT,
+    layout_algorithm VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Rooms table (spaces within galleries)
+CREATE TABLE rooms (
+    room_id SERIAL PRIMARY KEY,
+    gallery_id INTEGER, -- Will add foreign key constraint after galleries table is created
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    theme VARCHAR(100), -- 'impressionism', 'sculpture', 'renaissance', etc.
+    region VARCHAR(100), -- 'european', 'asian', 'american', etc.
+    author VARCHAR(255), -- Specific author if room is dedicated to one
+    capacity INTEGER DEFAULT 50, -- Max number of visitors
+    tags TEXT[],
+    layout_settings JSONB, -- Room-specific layout settings
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Artworks table
 CREATE TABLE artworks (
     artwork_id SERIAL PRIMARY KEY,
@@ -26,6 +55,8 @@ CREATE TABLE artworks (
     thumbnail_url TEXT,
     location_in_gallery JSONB, -- 3D coordinates {x, y, z, rotation}
     tags TEXT[],
+    gallery_id INTEGER, -- Will add foreign key constraint after galleries table is created
+    room_id INTEGER, -- Will add foreign key constraint after rooms table is created
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -37,37 +68,27 @@ CREATE TABLE tags (
     tag_category VARCHAR(50) -- theme, style, color, subject, etc.
 );
 
--- Junction table for artworks and tags
-CREATE TABLE artwork_tags (
-    artwork_id INTEGER REFERENCES artworks(artwork_id) ON DELETE CASCADE,
-    tag_id INTEGER REFERENCES tags(tag_id) ON DELETE CASCADE,
-    PRIMARY KEY (artwork_id, tag_id)
-);
-
--- Galleries table
-CREATE TABLE galleries (
-    gallery_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    three_d_model_path TEXT,
-    layout_algorithm VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Collections table
 CREATE TABLE collections (
     collection_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    curator_id INTEGER REFERENCES users(user_id),
+    curator_id INTEGER, -- Will add foreign key constraint after users table is created
     is_ai_generated BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Junction table for artworks and tags
+CREATE TABLE artwork_tags (
+    artwork_id INTEGER, -- Will add foreign key constraint after artworks table is created
+    tag_id INTEGER, -- Will add foreign key constraint after tags table is created
+    PRIMARY KEY (artwork_id, tag_id)
+);
+
 -- Junction table for collections and artworks
 CREATE TABLE collection_artworks (
-    collection_id INTEGER REFERENCES collections(collection_id) ON DELETE CASCADE,
-    artwork_id INTEGER REFERENCES artworks(artwork_id) ON DELETE CASCADE,
+    collection_id INTEGER, -- Will add foreign key constraint after collections table is created
+    artwork_id INTEGER, -- Will add foreign key constraint after artworks table is created
     display_order INTEGER,
     PRIMARY KEY (collection_id, artwork_id)
 );
@@ -75,8 +96,8 @@ CREATE TABLE collection_artworks (
 -- User interactions table
 CREATE TABLE user_interactions (
     interaction_id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(user_id),
-    artwork_id INTEGER REFERENCES artworks(artwork_id),
+    user_id INTEGER, -- Will add foreign key constraint after users table is created
+    artwork_id INTEGER, -- Will add foreign key constraint after artworks table is created
     interaction_type VARCHAR(50), -- view, zoom, like, share
     duration INTEGER, -- in seconds
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -107,11 +128,24 @@ CREATE TABLE iot_sensor_data (
     sensor_data_id SERIAL PRIMARY KEY,
     sensor_id VARCHAR(100) NOT NULL, -- ID of the specific sensor
     sensor_type VARCHAR(50) NOT NULL, -- e.g., 'audio', 'motion', 'proximity', 'environment'
-    gallery_id INTEGER REFERENCES galleries(gallery_id),
+    gallery_id INTEGER, -- Will add foreign key constraint after galleries table is created
     room_id INTEGER, -- ID of the room where sensor is located
     data_payload JSONB, -- Sensor-specific data in JSON format
     recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Now add the foreign key constraints
+ALTER TABLE rooms ADD CONSTRAINT fk_rooms_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(gallery_id) ON DELETE CASCADE;
+ALTER TABLE artworks ADD CONSTRAINT fk_artworks_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(gallery_id);
+ALTER TABLE artworks ADD CONSTRAINT fk_artworks_room FOREIGN KEY (room_id) REFERENCES rooms(room_id);
+ALTER TABLE collections ADD CONSTRAINT fk_collections_user FOREIGN KEY (curator_id) REFERENCES users(user_id);
+ALTER TABLE artwork_tags ADD CONSTRAINT fk_artwork_tags_artwork FOREIGN KEY (artwork_id) REFERENCES artworks(artwork_id) ON DELETE CASCADE;
+ALTER TABLE artwork_tags ADD CONSTRAINT fk_artwork_tags_tag FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE;
+ALTER TABLE collection_artworks ADD CONSTRAINT fk_collection_artworks_collection FOREIGN KEY (collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE;
+ALTER TABLE collection_artworks ADD CONSTRAINT fk_collection_artworks_artwork FOREIGN KEY (artwork_id) REFERENCES artworks(artwork_id) ON DELETE CASCADE;
+ALTER TABLE user_interactions ADD CONSTRAINT fk_user_interactions_user FOREIGN KEY (user_id) REFERENCES users(user_id);
+ALTER TABLE user_interactions ADD CONSTRAINT fk_user_interactions_artwork FOREIGN KEY (artwork_id) REFERENCES artworks(artwork_id);
+ALTER TABLE iot_sensor_data ADD CONSTRAINT fk_iot_sensor_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(gallery_id);
 
 -- Indexes for performance
 CREATE INDEX idx_artworks_tags ON artworks USING GIN(tags);
@@ -124,3 +158,4 @@ CREATE INDEX idx_artwork_tags_tag ON artwork_tags(tag_id);
 CREATE INDEX idx_iot_sensor_data_gallery ON iot_sensor_data(gallery_id);
 CREATE INDEX idx_iot_sensor_data_recorded_at ON iot_sensor_data(recorded_at);
 CREATE INDEX idx_iot_sensor_data_type ON iot_sensor_data(sensor_type);
+CREATE INDEX idx_rooms_gallery ON rooms(gallery_id);

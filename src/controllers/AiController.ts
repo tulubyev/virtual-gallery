@@ -8,10 +8,15 @@ import { generateEducationalContent } from '../ai-ml/services/educationalService
 import { RecommendationService } from '../services/RecommendationService';
 
 class AiController {
+  private recommendationService: RecommendationService;
+
   constructor(
     private artworkAnalyzer: IArtworkAnalyzer,
-    private logger: ILogger
-  ) {}
+    private logger: ILogger,
+    recommendationService: RecommendationService
+  ) {
+    this.recommendationService = recommendationService;
+  }
 
   // Инициализация сервиса рекомендаций
   async initializeRecommendationService(): Promise<void> {
@@ -31,7 +36,7 @@ class AiController {
       const count = parseInt(req.query.count as string) || 5;
 
       // Используем сервис рекомендаций для генерации персонализированных рекомендаций
-      const recommendations = await recommendationService.getRecommendations(userId, count);
+      const recommendations = await this.recommendationService.getRecommendations(userId, count);
 
       res.json(recommendations);
     } catch (error: any) {
@@ -79,12 +84,12 @@ class AiController {
       }
 
       // Initialize the artwork analyzer if not already done
-      if (!artworkAnalyzer['isTrained']) {
-        await artworkAnalyzer.initialize();
+      if (!this.artworkAnalyzer.isTrained) {
+        await this.artworkAnalyzer.initialize();
       }
 
       // Use the new analyzeArtwork method
-      const analysis = await artworkAnalyzer.analyzeArtwork(imageUrl);
+      const analysis = await this.artworkAnalyzer.analyzeArtwork(imageUrl);
 
       res.json(analysis);
     } catch (error: any) {
@@ -99,7 +104,7 @@ class AiController {
       const count = parseInt(req.query.count as string) || 5;
 
       // Используем сервис рекомендаций для поиска похожих экспонатов
-      const similarArtworks = await recommendationService.getSimilarArtworks(artworkId, count);
+      const similarArtworks = await this.recommendationService.getSimilarArtworks(artworkId, count);
 
       res.json(similarArtworks);
     } catch (error: any) {
@@ -174,6 +179,56 @@ class AiController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  // Generate personalized tour
+  async generatePersonalizedTour(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).userId; // Предполагается, что ID пользователя добавлен в middleware аутентификации
+      const duration = parseInt(req.body.duration) || 60; // в минутах
+      const preferredThemes = req.body.themes || [];
+
+      // В реальной реализации это будет использовать ИИ для создания персонализированного
+      // маршрута по галерее на основе предпочтений пользователя
+
+      // Возвращаем заглушку
+      const tour = {
+        tour_id: 1,
+        name: 'Персонализированный тур',
+        description: 'Тур, созданный специально для вас',
+        estimated_duration: duration,
+        themes: preferredThemes,
+        artwork_sequence: [1, 5, 12, 8, 15], // IDs экспонатов в маршруте
+        created_at: new Date()
+      };
+
+      res.json(tour);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Generate artwork description
+  async generateArtworkDescription(req: Request, res: Response): Promise<void> {
+    try {
+      const { artworkId } = req.params;
+      const { language } = req.body;
+
+      // В реальной реализации это будет использовать ИИ для генерации
+      // описания экспоната на основе его визуальных характеристик и метаданных
+
+      // Возвращаем заглушку
+      const description = {
+        artwork_id: artworkId,
+        description: 'Это описание было сгенерировано с использованием ИИ',
+        language: language || 'ru',
+        generated_at: new Date()
+      };
+
+      res.json(description);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
-export default new AiController();
+export { AiController };

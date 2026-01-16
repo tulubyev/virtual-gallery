@@ -1,11 +1,9 @@
 // routes/index.ts
-export { authRoutes } from './authRoutes';
-export { userRoutes } from './userRoutes';
-export { artworkRoutes } from './artworkRoutes';
-export { galleryRoutes } from './galleryRoutes';
-export { aiRoutes } from './aiRoutes';
-export { userManagementRoutes } from './userManagementRoutes';
-export { iotRoutes } from './iotRoutes';
-// artworkUploadRoutes экспортируется по умолчанию
-import artworkUploadRoutes from './artworkUploadRoutes';
-export { artworkUploadRoutes };
+export { createAuthRoutes } from './authRoutes';
+export { createUserRoutes } from './userRoutes';
+export { createArtworkRoutes } from './artworkRoutes';
+export { createGalleryRoutes } from './galleryRoutes';
+export { createAiRoutes } from './aiRoutes';
+export { createUserManagementRoutes } from './userManagementRoutes';
+export { createIotRoutes } from './iotRoutes';
+export { createArtworkUploadRoutes } from './artworkUploadRoutes';

@@ -1,23 +1,25 @@
 // routes/userManagementRoutes.ts
 import { Router } from 'express';
 import { requireAdmin } from '../middleware/auth';
-import userController from '../controllers/UserController';
+import { UserController } from '../controllers/UserController';
 
-const router = Router();
+export function createUserManagementRoutes(controller: UserController) {
+  const router = Router();
 
-// Get all users (admin only)
-router.get('/', requireAdmin, userController.getAllUsers);
+  // Get all users (admin only)
+  router.get('/', requireAdmin, (req, res) => controller.getAllUsers(req, res));
 
-// Get users by role (admin only)
-router.get('/role/:role', requireAdmin, userController.getUsersByRole);
+  // Get users by role (admin only)
+  router.get('/role/:role', requireAdmin, (req, res) => controller.getUsersByRole(req, res));
 
-// Update user role (admin only)
-router.put('/:userId/role', requireAdmin, userController.updateUserRole);
+  // Update user role (admin only)
+  router.put('/:userId/role', requireAdmin, (req, res) => controller.updateUserRole(req, res));
 
-// Delete user (admin only)
-router.delete('/:userId', requireAdmin, userController.deleteUser);
+  // Delete user (admin only)
+  router.delete('/:userId', requireAdmin, (req, res) => controller.deleteUser(req, res));
 
-// Get user statistics (admin only)
-router.get('/stats', requireAdmin, userController.getUserStats);
+  // Get user statistics (admin only)
+  router.get('/stats', requireAdmin, (req, res) => controller.getUserStats(req, res));
 
-export { router as userManagementRoutes };
+  return router;
+}

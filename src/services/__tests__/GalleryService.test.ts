@@ -1,13 +1,14 @@
 // src/services/__tests__/GalleryService.test.ts
-import { Pool } from 'pg';
+
+import { Pool, PoolClient } from 'pg';
 import { GalleryService } from '../GalleryService';
-import { Gallery } from '../../types/artwork';
+import { Gallery, Room } from '../../types/gallery';
 import { ILogger } from '../../types/interfaces';
 
 // Mock the database pool
 const mockPool = {
   connect: jest.fn(),
-} as unknown as Pool;
+} as unknown as jest.Mocked<Pool>;
 
 // Mock the logger
 const mockLogger: ILogger = {
@@ -36,14 +37,13 @@ describe('GalleryService', () => {
         name: 'Test Gallery',
         description: 'A test gallery',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [mockGallery] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await galleryService.getById('1');
@@ -62,10 +62,9 @@ describe('GalleryService', () => {
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await galleryService.getById('999');
@@ -76,43 +75,69 @@ describe('GalleryService', () => {
     });
   });
 
+  describe('getRooms', () => {
+    it('should return rooms for a gallery', async () => {
+      // Arrange
+      const mockRooms: Room[] = [
+        { room_id: '1', gallery_id: '1', name: 'Main Hall', description: 'Main exhibition hall' },
+        { room_id: '2', gallery_id: '1', name: 'Contemporary Wing', description: 'Modern art wing' }
+      ];
+
+      const mockClient = {
+        query: jest.fn().mockResolvedValue({ rows: mockRooms }),
+        release: jest.fn(),
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
+
+      // Act
+      const result = await galleryService.getRooms('1');
+
+      // Assert
+      expect(result).toEqual(mockRooms);
+      expect(mockClient.query).toHaveBeenCalledWith(
+        'SELECT * FROM rooms WHERE gallery_id = $1 ORDER BY created_at DESC',
+        ['1']
+      );
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+  });
+
   describe('create', () => {
     it('should create a new gallery', async () => {
       // Arrange
-      const newGalleryData = {
+      const galleryData = {
         name: 'New Gallery',
-        description: 'A new gallery',
-        location: 'New York',
+        description: 'A new test gallery',
+        location: 'Test Location',
         opening_hours: '9AM-5PM',
         image_url: 'http://example.com/image.jpg'
       };
-      
+
       const createdGallery: Gallery = {
         gallery_id: '2',
-        ...newGalleryData,
+        ...galleryData,
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [createdGallery] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
-      const result = await galleryService.create(newGalleryData);
+      const result = await galleryService.create(galleryData);
 
       // Assert
       expect(result).toEqual(createdGallery);
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO galleries'),
         expect.arrayContaining([
-          newGalleryData.name,
-          newGalleryData.description,
-          newGalleryData.location,
-          newGalleryData.opening_hours,
-          newGalleryData.image_url
+          galleryData.name,
+          galleryData.description,
+          galleryData.opening_hours,
+          galleryData.image_url
         ])
       );
       expect(mockLogger.info).toHaveBeenCalledWith('Gallery created', { galleryId: '2' });
@@ -127,20 +152,19 @@ describe('GalleryService', () => {
         name: 'Updated Gallery Name',
         description: 'Updated Description'
       };
-      
+
       const updatedGallery: Gallery = {
         gallery_id: '1',
         name: 'Updated Gallery Name',
         description: 'Updated Description',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [updatedGallery] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await galleryService.update('1', updateData);
@@ -162,10 +186,9 @@ describe('GalleryService', () => {
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [{ gallery_id: '1' }] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       await galleryService.delete('1');
@@ -184,42 +207,12 @@ describe('GalleryService', () => {
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+      } as unknown as jest.Mocked<PoolClient>;
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act & Assert
       await expect(galleryService.delete('999')).rejects.toThrow('Gallery with ID 999 not found');
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-  });
-
-  describe('getRooms', () => {
-    it('should return rooms for a gallery', async () => {
-      // Arrange
-      const mockRooms = [
-        { room_id: '1', gallery_id: '1', name: 'Main Hall' },
-        { room_id: '2', gallery_id: '1', name: 'Contemporary Wing' }
-      ];
-      
-      const mockClient = {
-        query: jest.fn().mockResolvedValue({ rows: mockRooms }),
-        release: jest.fn(),
-      };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
-
-      // Act
-      const result = await galleryService.getRooms('1');
-
-      // Assert
-      expect(result).toEqual(mockRooms);
-      expect(mockClient.query).toHaveBeenCalledWith(
-        'SELECT * FROM rooms WHERE gallery_id = $1 ORDER BY created_at DESC',
-        ['1']
-      );
       expect(mockClient.release).toHaveBeenCalled();
     });
   });

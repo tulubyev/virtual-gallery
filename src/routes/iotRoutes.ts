@@ -1,38 +1,24 @@
 // src/routes/iotRoutes.ts
 import { Router } from 'express';
 import { IoTController } from '../controllers/IoTController';
-import { authenticateToken } from '../middleware/auth';
 
-const router = Router();
+export function createIotRoutes(controller: IoTController) {
+  const router = Router();
 
-// Register a new IoT device
-router.post('/devices/register', authenticateToken, IoTController.registerDevice);
+  // Get IoT device status
+  router.get('/devices/status', (req, res) => controller.getDeviceStatus(req, res));
 
-// Connect an IoT device
-router.post('/devices/:deviceId/connect', authenticateToken, IoTController.connectDevice);
+  // Send command to IoT device
+  router.post('/devices/:deviceId/command', (req, res) => controller.sendDeviceCommand(req, res));
 
-// Disconnect an IoT device
-router.post('/devices/:deviceId/disconnect', authenticateToken, IoTController.disconnectDevice);
+  // Get sensor data
+  router.get('/sensors/data', (req, res) => controller.getSensorData(req, res));
 
-// Handle incoming data from an IoT device
-router.post('/devices/:deviceId/data', authenticateToken, IoTController.handleDeviceData);
+  // Update device configuration
+  router.put('/devices/:deviceId/config', (req, res) => controller.updateDeviceConfig(req, res));
 
-// Send a command to an IoT device
-router.post('/devices/:deviceId/command', authenticateToken, IoTController.sendCommand);
+  // Get device logs
+  router.get('/devices/:deviceId/logs', (req, res) => controller.getDeviceLogs(req, res));
 
-// Get status of all IoT devices
-router.get('/devices/status', authenticateToken, IoTController.getDevicesStatus);
-
-// Get status of a specific device
-router.get('/devices/:deviceId/status', authenticateToken, IoTController.getDeviceStatus);
-
-// Get aggregated feedback from IoT sensors
-router.get('/feedback/:galleryId', authenticateToken, IoTController.getAggregatedFeedback);
-
-// Simulate a device heartbeat
-router.post('/devices/:deviceId/heartbeat', authenticateToken, IoTController.simulateHeartbeat);
-
-// Initialize the IoT system
-router.post('/initialize', authenticateToken, IoTController.initializeIoTSystem);
-
-export default router;
+  return router;
+}

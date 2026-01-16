@@ -2,7 +2,9 @@
 import request from 'supertest';
 import { app } from '../server'; // Assuming we have an exported app from server.ts
 import { container } from '../container';
-import { IArtworkService, IGalleryService, IUserService } from '../types/artwork';
+import { IArtworkService } from '../types/artwork';
+import { IGalleryService } from '../types/gallery';
+import { IUserService } from '../types/user';
 
 describe('Integration Tests', () => {
   let artworkService: IArtworkService;
@@ -15,18 +17,21 @@ describe('Integration Tests', () => {
     userService = container.get<IUserService>('userService');
   });
 
+  // Unique identifiers for test data to avoid conflicts
+  const testId = Date.now(); // Use timestamp to ensure uniqueness
+
   describe('Artwork API Integration', () => {
     it('should create and retrieve an artwork', async () => {
       // First, create a gallery to associate with the artwork
       const gallery = await galleryService.create({
-        name: 'Test Gallery',
+        name: `Test Gallery ${testId}`,
         description: 'A gallery for testing',
       });
 
       // Create an artwork
       const newArtwork = {
-        title: 'Test Artwork',
-        artist_name: 'Test Artist',
+        title: `Test Artwork ${testId}`,
+        artist_name: `Test Artist ${testId}`,
         tags: ['test', 'integration'],
         gallery_id: gallery.gallery_id,
       };
@@ -37,8 +42,8 @@ describe('Integration Tests', () => {
       const retrievedArtwork = await artworkService.getById(createdArtwork.artwork_id!);
 
       expect(retrievedArtwork).toBeDefined();
-      expect(retrievedArtwork?.title).toBe('Test Artwork');
-      expect(retrievedArtwork?.artist_name).toBe('Test Artist');
+      expect(retrievedArtwork?.title).toBe(`Test Artwork ${testId}`);
+      expect(retrievedArtwork?.artist_name).toBe(`Test Artist ${testId}`);
       expect(retrievedArtwork?.gallery_id).toBe(gallery.gallery_id);
     });
 
@@ -51,7 +56,7 @@ describe('Integration Tests', () => {
   describe('Gallery API Integration', () => {
     it('should create and retrieve a gallery', async () => {
       const newGallery = {
-        name: 'Integration Test Gallery',
+        name: `Integration Test Gallery ${testId}`,
         description: 'A gallery created for integration testing',
       };
 
@@ -60,7 +65,7 @@ describe('Integration Tests', () => {
       const retrievedGallery = await galleryService.getById(createdGallery.gallery_id!);
 
       expect(retrievedGallery).toBeDefined();
-      expect(retrievedGallery?.name).toBe('Integration Test Gallery');
+      expect(retrievedGallery?.name).toBe(`Integration Test Gallery ${testId}`);
       expect(retrievedGallery?.description).toBe('A gallery created for integration testing');
     });
   });
@@ -68,8 +73,8 @@ describe('Integration Tests', () => {
   describe('User API Integration', () => {
     it('should create and retrieve a user', async () => {
       const newUser = {
-        username: 'integration_test_user',
-        email: 'integration_test@example.com',
+        username: `integration_test_user_${testId}`,
+        email: `integration_test_${testId}@example.com`,
         password: 'secure_password',
         role: 'user',
       };
@@ -79,8 +84,8 @@ describe('Integration Tests', () => {
       const retrievedUser = await userService.getUserById(createdUser.user_id!);
 
       expect(retrievedUser).toBeDefined();
-      expect(retrievedUser?.username).toBe('integration_test_user');
-      expect(retrievedUser?.email).toBe('integration_test@example.com');
+      expect(retrievedUser?.username).toBe(`integration_test_user_${testId}`);
+      expect(retrievedUser?.email).toBe(`integration_test_${testId}@example.com`);
       expect(retrievedUser?.role).toBe('user');
     });
   });

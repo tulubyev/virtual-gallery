@@ -34,7 +34,7 @@ export const generateToken = (user: User): string => {
 
 // Миддлвар для аутентификации
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
+  const authHeader = (req as any).headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {

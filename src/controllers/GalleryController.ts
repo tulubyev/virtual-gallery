@@ -1,6 +1,6 @@
 // src/controllers/GalleryController.ts
 import { Request, Response } from 'express';
-import { IGalleryService } from '../types/artwork';
+import { IGalleryService } from '../types/gallery';
 import { ILogger } from '../types/interfaces';
 
 class GalleryController {
@@ -20,8 +20,8 @@ class GalleryController {
   }
 
   async getGalleryById(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       const gallery = await this.galleryService.getById(id);
 
       if (!gallery) {
@@ -37,8 +37,8 @@ class GalleryController {
   }
 
   async getGalleryRooms(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       const rooms = await this.galleryService.getRooms(id);
       res.json(rooms);
     } catch (error: any) {
@@ -60,8 +60,8 @@ class GalleryController {
   }
 
   async updateGallery(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       const galleryData = req.body;
       const updatedGallery = await this.galleryService.update(id, galleryData);
 
@@ -74,8 +74,8 @@ class GalleryController {
   }
 
   async deleteGallery(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       await this.galleryService.delete(id);
 
       this.logger.info('Gallery deleted', { galleryId: id });
@@ -87,8 +87,8 @@ class GalleryController {
   }
 
   async getRecommendedArtworks(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
       // Note: IGalleryService doesn't have getRecommendedArtworks method, so we'll need to use a different approach
       // For now, returning empty array as placeholder
       res.json([]);
@@ -99,4 +99,4 @@ class GalleryController {
   }
 }
 
-export default GalleryController;
+export { GalleryController };

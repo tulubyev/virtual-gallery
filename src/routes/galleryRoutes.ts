@@ -1,29 +1,31 @@
 // routes/galleryRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import galleryController from '../controllers/GalleryController';
+import { GalleryController } from '../controllers/GalleryController';
 
-const router = Router();
+export function createGalleryRoutes(controller: GalleryController) {
+  const router = Router();
 
-// Get all galleries
-router.get('/', galleryController.getAllGalleries);
+  // Get all galleries
+  router.get('/', (req, res) => controller.getAllGalleries(req, res));
 
-// Get gallery by ID
-router.get('/:id', galleryController.getGalleryById);
+  // Get gallery by ID
+  router.get('/:id', (req, res) => controller.getGalleryById(req, res));
 
-// Get gallery rooms
-router.get('/:id/rooms', galleryController.getGalleryRooms);
+  // Get gallery rooms
+  router.get('/:id/rooms', (req, res) => controller.getGalleryRooms(req, res));
 
-// Create new gallery
-router.post('/', authenticateToken, galleryController.createGallery);
+  // Create new gallery
+  router.post('/', authenticateToken, (req, res) => controller.createGallery(req, res));
 
-// Update gallery
-router.put('/:id', authenticateToken, galleryController.updateGallery);
+  // Update gallery
+  router.put('/:id', authenticateToken, (req, res) => controller.updateGallery(req, res));
 
-// Delete gallery
-router.delete('/:id', authenticateToken, galleryController.deleteGallery);
+  // Delete gallery
+  router.delete('/:id', authenticateToken, (req, res) => controller.deleteGallery(req, res));
 
-// Get recommended artworks for gallery
-router.get('/:id/recommended', authenticateToken, galleryController.getRecommendedArtworks);
+  // Get recommended artworks for gallery
+  router.get('/:id/recommended', authenticateToken, (req, res) => controller.getRecommendedArtworks(req, res));
 
-export { router as galleryRoutes };
+  return router;
+}

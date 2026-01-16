@@ -2,14 +2,19 @@
 import { Artwork } from '../types/index';
 import { ArtworkService } from './ArtworkService';
 import { RecommendationService } from './RecommendationService';
+import { Pool } from 'pg';
+import { ILogger } from '../types/interfaces';
 
 export class AIService {
   private artworkService: ArtworkService;
   private recommendationService: RecommendationService;
 
-  constructor() {
-    this.artworkService = new ArtworkService();
-    this.recommendationService = new RecommendationService();
+  constructor(
+    private pool: Pool,
+    private logger: ILogger
+  ) {
+    this.artworkService = new ArtworkService(this.pool, this.logger);
+    this.recommendationService = new RecommendationService(this.pool, this.logger);
   }
 
   async getRecommendations(userId: string, count: number = 5): Promise<any[]> {
@@ -17,12 +22,9 @@ export class AIService {
     // на основе предпочтений пользователя и истории взаимодействия
 
     // Using the new RecommendationService
-    const recommendations = await this.recommendationService.getRecommendations({
-      userId,
-      count
-    });
+    const recommendations = await this.recommendationService.getRecommendations(userId, count);
 
-    return recommendations.map(artwork => ({
+    return recommendations.map((artwork: Artwork) => ({
       artwork_id: artwork.artwork_id,
       title: artwork.title,
       artist_name: artwork.artist_name,
@@ -36,14 +38,14 @@ export class AIService {
 
     const { theme, style, artist, count = 5 } = criteria;
 
-    // Using the new RecommendationService
-    const collection = await this.recommendationService.getPersonalizedCollection(theme, 'default_user', count);
+    // Using the new RecommendationService - get general recommendations for now
+    const artworks = await this.recommendationService.getRecommendations('ai_curator', count);
 
     return {
-      name: collection.name,
-      description: collection.description,
+      name: `AI Curated: ${theme}`,
+      description: `Collection curated by AI based on ${theme} theme`,
       curator: 'AI Curator',
-      artworks: collection.artworks.map(artwork => ({
+      artworks: artworks.map((artwork: Artwork) => ({
         artwork_id: artwork.artwork_id,
         title: artwork.title
       })),
@@ -78,7 +80,7 @@ export class AIService {
     // Using the new RecommendationService
     const similarArtworks = await this.recommendationService.getSimilarArtworks(artworkId, count);
 
-    return similarArtworks.map(artwork => ({
+    return similarArtworks.map((artwork: Artwork) => ({
       artwork_id: artwork.artwork_id,
       title: artwork.title,
       artist_name: artwork.artist_name,

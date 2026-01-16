@@ -1,10 +1,12 @@
 // src/controllers/index.ts
-import { IArtworkService, IGalleryService, IUserService } from '../types/artwork';
+import { IArtworkService } from '../types/artwork';
+import { IGalleryService } from '../types/gallery';
+import { IUserService } from '../types/user';
 import { ILogger } from '../types/interfaces';
-import ArtworkController from './ArtworkController';
-import GalleryController from './GalleryController';
-import UserController from './UserController';
-import AuthController from './AuthController';
+import { ArtworkController } from './ArtworkController';
+import { GalleryController } from './GalleryController';
+import { UserController } from './UserController';
+import { AuthController } from './AuthController';
 
 export interface IControllerFactory {
   createArtworkController(): ArtworkController;

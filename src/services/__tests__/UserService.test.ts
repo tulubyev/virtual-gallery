@@ -1,13 +1,14 @@
 // src/services/__tests__/UserService.test.ts
-import { Pool } from 'pg';
+
+import { Pool, PoolClient } from 'pg';
 import { UserService } from '../UserService';
-import { User } from '../../types/artwork';
+import { User } from '../../types/user';
 import { ILogger } from '../../types/interfaces';
 
 // Mock the database pool
 const mockPool = {
   connect: jest.fn(),
-} as unknown as Pool;
+} as unknown as jest.Mocked<Pool>;
 
 // Mock the logger
 const mockLogger: ILogger = {
@@ -37,14 +38,13 @@ describe('UserService', () => {
         email: 'test@example.com',
         role: 'user',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [mockUser] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.getUserById('1');
@@ -64,9 +64,8 @@ describe('UserService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.getUserById('999');
@@ -86,14 +85,13 @@ describe('UserService', () => {
         email: 'test@example.com',
         role: 'user',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [mockUser] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.getUserByEmail('test@example.com');
@@ -113,9 +111,8 @@ describe('UserService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.getUserByEmail('nonexistent@example.com');
@@ -135,19 +132,18 @@ describe('UserService', () => {
         password: 'hashed_password',
         role: 'user'
       };
-      
+
       const createdUser: User = {
         user_id: '2',
         ...newUser,
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [createdUser] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.createUser(newUser);
@@ -175,21 +171,20 @@ describe('UserService', () => {
         username: 'updateduser',
         email: 'updated@example.com'
       };
-      
+
       const updatedUser: User = {
         user_id: '1',
         username: 'updateduser',
         email: 'updated@example.com',
         role: 'user',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [updatedUser] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.updateUser('1', updateData);
@@ -212,9 +207,8 @@ describe('UserService', () => {
         query: jest.fn().mockResolvedValue({ rows: [{ user_id: '1' }] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       await userService.deleteUser('1');
@@ -234,9 +228,8 @@ describe('UserService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act & Assert
       await expect(userService.deleteUser('999')).rejects.toThrow('User with ID 999 not found');
@@ -254,14 +247,13 @@ describe('UserService', () => {
         password_hash: 'valid_hash',
         role: 'user',
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [mockUser] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.authenticate('test@example.com', 'valid_password');
@@ -277,9 +269,8 @@ describe('UserService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await userService.authenticate('invalid@example.com', 'wrong_password');

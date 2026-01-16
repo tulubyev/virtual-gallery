@@ -9,19 +9,22 @@ import 'dotenv/config';
 // Импортируем сервисы и контроллеры
 import { container } from './container';
 import { ControllerFactory } from './controllers';
-import { IArtworkService, IGalleryService, IUserService } from './types/artwork';
+import { IArtworkService } from './types/artwork';
+import { IGalleryService } from './types/gallery';
+import { IUserService } from './types/user';
 import { ILogger } from './types/interfaces';
-import AiController from './controllers/AiController';
+import { AiController } from './controllers/AiController';
+import { IoTController } from './controllers/IoTController';
 
 // Импортируем маршруты
-import { authRoutes } from './routes/authRoutes';
-import { artworkRoutes } from './routes/artworkRoutes';
-import { galleryRoutes } from './routes/galleryRoutes';
-import { userRoutes } from './routes/userRoutes';
-import { aiRoutes } from './routes/aiRoutes';
-import { userManagementRoutes } from './routes/userManagementRoutes';
-import artworkUploadRoutes from './routes/artworkUploadRoutes';
-import iotRoutes from './routes/iotRoutes';
+import { createAuthRoutes } from './routes/authRoutes';
+import { createArtworkRoutes } from './routes/artworkRoutes';
+import { createGalleryRoutes } from './routes/galleryRoutes';
+import { createUserRoutes } from './routes/userRoutes';
+import { createAiRoutes } from './routes/aiRoutes';
+import { createUserManagementRoutes } from './routes/userManagementRoutes';
+import { createArtworkUploadRoutes } from './routes/artworkUploadRoutes';
+import { createIotRoutes } from './routes/iotRoutes';
 
 // Импортируем миддлвары безопасности
 import { xssProtection, limiter, sanitizeInput, csrfProtection, generateCsrfToken } from './middleware/security';
@@ -55,6 +58,11 @@ const artworkController = controllerFactory.createArtworkController();
 const galleryController = controllerFactory.createGalleryController();
 const userController = controllerFactory.createUserController();
 const authController = controllerFactory.createAuthController();
+// Create AI controller instance
+const aiController = container.get<AiController>('aiController');
+
+// Create IoT controller instance
+const iotController = new IoTController(logger);
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -98,56 +106,40 @@ console.log('Middleware загружены');
 // Инициализация сервиса рекомендаций
 (async () => {
   try {
-    const aiController = container.get('aiController');
+    const aiController = container.get('aiController') as any;
     await aiController.initializeRecommendationService();
   } catch (error) {
     console.error('Ошибка при инициализации сервиса рекомендаций:', error);
   }
 })();
 
-// Serve static files
-app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '../../src/frontend/dist')));
 
 console.log('Статические файлы настроены');
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/artworks', artworkRoutes);
-app.use('/api/galleries', galleryRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/admin/users', userManagementRoutes);
-app.use('/api/artworks', artworkUploadRoutes);
-app.use('/api/iot', iotRoutes);
+app.use('/api/auth', createAuthRoutes(authController));
+app.use('/api/artworks', createArtworkRoutes(artworkController));
+app.use('/api/galleries', createGalleryRoutes(galleryController));
+app.use('/api/users', createUserRoutes(userController));
+app.use('/api/ai', createAiRoutes(aiController));
+app.use('/api/admin/users', createUserManagementRoutes(userController));
+app.use('/api/artworks/upload', createArtworkUploadRoutes(artworkController));
+app.use('/api/iot', createIotRoutes(iotController));
 
-// Serve frontend
+// Health check endpoint (must be defined before catch-all route)
 app.get('/', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.status(200).json({
+        status: 'ok',
+        message: 'Виртуальная галерея искусств API',
+        timestamp: new Date().toISOString()
+    });
 });
 
-// Serve admin panel
-app.get('/admin', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/admin.html'));
-});
-
-// Serve curator panel
-app.get('/curator', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/curator.html'));
-});
-
-// Serve staff panel
-app.get('/staff', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/staff.html'));
-});
-
-// Serve tour guide panel
-app.get('/tour-guide', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/tour-guide.html'));
-});
-
-// Serve auction participant panel
-app.get('/auction-participant', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../public/auction-participant.html'));
+// Serve React app for all other non-API routes (catch-all should be last)
+app.get(/^(?!\/api).*$/, (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../../src/frontend/dist/index.html'));
 });
 
 console.log('Маршруты загружены');
@@ -227,11 +219,15 @@ io.on('connection', (socket: TypedSocket) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
-    console.log(`Виртуальная галерея доступна по адресу http://localhost:${PORT}`);
-});
-
 export { app, server };
+
+// Запуск сервера только если файл запускается напрямую, а не импортируется
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+
+    server.listen(PORT, () => {
+        console.log(`Сервер запущен на порту ${PORT}`);
+        console.log(`Виртуальная галерея доступна по адресу http://localhost:${PORT}`);
+    });
+}
+

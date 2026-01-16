@@ -1,5 +1,5 @@
 // src/types/artwork.ts
-import { IService } from './interfaces';
+import { IService, ILogger, ICacheable } from './interfaces';
 
 export interface Artwork {
   artwork_id?: string;
@@ -59,94 +59,13 @@ export interface SearchFilters {
 
 export interface IArtworkService extends IService {
   getById(id: string): Promise<Artwork | null>;
-  getByGallery(galleryId: string, filters?: ArtworkFilters): Promise<Artwork[]>;
+  getAll(filters?: ArtworkFilters): Promise<Artwork[]>;
   create(artwork: CreateArtworkDto): Promise<Artwork>;
   update(id: string, updates: UpdateArtworkDto): Promise<Artwork>;
-  delete(id: string): Promise<void>;
+  delete(id: string): Promise<boolean>;
   search(query: string, filters?: SearchFilters): Promise<Artwork[]>;
-}
-
-export interface Gallery {
-  gallery_id?: string;
-  name: string;
-  description: string;
-  location?: string;
-  opening_hours?: string;
-  image_url?: string;
-  created_at?: Date;
-}
-
-export interface GalleryFilters {
-  limit?: number;
-  offset?: number;
-  sortBy?: 'created_at' | 'name';
-  sortOrder?: 'ASC' | 'DESC';
-}
-
-export interface CreateGalleryDto {
-  name: string;
-  description: string;
-  location?: string;
-  opening_hours?: string;
-  image_url?: string;
-}
-
-export interface UpdateGalleryDto {
-  name?: string;
-  description?: string;
-  location?: string;
-  opening_hours?: string;
-  image_url?: string;
-}
-
-export interface IGalleryService extends IService {
-  getById(id: string): Promise<Gallery | null>;
-  getAll(filters?: GalleryFilters): Promise<Gallery[]>;
-  create(gallery: CreateGalleryDto): Promise<Gallery>;
-  update(id: string, updates: UpdateGalleryDto): Promise<Gallery>;
-  delete(id: string): Promise<void>;
-  getRooms(galleryId: string): Promise<Room[]>;
-}
-
-export interface Room {
-  room_id?: string;
-  gallery_id: string;
-  name: string;
-  description?: string;
-  capacity?: number;
-  created_at?: Date;
-}
-
-export interface IUserService extends IService {
-  getUserById(id: string): Promise<User | null>;
-  getUserByEmail(email: string): Promise<User | null>;
-  createUser(userData: CreateUserDto): Promise<User>;
-  updateUser(id: string, updates: UpdateUserDto): Promise<User>;
-  deleteUser(id: string): Promise<void>;
-  authenticate(email: string, password: string): Promise<User | null>;
-}
-
-export interface User {
-  user_id?: string;
-  username: string;
-  email: string;
-  password_hash?: string;
-  role?: string;
-  preferences?: any;
-  created_at?: Date;
-}
-
-export interface CreateUserDto {
-  username: string;
-  email: string;
-  password: string;
-  role?: string;
-}
-
-export interface UpdateUserDto {
-  username?: string;
-  email?: string;
-  password?: string;
-  role?: string;
-  preferences?: any;
+  getRecommended(userId: string, count?: number): Promise<Artwork[]>;
+  getSimilar(artworkId: string, count?: number): Promise<Artwork[]>;
+  filterByTags(tags: string[]): Promise<Artwork[]>;
+  getAnalytics(artworkId: string): Promise<any>;
 }

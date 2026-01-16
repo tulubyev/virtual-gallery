@@ -1,178 +1,127 @@
 // src/controllers/IoTController.ts
-// Controller for IoT-related operations in the virtual art gallery
-
 import { Request, Response } from 'express';
-import deviceManager from '../iot/devices/DeviceManager';
-import sensorProcessor from '../iot/sensors/SensorProcessor';
+import { ILogger } from '../types/interfaces';
 
-export const IoTController = {
-  // Register a new IoT device
-  registerDevice: async (req: Request, res: Response) => {
+class IoTController {
+  constructor(private logger: ILogger) {}
+
+  async getDeviceStatus(req: Request, res: Response): Promise<void> {
     try {
-      const { deviceId, deviceType, galleryId, roomId, config } = req.body;
+      // В реальной реализации это будет получать статус IoT устройств
+      const deviceId = req.query.deviceId as string;
+      
+      // Заглушка для демонстрации
+      const status = {
+        device_id: deviceId || 'all',
+        status: 'online',
+        last_seen: new Date(),
+        battery_level: 85,
+        connectivity: 'wifi',
+        firmware_version: '1.2.3'
+      };
 
-      // Validate required fields
-      if (!deviceId || !deviceType || !galleryId || !roomId) {
-        res.status(400).json({
-          error: 'Missing required fields: deviceId, deviceType, galleryId, roomId'
-        });
-        return;
-      }
-
-      // Register the device
-      const result = deviceManager.registerDevice(deviceId, deviceType, galleryId, roomId, config);
-
-      if (result.success) {
-        res.status(201).json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-    return;
-  },
-
-  // Connect an IoT device
-  connectDevice: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-
-      const result = deviceManager.connectDevice(deviceId);
-
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Disconnect an IoT device
-  disconnectDevice: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-
-      const result = deviceManager.disconnectDevice(deviceId);
-
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Handle incoming data from an IoT device
-  handleDeviceData: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-      const data = req.body;
-
-      const result = await deviceManager.handleDeviceData(deviceId, data);
-
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Send a command to an IoT device
-  sendCommand: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-      const command = req.body;
-
-      const result = deviceManager.sendCommandToDevice(deviceId, command);
-
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Get status of all IoT devices
-  getDevicesStatus: async (req: Request, res: Response) => {
-    try {
-      const status = deviceManager.getDevicesStatus();
       res.json(status);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Get status of a specific device
-  getDeviceStatus: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-      const device = deviceManager.getDevice(deviceId);
-
-      if (!device) {
-        res.status(404).json({ error: 'Device not found' });
-        return;
-      }
-
-      const allStatus = deviceManager.getDevicesStatus();
-      const deviceStatus = allStatus.find((d: any) => d.deviceId === deviceId);
-
-      res.json(deviceStatus);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-    return;
-  },
-
-  // Get aggregated feedback from IoT sensors
-  getAggregatedFeedback: async (req: Request, res: Response) => {
-    try {
-      const { galleryId } = req.params;
-      const timeRangeHours = parseInt(req.query.timeRangeHours as string) || 24;
-
-      // Get aggregated feedback from sensor processor
-      const feedback = await sensorProcessor.getAggregatedFeedback(galleryId, timeRangeHours);
-
-      res.json(feedback);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Simulate a device heartbeat
-  simulateHeartbeat: async (req: Request, res: Response) => {
-    try {
-      const { deviceId } = req.params;
-
-      const result = deviceManager.simulateHeartbeat(deviceId);
-
-      if (result.success) {
-        res.json(result);
-      } else {
-        res.status(400).json(result);
-      }
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  // Initialize the IoT system
-  initializeIoTSystem: async (req: Request, res: Response) => {
-    try {
-      await deviceManager.initialize();
-      res.json({ message: 'IoT system initialized successfully' });
-    } catch (error: any) {
+      this.logger.error('Failed to get device status', error);
       res.status(500).json({ error: error.message });
     }
   }
-};
+
+  async sendDeviceCommand(req: Request, res: Response): Promise<void> {
+    try {
+      const { deviceId } = req.params;
+      const { command, parameters } = req.body;
+
+      // В реальной реализации это будет отправлять команду на IoT устройство
+      // Заглушка для демонстрации
+      const result = {
+        device_id: deviceId,
+        command_sent: command,
+        parameters,
+        success: true,
+        timestamp: new Date()
+      };
+
+      this.logger.info('Device command sent', { deviceId, command });
+      res.json(result);
+    } catch (error: any) {
+      this.logger.error('Failed to send device command', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getSensorData(req: Request, res: Response): Promise<void> {
+    try {
+      // В реальной реализации это будет получать данные с сенсоров
+      const sensorType = req.query.type as string;
+      const roomId = req.query.roomId as string;
+      
+      // Заглушка для демонстрации
+      const sensorData = {
+        sensor_type: sensorType || 'all',
+        room_id: roomId || 'all',
+        timestamp: new Date(),
+        data: {
+          temperature: 22.5,
+          humidity: 45,
+          light_level: 300,
+          motion_detected: false,
+          air_quality: 85
+        }
+      };
+
+      res.json(sensorData);
+    } catch (error: any) {
+      this.logger.error('Failed to get sensor data', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateDeviceConfig(req: Request, res: Response): Promise<void> {
+    try {
+      const { deviceId } = req.params;
+      const config = req.body;
+
+      // В реальной реализации это будет обновлять конфигурацию IoT устройства
+      // Заглушка для демонстрации
+      const result = {
+        device_id: deviceId,
+        config_updated: true,
+        new_config: config,
+        timestamp: new Date()
+      };
+
+      this.logger.info('Device configuration updated', { deviceId });
+      res.json(result);
+    } catch (error: any) {
+      this.logger.error('Failed to update device config', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getDeviceLogs(req: Request, res: Response): Promise<void> {
+    try {
+      const { deviceId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      // В реальной реализации это будет получать логи с IoT устройства
+      // Заглушка для демонстрации
+      const logs = Array.from({ length: limit }, (_, i) => ({
+        log_id: i + offset,
+        device_id: deviceId,
+        timestamp: new Date(Date.now() - (i * 60000)), // Every minute
+        level: i % 10 === 0 ? 'error' : i % 5 === 0 ? 'warning' : 'info',
+        message: `Log message #${i + offset}`,
+        data: {}
+      }));
+
+      res.json(logs);
+    } catch (error: any) {
+      this.logger.error('Failed to get device logs', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+export { IoTController };

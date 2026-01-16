@@ -243,7 +243,7 @@ export class ArtworkService extends BaseService implements IArtworkService {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<boolean> {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
@@ -262,6 +262,7 @@ export class ArtworkService extends BaseService implements IArtworkService {
       }
 
       this.logger.info('Artwork deleted', { artworkId: id });
+      return true;
     } finally {
       client.release();
     }
@@ -308,6 +309,174 @@ export class ArtworkService extends BaseService implements IArtworkService {
         client.release();
       }
     }, 900); // 15 minutes
+  }
+
+  async getAll(filters?: ArtworkFilters): Promise<Artwork[]> {
+    const cacheKey = `artworks:all:${JSON.stringify(filters)}`;
+
+    return this.withCache(cacheKey, async () => {
+      const client = await this.pool.connect();
+      try {
+        let query = 'SELECT * FROM artworks';
+        const params: any[] = [];
+        let paramIndex = 1;
+
+        // Apply filters if provided
+        if (filters) {
+          const conditions: string[] = [];
+
+          if (filters.tags && filters.tags.length > 0) {
+            // Filter by tags (assuming tags are stored as JSONB)
+            conditions.push(`tags @> $${paramIndex}::jsonb`);
+            params.push(JSON.stringify(filters.tags));
+            paramIndex++;
+          }
+
+          if (filters.searchQuery) {
+            // Full-text search on title, description, and artist name
+            conditions.push(`to_tsvector('english', title || ' ' || COALESCE(description, '') || ' ' || COALESCE(artist_name, '')) @@ plainto_tsquery('english', $${paramIndex})`);
+            params.push(filters.searchQuery);
+            paramIndex++;
+          }
+
+          if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(' AND ')}`;
+          }
+        }
+
+        // Apply sorting
+        if (filters?.sortBy) {
+          query += ` ORDER BY ${filters.sortBy} ${filters.sortOrder || 'ASC'}`;
+        } else {
+          query += ' ORDER BY created_at DESC'; // Default sort
+        }
+
+        // Apply pagination
+        if (filters?.limit) {
+          query += ` LIMIT $${paramIndex}`;
+          params.push(filters.limit);
+          paramIndex++;
+
+          if (filters.offset) {
+            query += ` OFFSET $${paramIndex}`;
+            params.push(filters.offset);
+          }
+        }
+
+        const result = await client.query(query, params);
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 300); // Cache for 5 minutes
+  }
+
+  async getRecommended(userId: string, count: number = 5): Promise<Artwork[]> {
+    const cacheKey = `recommended:artworks:user:${userId}:count:${count}`;
+
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would use AI/ML models to generate recommendations
+      // based on user preferences, history, and artwork characteristics
+
+      // For demonstration purposes, we'll return random artworks
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(
+          `SELECT * FROM artworks
+           ORDER BY RANDOM()
+           LIMIT $1`,
+          [count]
+        );
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 1800); // 30 minutes
+  }
+
+  async getSimilar(artworkId: string, count: number = 5): Promise<Artwork[]> {
+    const cacheKey = `similar:artworks:${artworkId}:count:${count}`;
+
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would use AI/ML models to find similar artworks
+      // based on visual features, style, tags, etc.
+
+      // For demonstration, we'll return random artworks
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(
+          `SELECT * FROM artworks
+           WHERE artwork_id != $1
+           ORDER BY RANDOM()
+           LIMIT $2`,
+          [artworkId, count]
+        );
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 1800); // 30 minutes
+  }
+
+  async filterByTags(tags: string[]): Promise<Artwork[]> {
+    const cacheKey = `artworks:by-tags:${tags.join(',')}`;
+
+    return this.withCache(cacheKey, async () => {
+      const client = await this.pool.connect();
+      try {
+        // Assuming tags are stored as JSONB in the database
+        const result = await client.query(
+          `SELECT * FROM artworks
+           WHERE tags @> $1::jsonb`,
+          [JSON.stringify(tags)]
+        );
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 300); // Cache for 5 minutes
+  }
+
+  async getAnalytics(artworkId: string): Promise<any> {
+    const cacheKey = `analytics:artwork:${artworkId}`;
+
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would aggregate analytics data
+      // from user interactions, views, likes, etc.
+
+      // For demonstration, we'll return mock analytics
+      const client = await this.pool.connect();
+      try {
+        // Get basic artwork info
+        const artworkResult = await client.query(
+          'SELECT * FROM artworks WHERE artwork_id = $1',
+          [artworkId]
+        );
+
+        if (artworkResult.rows.length === 0) {
+          throw new Error(`Artwork with ID ${artworkId} not found`);
+        }
+
+        // Mock analytics data
+        const analytics = {
+          artwork: artworkResult.rows[0],
+          views: Math.floor(Math.random() * 1000),
+          likes: Math.floor(Math.random() * 100),
+          shares: Math.floor(Math.random() * 50),
+          average_view_time: Math.floor(Math.random() * 120) + 30, // 30-150 seconds
+          engagement_rate: (Math.random() * 0.5).toFixed(2), // 0-50%
+          popular_times: [
+            { day: 'Monday', hour: 14, views: Math.floor(Math.random() * 100) },
+            { day: 'Wednesday', hour: 16, views: Math.floor(Math.random() * 100) },
+            { day: 'Saturday', hour: 11, views: Math.floor(Math.random() * 100) }
+          ]
+        };
+
+        return analytics;
+      } finally {
+        client.release();
+      }
+    }, 600); // Cache for 10 minutes
   }
 
   async initialize(): Promise<void> {

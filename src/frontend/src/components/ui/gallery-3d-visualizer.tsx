@@ -34,7 +34,8 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
 
     // Создаем сцену
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(0xf8fafc);
+    scene.fog = new THREE.Fog(0xf8fafc, 10, 25);
 
     // Создаем камеру
     const camera = new THREE.PerspectiveCamera(
@@ -46,29 +47,52 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
     camera.position.set(0, 5, 10);
 
     // Создаем рендерер
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     containerRef.current.appendChild(renderer.domElement);
 
     // Добавляем освещение
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
 
+    // Создаем направленный свет с тенями
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(10, 20, 15);
     directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 50;
     scene.add(directionalLight);
+
+    // Добавляем точечный свет для создания атмосферы
+    const pointLight = new THREE.PointLight(0xffccaa, 1, 100);
+    pointLight.position.set(0, 10, 0);
+    pointLight.castShadow = true;
+    scene.add(pointLight);
 
     // Добавляем элементы галереи
     const galleryObjects: THREE.Object3D[] = [];
 
-    // Создаем пол
+    // Создаем пол с текстурой
     const floorGeometry = new THREE.PlaneGeometry(20, 20);
-    const floorMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xdddddd,
-      roughness: 0.8,
-      metalness: 0.2
+    const floorTexture = new THREE.TextureLoader().load('/textures/wood-floor.jpg'); // Placeholder texture
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(4, 4);
+
+    const floorMaterial = new THREE.MeshStandardMaterial({
+      map: floorTexture,
+      roughness: 0.9,
+      metalness: 0.1
     });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
@@ -76,10 +100,10 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
     scene.add(floor);
 
     // Создаем стены
-    const wallMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xffffff,
-      roughness: 0.7,
-      metalness: 0.3
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0xf0f0f0,
+      roughness: 0.8,
+      metalness: 0.2
     });
 
     // Задняя стена
@@ -119,10 +143,12 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
         room.dimensions.depth
       );
       const roomMaterial = new THREE.MeshStandardMaterial({
-        color: 0xcccccc,
-        wireframe: true,
+        color: 0x4f46e5,
+        wireframe: false,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.2,
+        roughness: 0.7,
+        metalness: 0.3
       });
       const roomMesh = new THREE.Mesh(roomGeometry, roomMaterial);
       roomMesh.position.set(room.position.x, room.position.y, room.position.z);
@@ -133,7 +159,7 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
     artworks.forEach(artwork => {
       // Создаем раму для экспоната
       const frameGeometry = new THREE.BoxGeometry(1.5, 1.5, 0.1);
-      const frameMaterial = new THREE.MeshStandardMaterial({ 
+      const frameMaterial = new THREE.MeshStandardMaterial({
         color: 0x8B4513,
         metalness: 0.3,
         roughness: 0.7
@@ -146,13 +172,14 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
       // Создаем плоскость для изображения
       const artworkGeometry = new THREE.PlaneGeometry(1.4, 1.4);
       const artworkMaterial = new THREE.MeshStandardMaterial({
-        color: 0xdddddd,
-        emissive: 0x333333,
-        roughness: 0.5,
+        color: 0x333333,
+        emissive: 0x111111,
+        roughness: 0.2,
         metalness: 0.1
       });
       const artworkPlane = new THREE.Mesh(artworkGeometry, artworkMaterial);
       artworkPlane.position.set(artwork.position.x, artwork.position.y, artwork.position.z + 0.06); // немного впереди рамки
+      artworkPlane.castShadow = true;
       scene.add(artworkPlane);
 
       galleryObjects.push(frame, artworkPlane);
@@ -162,11 +189,13 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 20;
 
     // Обработка изменения размера окна
     const handleResize = () => {
       if (!containerRef.current) return;
-      
+
       camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
@@ -194,9 +223,9 @@ const Gallery3DVisualizer: React.FC<Gallery3DVisualizerProps> = ({
   }, [artworks, rooms]);
 
   return (
-    <div 
-      ref={containerRef} 
-      className={cn("w-full h-96 rounded-lg overflow-hidden border", className)}
+    <div
+      ref={containerRef}
+      className={cn("w-full h-96 rounded-lg overflow-hidden border bg-gradient-to-br from-gray-50 to-gray-100", className)}
     />
   );
 };

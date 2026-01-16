@@ -1,23 +1,25 @@
 // routes/authRoutes.ts
 import { Router } from 'express';
-import { AuthController } from '../controllers';
+import { AuthController } from '../controllers/AuthController';
 import { authenticateToken } from '../middleware/auth';
 
-const router = Router();
+export function createAuthRoutes(controller: AuthController) {
+  const router = Router();
 
-// Register new user
-router.post('/register', AuthController.register);
+  // Register new user
+  router.post('/register', (req, res) => controller.register(req, res));
 
-// User login
-router.post('/login', AuthController.login);
+  // User login
+  router.post('/login', (req, res) => controller.login(req, res));
 
-// Refresh token (requires valid token)
-router.post('/refresh', authenticateToken, AuthController.refreshToken);
+  // Refresh token (requires valid token)
+  router.post('/refresh', authenticateToken, (req, res) => controller.refreshToken(req, res));
 
-// Logout
-router.post('/logout', authenticateToken, AuthController.logout);
+  // Logout
+  router.post('/logout', authenticateToken, (req, res) => controller.logout(req, res));
 
-// Verify token
-router.get('/verify', authenticateToken, AuthController.verifyToken);
+  // Verify token
+  router.get('/verify', authenticateToken, (req, res) => controller.verifyToken(req, res));
 
-export { router as authRoutes };
+  return router;
+}

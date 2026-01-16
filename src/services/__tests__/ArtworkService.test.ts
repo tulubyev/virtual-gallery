@@ -1,5 +1,6 @@
 // src/services/__tests__/ArtworkService.test.ts
-import { Pool } from 'pg';
+
+import { Pool, PoolClient } from 'pg';
 import { ArtworkService } from '../ArtworkService';
 import { Artwork } from '../../types/artwork';
 import { ILogger } from '../../types/interfaces';
@@ -7,7 +8,7 @@ import { ILogger } from '../../types/interfaces';
 // Mock the database pool
 const mockPool = {
   connect: jest.fn(),
-} as unknown as Pool;
+} as unknown as jest.Mocked<Pool>;
 
 // Mock the logger
 const mockLogger: ILogger = {
@@ -37,14 +38,13 @@ describe('ArtworkService', () => {
         artist_name: 'Test Artist',
         tags: ['test', 'art'],
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [mockArtwork] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await artworkService.getById('1');
@@ -64,9 +64,8 @@ describe('ArtworkService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await artworkService.getById('999');
@@ -80,38 +79,37 @@ describe('ArtworkService', () => {
   describe('create', () => {
     it('should create a new artwork', async () => {
       // Arrange
-      const newArtworkData = {
+      const artworkData = {
         title: 'New Artwork',
         artist_name: 'New Artist',
         tags: ['modern', 'abstract'],
         gallery_id: 'gallery1'
       };
-      
+
       const createdArtwork: Artwork = {
         artwork_id: '2',
-        ...newArtworkData,
+        ...artworkData,
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [createdArtwork] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
-      const result = await artworkService.create(newArtworkData);
+      const result = await artworkService.create(artworkData);
 
       // Assert
       expect(result).toEqual(createdArtwork);
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO artworks'),
         expect.arrayContaining([
-          newArtworkData.title,
-          newArtworkData.artist_name,
+          artworkData.title,
+          artworkData.artist_name,
           expect.anything(), // tags array
-          newArtworkData.gallery_id
+          artworkData.gallery_id
         ])
       );
       expect(mockLogger.info).toHaveBeenCalledWith('Artwork created', { artworkId: '2' });
@@ -126,21 +124,20 @@ describe('ArtworkService', () => {
         title: 'Updated Title',
         artist_name: 'Updated Artist'
       };
-      
+
       const updatedArtwork: Artwork = {
         artwork_id: '1',
         title: 'Updated Title',
         artist_name: 'Updated Artist',
         tags: ['test', 'art'],
       };
-      
+
       const mockClient = {
         query: jest.fn().mockResolvedValue({ rows: [updatedArtwork] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       const result = await artworkService.update('1', updateData);
@@ -163,9 +160,8 @@ describe('ArtworkService', () => {
         query: jest.fn().mockResolvedValue({ rows: [{ artwork_id: '1' }] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act
       await artworkService.delete('1');
@@ -185,9 +181,8 @@ describe('ArtworkService', () => {
         query: jest.fn().mockResolvedValue({ rows: [] }),
         release: jest.fn(),
       };
-      
-      (mockPool.connect as jest.MockedFunction<typeof mockPool.connect>)
-        .mockResolvedValue(mockClient as any);
+
+      (mockPool.connect as jest.Mock).mockResolvedValue(mockClient as any);
 
       // Act & Assert
       await expect(artworkService.delete('999')).rejects.toThrow('Artwork with ID 999 not found');

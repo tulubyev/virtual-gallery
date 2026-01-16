@@ -284,6 +284,54 @@ CREATE TABLE user_tour_participations (
     is_host BOOLEAN DEFAULT FALSE
 );
 
+-- Room Types table (predefined room templates)
+CREATE TABLE room_types (
+    type_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(50) NOT NULL, -- 'classical', 'modern', 'themed', 'special'
+    base_template JSONB NOT NULL, -- Room geometry, materials, decorations
+    customization_options JSONB, -- Available customization options
+    lighting_preset JSONB NOT NULL, -- Lighting configuration
+    audio_preset JSONB, -- Audio environment settings
+    supported_artwork_types TEXT[], -- Compatible artwork categories
+    visitor_capacity INTEGER DEFAULT 50,
+    accessibility_features TEXT[],
+    thumbnail_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Room Instances table (created rooms based on types)
+CREATE TABLE room_instances (
+    instance_id SERIAL PRIMARY KEY,
+    type_id INTEGER REFERENCES room_types(type_id),
+    gallery_id INTEGER REFERENCES galleries(gallery_id),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    customizations JSONB, -- Applied customizations
+    artworks JSONB, -- Artwork placements with positions
+    current_visitors INTEGER DEFAULT 0,
+    max_visitors INTEGER DEFAULT 50,
+    status VARCHAR(20) DEFAULT 'active', -- 'active', 'maintenance', 'closed'
+    created_by INTEGER REFERENCES users(user_id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Room Analytics table
+CREATE TABLE room_analytics (
+    analytics_id SERIAL PRIMARY KEY,
+    room_instance_id INTEGER REFERENCES room_instances(instance_id),
+    visitor_count INTEGER DEFAULT 0,
+    average_session_time INTEGER, -- in seconds
+    popular_artworks TEXT[],
+    interaction_heatmap JSONB,
+    date_range_start DATE,
+    date_range_end DATE,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_email ON users(email);
@@ -296,6 +344,63 @@ CREATE INDEX idx_artworks_room ON artworks(room_id);
 CREATE INDEX idx_artworks_curator ON artworks(curator_id);
 CREATE INDEX idx_rooms_gallery ON rooms(gallery_id);
 CREATE INDEX idx_rooms_theme ON rooms(theme);
+CREATE INDEX idx_room_types_category ON room_types(category);
+CREATE INDEX idx_room_instances_gallery ON room_instances(gallery_id);
+CREATE INDEX idx_room_instances_type ON room_instances(type_id);
+CREATE INDEX idx_room_instances_status ON room_instances(status);
+CREATE INDEX idx_room_analytics_room ON room_analytics(room_instance_id);
+CREATE INDEX idx_user_interactions_user ON user_interactions(user_id);
+CREATE INDEX idx_user_interactions_artwork ON user_interactions(artwork_id);
+CREATE INDEX idx_user_interactions_type ON user_interactions(interaction_type);
+CREATE INDEX idx_user_interactions_timestamp ON user_interactions(timestamp);
+CREATE INDEX idx_artwork_tags_artwork ON artwork_tags(artwork_id);
+CREATE INDEX idx_artwork_tags_tag ON artwork_tags(tag_id);
+CREATE INDEX idx_collections_curator ON collections(curator_id);
+CREATE INDEX idx_collections_theme ON collections(theme);
+CREATE INDEX idx_exhibitions_gallery ON exhibitions(gallery_id);
+CREATE INDEX idx_exhibitions_dates ON exhibitions(start_date, end_date);
+CREATE INDEX idx_auctions_gallery ON auctions(gallery_id);
+CREATE INDEX idx_auctions_dates ON auctions(start_datetime, end_datetime);
+CREATE INDEX idx_auction_lots_auction ON auction_lots(auction_id);
+CREATE INDEX idx_auction_lots_artwork ON auction_lots(artwork_id);
+CREATE INDEX idx_bids_lot ON bids(lot_id);
+CREATE INDEX idx_bids_user ON bids(user_id);
+CREATE INDEX idx_recommendations_user ON recommendations(user_id);
+CREATE INDEX idx_recommendations_artwork ON recommendations(artwork_id);
+CREATE INDEX idx_recommendations_model ON recommendations(model_id);
+CREATE INDEX idx_iot_sensor_data_gallery ON iot_sensor_data(gallery_id);
+CREATE INDEX idx_iot_sensor_data_room ON iot_sensor_data(room_id);
+CREATE INDEX idx_iot_sensor_data_artwork ON iot_sensor_data(artwork_id);
+CREATE INDEX idx_iot_sensor_data_type ON iot_sensor_data(sensor_type);
+CREATE INDEX idx_iot_sensor_data_recorded_at ON iot_sensor_data(recorded_at);
+CREATE INDEX idx_submissions_status ON artwork_submissions(status);
+CREATE INDEX idx_submissions_submitter ON artwork_submissions(submitter_id);
+CREATE INDEX idx_submissions_reviewer ON artwork_submissions(reviewer_id);    visitor_count INTEGER DEFAULT 0,
+    average_session_time INTEGER, -- in seconds
+    popular_artworks TEXT[],
+    interaction_heatmap JSONB,
+    date_range_start DATE,
+    date_range_end DATE,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for performance
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_artworks_tags ON artworks USING GIN(tags);
+CREATE INDEX idx_artworks_style ON artworks(style);
+CREATE INDEX idx_artworks_year ON artworks(year_created);
+CREATE INDEX idx_artworks_status ON artworks(status);
+CREATE INDEX idx_artworks_gallery ON artworks(gallery_id);
+CREATE INDEX idx_artworks_room ON artworks(room_id);
+CREATE INDEX idx_artworks_curator ON artworks(curator_id);
+CREATE INDEX idx_rooms_gallery ON rooms(gallery_id);
+CREATE INDEX idx_rooms_theme ON rooms(theme);
+CREATE INDEX idx_room_types_category ON room_types(category);
+CREATE INDEX idx_room_instances_gallery ON room_instances(gallery_id);
+CREATE INDEX idx_room_instances_type ON room_instances(type_id);
+CREATE INDEX idx_room_instances_status ON room_instances(status);
+CREATE INDEX idx_room_analytics_room ON room_analytics(room_instance_id);
 CREATE INDEX idx_user_interactions_user ON user_interactions(user_id);
 CREATE INDEX idx_user_interactions_artwork ON user_interactions(artwork_id);
 CREATE INDEX idx_user_interactions_type ON user_interactions(interaction_type);

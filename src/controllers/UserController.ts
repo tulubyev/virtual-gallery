@@ -1,6 +1,6 @@
 // controllers/UserController.ts
 import { Request, Response } from 'express';
-import { IUserService, CreateUserDto, UpdateUserDto } from '../types/artwork';
+import { IUserService, CreateUserDto, UpdateUserDto } from '../types/user';
 import { ILogger } from '../types/interfaces';
 
 class UserController {
@@ -114,8 +114,8 @@ class UserController {
   }
 
   async updateUserProfile(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
     try {
-      const userId = (req as any).userId; // From JWT token
       const updateData = req.body;
 
       // Don't allow updating user ID or password through this endpoint
@@ -134,9 +134,8 @@ class UserController {
   }
 
   async getUserPreferences(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
     try {
-      const userId = (req as any).userId; // From JWT token
-
       const user = await this.userService.getUserById(userId);
       if (!user) {
         res.status(404).json({ error: 'User not found' });
@@ -151,8 +150,8 @@ class UserController {
   }
 
   async updateUserPreferences(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
     try {
-      const userId = (req as any).userId; // From JWT token
       const preferences = req.body;
 
       const updatedUser = await this.userService.updateUser(userId, { preferences });
@@ -176,8 +175,8 @@ class UserController {
   }
 
   async deleteUser(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
     try {
-      const { userId } = req.params;
       await this.userService.deleteUser(userId);
 
       this.logger.info('User deleted', { userId });
@@ -187,6 +186,97 @@ class UserController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async getUserFavorites(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
+    try {
+      const favorites = await this.userService.getFavorites(userId);
+      res.json(favorites);
+    } catch (error: any) {
+      this.logger.error(`Failed to get favorites for user with id ${userId}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async addFavorite(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
+    const { artworkId } = req.params;
+    try {
+      const result = await this.userService.addFavorite(userId, artworkId);
+      res.json(result);
+    } catch (error: any) {
+      this.logger.error(`Failed to add artwork ${artworkId} to favorites for user ${userId}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async removeFavorite(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
+    const { artworkId } = req.params;
+    try {
+      const result = await this.userService.removeFavorite(userId, artworkId);
+      res.json(result);
+    } catch (error: any) {
+      this.logger.error(`Failed to remove artwork ${artworkId} from favorites for user ${userId}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getUserHistory(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).userId; // From JWT token
+    try {
+      const history = await this.userService.getHistory(userId);
+      res.json(history);
+    } catch (error: any) {
+      this.logger.error(`Failed to get history for user with id ${userId}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getUsersByRole(req: Request, res: Response): Promise<void> {
+    const { role } = req.params;
+    try {
+      const users = await this.userService.getUsersByRole(role);
+      res.json(users);
+    } catch (error: any) {
+      this.logger.error(`Failed to get users by role ${role}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateUserRole(req: Request, res: Response): Promise<void> {
+    const { userId } = req.params;
+    const { role } = req.body;
+    try {
+      const updatedUser = await this.userService.updateRole(userId, role);
+      res.json(updatedUser);
+    } catch (error: any) {
+      this.logger.error(`Failed to update role for user with id ${userId}`, error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getUserStats(req: Request, res: Response): Promise<void> {
+    try {
+      // In a real implementation, this would aggregate user statistics
+      // For now, returning mock data
+      const stats = {
+        totalUsers: 100,
+        activeUsers: 75,
+        newUsersThisMonth: 10,
+        mostActiveRoles: ['user', 'curator'],
+        engagementMetrics: {
+          avgSessionDuration: 1200, // seconds
+          pageViewsPerSession: 5.5,
+          returnRate: 0.65
+        }
+      };
+      res.json(stats);
+    } catch (error: any) {
+      this.logger.error('Failed to get user stats', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
-export default UserController;
+export { UserController };

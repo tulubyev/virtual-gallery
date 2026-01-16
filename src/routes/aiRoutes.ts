@@ -1,29 +1,27 @@
-// routes/aiRoutes.ts
+// src/routes/aiRoutes.ts
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth';
-import aiController from '../controllers/AiController';
+import { AiController } from '../controllers/AiController';
 
-const router = Router();
+export function createAiRoutes(controller: AiController) {
+  const router = Router();
 
-// Получить ИИ-рекомендации (требует аутентификации)
-router.get('/recommendations', authenticateToken, aiController.getRecommendations);
+  // Generate personalized tour
+  router.post('/generate-tour', (req, res) => controller.generatePersonalizedTour(req, res));
 
-// Сгенерировать ИИ-коллекцию (требует аутентификации)
-router.get('/collections/generate', authenticateToken, aiController.generateCollection);
+  // Get artwork recommendations for user
+  router.get('/recommendations/:userId', (req, res) => controller.getRecommendations(req, res));
 
-// Анализировать изображение экспоната (требует аутентификации)
-router.post('/analyze-image', authenticateToken, aiController.analyzeImage);
+  // Analyze artwork image
+  router.post('/analyze-image', (req, res) => controller.analyzeImage(req, res));
 
-// Получить похожие экспонаты
-router.get('/similar/:artworkId', aiController.getSimilarArtworks);
+  // Generate artwork description
+  router.post('/generate-description', (req, res) => controller.generateArtworkDescription(req, res));
 
-// Обучить модель рекомендаций (требует аутентификации)
-router.post('/train-model', authenticateToken, aiController.trainModel);
+  // Get similar artworks
+  router.get('/similar/:artworkId', (req, res) => controller.getSimilarArtworks(req, res));
 
-// Персонализировать маршрут галереи на основе предпочтений пользователя (требует аутентификации)
-router.get('/personalize-route', authenticateToken, aiController.personalizeGalleryRoute);
+  // Predict engagement
+  router.post('/predict-engagement', (req, res) => controller.predictEngagement(req, res));
 
-// Прогнозировать вовлеченность пользователя с экспонатами (требует аутентификации)
-router.post('/predict-engagement', authenticateToken, aiController.predictEngagement);
-
-export { router as aiRoutes };
+  return router;
+}

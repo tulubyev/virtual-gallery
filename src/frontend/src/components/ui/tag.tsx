@@ -2,22 +2,25 @@ import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { Badge } from "@/components/ui/badge";
+
 interface TagProps {
   text: string;
   onRemove?: () => void;
   className?: string;
+  variant?: "default" | "secondary" | "destructive" | "outline";
 }
 
-const Tag: React.FC<TagProps> = ({ text, onRemove, className }) => {
-  return (
-    <div 
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground",
-        className
-      )}
-    >
-      {text}
-      {onRemove && (
+const Tag: React.FC<TagProps> = ({ text, onRemove, className, variant = "default" }) => {
+  if (onRemove) {
+    return (
+      <div
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground",
+          className
+        )}
+      >
+        {text}
         <Button
           variant="ghost"
           size="icon"
@@ -26,8 +29,14 @@ const Tag: React.FC<TagProps> = ({ text, onRemove, className }) => {
         >
           <X className="h-3 w-3" />
         </Button>
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <Badge variant={variant} className={cn("rounded-full", className)}>
+      {text}
+    </Badge>
   );
 };
 

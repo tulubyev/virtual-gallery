@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { IUserService, CreateUserDto } from '../types/artwork';
+import { IUserService, CreateUserDto } from '../types/user';
 import { ILogger } from '../types/interfaces';
 
 class AuthController {
@@ -165,4 +165,4 @@ class AuthController {
   }
 }
 
-export default AuthController;
+export { AuthController };

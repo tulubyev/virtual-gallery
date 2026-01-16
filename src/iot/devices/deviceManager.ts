@@ -1,7 +1,7 @@
 // src/iot/devices/DeviceManager.ts
 // Module for managing IoT devices in the virtual art gallery
 
-import sensorProcessor from '../sensors/SensorProcessor';
+import sensorProcessor from '../sensors/sensorProcessor';
 
 interface Device {
   deviceId: string;

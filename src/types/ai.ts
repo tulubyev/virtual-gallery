@@ -10,7 +10,9 @@ export interface IRecommendationEngine extends IService {
 }
 
 export interface IArtworkAnalyzer extends IService {
+  isTrained: boolean;
   analyzeImage(imageBuffer: Buffer): Promise<ArtworkAnalysis>;
+  analyzeArtwork(imagePath: string): Promise<ArtworkAnalysis>;
   extractFeatures(imageBuffer: Buffer): Promise<ImageFeatures>;
   classifyStyle(imageBuffer: Buffer): Promise<string[]>;
 }

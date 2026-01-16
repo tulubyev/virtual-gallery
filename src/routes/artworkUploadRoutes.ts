@@ -1,61 +1,22 @@
 // src/routes/artworkUploadRoutes.ts
 import { Router } from 'express';
-import artworkController from '../controllers/ArtworkController';
+import multer from 'multer';
+import { ArtworkController } from '../controllers/ArtworkController';
 
-const router = Router();
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
 
-// Загрузить изображение экспоната
-router.post('/upload', artworkController.createArtwork);
+export function createArtworkUploadRoutes(controller: ArtworkController) {
+  const router = Router();
 
-// Запустить ИИ-анализ загруженного изображения
-router.post('/:uploadId/analyze', (req, res) => {
-  // В реальной реализации это будет вызывать метод анализа изображения
-  res.json({ message: 'Image analysis started', uploadId: req.params.uploadId });
-});
+  // Upload artwork image
+  router.post('/image', upload.single('image'), (req, res) => controller.uploadArtworkImage(req, res));
 
-// Получить результаты ИИ-анализа
-router.get('/:uploadId/analysis', (req, res) => {
-  // В реальной реализации это будет возвращать результаты анализа
-  res.json({ uploadId: req.params.uploadId, analysis: 'Sample analysis results' });
-});
+  // Upload multiple artwork images
+  router.post('/images', upload.array('images'), (req, res) => controller.uploadMultipleArtworkImages(req, res));
 
-// Отправить экспонат на проверку куратору
-router.post('/submit-for-review', artworkController.createArtwork);
+  // Submit artwork for review
+  router.post('/submit-for-review', (req, res) => controller.submitArtworkForReview(req, res));
 
-// Получить все загрузки пользователя
-router.get('/users/:userId/uploads', (req, res) => {
-  // В реальной реализации это будет возвращать загрузки пользователя
-  res.json({ userId: req.params.userId, uploads: [] });
-});
-
-// Получить все материалы на проверке (только для кураторов и администраторов)
-router.get('/submissions-for-review', (req, res) => {
-  // В реальной реализации это будет возвращать материалы на проверке
-  res.json({ submissions: [] });
-});
-
-// Одобрить экспонат (только для кураторов и администраторов)
-router.post('/submissions/:submissionId/approve', (req, res) => {
-  // В реальной реализации это будет одобрять экспонат
-  res.json({ submissionId: req.params.submissionId, status: 'approved' });
-});
-
-// Отклонить экспонат (только для кураторов и администраторов)
-router.post('/submissions/:submissionId/reject', (req, res) => {
-  // В реальной реализации это будет отклонять экспонат
-  res.json({ submissionId: req.params.submissionId, status: 'rejected' });
-});
-
-// Запросить повторный анализ изображения
-router.post('/:uploadId/reanalyze', (req, res) => {
-  // В реальной реализации это будет запрашивать повторный анализ
-  res.json({ uploadId: req.params.uploadId, status: 'reanalysis requested' });
-});
-
-// Сгенерировать NFT для произведения искусства
-router.post('/generate-nft', (req, res) => {
-  // В реальной реализации это будет генерировать NFT
-  res.json({ message: 'NFT generation initiated' });
-});
-
-export default router;
+  return router;
+}

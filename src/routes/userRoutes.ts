@@ -1,38 +1,40 @@
 // routes/userRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import userController from '../controllers/UserController';
+import { UserController } from '../controllers/UserController';
 
-const router = Router();
+export function createUserRoutes(controller: UserController) {
+  const router = Router();
 
-// Register new user
-router.post('/register', userController.registerUser);
+  // Register new user
+  router.post('/register', (req, res) => controller.registerUser(req, res));
 
-// User login
-router.post('/login', userController.loginUser);
+  // User login
+  router.post('/login', (req, res) => controller.loginUser(req, res));
 
-// Get user profile
-router.get('/profile', authenticateToken, userController.getUserProfile);
+  // Get user profile
+  router.get('/profile', authenticateToken, (req, res) => controller.getUserProfile(req, res));
 
-// Update user profile
-router.put('/profile', authenticateToken, userController.updateUserProfile);
+  // Update user profile
+  router.put('/profile', authenticateToken, (req, res) => controller.updateUserProfile(req, res));
 
-// Get user preferences
-router.get('/preferences', authenticateToken, userController.getUserPreferences);
+  // Get user preferences
+  router.get('/preferences', authenticateToken, (req, res) => controller.getUserPreferences(req, res));
 
-// Update user preferences
-router.put('/preferences', authenticateToken, userController.updateUserPreferences);
+  // Update user preferences
+  router.put('/preferences', authenticateToken, (req, res) => controller.updateUserPreferences(req, res));
 
-// Get user's favorite artworks
-router.get('/favorites', authenticateToken, userController.getUserFavorites);
+  // Get user's favorite artworks
+  router.get('/favorites', authenticateToken, (req, res) => controller.getUserFavorites(req, res));
 
-// Add artwork to favorites
-router.post('/favorites/:artworkId', authenticateToken, userController.addFavorite);
+  // Add artwork to favorites
+  router.post('/favorites/:artworkId', authenticateToken, (req, res) => controller.addFavorite(req, res));
 
-// Remove artwork from favorites
-router.delete('/favorites/:artworkId', authenticateToken, userController.removeFavorite);
+  // Remove artwork from favorites
+  router.delete('/favorites/:artworkId', authenticateToken, (req, res) => controller.removeFavorite(req, res));
 
-// Get user's interaction history
-router.get('/history', authenticateToken, userController.getUserHistory);
+  // Get user's interaction history
+  router.get('/history', authenticateToken, (req, res) => controller.getUserHistory(req, res));
 
-export { router as userRoutes };
+  return router;
+}

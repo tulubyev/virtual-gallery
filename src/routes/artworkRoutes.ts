@@ -1,41 +1,43 @@
 // routes/artworkRoutes.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import artworkController from '../controllers/ArtworkController';
+import { ArtworkController } from '../controllers/ArtworkController';
 
-const router = Router();
+export function createArtworkRoutes(controller: ArtworkController) {
+  const router = Router();
 
-// Get all artworks
-router.get('/', artworkController.getAllArtworks);
+  // Get all artworks
+  router.get('/', (req, res) => controller.getAllArtworks(req, res));
 
-// Get artwork by ID
-router.get('/:id', artworkController.getArtworkById);
+  // Get artwork by ID
+  router.get('/:id', (req, res) => controller.getArtworkById(req, res));
 
-// Search artworks
-router.get('/search/:query', artworkController.searchArtworks);
+  // Search artworks
+  router.get('/search/:query', (req, res) => controller.searchArtworks(req, res));
 
-// Filter artworks by tags
-router.get('/filter/:tags', artworkController.filterArtworksByTags);
+  // Filter artworks by tags
+  router.get('/filter/:tags', (req, res) => controller.filterArtworksByTags(req, res));
 
-// Create new artwork (requires authentication)
-router.post('/', authenticateToken, artworkController.createArtwork);
+  // Create new artwork (requires authentication)
+  router.post('/', authenticateToken, (req, res) => controller.createArtwork(req, res));
 
-// Update artwork (requires authentication)
-router.put('/:id', authenticateToken, artworkController.updateArtwork);
+  // Update artwork (requires authentication)
+  router.put('/:id', authenticateToken, (req, res) => controller.updateArtwork(req, res));
 
-// Delete artwork (requires authentication)
-router.delete('/:id', authenticateToken, artworkController.deleteArtwork);
+  // Delete artwork (requires authentication)
+  router.delete('/:id', authenticateToken, (req, res) => controller.deleteArtwork(req, res));
 
-// Get recommended artworks for a user (requires authentication)
-router.get('/recommendations', authenticateToken, artworkController.getRecommendedArtworks);
+  // Get recommended artworks for a user (requires authentication)
+  router.get('/recommendations', authenticateToken, (req, res) => controller.getRecommendedArtworks(req, res));
 
-// Get similar artworks to a given artwork
-router.get('/:id/similar', artworkController.getSimilarArtworks);
+  // Get similar artworks to a given artwork
+  router.get('/:id/similar', (req, res) => controller.getSimilarArtworks(req, res));
 
-// Add artwork to a collection (requires authentication)
-router.post('/:artworkId/collections/:collectionId', authenticateToken, artworkController.addToCollection);
+  // Add artwork to a collection (requires authentication)
+  router.post('/:artworkId/collections/:collectionId', authenticateToken, (req, res) => controller.addToCollection(req, res));
 
-// Get artwork analytics
-router.get('/:id/analytics', artworkController.getArtworkAnalytics);
+  // Get artwork analytics
+  router.get('/:id/analytics', (req, res) => controller.getArtworkAnalytics(req, res));
 
-export { router as artworkRoutes };
+  return router;
+}

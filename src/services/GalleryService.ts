@@ -7,8 +7,9 @@ import {
   GalleryFilters,
   CreateGalleryDto,
   UpdateGalleryDto
-} from '../types/artwork';
+} from '../types/gallery';
 import { ILogger, ICacheable } from '../types/interfaces';
+import { Artwork } from '../types/artwork';
 
 export interface Room {
   room_id?: string;
@@ -86,13 +87,12 @@ export class GalleryService extends BaseService implements IGalleryService {
     try {
       const result = await client.query(
         `INSERT INTO galleries
-         (name, description, location, opening_hours, image_url)
-         VALUES ($1, $2, $3, $4, $5)
+         (name, description, opening_hours, image_url)
+         VALUES ($1, $2, $3, $4)
          RETURNING *`,
         [
           gallery.name,
           gallery.description,
-          gallery.location,
           gallery.opening_hours,
           gallery.image_url
         ]
@@ -132,11 +132,6 @@ export class GalleryService extends BaseService implements IGalleryService {
         paramIndex++;
       }
 
-      if (updates.location !== undefined) {
-        updateFields.push(`location = $${paramIndex}`);
-        values.push(updates.location);
-        paramIndex++;
-      }
 
       if (updates.opening_hours !== undefined) {
         updateFields.push(`opening_hours = $${paramIndex}`);
@@ -184,7 +179,7 @@ export class GalleryService extends BaseService implements IGalleryService {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<boolean> {
     const client = await this.pool.connect();
     try {
       const result = await client.query('DELETE FROM galleries WHERE gallery_id = $1 RETURNING gallery_id', [id]);
@@ -200,6 +195,7 @@ export class GalleryService extends BaseService implements IGalleryService {
       }
 
       this.logger.info('Gallery deleted', { galleryId: id });
+      return true;
     } finally {
       client.release();
     }
@@ -216,6 +212,30 @@ export class GalleryService extends BaseService implements IGalleryService {
     } finally {
       client.release();
     }
+  }
+
+  async getRecommendedArtworks(galleryId: string, count: number = 5): Promise<Artwork[]> {
+    const cacheKey = `recommended:artworks:gallery:${galleryId}:count:${count}`;
+
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would use AI/ML models to generate recommendations
+      // based on gallery theme, user preferences, and artwork characteristics
+
+      // For demonstration purposes, we'll return random artworks from the gallery
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(
+          `SELECT * FROM artworks
+           WHERE gallery_id = $1
+           ORDER BY RANDOM()
+           LIMIT $2`,
+          [galleryId, count]
+        );
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 1800); // 30 minutes
   }
 
   async initialize(): Promise<void> {

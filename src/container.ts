@@ -1,6 +1,8 @@
 // src/container.ts
 import { Pool } from 'pg';
-import { IArtworkService, IGalleryService, IUserService } from './types/artwork';
+import { IArtworkService } from './types/artwork';
+import { IGalleryService } from './types/gallery';
+import { IUserService } from './types/user';
 import { IRecommendationEngine, IArtworkAnalyzer, IImageProcessor } from './types/ai';
 import { ILogger, ICacheable } from './types/interfaces';
 import { ArtworkService } from './services/ArtworkService';
@@ -9,7 +11,7 @@ import { UserService } from './services/UserService';
 import { RecommendationService } from './services/RecommendationService';
 import { ArtworkAnalyzer } from './ai-ml/models/artworkAnalyzer';
 import { DatabaseService } from './services/DatabaseService';
-import AiController from './controllers/AiController';
+import { AiController } from './controllers/AiController';
 
 export class Container {
   private services = new Map<string, any>();
@@ -47,15 +49,12 @@ export class Container {
       case 'recommendationService':
         return new RecommendationService(
           this.get<Pool>('database'),
-          this.get<IArtworkAnalyzer>('artworkAnalyzer'),
           this.get<ILogger>('logger'),
           this.get<ICacheable>('cache')
         );
 
       case 'artworkAnalyzer':
-        return new ArtworkAnalyzer(
-          this.get<ILogger>('logger')
-        );
+        return new ArtworkAnalyzer();
 
       case 'database':
         return new DatabaseService().getPool(); // Access the pool property
@@ -67,9 +66,15 @@ export class Container {
         return this.createCache();
 
       case 'aiController':
-        // Import the default instance of AiController
-        const aiControllerModule = require('./controllers/AiController');
-        return aiControllerModule.default;
+        // Create AiController instance with its dependencies
+        const artworkAnalyzer = this.get<IArtworkAnalyzer>('artworkAnalyzer');
+        const logger = this.get<ILogger>('logger');
+        const recommendationService = this.get<IRecommendationEngine>('recommendationService');
+
+        // Import AiController class
+        const { AiController } = require('./controllers/AiController');
+
+        return new AiController(artworkAnalyzer, logger, recommendationService);
 
       default:
         throw new Error(`Unknown service: ${serviceName}`);

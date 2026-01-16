@@ -1,27 +1,27 @@
-// src/backend/services/S3Service.ts
+// src/services/infrastructure/S3Service.ts
 import AWS from 'aws-sdk';
 import { Readable } from 'stream';
 import path from 'path';
 import fs from 'fs';
-import s3Config from '../config/s3Config';
+import s3Config from '../../backend/config/s3Config';
 
-// Настройка AWS SDK для работы с S3-совместимым хранилищем beget
+// Configure AWS SDK
 const s3 = new AWS.S3({
   accessKeyId: s3Config.accessKeyId,
   secretAccessKey: s3Config.secretAccessKey,
   region: s3Config.region,
-  endpoint: s3Config.endpoint, // Для beget S3
-  s3ForcePathStyle: true, // Необходимо для некоторых S3-совместимых сервисов
+  endpoint: s3Config.endpoint, // For beget S3
+  s3ForcePathStyle: true, // Necessary for some S3-compatible services
 });
 
-interface UploadResult {
+export interface UploadResult {
   success: boolean;
   url: string;
   key: string;
   etag: string;
 }
 
-interface S3File {
+export interface S3File {
   Body?: Buffer | Uint8Array | Blob | string | Readable;
   ContentType?: string;
   Metadata?: {
@@ -29,7 +29,7 @@ interface S3File {
   };
 }
 
-class S3Service {
+export class S3Service {
   private bucket: string;
 
   constructor() {
@@ -127,7 +127,7 @@ class S3Service {
         Key: s3Key
       };
 
-      return await s3.getObject(params).promise();
+      return s3.getObject(params).promise();
     } catch (error: any) {
       console.error('Ошибка при получении файла из S3:', error);
       throw error;
@@ -143,7 +143,7 @@ class S3Service {
         Expires: expiresIn
       };
 
-      return s3.getSignedUrlPromise('getObject', params);
+      return s3.getSignedUrl('getObject', params);
     } catch (error: any) {
       console.error('Ошибка при получении URL файла из S3:', error);
       throw error;
