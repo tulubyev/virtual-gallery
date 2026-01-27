@@ -77,6 +77,11 @@
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
                     <span class="font-medium">AI-курирование</span>
                 </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="digitized">
+                    <i data-lucide="scan" class="w-5 h-5"></i>
+                    <span class="font-medium">Оцифрованные</span>
+                    <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
             </nav>
 
             <div class="p-4 border-t border-gray-100">
@@ -349,6 +354,166 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Digitized Artworks -->
+            <section id="digitized" class="tab-content">
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Оцифрованные работы</h1>
+                        <p class="text-gray-600">Модерация и утверждение оцифрованных произведений</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="digitizedStatusFilter" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
+                            <option value="">Все статусы</option>
+                            <option value="pending_review">Ожидают проверки</option>
+                            <option value="approved">Одобренные</option>
+                            <option value="rejected">Отклоненные</option>
+                            <option value="published">Опубликованные</option>
+                        </select>
+                        <button id="refreshDigitized" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl flex items-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            Обновить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-amber-700" id="pendingCount">0</p>
+                        <p class="text-sm text-amber-600">Ожидают проверки</p>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-green-700" id="approvedCount">0</p>
+                        <p class="text-sm text-green-600">Одобренных</p>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-red-700" id="rejectedCount">0</p>
+                        <p class="text-sm text-red-600">Отклоненных</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <p class="text-2xl font-bold text-blue-700" id="publishedCount">0</p>
+                        <p class="text-sm text-blue-600">Опубликованных</p>
+                    </div>
+                </div>
+
+                <!-- Artworks Grid -->
+                <div id="digitizedGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Loading State -->
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                            <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 animate-spin"></i>
+                        </div>
+                        <p>Загрузка оцифрованных работ...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Artwork Detail Modal -->
+            <div id="artworkModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
+                        <h3 class="text-xl font-display font-bold text-gray-900" id="modalTitle">Детали работы</h3>
+                        <button id="closeModal" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Front Image -->
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 mb-2">Лицевая сторона</p>
+                                <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden">
+                                    <img id="modalFrontImage" src="" alt="Front" class="w-full h-full object-contain">
+                                </div>
+                            </div>
+                            <!-- Back Image -->
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 mb-2">Обратная сторона</p>
+                                <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden">
+                                    <img id="modalBackImage" src="" alt="Back" class="w-full h-full object-contain">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metadata Form -->
+                        <div class="space-y-4 mb-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                                    <input type="text" id="modalArtworkTitle" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Художник</label>
+                                    <input type="text" id="modalArtworkArtist" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Стиль</label>
+                                    <input type="text" id="modalArtworkStyle" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Период</label>
+                                    <input type="text" id="modalArtworkPeriod" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Техника</label>
+                                    <input type="text" id="modalArtworkTechnique" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Заметки куратора</label>
+                                <textarea id="modalCuratorNotes" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Добавьте комментарий к работе..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- AI Analysis -->
+                        <div class="bg-purple-50 rounded-xl p-4 mb-6">
+                            <h4 class="font-medium text-purple-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                AI-анализ
+                            </h4>
+                            <div id="modalAIAnalysis" class="text-sm text-purple-700"></div>
+                        </div>
+
+                        <!-- Watermark Info -->
+                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                            <h4 class="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                Защита авторских прав
+                            </h4>
+                            <div class="flex gap-4 text-sm">
+                                <div id="visibleWatermark" class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-gray-300"></span>
+                                    Видимый водяной знак
+                                </div>
+                                <div id="invisibleWatermark" class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-gray-300"></span>
+                                    Стеганографическая метка
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Verification Hash: <code id="modalVerificationHash" class="bg-gray-200 px-1 rounded">-</code></p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-3">
+                            <button id="approveArtwork" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                                <i data-lucide="check" class="w-5 h-5"></i>
+                                Одобрить
+                            </button>
+                            <button id="rejectArtwork" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                                Отклонить
+                            </button>
+                            <button id="saveChanges" class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-5 h-5"></i>
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -388,6 +553,279 @@
 
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             window.location.href = '/';
+        });
+
+        // Digitized Artworks Management
+        const AI_ML_API = '/api/v1';
+        let currentArtwork = null;
+        let digitizedArtworks = [];
+
+        async function loadDigitizedArtworks(status = '') {
+            const grid = document.getElementById('digitizedGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 text-gray-500">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                        <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 animate-spin"></i>
+                    </div>
+                    <p>Загрузка оцифрованных работ...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const url = status ? `${AI_ML_API}/artworks?status=${status}` : `${AI_ML_API}/artworks`;
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error('Failed to fetch artworks');
+                
+                digitizedArtworks = await response.json();
+                renderDigitizedArtworks();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading artworks:', error);
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="alert-circle" class="w-8 h-8 text-red-400"></i>
+                        </div>
+                        <p>Ошибка загрузки данных</p>
+                        <button onclick="loadDigitizedArtworks()" class="mt-4 text-purple-600 hover:underline">Попробовать снова</button>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function renderDigitizedArtworks() {
+            const grid = document.getElementById('digitizedGrid');
+            
+            if (digitizedArtworks.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="image-off" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <p>Нет оцифрованных работ</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = digitizedArtworks.map(artwork => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onclick="openArtworkModal(${artwork.id})">
+                    <div class="relative h-48 bg-gray-100">
+                        <img src="${artwork.front_watermarked_url || artwork.front_url}" alt="${artwork.title}" class="w-full h-full object-cover">
+                        <span class="absolute top-3 right-3 ${getStatusBadgeClass(artwork.status)} px-2 py-1 rounded-full text-xs font-medium">
+                            ${getStatusLabel(artwork.status)}
+                        </span>
+                        ${artwork.verification_hash ? '<span class="absolute top-3 left-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i>Protected</span>' : ''}
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-gray-900 truncate">${artwork.title || 'Без названия'}</h4>
+                        <p class="text-sm text-gray-500">${artwork.artist || 'Неизвестный художник'}</p>
+                        <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                            ${artwork.style ? `<span class="bg-gray-100 px-2 py-0.5 rounded">${artwork.style}</span>` : ''}
+                            ${artwork.period ? `<span class="bg-gray-100 px-2 py-0.5 rounded">${artwork.period}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'pending_review': 'bg-amber-100 text-amber-700',
+                'approved': 'bg-green-100 text-green-700',
+                'rejected': 'bg-red-100 text-red-700',
+                'published': 'bg-blue-100 text-blue-700',
+                'needs_revision': 'bg-orange-100 text-orange-700'
+            };
+            return classes[status] || 'bg-gray-100 text-gray-700';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending_review': 'На проверке',
+                'approved': 'Одобрено',
+                'rejected': 'Отклонено',
+                'published': 'Опубликовано',
+                'needs_revision': 'Требует правок'
+            };
+            return labels[status] || status;
+        }
+
+        function updateStats() {
+            const counts = {
+                pending_review: 0,
+                approved: 0,
+                rejected: 0,
+                published: 0
+            };
+            
+            digitizedArtworks.forEach(a => {
+                if (counts[a.status] !== undefined) counts[a.status]++;
+            });
+            
+            document.getElementById('pendingCount').textContent = counts.pending_review;
+            document.getElementById('approvedCount').textContent = counts.approved;
+            document.getElementById('rejectedCount').textContent = counts.rejected;
+            document.getElementById('publishedCount').textContent = counts.published;
+            
+            const badge = document.getElementById('pendingBadge');
+            if (counts.pending_review > 0) {
+                badge.textContent = counts.pending_review;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        async function openArtworkModal(artworkId) {
+            const artwork = digitizedArtworks.find(a => a.id === artworkId);
+            if (!artwork) return;
+            
+            currentArtwork = artwork;
+            
+            document.getElementById('modalTitle').textContent = artwork.title || 'Детали работы';
+            document.getElementById('modalFrontImage').src = artwork.front_watermarked_url || artwork.front_url;
+            document.getElementById('modalBackImage').src = artwork.back_watermarked_url || artwork.back_url || '';
+            
+            document.getElementById('modalArtworkTitle').value = artwork.title || '';
+            document.getElementById('modalArtworkArtist').value = artwork.artist || '';
+            document.getElementById('modalArtworkStyle').value = artwork.style || '';
+            document.getElementById('modalArtworkPeriod').value = artwork.period || '';
+            document.getElementById('modalArtworkTechnique').value = artwork.technique || '';
+            document.getElementById('modalCuratorNotes').value = artwork.curator_notes || '';
+            
+            const analysis = artwork.ai_analysis || {};
+            let analysisHtml = '';
+            if (analysis.front) {
+                analysisHtml += `<p><strong>Лицевая сторона:</strong> ${analysis.front.description || 'Нет описания'}</p>`;
+            }
+            if (analysis.back && analysis.back.provenance) {
+                analysisHtml += `<p class="mt-2"><strong>Провенанс:</strong> ${analysis.back.provenance}</p>`;
+            }
+            document.getElementById('modalAIAnalysis').innerHTML = analysisHtml || 'AI-анализ недоступен';
+            
+            const visibleEl = document.querySelector('#visibleWatermark span');
+            const invisibleEl = document.querySelector('#invisibleWatermark span');
+            visibleEl.className = `w-3 h-3 rounded-full ${artwork.visible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
+            invisibleEl.className = `w-3 h-3 rounded-full ${artwork.invisible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
+            document.getElementById('modalVerificationHash').textContent = artwork.verification_hash || '-';
+            
+            const approveBtn = document.getElementById('approveArtwork');
+            const rejectBtn = document.getElementById('rejectArtwork');
+            if (artwork.status === 'approved' || artwork.status === 'published') {
+                approveBtn.disabled = true;
+                approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                approveBtn.disabled = false;
+                approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            
+            document.getElementById('artworkModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('artworkModal').classList.add('hidden');
+            currentArtwork = null;
+        }
+
+        async function approveArtwork() {
+            if (!currentArtwork) return;
+            
+            const notes = document.getElementById('modalCuratorNotes').value;
+            
+            try {
+                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}/approve`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ curator_notes: notes })
+                });
+                
+                if (!response.ok) throw new Error('Failed to approve');
+                
+                closeModal();
+                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+            } catch (error) {
+                console.error('Approve error:', error);
+                alert('Ошибка при одобрении работы');
+            }
+        }
+
+        async function rejectArtwork() {
+            if (!currentArtwork) return;
+            
+            const reason = prompt('Укажите причину отклонения:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}/reject`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rejection_reason: reason })
+                });
+                
+                if (!response.ok) throw new Error('Failed to reject');
+                
+                closeModal();
+                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+            } catch (error) {
+                console.error('Reject error:', error);
+                alert('Ошибка при отклонении работы');
+            }
+        }
+
+        async function saveChanges() {
+            if (!currentArtwork) return;
+            
+            const updates = {
+                title: document.getElementById('modalArtworkTitle').value,
+                artist: document.getElementById('modalArtworkArtist').value,
+                style: document.getElementById('modalArtworkStyle').value,
+                period: document.getElementById('modalArtworkPeriod').value,
+                technique: document.getElementById('modalArtworkTechnique').value,
+                curator_notes: document.getElementById('modalCuratorNotes').value
+            };
+            
+            try {
+                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save');
+                
+                alert('Изменения сохранены');
+                closeModal();
+                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Ошибка при сохранении');
+            }
+        }
+
+        document.getElementById('closeModal')?.addEventListener('click', closeModal);
+        document.getElementById('approveArtwork')?.addEventListener('click', approveArtwork);
+        document.getElementById('rejectArtwork')?.addEventListener('click', rejectArtwork);
+        document.getElementById('saveChanges')?.addEventListener('click', saveChanges);
+        document.getElementById('refreshDigitized')?.addEventListener('click', () => {
+            loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+        });
+        document.getElementById('digitizedStatusFilter')?.addEventListener('change', (e) => {
+            loadDigitizedArtworks(e.target.value);
+        });
+        
+        document.getElementById('artworkModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'artworkModal') closeModal();
+        });
+
+        document.querySelector('[data-tab="digitized"]')?.addEventListener('click', () => {
+            setTimeout(() => loadDigitizedArtworks(), 100);
         });
     </script>
 </body>
