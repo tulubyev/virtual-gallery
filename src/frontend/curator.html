@@ -25,12 +25,25 @@
         .sidebar-link.active { background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), transparent); border-left-color: #8b5cf6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } }
     </style>
 </head>
 <body class="font-sans bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 px-4 py-3 flex items-center justify-between">
+        <button id="mobileMenuBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i data-lucide="menu" class="w-6 h-6 text-gray-700"></i>
+        </button>
+        <span class="font-display font-bold text-gray-900">Virtual Gallery</span>
+        <div class="w-10"></div>
+    </header>
+
     <div class="flex min-h-screen">
+        <!-- Mobile Overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+        <aside id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-50 transition-transform md:translate-x-0">
             <div class="p-6 border-b border-gray-100">
                 <a href="/" class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
@@ -84,7 +97,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
             <!-- Dashboard -->
             <section id="dashboard" class="tab-content active">
                 <div class="mb-8">
@@ -342,6 +355,22 @@
     <script>
         lucide.createIcons();
 
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const menuBtn = document.getElementById('mobileMenuBtn');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        }
+
+        menuBtn?.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay?.addEventListener('click', closeSidebar);
+
         document.querySelectorAll('.sidebar-link').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
@@ -353,7 +382,12 @@
                 btn.classList.add('active');
                 document.getElementById(tab).classList.add('active');
                 lucide.createIcons();
+                closeSidebar();
             });
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            window.location.href = '/';
         });
     </script>
 </body>
