@@ -106,6 +106,7 @@
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="#overview" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Обзор</a>
                     <a href="#analysis" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Анализ</a>
+                    <a href="#digitization" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Оцифровка</a>
                     <a href="#documents" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Документы</a>
                     <a href="#assistant" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Ассистент</a>
                 </nav>
@@ -134,6 +135,7 @@
             <nav class="px-4 py-4 space-y-3">
                 <a href="#overview" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Обзор</a>
                 <a href="#analysis" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Анализ</a>
+                <a href="#digitization" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Оцифровка</a>
                 <a href="#documents" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Документы</a>
                 <a href="#assistant" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Ассистент</a>
                 <a href="/admin" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Админ панель</a>
@@ -253,6 +255,52 @@
                         </span>
                     </div>
                 </div>
+
+                <!-- Digitization Card -->
+                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="scan" class="w-6 h-6 text-amber-600"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold">Оцифровка</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Загрузите сканы картин для AI-анализа, создания карточки и защиты авторских прав.
+                    </p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            Watermark
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="coins" class="w-4 h-4"></i>
+                            NFT Ready
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Knowledge Base Card -->
+                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="library" class="w-6 h-6 text-rose-600"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold">База знаний</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        RAG-обучение на документах, стилях, художниках и внешних источниках искусства.
+                    </p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="globe" class="w-4 h-4"></i>
+                            WikiArt
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            Семантический поиск
+                        </span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -346,6 +394,201 @@
                                 <p class="text-xs text-orange-600 font-medium mb-1">Токены</p>
                                 <p class="font-semibold text-gray-900">350</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Digitization Section -->
+        <section id="digitization" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Оцифровка произведений</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Загрузите сканы произведения для AI-анализа и создания карточки в галерее</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100 max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Front Side Upload -->
+                    <div>
+                        <h3 class="text-lg font-display font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="image" class="w-5 h-5 text-amber-600"></i>
+                            Лицевая сторона
+                        </h3>
+                        <div id="front-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-amber-400 transition-colors cursor-pointer h-48 flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="image-plus" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1">Перетащите изображение</p>
+                            <p class="text-xs text-gray-400">PNG, JPG до 20MB</p>
+                            <input type="file" accept="image/*" class="hidden" id="front-upload">
+                        </div>
+                        <div id="front-preview-container" class="hidden mt-4">
+                            <img id="front-preview" class="w-full h-40 object-cover rounded-xl border border-gray-200" alt="Front preview">
+                            <button id="remove-front" class="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Back Side Upload -->
+                    <div>
+                        <h3 class="text-lg font-display font-semibold mb-4 flex items-center gap-2">
+                            <i data-lucide="flip-horizontal" class="w-5 h-5 text-blue-600"></i>
+                            Обратная сторона
+                        </h3>
+                        <div id="back-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors cursor-pointer h-48 flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="scan-text" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1">Перетащите изображение</p>
+                            <p class="text-xs text-gray-400">Подписи, провенанс, штампы</p>
+                            <input type="file" accept="image/*" class="hidden" id="back-upload">
+                        </div>
+                        <div id="back-preview-container" class="hidden mt-4">
+                            <img id="back-preview" class="w-full h-40 object-cover rounded-xl border border-gray-200" alt="Back preview">
+                            <button id="remove-back" class="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ZIP Upload Option -->
+                <div class="border-t border-gray-200 pt-6 mb-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-1 h-px bg-gray-200"></div>
+                        <span class="text-sm text-gray-500">или загрузите архив</span>
+                        <div class="flex-1 h-px bg-gray-200"></div>
+                    </div>
+                    <div id="zip-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-purple-400 transition-colors cursor-pointer">
+                        <div class="flex items-center justify-center gap-4">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="archive" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-gray-700 font-medium">ZIP архив с несколькими произведениями</p>
+                                <p class="text-xs text-gray-400">Формат: front_001.jpg, back_001.jpg, front_002.jpg...</p>
+                            </div>
+                        </div>
+                        <input type="file" accept=".zip" class="hidden" id="zip-upload">
+                    </div>
+                    <div id="zip-info" class="hidden mt-3 p-3 bg-purple-50 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="file-archive" class="w-5 h-5 text-purple-600"></i>
+                            <span id="zip-filename" class="text-sm text-purple-700 font-medium"></span>
+                            <button id="remove-zip" class="ml-auto text-red-500 hover:text-red-600">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Название произведения</label>
+                        <input type="text" id="artwork-title" placeholder="Введите название или оставьте для AI" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Художник</label>
+                        <input type="text" id="artwork-artist" placeholder="Имя художника или 'Неизвестен'" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Watermark Options -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-600"></i>
+                        Защита авторских прав
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="visible-watermark" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500" checked>
+                            <span class="text-sm text-gray-600">Видимый водяной знак</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="invisible-watermark" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500" checked>
+                            <span class="text-sm text-gray-600">Невидимая метка</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="generate-nft" class="w-5 h-5 rounded text-amber-600 focus:ring-amber-500">
+                            <span class="text-sm text-gray-600">NFT метаданные</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button id="digitize-btn" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span id="digitize-text">Оцифровать и проанализировать</span>
+                    <div id="digitize-loading" class="hidden flex items-center gap-2">
+                        <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Обработка...
+                    </div>
+                </button>
+
+                <!-- Progress/Results -->
+                <div id="digitize-progress" class="hidden mt-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text" class="text-sm text-gray-600">0%</span>
+                    </div>
+                    <div id="progress-steps" class="space-y-2 text-sm">
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="circle" class="w-4 h-4"></i>
+                            <span>Загрузка изображений</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="circle" class="w-4 h-4"></i>
+                            <span>AI-анализ лицевой стороны</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="circle" class="w-4 h-4"></i>
+                            <span>OCR обратной стороны</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="circle" class="w-4 h-4"></i>
+                            <span>Нанесение водяных знаков</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-gray-400">
+                            <i data-lucide="circle" class="w-4 h-4"></i>
+                            <span>Сохранение в галерею</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digitization Result -->
+                <div id="digitize-result" class="hidden mt-6 p-6 bg-green-50 rounded-xl border border-green-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-green-800">Произведение оцифровано</h4>
+                            <p class="text-sm text-green-600">Отправлено куратору на проверку</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="text-gray-500">Стиль</p>
+                            <p id="result-style" class="font-medium text-gray-800">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="text-gray-500">Период</p>
+                            <p id="result-period" class="font-medium text-gray-800">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="text-gray-500">Техника</p>
+                            <p id="result-technique" class="font-medium text-gray-800">-</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="text-gray-500">Статус</p>
+                            <p class="font-medium text-amber-600">На проверке</p>
                         </div>
                     </div>
                 </div>
@@ -470,6 +713,7 @@
                     <ul class="space-y-3">
                         <li><a href="#overview" class="hover:text-white transition-colors">Обзор</a></li>
                         <li><a href="#analysis" class="hover:text-white transition-colors">Анализ</a></li>
+                        <li><a href="#digitization" class="hover:text-white transition-colors">Оцифровка</a></li>
                         <li><a href="#documents" class="hover:text-white transition-colors">Документы</a></li>
                         <li><a href="#assistant" class="hover:text-white transition-colors">Ассистент</a></li>
                     </ul>
@@ -645,6 +889,180 @@
                     mobileMenu.classList.add('hidden');
                 }
             });
+        });
+
+        // Digitization functionality
+        let frontFile = null;
+        let backFile = null;
+        let zipFile = null;
+
+        // Front side upload
+        const frontDropZone = document.getElementById('front-drop-zone');
+        const frontUpload = document.getElementById('front-upload');
+        const frontPreviewContainer = document.getElementById('front-preview-container');
+        const frontPreview = document.getElementById('front-preview');
+        const removeFront = document.getElementById('remove-front');
+
+        function setupDropZone(dropZone, input, previewContainer, preview, removeBtn, colorClass, fileVar) {
+            dropZone.addEventListener('click', () => input.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add(`border-${colorClass}-400`, `bg-${colorClass}-50`);
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove(`border-${colorClass}-400`, `bg-${colorClass}-50`);
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove(`border-${colorClass}-400`, `bg-${colorClass}-50`);
+                if (e.dataTransfer.files.length) {
+                    handleDigitizationFile(e.dataTransfer.files[0], dropZone, previewContainer, preview, fileVar);
+                }
+            });
+            input.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleDigitizationFile(e.target.files[0], dropZone, previewContainer, preview, fileVar);
+                }
+            });
+            removeBtn.addEventListener('click', () => {
+                preview.src = '';
+                input.value = '';
+                dropZone.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                if (fileVar === 'front') frontFile = null;
+                if (fileVar === 'back') backFile = null;
+            });
+        }
+
+        function handleDigitizationFile(file, dropZone, previewContainer, preview, fileVar) {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    dropZone.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+                if (fileVar === 'front') frontFile = file;
+                if (fileVar === 'back') backFile = file;
+            }
+        }
+
+        setupDropZone(
+            document.getElementById('front-drop-zone'),
+            document.getElementById('front-upload'),
+            document.getElementById('front-preview-container'),
+            document.getElementById('front-preview'),
+            document.getElementById('remove-front'),
+            'amber',
+            'front'
+        );
+
+        setupDropZone(
+            document.getElementById('back-drop-zone'),
+            document.getElementById('back-upload'),
+            document.getElementById('back-preview-container'),
+            document.getElementById('back-preview'),
+            document.getElementById('remove-back'),
+            'blue',
+            'back'
+        );
+
+        // ZIP upload
+        const zipDropZone = document.getElementById('zip-drop-zone');
+        const zipUploadInput = document.getElementById('zip-upload');
+        const zipInfo = document.getElementById('zip-info');
+        const zipFilename = document.getElementById('zip-filename');
+        const removeZip = document.getElementById('remove-zip');
+
+        zipDropZone.addEventListener('click', () => zipUploadInput.click());
+        zipDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zipDropZone.classList.add('border-purple-400', 'bg-purple-50');
+        });
+        zipDropZone.addEventListener('dragleave', () => {
+            zipDropZone.classList.remove('border-purple-400', 'bg-purple-50');
+        });
+        zipDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zipDropZone.classList.remove('border-purple-400', 'bg-purple-50');
+            if (e.dataTransfer.files.length) {
+                handleZipFile(e.dataTransfer.files[0]);
+            }
+        });
+        zipUploadInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleZipFile(e.target.files[0]);
+            }
+        });
+
+        function handleZipFile(file) {
+            if (file.name.endsWith('.zip')) {
+                zipFile = file;
+                zipFilename.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                zipInfo.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        }
+
+        removeZip.addEventListener('click', () => {
+            zipFile = null;
+            zipUploadInput.value = '';
+            zipInfo.classList.add('hidden');
+        });
+
+        // Digitize button
+        document.getElementById('digitize-btn').addEventListener('click', async function() {
+            if (!frontFile && !zipFile) {
+                alert('Пожалуйста, загрузите изображение лицевой стороны или ZIP архив');
+                return;
+            }
+
+            const btn = this;
+            const textSpan = document.getElementById('digitize-text');
+            const loadingDiv = document.getElementById('digitize-loading');
+            const progressDiv = document.getElementById('digitize-progress');
+            const resultDiv = document.getElementById('digitize-result');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressSteps = document.getElementById('progress-steps').children;
+
+            textSpan.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            btn.disabled = true;
+            progressDiv.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            const steps = [
+                { progress: 20, text: 'Загрузка изображений...' },
+                { progress: 40, text: 'AI-анализ лицевой стороны...' },
+                { progress: 60, text: 'OCR обратной стороны...' },
+                { progress: 80, text: 'Нанесение водяных знаков...' },
+                { progress: 100, text: 'Сохранение в галерею...' }
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                progressBar.style.width = steps[i].progress + '%';
+                progressText.textContent = steps[i].progress + '%';
+                progressSteps[i].classList.remove('text-gray-400');
+                progressSteps[i].classList.add('text-green-600');
+                progressSteps[i].querySelector('i').setAttribute('data-lucide', 'check-circle');
+                lucide.createIcons();
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+            textSpan.classList.remove('hidden');
+            loadingDiv.classList.add('hidden');
+            btn.disabled = false;
+            progressDiv.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+
+            document.getElementById('result-style').textContent = 'Импрессионизм';
+            document.getElementById('result-period').textContent = 'XIX век';
+            document.getElementById('result-technique').textContent = 'Масло';
+
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
         });
     </script>
 </body>
