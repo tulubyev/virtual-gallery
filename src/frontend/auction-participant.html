@@ -3,134 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кабинет участника аукциона - Виртуальная галерея</title>
-    <link rel="stylesheet" href="/assets/auction-participant.css">
+    <title>Кабинет участника аукциона - Virtual Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(234, 179, 8, 0.1), transparent); border-left-color: #eab308; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0); } }
+        .live-badge { animation: pulse-glow 2s infinite; }
+    </style>
 </head>
-<body>
-    <div class="auction-participant-container">
-        <header class="auction-participant-header">
-            <h1>Кабинет участника аукциона</h1>
-            <nav class="auction-participant-nav">
-                <button class="nav-btn active" data-tab="dashboard">Главная</button>
-                <button class="nav-btn" data-tab="auctions">Аукционы</button>
-                <button class="nav-btn" data-tab="bids">Мои ставки</button>
-                <button class="nav-btn" data-tab="watchlist">Наблюдение</button>
-                <button class="nav-btn" data-tab="transactions">Транзакции</button>
-                <button class="nav-btn" id="logoutBtn">Выход</button>
-            </nav>
-        </header>
+<body class="font-sans bg-gray-50 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+            <div class="p-6 border-b border-gray-100">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="gavel" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-gray-900">Virtual Gallery</h1>
+                        <span class="text-xs text-amber-600">Аукцион</span>
+                    </div>
+                </a>
+            </div>
 
-        <main class="auction-participant-main">
-            <!-- Главная панель -->
-            <section id="dashboard" class="tab-content active">
-                <h2>Панель управления участника аукциона</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Баланс</h3>
-                        <p id="balance" class="stat-number">0 ₽</p>
+            <nav class="flex-1 p-4 space-y-1">
+                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span class="font-medium">Главная</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="auctions">
+                    <i data-lucide="gavel" class="w-5 h-5"></i>
+                    <span class="font-medium">Аукционы</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="bids">
+                    <i data-lucide="hand" class="w-5 h-5"></i>
+                    <span class="font-medium">Мои ставки</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="watchlist">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                    <span class="font-medium">Наблюдение</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="transactions">
+                    <i data-lucide="receipt" class="w-5 h-5"></i>
+                    <span class="font-medium">Транзакции</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-5 h-5 text-amber-600"></i>
                     </div>
-                    <div class="stat-card">
-                        <h3>Активные ставки</h3>
-                        <p id="activeBids" class="stat-number">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Выиграно лотов</h3>
-                        <p id="wonLots" class="stat-number">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Участие в аукционах</h3>
-                        <p id="participatedAuctions" class="stat-number">0</p>
+                    <div>
+                        <p class="font-medium text-gray-900 text-sm">Участник</p>
+                        <p class="text-xs text-gray-500">bidder@gallery.com</p>
                     </div>
                 </div>
-                
-                <div class="upcoming-auctions">
-                    <h3>Предстоящие аукционы</h3>
-                    <div class="auctions-list" id="upcomingAuctionsList">
-                        <!-- Аукционы будут загружены динамически -->
+                <button id="logoutBtn" class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8">
+            <!-- Dashboard -->
+            <section id="dashboard" class="tab-content active">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Кабинет участника</h1>
+                    <p class="text-gray-600">Ваша активность на аукционах</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-amber-500 to-yellow-400 rounded-2xl p-6 text-white">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="wallet" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-3xl font-bold">2,450,000 Rub</p>
+                        <p class="text-white/80 text-sm">Баланс</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="hand" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">7</p>
+                        <p class="text-gray-500 text-sm">Активные ставки</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="trophy" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">12</p>
+                        <p class="text-gray-500 text-sm">Выиграно лотов</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">34</p>
+                        <p class="text-gray-500 text-sm">Участие в аукционах</p>
+                    </div>
+                </div>
+
+                <!-- Upcoming Auctions -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                        <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
+                        Предстоящие аукционы
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="font-semibold text-gray-900">Современное искусство</h4>
+                                    <span class="live-badge bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
+                                        LIVE
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600">15 лотов</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">Осталось</p>
+                                <p class="font-bold text-amber-600">2ч 34м</p>
+                            </div>
+                            <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-medium transition-colors">
+                                Участвовать
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-gray-900">Импрессионисты</h4>
+                                <p class="text-sm text-gray-600">23 лота</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">Начало</p>
+                                <p class="font-medium text-gray-900">Завтра, 14:00</p>
+                            </div>
+                            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors">
+                                Напомнить
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Аукционы -->
+            <!-- Auctions -->
             <section id="auctions" class="tab-content">
-                <h2>Доступные аукционы</h2>
-                <div class="controls-row">
-                    <input type="text" id="auctionSearch" placeholder="Поиск аукционов...">
-                    <select id="auctionFilter">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Доступные аукционы</h1>
+                    <p class="text-gray-600">Выберите аукцион для участия</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" placeholder="Поиск лотов..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <select class="px-4 py-2 border border-gray-200 rounded-xl">
                         <option value="">Все категории</option>
                         <option value="paintings">Живопись</option>
                         <option value="sculptures">Скульптура</option>
-                        <option value="photography">Фотография</option>
                         <option value="antiques">Антиквариат</option>
                     </select>
                 </div>
-                <div class="auctions-grid" id="auctionsGrid">
-                    <!-- Аукционы будут загружены динамически -->
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="relative">
+                            <div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
+                            <span class="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                                LIVE
+                            </span>
+                        </div>
+                        <div class="p-5">
+                            <h4 class="font-display font-semibold text-lg text-gray-900 mb-1">Звездная ночь</h4>
+                            <p class="text-sm text-gray-500 mb-4">Винсент Ван Гог, 1889</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-xs text-gray-500">Текущая ставка</p>
+                                    <p class="text-xl font-bold text-amber-600">850,000 Rub</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-500">Осталось</p>
+                                    <p class="font-medium text-gray-900">1ч 23м</p>
+                                </div>
+                            </div>
+                            <button class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="gavel" class="w-4 h-4"></i>
+                                Сделать ставку
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Мои ставки -->
+            <!-- Bids -->
             <section id="bids" class="tab-content">
-                <h2>Мои ставки</h2>
-                <div class="table-container">
-                    <table id="bidsTable">
-                        <thead>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Мои ставки</h1>
+                    <p class="text-gray-600">История ваших ставок</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th>Лот</th>
-                                <th>Экспонат</th>
-                                <th>Текущая ставка</th>
-                                <th>Моя ставка</th>
-                                <th>Статус</th>
-                                <th>Дата ставки</th>
-                                <th>Действия</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Лот</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Текущая ставка</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Моя ставка</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
                             </tr>
                         </thead>
-                        <tbody id="bidsTableBody">
-                            <!-- Данные будут загружены динамически -->
+                        <tbody>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-xl"></div>
+                                        <span class="font-medium text-gray-900">Звездная ночь</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-gray-900">850,000 Rub</td>
+                                <td class="px-6 py-4 text-gray-600">800,000 Rub</td>
+                                <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Перебита</span></td>
+                                <td class="px-6 py-4">
+                                    <button class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium text-sm hover:bg-amber-200">Поднять</button>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-200 to-indigo-300 rounded-xl"></div>
+                                        <span class="font-medium text-gray-900">Водяные лилии</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-gray-900">450,000 Rub</td>
+                                <td class="px-6 py-4 text-gray-600">450,000 Rub</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Лидирует</span></td>
+                                <td class="px-6 py-4">
+                                    <button class="text-gray-400 px-3 py-1.5 rounded-lg text-sm cursor-default">Вы впереди</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Наблюдение -->
+            <!-- Watchlist -->
             <section id="watchlist" class="tab-content">
-                <h2>Список наблюдения</h2>
-                <div class="table-container">
-                    <table id="watchlistTable">
-                        <thead>
-                            <tr>
-                                <th>Лот</th>
-                                <th>Экспонат</th>
-                                <th>Текущая ставка</th>
-                                <th>Аукцион</th>
-                                <th>До окончания</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody id="watchlistTableBody">
-                            <!-- Данные будут загружены динамически -->
-                        </tbody>
-                    </table>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Список наблюдения</h1>
+                    <p class="text-gray-600">Лоты, за которыми вы следите</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="h-40 bg-gradient-to-br from-rose-200 to-pink-300 relative">
+                            <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-900">Девушка с жемчужной сережкой</h4>
+                            <p class="text-sm text-gray-500 mb-3">Вермеер, 1665</p>
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-amber-600">1,200,000 Rub</span>
+                                <span class="text-sm text-gray-500">2ч 15м</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Транзакции -->
+            <!-- Transactions -->
             <section id="transactions" class="tab-content">
-                <h2>История транзакций</h2>
-                <div class="table-container">
-                    <table id="transactionsTable">
-                        <thead>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">История транзакций</h1>
+                    <p class="text-gray-600">Ваши финансовые операции</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th>ID транзакции</th>
-                                <th>Тип</th>
-                                <th>Сумма</th>
-                                <th>Дата</th>
-                                <th>Статус</th>
-                                <th>Детали</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Тип</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Сумма</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Дата</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
                             </tr>
                         </thead>
-                        <tbody id="transactionsTableBody">
-                            <!-- Данные будут загружены динамически -->
+                        <tbody>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <i data-lucide="arrow-down" class="w-5 h-5 text-green-600"></i>
+                                        </div>
+                                        <span class="font-medium text-gray-900">Пополнение</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-green-600">+500,000 Rub</td>
+                                <td class="px-6 py-4 text-gray-600">25.01.2025</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Выполнено</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                            <i data-lucide="gavel" class="w-5 h-5 text-amber-600"></i>
+                                        </div>
+                                        <span class="font-medium text-gray-900">Покупка лота</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-red-600">-350,000 Rub</td>
+                                <td class="px-6 py-4 text-gray-600">20.01.2025</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Выполнено</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -138,24 +352,22 @@
         </main>
     </div>
 
-    <!-- Модальное окно для подтверждения ставки -->
-    <div id="bidModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Сделать ставку</h2>
-            <form id="bidForm">
-                <input type="hidden" id="lotId">
-                <div class="form-group">
-                    <label for="bidAmount">Сумма ставки:</label>
-                    <input type="number" id="bidAmount" min="1" required>
-                    <p class="info-text">Минимальная следующая ставка: <span id="minBidAmount">0</span> ₽</p>
-                </div>
-                <button type="submit" class="btn btn-primary">Сделать ставку</button>
-            </form>
-        </div>
-    </div>
+    <script>
+        lucide.createIcons();
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/assets/auction-participant.js"></script>
+        document.querySelectorAll('.sidebar-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+                lucide.createIcons();
+            });
+        });
+    </script>
 </body>
 </html>

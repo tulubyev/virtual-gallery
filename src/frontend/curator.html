@@ -3,199 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кураторская панель - Виртуальная галерея</title>
-    <link rel="stylesheet" href="/assets/curator.css">
+    <title>Панель куратора - Virtual Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), transparent); border-left-color: #8b5cf6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
 </head>
-<body>
-    <div class="curator-container">
-        <header class="curator-header">
-            <h1>Панель куратора выставки</h1>
-            <nav class="curator-nav">
-                <button class="nav-btn active" data-tab="dashboard">Главная</button>
-                <button class="nav-btn" data-tab="collections">Коллекции</button>
-                <button class="nav-btn" data-tab="exhibitions">Выставки</button>
-                <button class="nav-btn" data-tab="artworks">Экспонаты</button>
-                <button class="nav-btn" data-tab="ai-curation">AI-курирование</button>
-                <button class="nav-btn" id="logoutBtn">Выход</button>
+<body class="font-sans bg-gray-50 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+            <div class="p-6 border-b border-gray-100">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="palette" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-gray-900">Virtual Gallery</h1>
+                        <span class="text-xs text-purple-600">Панель куратора</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1">
+                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    <span class="font-medium">Главная</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="collections">
+                    <i data-lucide="folder" class="w-5 h-5"></i>
+                    <span class="font-medium">Коллекции</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="exhibitions">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                    <span class="font-medium">Выставки</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="artworks">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <span class="font-medium">Экспонаты</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="ai-curation">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span class="font-medium">AI-курирование</span>
+                </button>
             </nav>
-        </header>
 
-        <main class="curator-main">
-            <!-- Главная панель -->
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 text-sm">Куратор</p>
+                        <p class="text-xs text-gray-500">curator@gallery.com</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8">
+            <!-- Dashboard -->
             <section id="dashboard" class="tab-content active">
-                <h2>Панель управления куратора</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Активных коллекций</h3>
-                        <p id="activeCollections" class="stat-number">0</p>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Панель куратора</h1>
+                    <p class="text-gray-600">Управление выставками и коллекциями</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="folder" class="w-6 h-6 text-purple-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">12</p>
+                        <p class="text-gray-500 text-sm">Активных коллекций</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Созданных выставок</h3>
-                        <p id="createdExhibitions" class="stat-number">0</p>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="layout-grid" class="w-6 h-6 text-pink-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">5</p>
+                        <p class="text-gray-500 text-sm">Созданных выставок</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Подобранных экспонатов</h3>
-                        <p id="selectedArtworks" class="stat-number">0</p>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="image" class="w-6 h-6 text-indigo-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">248</p>
+                        <p class="text-gray-500 text-sm">Подобранных экспонатов</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Посетителей сегодня</h3>
-                        <p id="todayVisitors" class="stat-number">0</p>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900">1,847</p>
+                        <p class="text-gray-500 text-sm">Посетителей сегодня</p>
                     </div>
                 </div>
-                
-                <div class="quick-actions">
-                    <h3>Быстрые действия</h3>
-                    <div class="actions-grid">
-                        <button class="action-btn" id="createCollectionBtn">
-                            <i class="icon">🎨</i>
-                            <span>Создать коллекцию</span>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Быстрые действия</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button class="flex flex-col items-center gap-3 p-6 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-colors">
+                            <div class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="folder-plus" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">Создать коллекцию</span>
                         </button>
-                        <button class="action-btn" id="createExhibitionBtn">
-                            <i class="icon">🖼️</i>
-                            <span>Создать выставку</span>
+                        <button class="flex flex-col items-center gap-3 p-6 bg-pink-50 hover:bg-pink-100 rounded-2xl transition-colors">
+                            <div class="w-14 h-14 bg-pink-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="layout-template" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">Создать выставку</span>
                         </button>
-                        <button class="action-btn" id="aiCurateBtn">
-                            <i class="icon">🤖</i>
-                            <span>AI-курирование</span>
+                        <button class="flex flex-col items-center gap-3 p-6 bg-indigo-50 hover:bg-indigo-100 rounded-2xl transition-colors">
+                            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">AI-курирование</span>
                         </button>
-                        <button class="action-btn" id="scheduleTourBtn">
-                            <i class="icon">🧭</i>
-                            <span>Назначить тур</span>
+                        <button class="flex flex-col items-center gap-3 p-6 bg-green-50 hover:bg-green-100 rounded-2xl transition-colors">
+                            <div class="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="compass" class="w-7 h-7 text-white"></i>
+                            </div>
+                            <span class="font-medium text-gray-900">Назначить тур</span>
                         </button>
                     </div>
                 </div>
             </section>
 
-            <!-- Управление коллекциями -->
+            <!-- Collections -->
             <section id="collections" class="tab-content">
-                <h2>Управление коллекциями</h2>
-                <div class="controls-row">
-                    <input type="text" id="collectionSearch" placeholder="Поиск коллекций...">
-                    <button class="btn btn-primary" id="newCollectionBtn">Новая коллекция</button>
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Коллекции</h1>
+                        <p class="text-gray-600">Управление тематическими коллекциями</p>
+                    </div>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Новая коллекция
+                    </button>
                 </div>
-                <div class="collections-grid" id="collectionsGrid">
-                    <!-- Коллекции будут загружены динамически -->
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+                        <div class="h-40 bg-gradient-to-br from-purple-400 to-pink-500"></div>
+                        <div class="p-6">
+                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Импрессионизм</h3>
+                            <p class="text-gray-600 text-sm mb-4">Коллекция работ импрессионистов XIX века</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">45 экспонатов</span>
+                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+                        <div class="h-40 bg-gradient-to-br from-blue-400 to-cyan-500"></div>
+                        <div class="p-6">
+                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Современное искусство</h3>
+                            <p class="text-gray-600 text-sm mb-4">Работы современных художников</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">78 экспонатов</span>
+                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+                        <div class="h-40 bg-gradient-to-br from-amber-400 to-orange-500"></div>
+                        <div class="p-6">
+                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Ренессанс</h3>
+                            <p class="text-gray-600 text-sm mb-4">Шедевры эпохи Возрождения</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">32 экспоната</span>
+                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Управление выставками -->
+            <!-- Exhibitions -->
             <section id="exhibitions" class="tab-content">
-                <h2>Управление выставками</h2>
-                <div class="controls-row">
-                    <button class="btn btn-primary" id="newExhibitionBtn">Новая выставка</button>
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Выставки</h1>
+                        <p class="text-gray-600">Управление виртуальными выставками</p>
+                    </div>
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Новая выставка
+                    </button>
                 </div>
-                <div class="table-container">
-                    <table id="exhibitionsTable">
-                        <thead>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th>ID</th>
-                                <th>Название</th>
-                                <th>Тема</th>
-                                <th>Дата начала</th>
-                                <th>Дата окончания</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Выставка</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Тема</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Даты</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
                             </tr>
                         </thead>
-                        <tbody id="exhibitionsTableBody">
-                            <!-- Данные будут загружены динамически -->
+                        <tbody>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4 font-medium text-gray-900">Мир импрессионизма</td>
+                                <td class="px-6 py-4 text-gray-600">Живопись XIX века</td>
+                                <td class="px-6 py-4 text-gray-600">01.02 - 28.02.2025</td>
+                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Активна</span></td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="eye" class="w-4 h-4 text-gray-600"></i></button>
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="edit" class="w-4 h-4 text-gray-600"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Управление экспонатами -->
+            <!-- Artworks -->
             <section id="artworks" class="tab-content">
-                <h2>Управление экспонатами</h2>
-                <div class="controls-row">
-                    <input type="text" id="artworkSearch" placeholder="Поиск экспонатов...">
-                    <select id="artworkFilter">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Экспонаты</h1>
+                    <p class="text-gray-600">Поиск и подбор экспонатов для коллекций</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" placeholder="Поиск экспонатов..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <select class="px-4 py-2 border border-gray-200 rounded-xl">
                         <option value="">Все категории</option>
                         <option value="painting">Живопись</option>
                         <option value="sculpture">Скульптура</option>
                         <option value="photography">Фотография</option>
-                        <option value="installation">Инсталляция</option>
                     </select>
                 </div>
-                <div class="table-container">
-                    <table id="artworksTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Название</th>
-                                <th>Автор</th>
-                                <th>Категория</th>
-                                <th>Год создания</th>
-                                <th>В коллекции</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody id="artworksTableBody">
-                            <!-- Данные будут загружены динамически -->
-                        </tbody>
-                    </table>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-900">Звездная ночь</h4>
+                            <p class="text-sm text-gray-500">Ван Гог, 1889</p>
+                            <button class="mt-3 w-full bg-purple-100 text-purple-700 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors text-sm">
+                                Добавить в коллекцию
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200"></div>
+                        <div class="p-4">
+                            <h4 class="font-semibold text-gray-900">Мона Лиза</h4>
+                            <p class="text-sm text-gray-500">Да Винчи, 1503</p>
+                            <button class="mt-3 w-full bg-purple-100 text-purple-700 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors text-sm">
+                                Добавить в коллекцию
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- AI-курирование -->
+            <!-- AI Curation -->
             <section id="ai-curation" class="tab-content">
-                <h2>AI-курирование</h2>
-                <div class="ai-controls">
-                    <div class="form-group">
-                        <label for="aiTheme">Тема для подбора:</label>
-                        <input type="text" id="aiTheme" placeholder="Введите тему для подбора экспонатов">
-                    </div>
-                    <div class="form-group">
-                        <label for="aiStyle">Стиль (опционально):</label>
-                        <input type="text" id="aiStyle" placeholder="Например: импрессионизм, абстракция">
-                    </div>
-                    <div class="form-group">
-                        <label for="aiCount">Количество экспонатов:</label>
-                        <input type="number" id="aiCount" min="1" max="50" value="10">
-                    </div>
-                    <button class="btn btn-primary" id="generateCollectionBtn">Сгенерировать коллекцию</button>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">AI-курирование</h1>
+                    <p class="text-gray-600">Автоматический подбор экспонатов с помощью AI</p>
                 </div>
-                
-                <div class="ai-results">
-                    <h3>Результаты AI-курирования</h3>
-                    <div id="aiResultsContainer">
-                        <!-- Результаты будут отображаться здесь -->
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-purple-600"></i>
+                            Параметры подбора
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Тема для подбора</label>
+                                <input type="text" id="aiTheme" placeholder="Введите тему..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Стиль (опционально)</label>
+                                <input type="text" id="aiStyle" placeholder="Например: импрессионизм" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Количество экспонатов</label>
+                                <input type="number" id="aiCount" min="1" max="50" value="10" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <button class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="wand-2" class="w-5 h-5"></i>
+                                Сгенерировать коллекцию
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Результаты AI-курирования</h3>
+                        <div class="text-center py-12 text-gray-500">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="sparkles" class="w-8 h-8 text-gray-400"></i>
+                            </div>
+                            <p>Задайте параметры и запустите генерацию</p>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Модальное окно для создания коллекции -->
-    <div id="collectionModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Создать новую коллекцию</h2>
-            <form id="collectionForm">
-                <div class="form-group">
-                    <label for="collectionName">Название коллекции:</label>
-                    <input type="text" id="collectionName" required>
-                </div>
-                <div class="form-group">
-                    <label for="collectionDescription">Описание:</label>
-                    <textarea id="collectionDescription" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="collectionTheme">Тема:</label>
-                    <input type="text" id="collectionTheme">
-                </div>
-                <div class="form-group">
-                    <label for="collectionArtworks">Экспонаты:</label>
-                    <select multiple id="collectionArtworks">
-                        <!-- Опции будут загружены динамически -->
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Создать коллекцию</button>
-            </form>
-        </div>
-    </div>
+    <script>
+        lucide.createIcons();
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/assets/curator.js"></script>
+        document.querySelectorAll('.sidebar-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+                lucide.createIcons();
+            });
+        });
+    </script>
 </body>
 </html>

@@ -3,165 +3,449 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель - Виртуальная галерея</title>
-    <link rel="stylesheet" href="/assets/admin.css">
+    <title>Админ-панель - Virtual Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent); border-left-color: #6366f1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
 </head>
-<body>
-    <div class="admin-container">
-        <header class="admin-header">
-            <h1>Административная панель</h1>
-            <nav class="admin-nav">
-                <button class="nav-btn active" data-tab="dashboard">Панель управления</button>
-                <button class="nav-btn" data-tab="users">Управление пользователями</button>
-                <button class="nav-btn" data-tab="artworks">Управление экспонатами</button>
-                <button class="nav-btn" data-tab="analytics">Аналитика</button>
-                <button class="nav-btn" data-tab="settings">Настройки</button>
-                <button class="nav-btn" id="logoutBtn">Выход</button>
-            </nav>
-        </header>
+<body class="font-sans bg-gray-50 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-100">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="palette" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-gray-900">Virtual Gallery</h1>
+                        <span class="text-xs text-indigo-600">Админ-панель</span>
+                    </div>
+                </a>
+            </div>
 
-        <main class="admin-main">
-            <!-- Панель управления -->
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">Панель управления</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="users">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span class="font-medium">Пользователи</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="artworks">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                    <span class="font-medium">Экспонаты</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="analytics">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                    <span class="font-medium">Аналитика</span>
+                </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="settings">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span class="font-medium">Настройки</span>
+                </button>
+            </nav>
+
+            <!-- User section -->
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-5 h-5 text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 text-sm">Администратор</p>
+                        <p class="text-xs text-gray-500">admin@gallery.com</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8">
+            <!-- Dashboard -->
             <section id="dashboard" class="tab-content active">
-                <h2>Панель управления</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Всего пользователей</h3>
-                        <p id="totalUsers" class="stat-number">0</p>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Панель управления</h1>
+                    <p class="text-gray-600">Обзор активности галереи</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +12%
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="totalUsers">1,247</p>
+                        <p class="text-gray-500 text-sm">Всего пользователей</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Активных пользователей</h3>
-                        <p id="activeUsers" class="stat-number">0</p>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="user-check" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +8%
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="activeUsers">892</p>
+                        <p class="text-gray-500 text-sm">Активных пользователей</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Всего экспонатов</h3>
-                        <p id="totalArtworks" class="stat-number">0</p>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="image" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
+                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                +24
+                            </span>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="totalArtworks">3,456</p>
+                        <p class="text-gray-500 text-sm">Всего экспонатов</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>Новые за сегодня</h3>
-                        <p id="newToday" class="stat-number">0</p>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="plus-circle" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="newToday">47</p>
+                        <p class="text-gray-500 text-sm">Новые за сегодня</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Последняя активность</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900">Новый пользователь зарегистрирован</p>
+                                <p class="text-sm text-gray-500">user@example.com</p>
+                            </div>
+                            <span class="text-sm text-gray-400">2 мин назад</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="image-plus" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900">Добавлен новый экспонат</p>
+                                <p class="text-sm text-gray-500">"Звездная ночь" - Ван Гог</p>
+                            </div>
+                            <span class="text-sm text-gray-400">15 мин назад</span>
+                        </div>
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="eye" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900">Новый VR-тур создан</p>
+                                <p class="text-sm text-gray-500">Импрессионисты XIX века</p>
+                            </div>
+                            <span class="text-sm text-gray-400">1 час назад</span>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Управление пользователями -->
+            <!-- Users -->
             <section id="users" class="tab-content">
-                <h2>Управление пользователями</h2>
-                <div class="admin-controls">
-                    <input type="text" id="userSearch" placeholder="Поиск пользователей...">
-                    <select id="roleFilter">
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Пользователи</h1>
+                        <p class="text-gray-600">Управление пользователями системы</p>
+                    </div>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition-colors">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        Добавить
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
+                    <div class="flex-1 relative">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="userSearch" placeholder="Поиск пользователей..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <select id="roleFilter" class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">Все роли</option>
                         <option value="user">Пользователь</option>
                         <option value="admin">Администратор</option>
                         <option value="curator">Куратор</option>
                         <option value="staff">Сотрудник</option>
-                        <option value="tour_guide">Организатор туров</option>
-                        <option value="auction_participant">Участник аукциона</option>
                     </select>
                 </div>
-                <div class="table-container">
-                    <table id="usersTable">
-                        <thead>
+
+                <!-- Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th>ID</th>
-                                <th>Имя пользователя</th>
-                                <th>Email</th>
-                                <th>Роль</th>
-                                <th>Дата регистрации</th>
-                                <th>Действия</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Пользователь</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Email</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Роль</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Дата регистрации</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <!-- Данные будут загружены динамически -->
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                            <span class="font-medium text-indigo-600">ИП</span>
+                                        </div>
+                                        <span class="font-medium text-gray-900">Иван Петров</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">ivan@example.com</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">Куратор</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">15.01.2025</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                            <i data-lucide="edit" class="w-4 h-4 text-gray-600"></i>
+                                        </button>
+                                        <button class="p-2 hover:bg-red-50 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span class="font-medium text-green-600">МС</span>
+                                        </div>
+                                        <span class="font-medium text-gray-900">Мария Сидорова</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">maria@example.com</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">Пользователь</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">20.01.2025</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                                            <i data-lucide="edit" class="w-4 h-4 text-gray-600"></i>
+                                        </button>
+                                        <button class="p-2 hover:bg-red-50 rounded-lg transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Управление экспонатами -->
+            <!-- Artworks -->
             <section id="artworks" class="tab-content">
-                <h2>Управление экспонатами</h2>
-                <button class="btn btn-primary" id="addArtworkBtn">Добавить экспонат</button>
-                <div class="table-container">
-                    <table id="artworksTable">
-                        <thead>
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Экспонаты</h1>
+                        <p class="text-gray-600">Управление коллекцией галереи</p>
+                    </div>
+                    <button id="addArtworkBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Добавить экспонат
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th>ID</th>
-                                <th>Название</th>
-                                <th>Автор</th>
-                                <th>Год создания</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Экспонат</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Автор</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Год</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
+                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
                             </tr>
                         </thead>
                         <tbody id="artworksTableBody">
-                            <!-- Данные будут загружены динамически -->
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-xl"></div>
+                                        <span class="font-medium text-gray-900">Звездная ночь</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600">Винсент Ван Гог</td>
+                                <td class="px-6 py-4 text-gray-600">1889</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">Опубликован</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="eye" class="w-4 h-4 text-gray-600"></i></button>
+                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="edit" class="w-4 h-4 text-gray-600"></i></button>
+                                        <button class="p-2 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Аналитика -->
+            <!-- Analytics -->
             <section id="analytics" class="tab-content">
-                <h2>Аналитика</h2>
-                <div class="analytics-grid">
-                    <div class="chart-container">
-                        <h3>Посещаемость по дням</h3>
-                        <canvas id="visitsChart"></canvas>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Аналитика</h1>
+                    <p class="text-gray-600">Статистика посещаемости и активности</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Посещаемость по дням</h3>
+                        <div class="h-64 bg-gradient-to-t from-indigo-50 to-white rounded-xl flex items-end justify-around p-4">
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 60%"></div>
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 80%"></div>
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 45%"></div>
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 90%"></div>
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 70%"></div>
+                            <div class="w-8 bg-indigo-500 rounded-t-lg" style="height: 55%"></div>
+                            <div class="w-8 bg-indigo-600 rounded-t-lg" style="height: 85%"></div>
+                        </div>
                     </div>
-                    <div class="chart-container">
-                        <h3>Популярные экспонаты</h3>
-                        <canvas id="popularArtworksChart"></canvas>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Популярные экспонаты</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl font-bold text-indigo-600">1</span>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900">Звездная ночь</p>
+                                    <p class="text-sm text-gray-500">2,345 просмотров</p>
+                                </div>
+                                <div class="w-24 bg-gray-100 rounded-full h-2">
+                                    <div class="bg-indigo-600 h-2 rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl font-bold text-gray-400">2</span>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900">Мона Лиза</p>
+                                    <p class="text-sm text-gray-500">1,987 просмотров</p>
+                                </div>
+                                <div class="w-24 bg-gray-100 rounded-full h-2">
+                                    <div class="bg-indigo-500 h-2 rounded-full" style="width: 80%"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl font-bold text-orange-400">3</span>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900">Крик</p>
+                                    <p class="text-sm text-gray-500">1,654 просмотра</p>
+                                </div>
+                                <div class="w-24 bg-gray-100 rounded-full h-2">
+                                    <div class="bg-indigo-400 h-2 rounded-full" style="width: 67%"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Настройки -->
+            <!-- Settings -->
             <section id="settings" class="tab-content">
-                <h2>Настройки системы</h2>
-                <div class="settings-form">
-                    <div class="form-group">
-                        <label for="galleryName">Название галереи:</label>
-                        <input type="text" id="galleryName" value="Виртуальная галерея искусств">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Настройки</h1>
+                    <p class="text-gray-600">Конфигурация системы</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-2xl">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Название галереи</label>
+                            <input type="text" id="galleryName" value="Виртуальная галерея искусств" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Максимальный размер файла (MB)</label>
+                            <input type="number" id="maxFileSize" value="10" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div>
+                                <p class="font-medium text-gray-900">Автоматическая модерация</p>
+                                <p class="text-sm text-gray-500">AI-проверка загружаемого контента</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="autoModeration" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+                        <button id="saveSettingsBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium transition-colors">
+                            Сохранить настройки
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="maxFileSize">Максимальный размер файла (MB):</label>
-                        <input type="number" id="maxFileSize" value="10">
-                    </div>
-                    <div class="form-group">
-                        <label for="autoModeration">Автоматическая модерация:</label>
-                        <input type="checkbox" id="autoModeration" checked>
-                    </div>
-                    <button class="btn btn-primary" id="saveSettingsBtn">Сохранить настройки</button>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Модальное окно для изменения роли пользователя -->
-    <div id="roleModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Изменить роль пользователя</h2>
-            <form id="roleForm">
-                <input type="hidden" id="userIdForRole">
-                <div class="form-group">
-                    <label for="newRole">Новая роль:</label>
-                    <select id="newRole">
-                        <option value="user">Пользователь</option>
-                        <option value="admin">Администратор</option>
-                        <option value="curator">Куратор</option>
-                        <option value="staff">Сотрудник</option>
-                        <option value="tour_guide">Организатор туров</option>
-                        <option value="auction_participant">Участник аукциона</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Сохранить</button>
-            </form>
-        </div>
-    </div>
+    <script>
+        lucide.createIcons();
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/assets/admin.js"></script>
+        // Tab navigation
+        document.querySelectorAll('.sidebar-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+                lucide.createIcons();
+            });
+        });
+    </script>
 </body>
 </html>
