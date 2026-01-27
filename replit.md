@@ -33,8 +33,8 @@ A custom dependency injection container (`src/container.ts`) manages service ins
 
 The frontend consists of role-specific HTML pages with modern responsive design:
 - **index.html** - Main landing page with AI dashboard, hero section, and assistant chat
-- **admin.html** - Admin panel with sidebar navigation, user/artwork management, analytics
-- **curator.html** - Curator dashboard for collections, exhibitions, AI-curation
+- **admin.html** - Admin panel with sidebar navigation, user/artwork management, analytics, knowledge base management (RAG stats, reindexing, external source imports)
+- **curator.html** - Curator dashboard for collections, exhibitions, AI-curation, digitized artworks review/approval workflow
 - **auction-participant.html** - Auction interface with live bidding, watchlist, transactions
 
 All dashboard pages feature:
@@ -49,13 +49,23 @@ A separate Python FastAPI microservice (`ai-ml-service/`) provides:
 - PDF processing with OCR and text chunking
 - RAG (Retrieval-Augmented Generation) system for semantic search
 - Async job processing with Redis/Bull queues
+- **Artwork Digitization**: Dual-sided scanning with AI analysis (front: style/technique, back: OCR/provenance)
+- **Watermarking**: Visible + invisible steganographic watermarks for copyright protection
+- **NFT Metadata**: ERC-721 compliant TAE (Token Art Edition) generation for limited editions
+- **External Sources**: Parsing from WikiArt, MET Museum, Rijksmuseum, Harvard Art Museums APIs
+- **PDF Categorization**: AI-powered extraction of styles, artists, techniques, periods
 
 ### Database Design
 - **Primary Database**: PostgreSQL for relational data (users, artworks, galleries, rooms)
 - **Vector Database**: Qdrant Cloud for AI embeddings and similarity search
 - **Caching**: Redis for session management and job queues
 
-Key tables: users, artworks, galleries, room_types, room_instances, room_analytics
+Key tables: users, artworks, galleries, room_types, room_instances, room_analytics, digitized_artworks, pdf_documents, pdf_chunks, external_artworks
+
+Three Qdrant collections for RAG:
+- **artworks**: Digitized artwork embeddings with AI analysis
+- **pdf_chunks**: PDF document text chunks with category metadata
+- **external_artworks**: Museum API indexed artworks
 
 ### Authentication & Authorization
 - JWT tokens for API authentication
