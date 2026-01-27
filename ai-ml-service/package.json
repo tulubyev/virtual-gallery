@@ -1,0 +1,76 @@
+{
+  "name": "ai-ml-service",
+  "version": "1.0.0",
+  "description": "AI/ML Service for Virtual Art Gallery - API Gateway",
+  "main": "src/api/index.js",
+  "scripts": {
+    "start": "node src/api/index.js",
+    "dev": "nodemon src/api/index.js",
+    "dev:api": "nodemon src/api/index.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "db:init": "node scripts/init-db.js",
+    "db:init-beget": "node scripts/init-beget-db.js",
+    "db:init-beget-auto": "cmd /c scripts\\init-beget-db-with-env.bat",
+    "setup:qdrant-local": "powershell -ExecutionPolicy Bypass -File scripts/setup-local-qdrant.ps1",
+    "db:migrate": "node scripts/migrate-db.js",
+    "docker:build": "docker build -t ai-ml-service .",
+    "docker:run": "docker run -p 8000:8000 ai-ml-service"
+  },
+  "keywords": [
+    "ai",
+    "ml",
+    "computer-vision",
+    "rag",
+    "art-gallery",
+    "api"
+  ],
+  "author": "AI/ML Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "axios": "^1.6.0",
+    "bull": "^4.11.4",
+    "winston": "^3.10.0",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.1",
+    "multer": "^1.4.5-lts.1",
+    "@aws-sdk/client-s3": "^3.427.0",
+    "openai": "^4.12.4",
+    "@qdrant/js-rest-client": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/ai-ml-service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/ai-ml-service/issues"
+  },
+  "homepage": "https://github.com/your-org/ai-ml-service#readme"
+}

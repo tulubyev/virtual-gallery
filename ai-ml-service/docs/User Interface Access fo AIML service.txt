@@ -1,0 +1,102 @@
+ # 🌐 User Interface Access
+
+   ## 📋 Architecture Overview
+
+   This AI/ML Service is a backend API service that provides AI/ML functionality to your Virtual Art Gallery application. It does not have a
+   built-in user interface.
+
+   ## 🖥️ User Access Path
+
+   Users access the AI/ML features through your main Gallery application:
+
+       ┌─────────────────────────────────────┐
+       │        Virtual Art Gallery UI       │  ← User-facing website
+       │  (Separate Frontend Application)    │
+       │                                     │
+       │  • Image upload interface           │
+       │  • RAG query interface              │
+       │  • Results display                  │
+       │  • User authentication              │
+       └─────────────────────────────────────┘
+                       │
+                       ▼ HTTP API calls
+       ┌─────────────────────────────────────┐
+       │        AI/ML Service Backend        │  ← This service
+       │  (Current Implementation)           │
+       │                                     │
+       │  • /api/v1/images/analyze           │
+       │  • /api/v1/rag/query                │
+       │  • /api/v1/pdfs/process             │
+       └─────────────────────────────────────┘
+
+   ## 🎯 User Journey
+
+   ### For Image Analysis:
+
+       1. User goes to Gallery website (your main app)
+       2. Uploads artwork image through Gallery UI
+       3. Gallery frontend calls POST /api/v1/images/analyze
+       4. Results displayed in Gallery interface
+
+   ### For RAG Queries:
+
+       1. User visits Gallery website
+       2. Types question in RAG search interface
+       3. Gallery frontend calls POST /api/v1/rag/query
+       4. AI-generated answer shown in Gallery UI
+
+   ## 🔗 Integration Points
+
+   Your Gallery application needs to:
+
+   ### Frontend Integration:
+
+       // Example: Image analysis integration
+       const analyzeImage = async (imageUrl, artworkId) => {
+         const response = await fetch('http://your-ai-ml-service:8000/api/v1/images/analyze', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ image_url: imageUrl, artwork_id: artworkId })
+         });
+         return response.json();
+       };
+
+   ### Configuration:
+
+       # In your Gallery app's environment
+       AI_ML_SERVICE_URL=http://your-ai-ml-service:8000
+
+   ## 📍 Access URLs
+
+   Production Access:
+
+       * API Base: http://your-domain.com:8000 (or configured port)
+       * Health Check: http://your-domain.com:8000/health
+       * API Docs: http://your-domain.com:8000/api/v1/docs
+
+   Development Access:
+
+       * API Base: http://localhost:8000
+       * Health Check: http://localhost:8000/health
+
+   ## 🛠️ What You Need to Build
+
+   Separate Frontend Application that:
+
+       * Provides user interface for image uploads
+       * Displays AI analysis results
+       * Offers RAG query interface
+       * Shows PDF processing status
+       * Handles user authentication
+       * Calls this AI/ML service APIs
+
+   ## 📊 Current Status
+
+   ✅ Backend APIs: Ready and tested
+   ✅ AI/ML Processing: Implemented and working
+   ✅ Database Integration: Connected
+   ✅ Queue System: Async processing ready
+
+   ⏳ Frontend UI: Needs separate implementation in your Gallery app
+
+   The AI/ML service is the backend engine - users interact with it through your Gallery website frontend! 🎨🌐

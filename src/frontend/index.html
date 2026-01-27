@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Art Gallery</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="brain" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900">Virtual Art Gallery</h1>
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">AI Powered</span>
+                    </div>
+                    <nav class="flex gap-4">
+                        <a href="#overview" class="text-gray-600 hover:text-gray-900">Overview</a>
+                        <a href="#analysis" class="text-gray-600 hover:text-gray-900">Analysis</a>
+                        <a href="#documents" class="text-gray-600 hover:text-gray-900">Documents</a>
+                        <a href="#assistant" class="text-gray-600 hover:text-gray-900">Assistant</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Overview Section -->
+            <section id="overview" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">AI Dashboard Overview</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Image Analysis Card -->
+                    <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="image" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold">Image Analysis</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Analyze artwork images with AI vision models to extract style, technique, and historical context.
+                        </p>
+                        <div class="space-y-2 text-xs text-gray-500">
+                            <div class="flex justify-between"><span>Model:</span><span class="font-medium">GPT-4 Vision</span></div>
+                            <div class="flex justify-between"><span>Response time:</span><span class="font-medium">~30 seconds</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Document Processing Card -->
+                    <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold">Document Processing</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Upload and process PDF documents about art history, techniques, and artists for AI-powered search.
+                        </p>
+                        <div class="space-y-2 text-xs text-gray-500">
+                            <div class="flex justify-between"><span>Supported:</span><span class="font-medium">PDF (50MB max)</span></div>
+                            <div class="flex justify-between"><span>Features:</span><span class="font-medium">OCR + Chunking</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Art Assistant Card -->
+                    <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="message-circle" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold">Art Assistant</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Ask questions about art using Retrieval-Augmented Generation for accurate, contextual answers.
+                        </p>
+                        <div class="space-y-2 text-xs text-gray-500">
+                            <div class="flex justify-between"><span>Technology:</span><span class="font-medium">RAG + Claude</span></div>
+                            <div class="flex justify-between"><span>Knowledge base:</span><span class="font-medium">Processed docs</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Analysis Section -->
+            <section id="analysis" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Artwork Image Analysis</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Upload Form -->
+                    <div class="bg-white rounded-lg shadow-sm border p-6">
+                        <h3 class="text-xl font-semibold mb-4">Upload Artwork for Analysis</h3>
+                        <p class="text-gray-600 mb-6">
+                            Upload an image of an artwork to get AI-powered analysis including style recognition,
+                            technique identification, and historical context.
+                        </p>
+
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                <i data-lucide="upload" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                                <p class="text-gray-600 mb-2">Drag and drop an image here, or click to browse</p>
+                                <p class="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                <input type="file" accept="image/*" class="hidden" id="image-upload">
+                                <button onclick="document.getElementById('image-upload').click()"
+                                        class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    Choose File
+                                </button>
+                            </div>
+
+                            <button id="analyze-btn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span id="analyze-text">Analyze Artwork</span>
+                                <div id="analyze-loading" class="hidden flex items-center justify-center gap-2">
+                                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Analyzing...
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Display -->
+                    <div id="analysis-results" class="bg-white rounded-lg shadow-sm border p-6 hidden">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                            <h3 class="text-xl font-semibold">Analysis Complete</h3>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium mb-2">Artwork Analysis</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg text-sm">
+                                    <p>This artwork appears to be an impressionist painting from the late 19th century. The loose brushwork and emphasis on light and color suggest influences from Claude Monet or Pierre-Auguste Renoir.</p>
+                                    <br>
+                                    <p><strong>Key characteristics:</strong></p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li>Use of broken color technique</li>
+                                        <li>Emphasis on natural light</li>
+                                        <li>Soft, blurred edges</li>
+                                        <li>Vibrant color palette</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><span class="font-medium">Model:</span> GPT-4 Vision</div>
+                                <div><span class="font-medium">Confidence:</span> 92%</div>
+                                <div><span class="font-medium">Processing time:</span> 28s</div>
+                                <div><span class="font-medium">Tokens used:</span> 350</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Documents Section -->
+            <section id="documents" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Document Processing</h2>
+
+                <div class="bg-white rounded-lg shadow-sm border p-6">
+                    <h3 class="text-xl font-semibold mb-4">Upload PDF Document</h3>
+                    <p class="text-gray-600 mb-6">
+                        Upload PDF documents about art history, techniques, and artists. The AI will process,
+                        analyze, and make the content searchable through the Art Assistant.
+                    </p>
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
+                        <i data-lucide="file-text" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 mb-2">Drag and drop a PDF here, or click to browse</p>
+                        <p class="text-sm text-gray-500">PDF files up to 50MB</p>
+                        <input type="file" accept=".pdf" class="hidden" id="pdf-upload">
+                        <button onclick="document.getElementById('pdf-upload').click()"
+                                class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            Choose PDF
+                        </button>
+                    </div>
+
+                    <button id="process-pdf-btn" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="process-text">Process Document</span>
+                        <div id="process-loading" class="hidden flex items-center justify-center gap-2">
+                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing...
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Art Assistant Section -->
+            <section id="assistant" class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Art Assistant</h2>
+
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <!-- Chat Header -->
+                    <div class="p-6 border-b">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i data-lucide="bot" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Art Assistant</h3>
+                                <p class="text-sm text-gray-600">AI-powered assistant for art-related questions</p>
+                            </div>
+                            <span class="ml-auto bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">AI Powered</span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="h-96 overflow-y-auto p-6 space-y-4">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="bot" class="w-4 h-4"></i>
+                            </div>
+                            <div class="bg-gray-100 rounded-lg p-3 max-w-[80%]">
+                                <p class="text-sm">Hello! I'm your Art Assistant. I can help you with questions about art history, techniques, artists, and more. What would you like to know?</p>
+                                <p class="text-xs text-gray-500 mt-2">Just now</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-6 border-t">
+                        <div class="flex gap-3">
+                            <input
+                                type="text"
+                                id="chat-input"
+                                placeholder="Ask me about art history, techniques, artists..."
+                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                onkeypress="handleChatKeyPress(event)"
+                            >
+                            <button
+                                onclick="sendChatMessage()"
+                                id="send-btn"
+                                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Chat functionality
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = [
+                    "That's an excellent question about art! Based on my knowledge of art history, the impressionist movement began in the 1870s in France. Artists like Monet, Renoir, and Degas sought to capture the fleeting effects of light and color rather than detailed realism.",
+                    "The technique you're referring to is called 'sfumato,' which means 'smoky' or 'soft' in Italian. It was perfected by Leonardo da Vinci and creates soft transitions between colors and tones, giving paintings a more lifelike appearance.",
+                    "Cubism, pioneered by Picasso and Braque around 1907, revolutionized art by depicting objects from multiple viewpoints simultaneously. This broke away from traditional perspective and influenced modern art profoundly.",
+                    "The Mona Lisa's enigmatic smile has fascinated art lovers for centuries. Some theories suggest it might be due to Leonardo's technique of painting both sides of the face simultaneously, creating a dynamic expression that changes with viewing angle."
+                ];
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessage('assistant', randomResponse);
+            }, 1000 + Math.random() * 2000);
+        }
+
+        function addMessage(type, content) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex gap-3 ${type === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                type === 'user' ? 'bg-blue-500' : 'bg-gray-100'
+            }`;
+
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', type === 'user' ? 'user' : 'bot');
+            icon.className = 'w-4 h-4';
+            if (type === 'user') icon.classList.add('text-white');
+            avatarDiv.appendChild(icon);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `rounded-lg p-3 max-w-[80%] ${
+                type === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'
+            }`;
+
+            const textP = document.createElement('p');
+            textP.className = 'text-sm';
+            textP.textContent = content;
+            contentDiv.appendChild(textP);
+
+            const timeP = document.createElement('p');
+            timeP.className = 'text-xs opacity-75 mt-2';
+            timeP.textContent = new Date().toLocaleTimeString();
+            contentDiv.appendChild(timeP);
+
+            if (type === 'user') {
+                messageDiv.appendChild(contentDiv);
+                messageDiv.appendChild(avatarDiv);
+            } else {
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(contentDiv);
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Re-initialize icons for new elements
+            lucide.createIcons();
+        }
+
+        // Image analysis functionality
+        document.getElementById('analyze-btn').addEventListener('click', async function() {
+            const btn = this;
+            const textSpan = document.getElementById('analyze-text');
+            const loadingDiv = document.getElementById('analyze-loading');
+
+            // Show loading state
+            textSpan.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            btn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Hide loading, show results
+                textSpan.classList.remove('hidden');
+                loadingDiv.classList.add('hidden');
+                btn.disabled = false;
+
+                document.getElementById('analysis-results').classList.remove('hidden');
+                document.getElementById('analysis-results').scrollIntoView({ behavior: 'smooth' });
+            }, 3000);
+        });
+
+        // PDF processing functionality
+        document.getElementById('process-pdf-btn').addEventListener('click', async function() {
+            const btn = this;
+            const textSpan = document.getElementById('process-text');
+            const loadingDiv = document.getElementById('process-loading');
+
+            // Show loading state
+            textSpan.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
+            btn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                // Hide loading
+                textSpan.classList.remove('hidden');
+                loadingDiv.classList.add('hidden');
+                btn.disabled = false;
+
+                // Show success message
+                alert('PDF processed successfully! The document is now searchable through the Art Assistant.');
+            }, 5000);
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

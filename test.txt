@@ -1,0 +1,1194 @@
+virtual-art-gallery@1.0.0 test:coverage
+> jest --coverage
+
+ FAIL  src/services/__tests__/UserService.test.ts
+  ● Test suite failed to run
+
+    src/services/__tests__/UserService.test.ts:4:10 - error TS2305: Module '"../../types/artwork"' has no exported member 'User'.
+
+    4 import { User } from '../../types/artwork';
+               ~~~~
+    src/services/__tests__/UserService.test.ts:47:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    47         .mockResolvedValue(mockClient as any);
+                                  ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:69:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    69         .mockResolvedValue(mockClient as any);
+                                  ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:96:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    96         .mockResolvedValue(mockClient as any);
+                                  ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:118:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    118         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:150:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    150         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:192:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    192         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:217:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    217         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:239:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    239         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:264:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    264         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+    src/services/__tests__/UserService.test.ts:282:28 - error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+
+    282         .mockResolvedValue(mockClient as any);
+                                   ~~~~~~~~~~~~~~~~~
+
+ FAIL  src/services/__tests__/ArtworkService.test.ts
+  ● Test suite failed to run
+
+    src/services/__tests__/ArtworkService.test.ts:48:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    48         .mockResolvedValue(mockClient);
+                                  ~~~~~~~~~~
+    src/services/__tests__/ArtworkService.test.ts:70:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    70         .mockResolvedValue(mockClient);
+                                  ~~~~~~~~~~
+    src/services/__tests__/ArtworkService.test.ts:102:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    102         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/ArtworkService.test.ts:144:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    144         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/ArtworkService.test.ts:169:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    169         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/ArtworkService.test.ts:191:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    191         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+
+ FAIL  src/services/__tests__/GalleryService.test.ts
+  ● Test suite failed to run
+
+    src/services/__tests__/GalleryService.test.ts:47:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    47         .mockResolvedValue(mockClient);
+                                  ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:69:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    69         .mockResolvedValue(mockClient);
+                                  ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:94:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    94         .mockResolvedValue(mockClient);
+                                  ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:131:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    131         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:173:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    173         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:198:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    198         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+    src/services/__tests__/GalleryService.test.ts:220:28 - error TS2345: Argument of type 'Mocked<PoolClient>' is not assignable to parameter of type 'never'.
+
+    220         .mockResolvedValue(mockClient);
+                                   ~~~~~~~~~~
+
+ FAIL  src/__tests__/integration.test.ts
+  ● Test suite failed to run
+
+    src/server.ts:27:28 - error TS2307: Cannot find module './routes/roomRoutes' or its corresponding type declarations.
+
+    27 import { roomRoutes } from './routes/roomRoutes';
+                                  ~~~~~~~~~~~~~~~~~~~~~
+    src/server.ts:241:10 - error TS2300: Duplicate identifier 'app'.
+
+    241 export { app, server };export { app, server };
+                 ~~~
+    src/server.ts:241:15 - error TS2300: Duplicate identifier 'server'.
+
+    241 export { app, server };export { app, server };
+                      ~~~~~~
+    src/server.ts:241:33 - error TS2300: Duplicate identifier 'app'.
+
+    241 export { app, server };export { app, server };
+                                        ~~~
+    src/server.ts:241:38 - error TS2300: Duplicate identifier 'server'.
+
+    241 export { app, server };export { app, server };
+                                             ~~~~~~
+    src/server.ts:243:10 - error TS2300: Duplicate identifier 'app'.
+
+    243 export { app, server };export { app, server };
+                 ~~~
+    src/server.ts:243:15 - error TS2300: Duplicate identifier 'server'.
+
+    243 export { app, server };export { app, server };
+                      ~~~~~~
+    src/server.ts:243:33 - error TS2300: Duplicate identifier 'app'.
+
+    243 export { app, server };export { app, server };
+                                        ~~~
+    src/server.ts:243:38 - error TS2300: Duplicate identifier 'server'.
+
+    243 export { app, server };export { app, server };
+                                             ~~~~~~
+
+Running coverage on untested files...Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\database\initialize.ts
+ERROR: src/database/initialize.ts:21:23 - error TS2345: Argument of type '{ host: string; port: string | number; database: string; user: string; password: string; ssl: { rejectUnauthorized: boolean; }; }' is not assignable to parameter of type 'PoolConfig'.
+  Types of property 'port' are incompatible.
+    Type 'string | number' is not assignable to type 'number'.
+      Type 'string' is not assignable to type 'number'.
+
+21 const pool = new Pool(dbConfig);
+                         ~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\database\initialize_debug.ts
+ERROR: src/database/initialize_debug.ts:21:23 - error TS2345: Argument of type '{ host: string; port: string | number; database: string; user: string; password: string; ssl: { rejectUnauthorized: boolean; }; }' is not assignable to parameter of type 'PoolConfig'.
+  Types of property 'port' are incompatible.
+    Type 'string | number' is not assignable to type 'number'.
+      Type 'string' is not assignable to type 'number'.
+
+21 const pool = new Pool(dbConfig);
+                         ~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\userManagementRoutes.ts
+ERROR: src/routes/userManagementRoutes.ts:9:46 - error TS2339: Property 'getAllUsers' does not exist on type 'typeof UserController'.
+
+9 router.get('/', requireAdmin, userController.getAllUsers);
+                                               ~~~~~~~~~~~
+src/routes/userManagementRoutes.ts:12:56 - error TS2339: Property 'getUsersByRole' does not exist on type 'typeof UserController'.
+
+12 router.get('/role/:role', requireAdmin, userController.getUsersByRole);
+                                                          ~~~~~~~~~~~~~~
+src/routes/userManagementRoutes.ts:15:58 - error TS2339: Property 'updateUserRole' does not exist on type 'typeof UserController'.
+
+15 router.put('/:userId/role', requireAdmin, userController.updateUserRole);
+                                                            ~~~~~~~~~~~~~~
+src/routes/userManagementRoutes.ts:18:56 - error TS2339: Property 'deleteUser' does not exist on type 'typeof UserController'.
+
+18 router.delete('/:userId', requireAdmin, userController.deleteUser);
+                                                          ~~~~~~~~~~
+src/routes/userManagementRoutes.ts:21:51 - error TS2339: Property 'getUserStats' does not exist on type 'typeof UserController'.
+
+21 router.get('/stats', requireAdmin, userController.getUserStats);
+                                                     ~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\index.ts
+ERROR: src/routes/index.ts:8:10 - error TS2614: Module '"./iotRoutes"' has no exported member 'iotRoutes'. Did you mean to use 'import iotRoutes from "./iotRoutes"' instead?
+
+8 export { iotRoutes } from './iotRoutes';
+           ~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\userRoutes.ts
+ERROR: src/routes/userRoutes.ts:9:41 - error TS2339: Property 'registerUser' does not exist on type 'typeof UserController'.
+
+9 router.post('/register', userController.registerUser);
+                                          ~~~~~~~~~~~~
+src/routes/userRoutes.ts:12:38 - error TS2339: Property 'loginUser' does not exist on type 'typeof UserController'.
+
+12 router.post('/login', userController.loginUser);
+                                        ~~~~~~~~~
+src/routes/userRoutes.ts:15:58 - error TS2339: Property 'getUserProfile' does not exist on type 'typeof UserController'.
+
+15 router.get('/profile', authenticateToken, userController.getUserProfile);
+                                                            ~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:18:58 - error TS2339: Property 'updateUserProfile' does not exist on type 'typeof UserController'.
+
+18 router.put('/profile', authenticateToken, userController.updateUserProfile);
+                                                            ~~~~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:21:62 - error TS2339: Property 'getUserPreferences' does not exist on type 'typeof UserController'.
+
+21 router.get('/preferences', authenticateToken, userController.getUserPreferences);
+                                                                ~~~~~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:24:62 - error TS2339: Property 'updateUserPreferences' does not exist on type 'typeof UserController'.
+
+24 router.put('/preferences', authenticateToken, userController.updateUserPreferences);
+                                                                ~~~~~~~~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:27:60 - error TS2339: Property 'getUserFavorites' does not exist on type 'typeof UserController'.
+
+27 router.get('/favorites', authenticateToken, userController.getUserFavorites);
+                                                              ~~~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:30:72 - error TS2339: Property 'addFavorite' does not exist on type 'typeof UserController'.
+
+30 router.post('/favorites/:artworkId', authenticateToken, userController.addFavorite);
+                                                                          ~~~~~~~~~~~
+src/routes/userRoutes.ts:33:74 - error TS2339: Property 'removeFavorite' does not exist on type 'typeof UserController'.
+
+33 router.delete('/favorites/:artworkId', authenticateToken, userController.removeFavorite);
+                                                                            ~~~~~~~~~~~~~~
+src/routes/userRoutes.ts:36:58 - error TS2339: Property 'getUserHistory' does not exist on type 'typeof UserController'.
+
+36 router.get('/history', authenticateToken, userController.getUserHistory);
+                                                            ~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\authRoutes.ts
+ERROR: src/routes/authRoutes.ts:3:10 - error TS2459: Module '"../controllers"' declares 'AuthController' locally, but it is not exported.
+
+3 import { AuthController } from '../controllers';
+           ~~~~~~~~~~~~~~
+
+  src/controllers/index.ts:9:8
+    9 import AuthController from './AuthController';
+             ~~~~~~~~~~~~~~
+    'AuthController' is declared here.
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\container.ts
+ERROR: src/container.ts:54:11 - error TS2554: Expected 2-3 arguments, but got 4.
+
+54           this.get<ICacheable>('cache')
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/container.ts:59:11 - error TS2554: Expected 0 arguments, but got 1.
+
+59           this.get<ILogger>('logger')
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\galleryRoutes.ts
+ERROR: src/routes/galleryRoutes.ts:9:35 - error TS2339: Property 'getAllGalleries' does not exist on type 'typeof GalleryController'.
+
+9 router.get('/', galleryController.getAllGalleries);
+                                    ~~~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:12:38 - error TS2339: Property 'getGalleryById' does not exist on type 'typeof GalleryController'.
+
+12 router.get('/:id', galleryController.getGalleryById);
+                                        ~~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:15:44 - error TS2339: Property 'getGalleryRooms' does not exist on type 'typeof GalleryController'.
+
+15 router.get('/:id/rooms', galleryController.getGalleryRooms);
+                                              ~~~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:18:55 - error TS2339: Property 'createGallery' does not exist on type 'typeof GalleryController'.
+
+18 router.post('/', authenticateToken, galleryController.createGallery);
+                                                         ~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:21:57 - error TS2339: Property 'updateGallery' does not exist on type 'typeof GalleryController'.
+
+21 router.put('/:id', authenticateToken, galleryController.updateGallery);
+                                                           ~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:24:60 - error TS2339: Property 'deleteGallery' does not exist on type 'typeof GalleryController'.
+
+24 router.delete('/:id', authenticateToken, galleryController.deleteGallery);
+                                                              ~~~~~~~~~~~~~
+src/routes/galleryRoutes.ts:27:69 - error TS2339: Property 'getRecommendedArtworks' does not exist on type 'typeof GalleryController'.
+
+27 router.get('/:id/recommended', authenticateToken, galleryController.getRecommendedArtworks);
+                                                                       ~~~~~~~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\models\Room.ts
+ERROR: src/models/Room.ts:129:10 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+129   width: number;
+             ~~~~~~
+src/models/Room.ts:130:11 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+130   height: number;
+              ~~~~~~
+src/models/Room.ts:131:10 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+131   depth: number;
+             ~~~~~~
+src/models/Room.ts:132:18 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+132   ceilingHeight: number;
+                     ~~~~~~
+src/models/Room.ts:133:18 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+133   wallThickness: number;
+                     ~~~~~~
+src/models/Room.ts:257:10 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+257   depth: number;
+             ~~~~~~
+src/models/Room.ts:258:18 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+258   ceilingHeight: number;
+                     ~~~~~~
+src/models/Room.ts:259:18 - error TS2693: 'number' only refers to a type, but is being used as a value here.
+
+259   wallThickness: number;
+                     ~~~~~~
+src/models/Room.ts:134:1 - error TS1128: Declaration or statement expected.
+
+134 }
+    ~
+src/models/Room.ts:260:1 - error TS1128: Declaration or statement expected.
+
+260 }
+    ~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\artworkUploadRoutes.ts
+ERROR: src/routes/artworkUploadRoutes.ts:8:42 - error TS2339: Property 'createArtwork' does not exist on type 'typeof ArtworkController'.
+
+8 router.post('/upload', artworkController.createArtwork);
+                                           ~~~~~~~~~~~~~
+src/routes/artworkUploadRoutes.ts:23:53 - error TS2339: Property 'createArtwork' does not exist on type 'typeof ArtworkController'.
+
+23 router.post('/submit-for-review', artworkController.createArtwork);
+                                                       ~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\server.ts
+ERROR: src/server.ts:27:28 - error TS2307: Cannot find module './routes/roomRoutes' or its corresponding type declarations.
+
+27 import { roomRoutes } from './routes/roomRoutes';
+                              ~~~~~~~~~~~~~~~~~~~~~
+src/server.ts:241:10 - error TS2300: Duplicate identifier 'app'.
+
+241 export { app, server };export { app, server };
+             ~~~
+src/server.ts:241:15 - error TS2300: Duplicate identifier 'server'.
+
+241 export { app, server };export { app, server };
+                  ~~~~~~
+src/server.ts:241:33 - error TS2300: Duplicate identifier 'app'.
+
+241 export { app, server };export { app, server };
+                                    ~~~
+src/server.ts:241:38 - error TS2300: Duplicate identifier 'server'.
+
+241 export { app, server };export { app, server };
+                                         ~~~~~~
+src/server.ts:243:10 - error TS2300: Duplicate identifier 'app'.
+
+243 export { app, server };export { app, server };
+             ~~~
+src/server.ts:243:15 - error TS2300: Duplicate identifier 'server'.
+
+243 export { app, server };export { app, server };
+                  ~~~~~~
+src/server.ts:243:33 - error TS2300: Duplicate identifier 'app'.
+
+243 export { app, server };export { app, server };
+                                    ~~~
+src/server.ts:243:38 - error TS2300: Duplicate identifier 'server'.
+
+243 export { app, server };export { app, server };
+                                         ~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\GalleryController.ts
+ERROR: src/controllers/GalleryController.ts:3:10 - error TS2305: Module '"../types/artwork"' has no exported member 'IGalleryService'.
+
+3 import { IGalleryService } from '../types/artwork';
+           ~~~~~~~~~~~~~~~
+src/controllers/GalleryController.ts:34:58 - error TS2304: Cannot find name 'id'.
+
+34       this.logger.error(`Failed to get gallery with id ${id}`, error);
+                                                            ~~
+src/controllers/GalleryController.ts:45:68 - error TS2304: Cannot find name 'id'.
+
+45       this.logger.error(`Failed to get rooms for gallery with id ${id}`, error);
+                                                                      ~~
+src/controllers/GalleryController.ts:71:61 - error TS2304: Cannot find name 'id'.
+
+71       this.logger.error(`Failed to update gallery with id ${id}`, error);
+                                                               ~~
+src/controllers/GalleryController.ts:84:61 - error TS2304: Cannot find name 'id'.
+
+84       this.logger.error(`Failed to delete gallery with id ${id}`, error);
+                                                               ~~
+src/controllers/GalleryController.ts:96:83 - error TS2304: Cannot find name 'id'.
+
+96       this.logger.error(`Failed to get recommended artworks for gallery with id ${id}`, error);
+                                                                                     ~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\routes\artworkRoutes.ts
+ERROR: src/routes/artworkRoutes.ts:9:35 - error TS2339: Property 'getAllArtworks' does not exist on type 'typeof ArtworkController'.
+
+9 router.get('/', artworkController.getAllArtworks);
+                                    ~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:12:38 - error TS2339: Property 'getArtworkById' does not exist on type 'typeof ArtworkController'.
+
+12 router.get('/:id', artworkController.getArtworkById);
+                                        ~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:15:48 - error TS2339: Property 'searchArtworks' does not exist on type 'typeof ArtworkController'.
+
+15 router.get('/search/:query', artworkController.searchArtworks);
+                                                  ~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:18:47 - error TS2339: Property 'filterArtworksByTags' does not exist on type 'typeof ArtworkController'.
+
+18 router.get('/filter/:tags', artworkController.filterArtworksByTags);
+                                                 ~~~~~~~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:21:55 - error TS2339: Property 'createArtwork' does not exist on type 'typeof ArtworkController'.
+
+21 router.post('/', authenticateToken, artworkController.createArtwork);
+                                                         ~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:24:57 - error TS2339: Property 'updateArtwork' does not exist on type 'typeof ArtworkController'.
+
+24 router.put('/:id', authenticateToken, artworkController.updateArtwork);
+                                                           ~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:27:60 - error TS2339: Property 'deleteArtwork' does not exist on type 'typeof ArtworkController'.
+
+27 router.delete('/:id', authenticateToken, artworkController.deleteArtwork);
+                                                              ~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:30:69 - error TS2339: Property 'getRecommendedArtworks' does not exist on type 'typeof ArtworkController'.
+
+30 router.get('/recommendations', authenticateToken, artworkController.getRecommendedArtworks);
+                                                                       ~~~~~~~~~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:33:46 - error TS2339: Property 'getSimilarArtworks' does not exist on type 'typeof ArtworkController'.
+
+33 router.get('/:id/similar', artworkController.getSimilarArtworks);
+                                                ~~~~~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:36:91 - error TS2339: Property 'addToCollection' does not exist on type 'typeof ArtworkController'.
+
+36 router.post('/:artworkId/collections/:collectionId', authenticateToken, artworkController.addToCollection);
+                                                                                             ~~~~~~~~~~~~~~~
+src/routes/artworkRoutes.ts:39:48 - error TS2339: Property 'getArtworkAnalytics' does not exist on type 'typeof ArtworkController'.
+
+39 router.get('/:id/analytics', artworkController.getArtworkAnalytics);
+                                                  ~~~~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\AuthController.ts
+ERROR: src/controllers/AuthController.ts:5:10 - error TS2305: Module '"../types/artwork"' has no exported member 'IUserService'.
+
+5 import { IUserService, CreateUserDto } from '../types/artwork';
+           ~~~~~~~~~~~~
+src/controllers/AuthController.ts:5:24 - error TS2305: Module '"../types/artwork"' has no exported member 'CreateUserDto'.
+
+5 import { IUserService, CreateUserDto } from '../types/artwork';
+                         ~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\IoTController.ts
+ERROR: src/controllers/IoTController.ts:5:27 - error TS1261: Already included file name 'D:/ALEX/Dev/qwen/vg/src/iot/devices/DeviceManager.ts' differs from file name 'D:/ALEX/Dev/qwen/vg/src/iot/devices/deviceManager.ts' only in casing.
+  The file is in the program because:
+    Imported via '../iot/devices/DeviceManager' from file 'D:/ALEX/Dev/qwen/vg/src/controllers/IoTController.ts'
+    Root file specified for compilation
+    Root file specified for compilation
+
+5 import deviceManager from '../iot/devices/DeviceManager';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\AiController.ts
+ERROR: src/controllers/AiController.ts:34:37 - error TS2552: Cannot find name 'recommendationService'. Did you mean 'recommendations'?
+
+34       const recommendations = await recommendationService.getRecommendations(userId, count);
+                                       ~~~~~~~~~~~~~~~~~~~~~
+
+  src/controllers/AiController.ts:34:13
+    34       const recommendations = await recommendationService.getRecommendations(userId, count);
+                   ~~~~~~~~~~~~~~~
+    'recommendations' is declared here.
+src/controllers/AiController.ts:82:12 - error TS2663: Cannot find name 'artworkAnalyzer'. Did you mean the instance member 'this.artworkAnalyzer'?
+
+82       if (!artworkAnalyzer['isTrained']) {
+              ~~~~~~~~~~~~~~~
+src/controllers/AiController.ts:83:15 - error TS2663: Cannot find name 'artworkAnalyzer'. Did you mean the instance member 'this.artworkAnalyzer'?
+
+83         await artworkAnalyzer.initialize();
+                 ~~~~~~~~~~~~~~~
+src/controllers/AiController.ts:87:30 - error TS2663: Cannot find name 'artworkAnalyzer'. Did you mean the instance member 'this.artworkAnalyzer'?
+
+87       const analysis = await artworkAnalyzer.analyzeArtwork(imageUrl);
+                                ~~~~~~~~~~~~~~~
+src/controllers/AiController.ts:102:37 - error TS2552: Cannot find name 'recommendationService'. Did you mean 'RecommendationService'?
+
+102       const similarArtworks = await recommendationService.getSimilarArtworks(artworkId, count);
+                                        ~~~~~~~~~~~~~~~~~~~~~
+src/controllers/AiController.ts:179:16 - error TS2554: Expected 2 arguments, but got 0.
+
+179 export default new AiController();
+                   ~~~~~~~~~~~~~~~~~~
+
+  src/controllers/AiController.ts:12:5
+    12     private artworkAnalyzer: IArtworkAnalyzer,
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'artworkAnalyzer' was not provided.
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\services\UserService.ts
+ERROR: src/services/UserService.ts:5:3 - error TS2305: Module '"../types/artwork"' has no exported member 'IUserService'.
+
+5   IUserService,
+    ~~~~~~~~~~~~
+src/services/UserService.ts:6:3 - error TS2305: Module '"../types/artwork"' has no exported member 'User'.
+
+6   User,
+    ~~~~
+src/services/UserService.ts:7:3 - error TS2305: Module '"../types/artwork"' has no exported member 'CreateUserDto'.
+
+7   CreateUserDto,
+    ~~~~~~~~~~~~~
+src/services/UserService.ts:8:3 - error TS2305: Module '"../types/artwork"' has no exported member 'UpdateUserDto'.
+
+8   UpdateUserDto
+    ~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\services\AIService.ts
+ERROR: src/services/AIService.ts:11:27 - error TS2554: Expected 2-3 arguments, but got 0.
+
+11     this.artworkService = new ArtworkService();
+                             ~~~~~~~~~~~~~~~~~~~~
+
+  src/services/ArtworkService.ts:27:5
+    27     pool: Pool,
+           ~~~~~~~~~~
+    An argument for 'pool' was not provided.
+src/services/AIService.ts:12:34 - error TS2554: Expected 2-3 arguments, but got 0.
+
+12     this.recommendationService = new RecommendationService();
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/services/RecommendationService.ts:11:5
+    11     pool: Pool,
+           ~~~~~~~~~~
+    An argument for 'pool' was not provided.
+src/services/AIService.ts:20:81 - error TS2345: Argument of type '{ userId: string; count: number; }' is not assignable to parameter of type 'string'.
+
+20     const recommendations = await this.recommendationService.getRecommendations({
+                                                                                   ~
+21       userId,
+   ~~~~~~~~~~~~~
+22       count
+   ~~~~~~~~~~~
+23     });
+   ~~~~~
+src/services/AIService.ts:40:57 - error TS2339: Property 'getPersonalizedCollection' does not exist on type 'RecommendationService'.
+
+40     const collection = await this.recommendationService.getPersonalizedCollection(theme, 'default_user', count);
+                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\UserController.ts
+ERROR: src/controllers/UserController.ts:3:10 - error TS2305: Module '"../types/artwork"' has no exported member 'IUserService'.
+
+3 import { IUserService, CreateUserDto, UpdateUserDto } from '../types/artwork';
+           ~~~~~~~~~~~~
+src/controllers/UserController.ts:3:24 - error TS2305: Module '"../types/artwork"' has no exported member 'CreateUserDto'.
+
+3 import { IUserService, CreateUserDto, UpdateUserDto } from '../types/artwork';
+                         ~~~~~~~~~~~~~
+src/controllers/UserController.ts:3:39 - error TS2305: Module '"../types/artwork"' has no exported member 'UpdateUserDto'.
+
+3 import { IUserService, CreateUserDto, UpdateUserDto } from '../types/artwork';
+                                        ~~~~~~~~~~~~~
+src/controllers/UserController.ts:131:58 - error TS2304: Cannot find name 'userId'.
+
+131       this.logger.error(`Failed to update user with id ${userId}`, error);
+                                                             ~~~~~~
+src/controllers/UserController.ts:148:71 - error TS2304: Cannot find name 'userId'.
+
+148       this.logger.error(`Failed to get preferences for user with id ${userId}`, error);
+                                                                          ~~~~~~
+src/controllers/UserController.ts:163:74 - error TS2304: Cannot find name 'userId'.
+
+163       this.logger.error(`Failed to update preferences for user with id ${userId}`, error);
+                                                                             ~~~~~~
+src/controllers/UserController.ts:186:58 - error TS2304: Cannot find name 'userId'.
+
+186       this.logger.error(`Failed to delete user with id ${userId}`, error);
+                                                             ~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\controllers\ArtworkController.ts
+ERROR: src/controllers/ArtworkController.ts:34:58 - error TS2304: Cannot find name 'id'.
+
+34       this.logger.error(`Failed to get artwork with id ${id}`, error);
+                                                            ~~
+src/controllers/ArtworkController.ts:47:65 - error TS2304: Cannot find name 'query'.
+
+47       this.logger.error(`Failed to search artworks with query ${query}`, error);
+                                                                   ~~~~~
+src/controllers/ArtworkController.ts:61:62 - error TS2304: Cannot find name 'tags'.
+
+61       this.logger.error(`Failed to filter artworks by tags ${tags}`, error);
+                                                                ~~~~
+src/controllers/ArtworkController.ts:87:61 - error TS2304: Cannot find name 'id'.
+
+87       this.logger.error(`Failed to update artwork with id ${id}`, error);
+                                                               ~~
+src/controllers/ArtworkController.ts:100:61 - error TS2304: Cannot find name 'id'.
+
+100       this.logger.error(`Failed to delete artwork with id ${id}`, error);
+                                                                ~~
+src/controllers/ArtworkController.ts:134:66 - error TS2304: Cannot find name 'id'.
+
+134       this.logger.error(`Failed to get similar artworks for id ${id}`, error);
+                                                                     ~~
+src/controllers/ArtworkController.ts:148:50 - error TS2304: Cannot find name 'artworkId'.
+
+148       this.logger.error(`Failed to add artwork ${artworkId} to collection ${collectionId}`, error);
+                                                     ~~~~~~~~~
+src/controllers/ArtworkController.ts:148:77 - error TS2304: Cannot find name 'collectionId'.
+
+148       this.logger.error(`Failed to add artwork ${artworkId} to collection ${collectionId}`, error);
+                                                                                ~~~~~~~~~~~~
+src/controllers/ArtworkController.ts:162:72 - error TS2304: Cannot find name 'id'.
+
+162       this.logger.error(`Failed to get analytics for artwork with id ${id}`, error);
+                                                                           ~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\services\ArtworkService.ts
+ERROR: src/services/ArtworkService.ts:246:9 - error TS2416: Property 'delete' in type 'ArtworkService' is not assignable to the same property in base type 'IArtworkService'.
+  Type '(id: string) => Promise<void>' is not assignable to type '(id: string) => Promise<boolean>'.
+    Type 'Promise<void>' is not assignable to type 'Promise<boolean>'.
+      Type 'void' is not assignable to type 'boolean'.
+
+246   async delete(id: string): Promise<void> {
+            ~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\backend\controllers\RoomController.ts
+ERROR: src/backend/controllers/RoomController.ts:2:10 - error TS2300: Duplicate identifier 'inject'.
+
+2 import { inject, injectable } from 'inversify';
+           ~~~~~~
+src/backend/controllers/RoomController.ts:2:18 - error TS2300: Duplicate identifier 'injectable'.
+
+2 import { inject, injectable } from 'inversify';
+                   ~~~~~~~~~~
+src/backend/controllers/RoomController.ts:2:36 - error TS2307: Cannot find module 'inversify' or its corresponding type declarations.
+
+2 import { inject, injectable } from 'inversify';
+                                     ~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:3:10 - error TS2300: Duplicate identifier 'RoomService'.
+
+3 import { RoomService } from '../services/RoomService';
+           ~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:4:10 - error TS2300: Duplicate identifier 'ILogger'.
+
+4 import { ILogger } from '../../types/interfaces';
+           ~~~~~~~
+src/backend/controllers/RoomController.ts:7:14 - error TS2300: Duplicate identifier 'RoomController'.
+
+7 export class RoomController {
+               ~~~~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:9:5 - error TS1206: Decorators are not valid here.
+
+9     @inject('RoomService') private roomService: RoomService,
+      ~
+src/backend/controllers/RoomController.ts:10:5 - error TS1206: Decorators are not valid here.
+
+10     @inject('ILogger') private logger: ILogger
+       ~
+src/backend/controllers/RoomController.ts:25:51 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+25       this.logger.error('Error in getRoomTypes:', error);
+                                                     ~~~~~
+src/backend/controllers/RoomController.ts:54:54 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+54       this.logger.error('Error in getRoomTypeById:', error);
+                                                        ~~~~~
+src/backend/controllers/RoomController.ts:111:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+111       this.logger.error('Error in createRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:131:64 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+131       this.logger.error('Error in getRoomInstancesByGallery:', error);
+                                                                   ~~~~~
+src/backend/controllers/RoomController.ts:160:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+160       this.logger.error('Error in getRoomInstanceById:', error);
+                                                             ~~~~~
+src/backend/controllers/RoomController.ts:191:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+191       this.logger.error('Error in updateRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:220:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+220       this.logger.error('Error in deleteRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:250:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+250       this.logger.error('Error in updateVisitorCount:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:277:55 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+277       this.logger.error('Error in getRoomAnalytics:', error);
+                                                          ~~~~~
+src/backend/controllers/RoomController.ts:310:64 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+310       this.logger.error('Error in validateRoomConfiguration:', error);
+                                                                   ~~~~~
+src/backend/controllers/RoomController.ts:317:11 - error TS2300: Duplicate identifier 'inject'.
+
+317 }import { inject, injectable } from 'inversify';
+              ~~~~~~
+src/backend/controllers/RoomController.ts:317:19 - error TS2300: Duplicate identifier 'injectable'.
+
+317 }import { inject, injectable } from 'inversify';
+                      ~~~~~~~~~~
+src/backend/controllers/RoomController.ts:317:37 - error TS2307: Cannot find module 'inversify' or its corresponding type declarations.
+
+317 }import { inject, injectable } from 'inversify';
+                                        ~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:318:10 - error TS2300: Duplicate identifier 'RoomService'.
+
+318 import { RoomService } from '../services/RoomService';
+             ~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:319:10 - error TS2300: Duplicate identifier 'ILogger'.
+
+319 import { ILogger } from '../../types/interfaces';
+             ~~~~~~~
+src/backend/controllers/RoomController.ts:322:14 - error TS2300: Duplicate identifier 'RoomController'.
+
+322 export class RoomController {
+                 ~~~~~~~~~~~~~~
+src/backend/controllers/RoomController.ts:324:5 - error TS1206: Decorators are not valid here.
+
+324     @inject('RoomService') private roomService: RoomService,
+        ~
+src/backend/controllers/RoomController.ts:325:5 - error TS1206: Decorators are not valid here.
+
+325     @inject('ILogger') private logger: ILogger
+        ~
+src/backend/controllers/RoomController.ts:340:51 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+340       this.logger.error('Error in getRoomTypes:', error);
+                                                      ~~~~~
+src/backend/controllers/RoomController.ts:369:54 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+369       this.logger.error('Error in getRoomTypeById:', error);
+                                                         ~~~~~
+src/backend/controllers/RoomController.ts:426:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+426       this.logger.error('Error in createRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:446:64 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+446       this.logger.error('Error in getRoomInstancesByGallery:', error);
+                                                                   ~~~~~
+src/backend/controllers/RoomController.ts:475:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+475       this.logger.error('Error in getRoomInstanceById:', error);
+                                                             ~~~~~
+src/backend/controllers/RoomController.ts:506:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+506       this.logger.error('Error in updateRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:535:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+535       this.logger.error('Error in deleteRoomInstance:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:565:57 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+565       this.logger.error('Error in updateVisitorCount:', error);
+                                                            ~~~~~
+src/backend/controllers/RoomController.ts:592:55 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+592       this.logger.error('Error in getRoomAnalytics:', error);
+                                                          ~~~~~
+src/backend/controllers/RoomController.ts:625:64 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+625       this.logger.error('Error in validateRoomConfiguration:', error);
+                                                                   ~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\backend\services\S3Service.ts
+ERROR: src/backend/services/S3Service.ts:55:46 - error TS2339: Property 'promise' does not exist on type 'void'.
+
+55       const result = await s3.upload(params).promise();
+                                                ~~~~~~~
+src/backend/services/S3Service.ts:82:46 - error TS2339: Property 'promise' does not exist on type 'void'.
+
+82       const result = await s3.upload(params).promise();
+                                                ~~~~~~~
+src/backend/services/S3Service.ts:109:46 - error TS2339: Property 'promise' does not exist on type 'void'.
+
+109       const result = await s3.upload(params).promise();
+                                                 ~~~~~~~
+src/backend/services/S3Service.ts:123:45 - error TS2724: '"D:/ALEX/Dev/qwen/vg/node_modules/@types/aws-sdk/index"' has no exported member named 'S3'. Did you mean 's3'?
+
+123   async getFile(s3Key: string): Promise<AWS.S3.GetObjectOutput> {
+                                                ~~
+src/backend/services/S3Service.ts:161:16 - error TS2554: Expected 2 arguments, but got 1.
+
+161       await s3.deleteObject(params).promise();
+                   ~~~~~~~~~~~~
+
+  node_modules/@types/aws-sdk/index.d.ts:433:50
+    433     deleteObject(params: s3.DeleteObjectRequest, callback: (err: Error, data: any) => void): void;
+                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'callback' was not provided.
+src/backend/services/S3Service.ts:161:37 - error TS2339: Property 'promise' does not exist on type 'void'.
+
+161       await s3.deleteObject(params).promise();
+                                        ~~~~~~~
+src/backend/services/S3Service.ts:177:16 - error TS2554: Expected 2 arguments, but got 1.
+
+177       await s3.headObject(params).promise();
+                   ~~~~~~~~~~
+
+  node_modules/@types/aws-sdk/index.d.ts:434:46
+    434     headObject(params: s3.HeadObjectRequest, callback: (err: Error, data: any) => void): void;
+                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'callback' was not provided.
+src/backend/services/S3Service.ts:177:35 - error TS2339: Property 'promise' does not exist on type 'void'.
+
+177       await s3.headObject(params).promise();
+                                      ~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\backend\routes\roomRoutes.ts
+ERROR: src/backend/routes/roomRoutes.ts:2:10 - error TS2300: Duplicate identifier 'RoomController'.
+
+2 import { RoomController } from '../controllers/RoomController';
+           ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:3:10 - error TS2300: Duplicate identifier 'authMiddleware'.
+
+3 import { authMiddleware } from '../middleware/auth';
+           ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:3:32 - error TS2307: Cannot find module '../middleware/auth' or its corresponding type declarations.
+
+3 import { authMiddleware } from '../middleware/auth';
+                                 ~~~~~~~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:4:10 - error TS2300: Duplicate identifier 'roleAuth'.
+
+4 import { roleAuth } from '../middleware/roleAuth';
+           ~~~~~~~~
+src/backend/routes/roomRoutes.ts:4:26 - error TS2307: Cannot find module '../middleware/roleAuth' or its corresponding type declarations.
+
+4 import { roleAuth } from '../middleware/roleAuth';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:6:7 - error TS2451: Cannot redeclare block-scoped variable 'router'.
+
+6 const router = Router();
+        ~~~~~~
+src/backend/routes/roomRoutes.ts:7:7 - error TS2451: Cannot redeclare block-scoped variable 'roomController'.
+
+7 const roomController = new RoomController(); // This will be injected via container in production
+        ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:7:24 - error TS2554: Expected 2 arguments, but got 0.
+
+7 const roomController = new RoomController(); // This will be injected via container in production
+                         ~~~~~~~~~~~~~~~~~~~~
+
+  src/backend/controllers/RoomController.ts:9:5
+    9     @inject('RoomService') private roomService: RoomService,
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'roomService' was not provided.
+src/backend/routes/roomRoutes.ts:79:20 - error TS2300: Duplicate identifier 'roomRoutes'.
+
+79 export { router as roomRoutes };import { RoomController } from '../controllers/RoomController';
+                      ~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:79:42 - error TS2300: Duplicate identifier 'RoomController'.
+
+79 export { router as roomRoutes };import { RoomController } from '../controllers/RoomController';
+                                            ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:80:10 - error TS2300: Duplicate identifier 'authMiddleware'.
+
+80 import { authMiddleware } from '../middleware/auth';
+            ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:80:32 - error TS2307: Cannot find module '../middleware/auth' or its corresponding type declarations.
+
+80 import { authMiddleware } from '../middleware/auth';
+                                  ~~~~~~~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:81:10 - error TS2300: Duplicate identifier 'roleAuth'.
+
+81 import { roleAuth } from '../middleware/roleAuth';
+            ~~~~~~~~
+src/backend/routes/roomRoutes.ts:81:26 - error TS2307: Cannot find module '../middleware/roleAuth' or its corresponding type declarations.
+
+81 import { roleAuth } from '../middleware/roleAuth';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:83:7 - error TS2451: Cannot redeclare block-scoped variable 'router'.
+
+83 const router = Router();
+         ~~~~~~
+src/backend/routes/roomRoutes.ts:84:7 - error TS2451: Cannot redeclare block-scoped variable 'roomController'.
+
+84 const roomController = new RoomController(); // This will be injected via container in production
+         ~~~~~~~~~~~~~~
+src/backend/routes/roomRoutes.ts:84:24 - error TS2554: Expected 2 arguments, but got 0.
+
+84 const roomController = new RoomController(); // This will be injected via container in production
+                          ~~~~~~~~~~~~~~~~~~~~
+
+  src/backend/controllers/RoomController.ts:9:5
+    9     @inject('RoomService') private roomService: RoomService,
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'roomService' was not provided.
+src/backend/routes/roomRoutes.ts:156:20 - error TS2300: Duplicate identifier 'roomRoutes'.
+
+156 export { router as roomRoutes };
+                       ~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\backend\utils\ImageProcessor.ts
+ERROR: src/backend/utils/ImageProcessor.ts:6:30 - error TS1149: File name 'D:/ALEX/Dev/qwen/vg/src/backend/utils/archiveProcessor.ts' differs from already included file name 'D:/ALEX/Dev/qwen/vg/src/backend/utils/ArchiveProcessor.ts' only in casing.
+  The file is in the program because:
+    Root file specified for compilation
+    Imported via './archiveProcessor' from file 'D:/ALEX/Dev/qwen/vg/src/backend/utils/ImageProcessor.ts'
+    Root file specified for compilation
+
+6 import archiveProcessor from './archiveProcessor';
+                               ~~~~~~~~~~~~~~~~~~~~
+src/backend/utils/ImageProcessor.ts:120:5 - error TS2322: Type 'ExtractedImage[]' is not assignable to type 'string[]'.
+  Type 'ExtractedImage' is not assignable to type 'string'.
+
+120     return await archiveProcessor.extractImagesFromArchive(archivePath, extractToDir);
+        ~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\services\GalleryService.ts
+ERROR: src/services/GalleryService.ts:5:3 - error TS2305: Module '"../types/artwork"' has no exported member 'IGalleryService'.
+
+5   IGalleryService,
+    ~~~~~~~~~~~~~~~
+src/services/GalleryService.ts:6:3 - error TS2305: Module '"../types/artwork"' has no exported member 'Gallery'.
+
+6   Gallery,
+    ~~~~~~~
+src/services/GalleryService.ts:7:3 - error TS2305: Module '"../types/artwork"' has no exported member 'GalleryFilters'.
+
+7   GalleryFilters,
+    ~~~~~~~~~~~~~~
+src/services/GalleryService.ts:8:3 - error TS2305: Module '"../types/artwork"' has no exported member 'CreateGalleryDto'.
+
+8   CreateGalleryDto,
+    ~~~~~~~~~~~~~~~~
+src/services/GalleryService.ts:9:3 - error TS2305: Module '"../types/artwork"' has no exported member 'UpdateGalleryDto'.
+
+9   UpdateGalleryDto
+    ~~~~~~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\backend\services\RoomService.ts
+ERROR: src/backend/services/RoomService.ts:1:36 - error TS2307: Cannot find module 'inversify' or its corresponding type declarations.
+
+1 import { injectable, inject } from 'inversify';
+                                     ~~~~~~~~~~~
+src/backend/services/RoomService.ts:2:10 - error TS2300: Duplicate identifier 'Pool'.
+
+2 import { Pool } from 'pg';
+           ~~~~
+src/backend/services/RoomService.ts:3:10 - error TS2300: Duplicate identifier 'ILogger'.
+
+3 import { ILogger } from '../../types/interfaces';
+           ~~~~~~~
+src/backend/services/RoomService.ts:5:3 - error TS2300: Duplicate identifier 'RoomType'.
+
+5   RoomType,
+    ~~~~~~~~
+src/backend/services/RoomService.ts:6:3 - error TS2300: Duplicate identifier 'RoomInstance'.
+
+6   RoomInstance,
+    ~~~~~~~~~~~~
+src/backend/services/RoomService.ts:7:3 - error TS2300: Duplicate identifier 'RoomAnalytics'.
+
+7   RoomAnalytics,
+    ~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:8:3 - error TS2300: Duplicate identifier 'RoomTemplate'.
+
+8   RoomTemplate,
+    ~~~~~~~~~~~~
+src/backend/services/RoomService.ts:9:3 - error TS2300: Duplicate identifier 'ArtworkPlacement'.
+
+9   ArtworkPlacement,
+    ~~~~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:10:3 - error TS2300: Duplicate identifier 'RoomCustomization'.
+
+10   RoomCustomization
+     ~~~~~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:14:14 - error TS2300: Duplicate identifier 'RoomService'.
+
+14 export class RoomService {
+                ~~~~~~~~~~~
+src/backend/services/RoomService.ts:16:5 - error TS1206: Decorators are not valid here.
+
+16     @inject('Database') private db: Pool,
+       ~
+src/backend/services/RoomService.ts:17:5 - error TS1206: Decorators are not valid here.
+
+17     @inject('ILogger') private logger: ILogger
+       ~
+src/backend/services/RoomService.ts:38:55 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+38       this.logger.error('Error fetching room types:', error);
+                                                         ~~~~~
+src/backend/services/RoomService.ts:52:54 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+52       this.logger.error('Error fetching room type:', error);
+                                                        ~~~~~
+src/backend/services/RoomService.ts:90:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+90       this.logger.error('Error creating room instance:', error);
+                                                            ~~~~~
+src/backend/services/RoomService.ts:110:59 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+110       this.logger.error('Error fetching room instances:', error);
+                                                              ~~~~~
+src/backend/services/RoomService.ts:131:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+131       this.logger.error('Error fetching room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:186:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+186       this.logger.error('Error updating room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:199:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+199       this.logger.error('Error deleting room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:214:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+214       this.logger.error('Error updating visitor count:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:241:59 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+241       this.logger.error('Error fetching room analytics:', error);
+                                                              ~~~~~
+src/backend/services/RoomService.ts:266:60 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+266       this.logger.error('Error recording room analytics:', error);
+                                                               ~~~~~
+src/backend/services/RoomService.ts:301:65 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+301       this.logger.error('Error validating room configuration:', error);
+                                                                    ~~~~~
+src/backend/services/RoomService.ts:346:7 - error TS2353: Object literal may only specify known properties, and 'analyticsId' does not exist in type 'RoomAnalytics'.
+
+346       analyticsId: row.analytics_id,
+          ~~~~~~~~~~~
+src/backend/services/RoomService.ts:359:11 - error TS2300: Duplicate identifier 'Pool'.
+
+359 }import { Pool } from 'pg';
+              ~~~~
+src/backend/services/RoomService.ts:360:10 - error TS2300: Duplicate identifier 'ILogger'.
+
+360 import { ILogger } from '../../types/interfaces';
+             ~~~~~~~
+src/backend/services/RoomService.ts:362:3 - error TS2300: Duplicate identifier 'RoomType'.
+
+362   RoomType,
+      ~~~~~~~~
+src/backend/services/RoomService.ts:363:3 - error TS2300: Duplicate identifier 'RoomInstance'.
+
+363   RoomInstance,
+      ~~~~~~~~~~~~
+src/backend/services/RoomService.ts:364:3 - error TS2300: Duplicate identifier 'RoomAnalytics'.
+
+364   RoomAnalytics,
+      ~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:365:3 - error TS2300: Duplicate identifier 'RoomTemplate'.
+
+365   RoomTemplate,
+      ~~~~~~~~~~~~
+src/backend/services/RoomService.ts:366:3 - error TS2300: Duplicate identifier 'ArtworkPlacement'.
+
+366   ArtworkPlacement,
+      ~~~~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:367:3 - error TS2300: Duplicate identifier 'RoomCustomization'.
+
+367   RoomCustomization
+      ~~~~~~~~~~~~~~~~~
+src/backend/services/RoomService.ts:371:14 - error TS2300: Duplicate identifier 'RoomService'.
+
+371 export class RoomService {
+                 ~~~~~~~~~~~
+src/backend/services/RoomService.ts:373:5 - error TS1206: Decorators are not valid here.
+
+373     @inject('Database') private db: Pool,
+        ~
+src/backend/services/RoomService.ts:374:5 - error TS1206: Decorators are not valid here.
+
+374     @inject('ILogger') private logger: ILogger
+        ~
+src/backend/services/RoomService.ts:395:55 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+395       this.logger.error('Error fetching room types:', error);
+                                                          ~~~~~
+src/backend/services/RoomService.ts:409:54 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+409       this.logger.error('Error fetching room type:', error);
+                                                         ~~~~~
+src/backend/services/RoomService.ts:447:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+447       this.logger.error('Error creating room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:467:59 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+467       this.logger.error('Error fetching room instances:', error);
+                                                              ~~~~~
+src/backend/services/RoomService.ts:488:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+488       this.logger.error('Error fetching room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:543:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+543       this.logger.error('Error updating room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:556:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+556       this.logger.error('Error deleting room instance:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:571:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+571       this.logger.error('Error updating visitor count:', error);
+                                                             ~~~~~
+src/backend/services/RoomService.ts:598:59 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+598       this.logger.error('Error fetching room analytics:', error);
+                                                              ~~~~~
+src/backend/services/RoomService.ts:623:60 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+623       this.logger.error('Error recording room analytics:', error);
+                                                               ~~~~~
+src/backend/services/RoomService.ts:658:65 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Error'.
+  Type '{}' is missing the following properties from type 'Error': name, message
+
+658       this.logger.error('Error validating room configuration:', error);
+                                                                    ~~~~~
+src/backend/services/RoomService.ts:703:7 - error TS2353: Object literal may only specify known properties, and 'analyticsId' does not exist in type 'RoomAnalytics'.
+
+703       analyticsId: row.analytics_id,
+          ~~~~~~~~~~~
+STACK:
+Failed to collect coverage from D:\ALEX\Dev\qwen\vg\src\iot\devices\deviceManager.ts
+ERROR: src/iot/devices/DeviceManager.ts:4:29 - error TS1261: Already included file name 'D:/ALEX/Dev/qwen/vg/src/iot/sensors/SensorProcessor.ts' differs from file name 'D:/ALEX/Dev/qwen/vg/src/iot/sensors/sensorProcessor.ts' only in casing.
+  The file is in the program because:
+    Imported via '../sensors/SensorProcessor' from file 'D:/ALEX/Dev/qwen/vg/src/iot/devices/DeviceManager.ts'
+    Imported via '../iot/sensors/SensorProcessor' from file 'D:/ALEX/Dev/qwen/vg/src/controllers/IoTController.ts'
+    Root file specified for compilation
+    Root file specified for compilation
+
+4 import sensorProcessor from '../sensors/SensorProcessor';
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/controllers/IoTController.ts:6:29
+    6 import sensorProcessor from '../iot/sensors/SensorProcessor';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

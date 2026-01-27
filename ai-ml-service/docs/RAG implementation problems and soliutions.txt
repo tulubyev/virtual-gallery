@@ -1,0 +1,195 @@
+To simplify the evaluation process, several powerful frameworks are available. We 
+will explore three popular ones: Ragas, Quotient AI, and Arize Phoenix.
+
+Why your RAG system might be underperforming: 
+
+problems and solutions
+
+
+Problem - You improperly  ingested data to the vector database
+ 
+
+You improperly  ingested data to the vector database retrieval
+Your  procedure isn’t optimized You might be embedding data incorrectly
+LLM generation   performance  is suboptimal
+
+Improper data ingestion can cause the loss of important contextual 
+information, which is critical for generating accurate and coherent responses. 
+Also, inconsistent data ingestion can cause the system to produce unreliable 
+and inconsistent responses, undermining user trust and satisfaction.
+indexing
+Vector databases support different  techniques. In order 
+to know if you are ingesting data properly, you should always 
+check how changes in variables related to indexing techniques
+
+Solution - Pay attention to how your data is chunked
+
+Calibrate document chunk size:
+The chunk size determines data granularity and impacts precision, recall, and 
+relevance. It should be aligned with the token limit of the embedding model.
+Ensure proper chunk overlap: 
+This helps retain context by sharing data points across chunks. It should be 
+managed with strategies like deduplication and content normalization.
+Develop a proper chunking/text splitting strategy:
+Make sure your chunking/text splitting strategy is tailored to your  data type 
+(e.g., HTML, markdown, code, PDF) and use-case nuances. For example, legal 
+documents may be split by headings and subsections, and medical literature 
+by sentence boundaries or key concepts 
+
+ You can use utilities like ChunkViz to visualize different chunk splitting strategies, 
+chunk sizes, and chunk overlaps
+
+You want to ensure that the embedding model accurately understands and 
+represents the data. If the generated embeddings are accurate, similar data 
+points will be closely positioned in the vector space. The quality of an 
+embedding model is typically measured using benchmarks like the
+where the model’s output is compared 
+against a ground-truth dataset.
+ 
+Pick the right 
+embedding model
+The embedding model plays a critical role in capturing semantic relationships 
+in data. 
+There are several embedding models you can choose from, and the 
+is a great resource for 
+reference. Lightweight libraries like 
+Text Embedding Benchmark (MTEB) Leaderboard
+FastEmbed 
+popular text embedding models. 
+vector embeddings using 
+Massive 
+
+
+support the generation of 
+When choosing an embedding model, retrieval performance and domain 
+specificity. You need to ensure that the model can capture semantic nuances, 
+which affects the retrieval performance. For specialized domains, you may 
+need to select or train a custom embedding model
+
+Problem - retrieval Your  procedure isn’t optimized
+
+Semantic retrieval evaluation tests the effectiveness of your data retrieval. 
+There are several metrics you can choose from:
+Precision@k
+Measures the number of relevant documents in the top-k search results
+Mean reciprocal rank (MRR)
+Considers the position of the first relevant document in the search results.
+Discounted cumulative gain (DCG) and normalized DCG (NDCG)
+Based on the relevance score of the documents.
+By evaluating the retrieval quality using these metrics, you can 
+assess the effectiveness of your retrieval step. For evaluating the 
+ANN algorithm specifically, Precision@k is the most appropriate 
+metric, as it directly measures how well the algorithm 
+approximates exact search results.
+
+Solution - Choose the best retrieval algorithm
+Each new LLM with a larger context window claims to render RAG obsolete. 
+However, studies like 
+"Lost in the Middle"
+demonstrate that feeding entire 
+documents to LLMs can diminish their ability to answer questions effectively. 
+Therefore, the retrieval algorithm is crucial for fetching the most relevant data 
+in the RAG system.
+
+
+Problem - LLM generation performance is suboptimal
+
+The LLM is responsible for generating responses based on the retrieved 
+context. The choice of LLM ranges from OpenAI’s GPT models to open-weight 
+models. The LLM you choose will significantly influence the performance of a 
+RAG system. Here are some areas to watch out for:
+Response quality:
+The LLM selection will influence the fluency, coherence, and factual accuracy 
+of generated responses.
+System performance:
+Inference speeds vary between LLMs. Slower inference speeds can impact 
+response times.
+Domain knowledge:
+For domain-specific RAG applications, you may need LLMs trained on that 
+domain. Some LLMs are easier to fine-tune than others
+
+Solution -Test and Critically  Analyze LLM Quality
+
+The  Open LLM Leaderboard can help guide your LLM selection. 
+On this leaderboard, LLMs are ranked based on their scores on 
+various benchmarks, such as IFEval, GPQA, MMLU-PRO, and 
+others.
+Evaluating LLMs involves several key metrics and methods. You can use these metrics or 
+frameworks to evaluate if the LLM is delivering high-quality, relevant, and reliable responses.
+Many LLM evaluation frameworks offer flexibility to accommodate domain-specific or custom 
+evaluations, addressing the key RAG metrics for your use case. These frameworks utilize either 
+LLM-as-a-Judge or the  OpenAI Moderation API your AI applications.
+
+Method   About Method        
+Perplexity      Measure how well the model predicts text.
+Human Evaluation   Rate responses based on relevance, coherence and quality. 
+BLEU      Used in translation tasks to compare generated output with reference 
+translations. Higher scores (0-1) indicate better performance.
+ROUGE     Evaluates summary quality by comparing generated summaries with 
+reference summaries, calculating precision, recall and F1-score.
+EleutherAI   A framework to test LLMs on different evaluation tasks.    
+HELM   A framework to evaluate LLMs, focusing on 12 different aspects that are 
+important in real-world model deployments.
+Diversity  Assesses the variety and uniqueness of responses, with higher scores 
+indicating more diverse outputs.
+
+Table 1: Methods for Measuring LLM Response 
+
+Working with custom datasets
+
+
+First, create question and ground-truth answer pairs from source 
+documents for the evaluation dataset. Ground-truth answers are 
+the precise responses you expect from the RAG system. You can 
+create these in multiple ways:
+Hand-crafting your dataset:
+Manually create questions and answers.
+Use LLM to create synthetic data:
+Leverage LLMs like or OpenAI APIs.
+T5
+Use the Ragas framework:
+This method 
+uses an LLM to generate various question types 
+for evaluating RAG systems.
+Use FiddleCube:
+FiddleCube
+is a system that can help generate a range of 
+question types aimed at different aspects of the testing 
+process.
+Once you have created a dataset, collect the retrieved context 
+and the final answer generated by your RAG pipeline for each 
+question.
+
+ 
+Here is an example of four 
+evaluation metrics:
+question:
+A set of questions based on the 
+source document.
+ground_truth:
+The anticipated accurate answers to 
+the queries.
+context:
+The context retrieved by the RAG 
+pipeline for each query.
+answer:
+The answer generated by the RAG 
+pipeline for each query
+
+RAG evaluation is 
+just the beginning
+RAG evaluation is just the beginning. It lays the foundation for 
+continuous improvement and long-term success of your system. 
+Initially, it can help you identify and address immediate issues 
+related to retrieval accuracy, contextual relevance, and response 
+quality. However, as your RAG system evolves and is subjected to 
+new data, use cases, and user interactions, you need to continue 
+testing and calibrating.
+By continuously evaluating your application, you can ensure that 
+the system adapts to changing requirements and maintains its 
+performance over time. You should regularly calibrate all 
+components such as embedding models, retrieval algorithms, 
+and the LLM itself. This iterative process will help you identify and 
+f
+ix emerging problems, optimize system parameters, and 
+incorporate user feedback

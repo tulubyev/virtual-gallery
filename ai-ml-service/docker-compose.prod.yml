@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # AI/ML API Gateway (Node.js) - Production
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/aimlservice_db
+      - QDRANT_URL=https://74af1b17-c379-483f-a90f-48a9d9bd1a78.us-east4-0.gcp.cloud.qdrant.io:6333
+      - QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.YStIZv7DI0bRRFCh1Px1LuPtkVLU_KD48s7iMZCyKhw
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:-default_prod_jwt_secret_change_this}
+      - MAIN_APP_WEBHOOK_URL=https://your-gallery-domain.com/webhooks/ai-results
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Qdrant vector database (using Qdrant Cloud - no local instance needed)
+  # Qdrant Cloud URL: https://74af1b17-c379-483f-a90f-48a9d9bd1a78.us-east4-0.gcp.cloud.qdrant.io:6333
+
+  # Redis for caching and queues
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # AI/ML Core Service (Python) for production
+  ai-core:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.python
+    ports:
+      - "8001:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/aimlservice_db
+      - QDRANT_URL=https://74af1b17-c379-483f-a90f-48a9d9bd1a78.us-east4-0.gcp.cloud.qdrant.io:6333
+      - QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.YStIZv7DI0bRRFCh1Px1LuPtkVLU_KD48s7iMZCyKhw
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:
+
+networks:
+  default:
+    name: ai-ml-prod-network

@@ -1,0 +1,26 @@
+
+
+
+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
+
+пример
+
+
+fetch("https://openrouter.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer <OPENROUTER_API_KEY>",
+    "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
+    "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    "model": "qwen/qwen3-coder:free",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the meaning of life?"
+      }
+    ]
+  })
+});
