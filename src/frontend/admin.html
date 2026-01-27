@@ -75,6 +75,10 @@
                     <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                     <span class="font-medium">Аналитика</span>
                 </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="knowledge">
+                    <i data-lucide="brain" class="w-5 h-5"></i>
+                    <span class="font-medium">База знаний</span>
+                </button>
                 <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="settings">
                     <i data-lucide="settings" class="w-5 h-5"></i>
                     <span class="font-medium">Настройки</span>
@@ -406,6 +410,260 @@
                 </div>
             </section>
 
+            <!-- Knowledge Base Management -->
+            <section id="knowledge" class="tab-content">
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">База знаний</h1>
+                        <p class="text-gray-600">Управление RAG-индексом и источниками данных</p>
+                    </div>
+                    <button id="refreshStatsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition-colors">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Обновить
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="image" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900" id="artworksCount">0</p>
+                                <p class="text-sm text-gray-500">Оцифрованные работы</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <i data-lucide="database" class="w-3 h-3"></i>
+                            <span>Коллекция: artworks</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900" id="pdfChunksCount">0</p>
+                                <p class="text-sm text-gray-500">PDF-фрагментов</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <i data-lucide="database" class="w-3 h-3"></i>
+                            <span>Коллекция: pdf_chunks</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="globe" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900" id="externalCount">0</p>
+                                <p class="text-sm text-gray-500">Внешние источники</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <i data-lucide="database" class="w-3 h-3"></i>
+                            <span>Коллекция: external_artworks</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="zap" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900" id="totalVectors">0</p>
+                                <p class="text-sm text-gray-500">Всего векторов</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <i data-lucide="cpu" class="w-3 h-3"></i>
+                            <span>Qdrant Cloud</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- External Sources Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Sources Stats -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="library" class="w-5 h-5 text-indigo-600"></i>
+                            Источники данных
+                        </h3>
+                        <div id="sourcesList" class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-xs font-bold text-red-600">MET</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Metropolitan Museum</p>
+                                        <p class="text-xs text-gray-500" id="metCount">0 записей</p>
+                                    </div>
+                                </div>
+                                <button class="fetch-source-btn text-indigo-600 hover:text-indigo-800 text-sm font-medium" data-source="met">
+                                    Загрузить
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-xs font-bold text-orange-600">RM</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Rijksmuseum</p>
+                                        <p class="text-xs text-gray-500" id="rijksCount">0 записей</p>
+                                    </div>
+                                </div>
+                                <button class="fetch-source-btn text-indigo-600 hover:text-indigo-800 text-sm font-medium" data-source="rijks">
+                                    Загрузить
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-xs font-bold text-purple-600">HV</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">Harvard Art Museums</p>
+                                        <p class="text-xs text-gray-500" id="harvardCount">0 записей</p>
+                                    </div>
+                                </div>
+                                <button class="fetch-source-btn text-indigo-600 hover:text-indigo-800 text-sm font-medium" data-source="harvard">
+                                    Загрузить
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <span class="text-xs font-bold text-green-600">WA</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">WikiArt</p>
+                                        <p class="text-xs text-gray-500" id="wikiartCount">0 записей</p>
+                                    </div>
+                                </div>
+                                <button class="fetch-source-btn text-indigo-600 hover:text-indigo-800 text-sm font-medium" data-source="wikiart">
+                                    Загрузить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fetch External Source Form -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i data-lucide="download-cloud" class="w-5 h-5 text-indigo-600"></i>
+                            Загрузка из внешних API
+                        </h3>
+                        <form id="fetchExternalForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Источник</label>
+                                <select id="fetchSource" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="met">Metropolitan Museum</option>
+                                    <option value="rijks">Rijksmuseum</option>
+                                    <option value="harvard">Harvard Art Museums</option>
+                                    <option value="wikiart">WikiArt</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Поисковый запрос</label>
+                                <input type="text" id="fetchQuery" placeholder="например: impressionism, van gogh, landscape" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div id="apiKeyField" class="hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                <input type="text" id="fetchApiKey" placeholder="API ключ для источника" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="indexToQdrant" checked class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                <label for="indexToQdrant" class="text-sm text-gray-700">Индексировать в Qdrant</label>
+                            </div>
+                            <button type="submit" id="startFetchBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="cloud-download" class="w-5 h-5"></i>
+                                Загрузить и индексировать
+                            </button>
+                        </form>
+                        <div id="fetchProgress" class="hidden mt-4 p-4 bg-indigo-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="animate-spin w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+                                <span class="text-sm text-indigo-700" id="fetchProgressText">Загрузка...</span>
+                            </div>
+                        </div>
+                        <div id="fetchResult" class="hidden mt-4 p-4 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Reindex Section -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="refresh-ccw" class="w-5 h-5 text-indigo-600"></i>
+                        Управление индексом
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button id="reindexArtworksBtn" class="p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200">
+                                    <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-medium text-gray-900">Оцифрованные работы</p>
+                                    <p class="text-xs text-gray-500">Переиндексировать коллекцию</p>
+                                </div>
+                            </div>
+                        </button>
+                        <button id="reindexPdfsBtn" class="p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200">
+                                    <i data-lucide="file-text" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-medium text-gray-900">PDF документы</p>
+                                    <p class="text-xs text-gray-500">Переиндексировать чанки</p>
+                                </div>
+                            </div>
+                        </button>
+                        <button id="reindexExternalBtn" class="p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200">
+                                    <i data-lucide="globe" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-medium text-gray-900">Внешние источники</p>
+                                    <p class="text-xs text-gray-500">Переиндексировать музеи</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Indexing Activity -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-5 h-5 text-indigo-600"></i>
+                        Последние операции индексации
+                    </h3>
+                    <div id="indexingActivity" class="space-y-3">
+                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-900">Индексация готова</p>
+                                <p class="text-xs text-gray-500">Нажмите "Обновить" для получения статистики</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Settings -->
             <section id="settings" class="tab-content">
                 <div class="mb-8">
@@ -480,6 +738,185 @@
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             window.location.href = '/';
         });
+
+        // Knowledge Base Management
+        const AI_SERVICE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : `${window.location.protocol}//${window.location.host.replace(/:\d+$/, '')}:8000`;
+        
+        async function loadKnowledgeStats() {
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/sources/stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update source counts
+                    const sources = data.sources || {};
+                    document.getElementById('metCount').textContent = `${sources.met || 0} записей`;
+                    document.getElementById('rijksCount').textContent = `${sources.rijksmuseum || sources.rijks || 0} записей`;
+                    document.getElementById('harvardCount').textContent = `${sources.harvard || 0} записей`;
+                    document.getElementById('wikiartCount').textContent = `${sources.wikiart || 0} записей`;
+                    document.getElementById('externalCount').textContent = data.total_indexed || 0;
+                }
+                
+                // Try to get RAG stats
+                const ragResponse = await fetch(`${AI_SERVICE_URL}/api/v1/rag/stats`);
+                if (ragResponse.ok) {
+                    const ragData = await ragResponse.json();
+                    document.getElementById('artworksCount').textContent = ragData.artworks_count || 0;
+                    document.getElementById('pdfChunksCount').textContent = ragData.pdf_chunks_count || 0;
+                    document.getElementById('totalVectors').textContent = ragData.total_vectors || 0;
+                }
+            } catch (error) {
+                console.log('Stats load error:', error);
+            }
+        }
+
+        document.getElementById('refreshStatsBtn')?.addEventListener('click', loadKnowledgeStats);
+
+        // Show/hide API key field based on source
+        document.getElementById('fetchSource')?.addEventListener('change', (e) => {
+            const apiKeyField = document.getElementById('apiKeyField');
+            if (e.target.value === 'rijks' || e.target.value === 'harvard') {
+                apiKeyField.classList.remove('hidden');
+            } else {
+                apiKeyField.classList.add('hidden');
+            }
+        });
+
+        // Fetch external form submission
+        document.getElementById('fetchExternalForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const source = document.getElementById('fetchSource').value;
+            const query = document.getElementById('fetchQuery').value || 'paintings';
+            const apiKey = document.getElementById('fetchApiKey').value;
+            const indexToQdrant = document.getElementById('indexToQdrant').checked;
+            
+            const progressEl = document.getElementById('fetchProgress');
+            const resultEl = document.getElementById('fetchResult');
+            const submitBtn = document.getElementById('startFetchBtn');
+            
+            progressEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+            submitBtn.disabled = true;
+            document.getElementById('fetchProgressText').textContent = `Загрузка из ${source}...`;
+            
+            try {
+                const requestBody = {
+                    query: query,
+                    index_to_qdrant: indexToQdrant
+                };
+                
+                if (apiKey) {
+                    requestBody.api_key = apiKey;
+                }
+                
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/fetch/${source}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultEl.className = 'mt-4 p-4 rounded-xl bg-green-50 text-green-800';
+                    resultEl.innerHTML = `
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            <span class="font-medium">Загрузка завершена</span>
+                        </div>
+                        <p class="text-sm">Загружено: ${data.fetched || 0} записей</p>
+                        ${data.indexed ? `<p class="text-sm">Индексировано: ${data.indexed}</p>` : ''}
+                    `;
+                    loadKnowledgeStats();
+                } else {
+                    resultEl.className = 'mt-4 p-4 rounded-xl bg-red-50 text-red-800';
+                    resultEl.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                            <span class="font-medium">Ошибка: ${data.detail || 'Неизвестная ошибка'}</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultEl.className = 'mt-4 p-4 rounded-xl bg-red-50 text-red-800';
+                resultEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <span class="font-medium">Ошибка подключения: ${error.message}</span>
+                    </div>
+                `;
+            } finally {
+                progressEl.classList.add('hidden');
+                resultEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+
+        // Quick fetch buttons
+        document.querySelectorAll('.fetch-source-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const source = btn.dataset.source;
+                document.getElementById('fetchSource').value = source;
+                document.getElementById('fetchSource').dispatchEvent(new Event('change'));
+                document.getElementById('fetchQuery').focus();
+            });
+        });
+
+        // Reindex buttons
+        document.getElementById('reindexArtworksBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все оцифрованные работы?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/artworks/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                alert('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        document.getElementById('reindexPdfsBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все PDF документы?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/pdfs/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                alert('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        document.getElementById('reindexExternalBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все внешние источники?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                alert('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        // Load stats on knowledge tab open
+        document.querySelector('[data-tab="knowledge"]')?.addEventListener('click', loadKnowledgeStats);
     </script>
 </body>
 </html>
