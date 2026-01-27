@@ -821,24 +821,57 @@
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
         const chatMessages = document.getElementById('chat-messages');
+        const AI_SERVICE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : `${window.location.protocol}//${window.location.host.replace(/:\d+$/, '')}:8000`;
 
-        function sendMessage() {
+        async function sendMessage() {
             const message = chatInput.value.trim();
             if (!message) return;
 
             addMessage('user', message);
             chatInput.value = '';
 
-            setTimeout(() => {
-                const responses = [
-                    "Отличный вопрос! Импрессионизм зародился во Франции в 1870-х годах. Художники, такие как Моне, Ренуар и Дега, стремились запечатлеть мимолетные эффекты света и цвета.",
-                    "Техника, о которой вы говорите, называется 'сфумато' - это мягкие переходы между цветами и тонами, придающие картинам реалистичность. Леонардо да Винчи довел эту технику до совершенства.",
-                    "Кубизм, созданный Пикассо и Браком около 1907 года, произвел революцию в искусстве, изображая объекты с нескольких точек зрения одновременно.",
-                    "Загадочная улыбка Моны Лизы веками восхищает ценителей искусства. Некоторые теории предполагают, что это связано с техникой Леонардо рисовать обе стороны лица одновременно."
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage('assistant', randomResponse);
-            }, 1000 + Math.random() * 2000);
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex gap-3 justify-start';
+            typingDiv.innerHTML = `
+                <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="bot" class="w-5 h-5 text-accent-600"></i>
+                </div>
+                <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lucide.createIcons();
+
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/rag/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: message })
+                });
+
+                const data = await response.json();
+                typingDiv.remove();
+
+                if (response.ok) {
+                    addMessage('assistant', data.answer);
+                } else {
+                    addMessage('assistant', 'Извините, произошла ошибка при поиске ответа: ' + (data.detail || 'неизвестная ошибка'));
+                }
+            } catch (error) {
+                typingDiv.remove();
+                addMessage('assistant', 'Не удалось связаться с AI-сервисом. Убедитесь, что сервер запущен.');
+                console.error('Chat error:', error);
+            }
         }
 
         function addMessage(type, content) {
