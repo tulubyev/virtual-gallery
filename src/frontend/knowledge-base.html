@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База знаний - Virtual Art Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'gallery': {
+                            50: '#faf7f5',
+                            100: '#f5ede8',
+                            200: '#e8d5c8',
+                            300: '#d4b59e',
+                            400: '#c09474',
+                            500: '#a67c5b',
+                            600: '#8b6545',
+                            700: '#6d4f37',
+                            800: '#4a3525',
+                            900: '#2d1f16',
+                        },
+                        'accent': {
+                            50: '#f0f4ff',
+                            100: '#e0e9ff',
+                            200: '#c7d6fe',
+                            300: '#a5b9fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .art-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gallery-50 text-gray-900">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="palette" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-display font-bold text-gray-900">Virtual Gallery</h1>
+                        <span class="text-xs text-accent-600 font-medium">AI Powered</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="/gallery.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
+                    <a href="/auction-participant.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
+                    <a href="/knowledge-base.html" class="nav-link text-accent-600 font-medium transition-colors">База знаний</a>
+                </nav>
+
+                <!-- Right side -->
+                <div class="flex items-center gap-4">
+                    <a href="/admin" class="hidden sm:flex items-center gap-2 text-gray-600 hover:text-accent-600 transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span class="text-sm font-medium">Дашборд</span>
+                    </a>
+                    <button class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Войти</span>
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <nav class="px-4 py-4 space-y-3">
+                <a href="/gallery.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Галерея</a>
+                <a href="/auction-participant.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Аукцион</a>
+                <a href="/knowledge-base.html" class="block px-3 py-2 text-accent-600 bg-accent-50 rounded-lg font-medium">База знаний</a>
+                <a href="/admin" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Дашборд</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                <i data-lucide="library" class="w-4 h-4"></i>
+                RAG-система
+            </div>
+            <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">База знаний</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">Обработка документов и AI-ассистент для исследования искусства</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                </div>
+                <p class="text-2xl font-bold text-gray-900">127</p>
+                <p class="text-sm text-gray-500">Документов</p>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <p class="text-2xl font-bold text-gray-900">2,450</p>
+                <p class="text-sm text-gray-500">Чанков</p>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="image" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <p class="text-2xl font-bold text-gray-900">892</p>
+                <p class="text-sm text-gray-500">Произведений</p>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="globe" class="w-5 h-5 text-purple-600"></i>
+                </div>
+                <p class="text-2xl font-bold text-gray-900">4</p>
+                <p class="text-sm text-gray-500">Источника</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Documents Section -->
+            <div id="documents">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-display font-semibold text-gray-900">Обработка документов</h2>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 art-shadow border border-gray-100">
+                    <div id="pdf-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors cursor-pointer mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="file-plus" class="w-8 h-8 text-green-600"></i>
+                        </div>
+                        <p class="text-gray-600 mb-2">Перетащите PDF сюда</p>
+                        <p class="text-sm text-gray-500">или нажмите для выбора файла</p>
+                        <p class="text-xs text-gray-400 mt-2">PDF до 50MB</p>
+                        <input type="file" accept=".pdf" class="hidden" id="pdf-upload">
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <label class="block text-sm font-medium text-gray-700">Категория документа</label>
+                        <select id="pdf-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="auto">Автоопределение (AI)</option>
+                            <option value="history">История искусства</option>
+                            <option value="technique">Техники и материалы</option>
+                            <option value="artist">Биографии художников</option>
+                            <option value="period">Периоды и стили</option>
+                        </select>
+                    </div>
+
+                    <button id="process-pdf-btn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="file-check" class="w-5 h-5"></i>
+                        <span id="process-text">Обработать документ</span>
+                    </button>
+
+                    <!-- Recent Documents -->
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Недавние документы</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                                <i data-lucide="file-text" class="w-4 h-4 text-green-600"></i>
+                                <span class="text-sm text-gray-700 flex-1 truncate">Импрессионизм_история.pdf</span>
+                                <span class="text-xs text-gray-400">2 дня назад</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+                                <i data-lucide="file-text" class="w-4 h-4 text-green-600"></i>
+                                <span class="text-sm text-gray-700 flex-1 truncate">Техники_масляной_живописи.pdf</span>
+                                <span class="text-xs text-gray-400">5 дней назад</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Assistant Section -->
+            <div id="assistant">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i data-lucide="bot" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-display font-semibold text-gray-900">AI Ассистент</h2>
+                </div>
+
+                <div class="glass-card rounded-2xl art-shadow border border-gray-100 overflow-hidden">
+                    <!-- Chat Header -->
+                    <div class="bg-gradient-to-r from-accent-600 to-purple-600 p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-display font-semibold text-white">Art Assistant</h3>
+                                <p class="text-white/70 text-xs">Эксперт по истории искусства</p>
+                            </div>
+                            <span class="ml-auto bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                                Онлайн
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="h-80 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="bot" class="w-4 h-4 text-accent-600"></i>
+                            </div>
+                            <div class="bg-white rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm">
+                                <p class="text-gray-700 text-sm">Здравствуйте! Я ваш AI-ассистент по искусству. Могу ответить на вопросы об истории искусства, техниках, художниках на основе загруженных документов.</p>
+                                <p class="text-xs text-gray-400 mt-2">Только что</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Questions -->
+                    <div class="px-4 py-3 bg-white border-t border-gray-100">
+                        <p class="text-xs text-gray-500 mb-2">Быстрые вопросы:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="quick-question text-xs bg-gray-100 hover:bg-accent-100 text-gray-700 hover:text-accent-700 px-3 py-1.5 rounded-full transition-colors">
+                                Что такое импрессионизм?
+                            </button>
+                            <button class="quick-question text-xs bg-gray-100 hover:bg-accent-100 text-gray-700 hover:text-accent-700 px-3 py-1.5 rounded-full transition-colors">
+                                Техники Ван Гога
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-4 bg-white border-t border-gray-100">
+                        <div class="flex gap-3">
+                            <input
+                                type="text"
+                                id="chat-input"
+                                placeholder="Спросите об искусстве..."
+                                class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all text-sm"
+                            >
+                            <button
+                                id="send-btn"
+                                class="bg-gradient-to-r from-accent-600 to-purple-600 text-white px-5 py-3 rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+                            >
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- External Sources -->
+        <div class="mt-12">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <i data-lucide="globe" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <h2 class="text-2xl font-display font-semibold text-gray-900">Внешние источники</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card rounded-xl p-4 border border-gray-100 hover:border-blue-200 transition-colors">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="palette" class="w-4 h-4 text-orange-600"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">WikiArt</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">250,000+ произведений искусства</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-green-600 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Подключено
+                        </span>
+                        <span class="text-gray-400">12,500 индексировано</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-gray-100 hover:border-blue-200 transition-colors">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="landmark" class="w-4 h-4 text-red-600"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">MET Museum</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">470,000+ экспонатов</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-green-600 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Подключено
+                        </span>
+                        <span class="text-gray-400">8,200 индексировано</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-gray-100 hover:border-blue-200 transition-colors">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="building" class="w-4 h-4 text-yellow-600"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Rijksmuseum</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">700,000+ объектов</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-green-600 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Подключено
+                        </span>
+                        <span class="text-gray-400">5,800 индексировано</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-4 border border-gray-100 hover:border-blue-200 transition-colors">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="graduation-cap" class="w-4 h-4 text-purple-600"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">Harvard Art</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">250,000+ произведений</p>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-green-600 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Подключено
+                        </span>
+                        <span class="text-gray-400">3,100 индексировано</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-accent-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="palette" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="font-display font-bold text-white">Virtual Gallery</span>
+                </div>
+                <p class="text-sm text-gray-400">© 2025 Virtual Art Gallery. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // PDF upload handling
+        const pdfDropZone = document.getElementById('pdf-drop-zone');
+        const pdfUpload = document.getElementById('pdf-upload');
+
+        pdfDropZone.addEventListener('click', () => pdfUpload.click());
+        pdfDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pdfDropZone.classList.add('border-green-400', 'bg-green-50');
+        });
+        pdfDropZone.addEventListener('dragleave', () => {
+            pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
+        });
+        pdfDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                handlePdfUpload(files[0]);
+            }
+        });
+
+        pdfUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handlePdfUpload(e.target.files[0]);
+            }
+        });
+
+        function handlePdfUpload(file) {
+            console.log('PDF uploaded:', file.name);
+            alert('Документ "' + file.name + '" загружен. Начинаем обработку...');
+        }
+
+        // Chat functionality
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex gap-3 justify-end';
+            userDiv.innerHTML = `
+                <div class="bg-accent-600 text-white rounded-2xl rounded-tr-none p-3 max-w-[85%] shadow-sm">
+                    <p class="text-sm">${message}</p>
+                </div>
+                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="user" class="w-4 h-4 text-gray-600"></i>
+                </div>
+            `;
+            chatMessages.appendChild(userDiv);
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lucide.createIcons();
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex gap-3';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="bot" class="w-4 h-4 text-accent-600"></i>
+                </div>
+                <div class="bg-white rounded-2xl rounded-tl-none p-3 shadow-sm">
+                    <div class="flex gap-1">
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            lucide.createIcons();
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, use_rag: true })
+                });
+
+                const data = await response.json();
+                typingDiv.remove();
+
+                const botDiv = document.createElement('div');
+                botDiv.className = 'flex gap-3';
+                botDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4 text-accent-600"></i>
+                    </div>
+                    <div class="bg-white rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm">
+                        <p class="text-gray-700 text-sm">${data.response || data.error || 'Произошла ошибка'}</p>
+                        <p class="text-xs text-gray-400 mt-2">Только что</p>
+                    </div>
+                `;
+                chatMessages.appendChild(botDiv);
+                lucide.createIcons();
+            } catch (error) {
+                typingDiv.remove();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'flex gap-3';
+                errorDiv.innerHTML = `
+                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-600"></i>
+                    </div>
+                    <div class="bg-red-50 rounded-2xl rounded-tl-none p-3 max-w-[85%]">
+                        <p class="text-red-700 text-sm">Ошибка подключения к серверу</p>
+                    </div>
+                `;
+                chatMessages.appendChild(errorDiv);
+                lucide.createIcons();
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Quick questions
+        document.querySelectorAll('.quick-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                chatInput.value = btn.textContent;
+                sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>

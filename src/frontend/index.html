@@ -150,7 +150,7 @@
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="/gallery.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
                     <a href="/auction-participant.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
-                    <a href="#knowledge-base" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">База знаний</a>
+                    <a href="/knowledge-base.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">База знаний</a>
                 </nav>
 
                 <!-- Right side -->
@@ -177,7 +177,7 @@
             <nav class="px-4 py-4 space-y-3">
                 <a href="/gallery.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Галерея</a>
                 <a href="/auction-participant.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Аукцион</a>
-                <a href="#knowledge-base" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">База знаний</a>
+                <a href="/knowledge-base.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">База знаний</a>
                 <a href="/admin" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Дашборд</a>
             </nav>
         </div>
@@ -693,101 +693,6 @@
             </div>
         </div>
         </section>
-
-        <!-- Knowledge Base Section -->
-        <section id="knowledge-base" class="mb-20">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">База знаний</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Обработка документов и AI-ассистент для исследования искусства</p>
-            </div>
-
-            <!-- Documents subsection -->
-            <div id="documents" class="mb-12">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-semibold text-gray-900">Обработка документов</h3>
-                </div>
-
-            <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100 max-w-2xl mx-auto">
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors cursor-pointer mb-6">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="file-plus" class="w-8 h-8 text-green-600"></i>
-                    </div>
-                    <p class="text-gray-600 mb-2">Перетащите PDF сюда</p>
-                    <p class="text-sm text-gray-500">или нажмите для выбора файла</p>
-                    <p class="text-xs text-gray-400 mt-2">PDF до 50MB</p>
-                    <input type="file" accept=".pdf" class="hidden" id="pdf-upload">
-                </div>
-
-                <button id="process-pdf-btn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="file-check" class="w-5 h-5"></i>
-                    <span id="process-text">Обработать документ</span>
-                </button>
-            </div>
-            </div>
-
-            <!-- AI Assistant subsection -->
-            <div id="assistant">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <i data-lucide="bot" class="w-5 h-5 text-purple-600"></i>
-                    </div>
-                    <h3 class="text-xl font-display font-semibold text-gray-900">AI Ассистент</h3>
-                </div>
-
-            <div class="glass-card rounded-2xl art-shadow border border-gray-100 overflow-hidden max-w-4xl mx-auto">
-                <!-- Chat Header -->
-                <div class="bg-gradient-to-r from-accent-600 to-purple-600 p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <i data-lucide="bot" class="w-6 h-6 text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-display font-semibold text-white">Art Assistant</h3>
-                            <p class="text-white/70 text-sm">Эксперт по истории искусства</p>
-                        </div>
-                        <span class="ml-auto bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                            Онлайн
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Chat Messages -->
-                <div id="chat-messages" class="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50">
-                    <div class="flex gap-3">
-                        <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="bot" class="w-5 h-5 text-accent-600"></i>
-                        </div>
-                        <div class="bg-white rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-sm">
-                            <p class="text-gray-700">Здравствуйте! Я ваш AI-ассистент по искусству. Могу помочь с вопросами об истории искусства, техниках, художниках и многом другом. Что бы вы хотели узнать?</p>
-                            <p class="text-xs text-gray-400 mt-2">Только что</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Input -->
-                <div class="p-4 bg-white border-t border-gray-100">
-                    <div class="flex gap-3">
-                        <input
-                            type="text"
-                            id="chat-input"
-                            placeholder="Спросите об истории искусства, техниках, художниках..."
-                            class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all"
-                        >
-                        <button
-                            id="send-btn"
-                            class="bg-gradient-to-r from-accent-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
-                        >
-                            <i data-lucide="send" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </section>
     </main>
 
     <!-- Footer -->
@@ -825,7 +730,7 @@
                         <li><a href="/gallery.html" class="hover:text-white transition-colors">Галерея</a></li>
                         <li><a href="/auction-participant.html" class="hover:text-white transition-colors">Аукцион</a></li>
                         <li><a href="#gallery-formation" class="hover:text-white transition-colors">Формирование галереи</a></li>
-                        <li><a href="#knowledge-base" class="hover:text-white transition-colors">База знаний</a></li>
+                        <li><a href="/knowledge-base.html" class="hover:text-white transition-colors">База знаний</a></li>
                         <li><a href="/admin" class="hover:text-white transition-colors">Дашборд</a></li>
                     </ul>
                 </div>
@@ -948,101 +853,6 @@
                 document.getElementById('analysis-results').classList.remove('hidden');
                 document.getElementById('analysis-results').scrollIntoView({ behavior: 'smooth' });
             }, 3000);
-        });
-
-        // Chat functionality
-        const chatInput = document.getElementById('chat-input');
-        const sendBtn = document.getElementById('send-btn');
-        const chatMessages = document.getElementById('chat-messages');
-        const AI_SERVICE_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000' 
-            : `${window.location.protocol}//${window.location.host.replace(/:\d+$/, '')}:8000`;
-
-        async function sendMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            addMessage('user', message);
-            chatInput.value = '';
-
-            // Add typing indicator
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.className = 'flex gap-3 justify-start';
-            typingDiv.innerHTML = `
-                <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="bot" class="w-5 h-5 text-accent-600"></i>
-                </div>
-                <div class="bg-white rounded-2xl rounded-tl-none p-4 shadow-sm">
-                    <div class="flex gap-1">
-                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        <div class="w-2 h-2 bg-accent-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
-                    </div>
-                </div>
-            `;
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            lucide.createIcons();
-
-            try {
-                const response = await fetch(`${AI_SERVICE_URL}/api/v1/rag/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: message })
-                });
-
-                const data = await response.json();
-                typingDiv.remove();
-
-                if (response.ok) {
-                    addMessage('assistant', data.answer);
-                } else {
-                    addMessage('assistant', 'Извините, произошла ошибка при поиске ответа: ' + (data.detail || 'неизвестная ошибка'));
-                }
-            } catch (error) {
-                typingDiv.remove();
-                addMessage('assistant', 'Не удалось связаться с AI-сервисом. Убедитесь, что сервер запущен.');
-                console.error('Chat error:', error);
-            }
-        }
-
-        function addMessage(type, content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `flex gap-3 ${type === 'user' ? 'justify-end' : 'justify-start'}`;
-
-            const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
-            if (type === 'user') {
-                messageDiv.innerHTML = `
-                    <div class="bg-gradient-to-r from-accent-600 to-purple-600 text-white rounded-2xl rounded-tr-none p-4 max-w-[80%] shadow-sm">
-                        <p>${content}</p>
-                        <p class="text-xs text-white/70 mt-2">${time}</p>
-                    </div>
-                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="user" class="w-5 h-5 text-gray-600"></i>
-                    </div>
-                `;
-            } else {
-                messageDiv.innerHTML = `
-                    <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="bot" class="w-5 h-5 text-accent-600"></i>
-                    </div>
-                    <div class="bg-white rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-sm">
-                        <p class="text-gray-700">${content}</p>
-                        <p class="text-xs text-gray-400 mt-2">${time}</p>
-                    </div>
-                `;
-            }
-
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            lucide.createIcons();
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
         });
 
         // Smooth scroll
