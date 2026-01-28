@@ -577,11 +577,11 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12">
                 <!-- Brand -->
-                <div class="md:col-span-1">
+                <div class="flex-1">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                             <i data-lucide="palette" class="w-5 h-5 text-white"></i>
                         </div>
                         <span class="text-xl font-display font-bold text-white">Virtual Gallery</span>
@@ -603,18 +603,16 @@
                 </div>
 
                 <!-- Right side info -->
-                <div class="flex flex-col items-end justify-between">
-                    <div class="text-right space-y-4">
-                        <div class="flex flex-col md:flex-row gap-4 md:gap-6 text-sm mb-4">
-                            <a href="#" class="hover:text-white transition-colors">Политика конфиденциальности</a>
-                            <a href="#" class="hover:text-white transition-colors">Условия использования</a>
-                        </div>
-                        <p class="text-gray-500 text-sm">© 2026 Virtual Art Gallery. Все права защищены.</p>
+                <div class="flex flex-col items-end text-right">
+                    <div class="space-y-2 mb-8">
+                        <a href="#" class="block text-sm hover:text-white transition-colors">Политика конфиденциальности</a>
+                        <a href="#" class="block text-sm hover:text-white transition-colors">Условия использования</a>
+                        <p class="text-gray-500 text-sm mt-4">© 2026 Virtual Art Gallery. Все права защищены.</p>
                     </div>
                     
-                    <div class="text-right mt-8">
-                        <p class="text-gray-500 text-sm mb-2">Свяжитесь с нами</p>
-                        <a href="mailto:info@virtualgallery.art" class="text-accent-400 hover:text-accent-300 transition-colors">info@virtualgallery.art</a>
+                    <div class="mt-4">
+                        <p class="text-gray-500 text-sm mb-1">Свяжитесь с нами</p>
+                        <a href="mailto:info@virtualgallery.art" class="text-accent-400 hover:text-accent-300 transition-colors font-medium">info@virtualgallery.art</a>
                     </div>
                 </div>
             </div>
