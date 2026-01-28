@@ -468,6 +468,87 @@
                 </div>
             </div>
         </section>
+
+        <!-- AI Assistant Section -->
+        <section id="ai-assistant" class="mb-20">
+            <div class="text-center mb-12">
+                <span class="inline-block bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-medium mb-4">Искусственный интеллект</span>
+                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">AI Ассистент</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Задавайте вопросы об истории искусства, техниках и художниках</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="glass-card rounded-2xl art-shadow border border-gray-100 overflow-hidden">
+                    <!-- Chat Header -->
+                    <div class="bg-gradient-to-r from-accent-600 to-purple-600 p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <i data-lucide="bot" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-display font-semibold text-white">Art Assistant</h3>
+                                <p class="text-white/70 text-xs">Эксперт по истории искусства</p>
+                            </div>
+                            <span class="ml-auto bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                                <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                                Онлайн
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="h-72 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="bot" class="w-4 h-4 text-accent-600"></i>
+                            </div>
+                            <div class="bg-white rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm">
+                                <p class="text-gray-700 text-sm">Здравствуйте! Я ваш AI-ассистент по искусству. Могу ответить на вопросы об истории искусства, техниках и художниках. Чем могу помочь?</p>
+                                <p class="text-xs text-gray-400 mt-2">Только что</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Questions -->
+                    <div class="px-4 py-3 bg-white border-t border-gray-100">
+                        <p class="text-xs text-gray-500 mb-2">Быстрые вопросы:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button class="quick-question text-xs bg-gray-100 hover:bg-accent-100 text-gray-700 hover:text-accent-700 px-3 py-1.5 rounded-full transition-colors">
+                                Что такое импрессионизм?
+                            </button>
+                            <button class="quick-question text-xs bg-gray-100 hover:bg-accent-100 text-gray-700 hover:text-accent-700 px-3 py-1.5 rounded-full transition-colors">
+                                Техники Ван Гога
+                            </button>
+                            <button class="quick-question text-xs bg-gray-100 hover:bg-accent-100 text-gray-700 hover:text-accent-700 px-3 py-1.5 rounded-full transition-colors">
+                                Эпоха Возрождения
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-4 bg-white border-t border-gray-100">
+                        <div class="flex gap-3">
+                            <input
+                                type="text"
+                                id="chat-input"
+                                placeholder="Спросите об искусстве..."
+                                class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all text-sm"
+                            >
+                            <button
+                                id="send-btn"
+                                class="bg-gradient-to-r from-accent-600 to-purple-600 text-white px-5 py-3 rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+                            >
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    Для расширенных возможностей перейдите в <a href="/knowledge-base.html" class="text-accent-600 hover:text-accent-700 font-medium">Базу знаний</a>
+                </p>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -571,6 +652,67 @@
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     mobileMenu.classList.add('hidden');
                 }
+            });
+        });
+
+        // AI Chat functionality
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex gap-3' + (isUser ? ' flex-row-reverse' : '');
+            
+            const avatar = isUser 
+                ? '<div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0"><i data-lucide="user" class="w-4 h-4 text-gray-600"></i></div>'
+                : '<div class="w-8 h-8 bg-accent-100 rounded-full flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4 text-accent-600"></i></div>';
+            
+            const bubbleClass = isUser 
+                ? 'bg-accent-600 text-white rounded-2xl rounded-tr-none' 
+                : 'bg-white rounded-2xl rounded-tl-none shadow-sm';
+            
+            const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                ${avatar}
+                <div class="${bubbleClass} p-3 max-w-[85%]">
+                    <p class="text-sm">${text}</p>
+                    <p class="text-xs ${isUser ? 'text-white/70' : 'text-gray-400'} mt-2">${time}</p>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lucide.createIcons();
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            addMessage(text, true);
+            chatInput.value = '';
+            
+            setTimeout(() => {
+                const responses = [
+                    'Импрессионизм - это художественное направление, возникшее во Франции в 1860-х годах. Художники-импрессионисты стремились передать мимолетные впечатления от реальности, используя короткие мазки чистых цветов.',
+                    'Ван Гог использовал технику "импасто" - нанесение толстых слоев краски для создания текстуры. Его характерный стиль включает динамичные, закрученные мазки.',
+                    'Эпоха Возрождения (XIV-XVII век) ознаменовалась возвратом к идеалам античности. Леонардо да Винчи, Микеланджело и Рафаэль - главные представители этого периода.'
+                ];
+                addMessage(responses[Math.floor(Math.random() * responses.length)]);
+            }, 1000);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        document.querySelectorAll('.quick-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                chatInput.value = btn.textContent;
+                sendMessage();
             });
         });
     </script>
