@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд сотрудника - Virtual Art Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'gallery': {
+                            50: '#faf7f5', 100: '#f5ede8', 200: '#e8d5c8', 300: '#d4b59e',
+                            400: '#c09474', 500: '#a67c5b', 600: '#8b6545', 700: '#6d4f37',
+                            800: '#4a3525', 900: '#2d1f16',
+                        },
+                        'accent': {
+                            50: '#f0f4ff', 100: '#e0e9ff', 200: '#c7d6fe', 300: '#a5b9fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .art-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="users" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-display font-bold text-gray-900">Дашборд сотрудника</h1>
+                        <span class="text-xs text-green-600 font-medium">Virtual Gallery</span>
+                    </div>
+                </a>
+
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Главная</a>
+                    <a href="/gallery.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
+                    <a href="/knowledge-base.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">База знаний</a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <span class="hidden sm:flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        Сотрудник
+                    </span>
+                    <button class="p-2 text-gray-600 hover:text-gray-900">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Формирование галереи</h1>
+            <p class="text-gray-600">Загрузка, оцифровка и AI-анализ произведений для создания карточек</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card rounded-xl p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="upload" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900">24</p>
+                        <p class="text-xs text-gray-500">Загружено сегодня</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900">8</p>
+                        <p class="text-xs text-gray-500">На проверке</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900">156</p>
+                        <p class="text-xs text-gray-500">Одобрено</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-4 border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900">892</p>
+                        <p class="text-xs text-gray-500">Всего в галерее</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-gray-200">
+            <button id="tab-upload" class="tab-btn px-4 py-3 font-medium text-green-600 border-b-2 border-green-600">
+                <i data-lucide="upload" class="w-4 h-4 inline mr-2"></i>Загрузка
+            </button>
+            <button id="tab-digitize" class="tab-btn px-4 py-3 font-medium text-gray-500 hover:text-gray-700">
+                <i data-lucide="scan" class="w-4 h-4 inline mr-2"></i>Оцифровка
+            </button>
+            <button id="tab-history" class="tab-btn px-4 py-3 font-medium text-gray-500 hover:text-gray-700">
+                <i data-lucide="history" class="w-4 h-4 inline mr-2"></i>История
+            </button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div id="content-upload" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Upload Form -->
+                <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100">
+                    <h3 class="text-xl font-display font-semibold mb-6 flex items-center gap-3">
+                        <i data-lucide="upload" class="w-5 h-5 text-green-600"></i>
+                        Загрузка произведения
+                    </h3>
+
+                    <div class="space-y-6">
+                        <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors cursor-pointer">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-green-600"></i>
+                            </div>
+                            <p class="text-gray-600 mb-2">Перетащите изображение сюда</p>
+                            <p class="text-sm text-gray-500">или нажмите для выбора файла</p>
+                            <p class="text-xs text-gray-400 mt-2">PNG, JPG до 10MB</p>
+                            <input type="file" accept="image/*" class="hidden" id="image-upload">
+                        </div>
+
+                        <div id="preview-container" class="hidden">
+                            <img id="image-preview" class="w-full h-48 object-cover rounded-xl" alt="Preview">
+                            <button id="remove-image" class="mt-2 text-sm text-red-600 hover:text-red-700 flex items-center gap-1">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                                Удалить
+                            </button>
+                        </div>
+
+                        <button id="analyze-btn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            Анализировать
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="analysis-results" class="glass-card rounded-2xl p-8 art-shadow border border-gray-100">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="info" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-xl font-display font-semibold text-gray-400">Результаты анализа</h3>
+                    </div>
+                    <p class="text-gray-500 text-center py-8">Загрузите изображение для анализа</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digitize Tab -->
+        <div id="content-digitize" class="tab-content hidden">
+            <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100">
+                <h3 class="text-xl font-display font-semibold mb-6 flex items-center gap-3">
+                    <i data-lucide="scan" class="w-5 h-5 text-amber-600"></i>
+                    Оцифровка произведений
+                </h3>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Front Side -->
+                    <div>
+                        <h4 class="text-lg font-medium mb-4 flex items-center gap-2">
+                            <i data-lucide="image" class="w-5 h-5 text-amber-600"></i>
+                            Лицевая сторона
+                        </h4>
+                        <div id="front-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-amber-400 transition-colors cursor-pointer h-48 flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="image-plus" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1">Перетащите изображение</p>
+                            <p class="text-xs text-gray-400">PNG, JPG до 20MB</p>
+                            <input type="file" accept="image/*" class="hidden" id="front-upload">
+                        </div>
+                    </div>
+
+                    <!-- Back Side -->
+                    <div>
+                        <h4 class="text-lg font-medium mb-4 flex items-center gap-2">
+                            <i data-lucide="flip-horizontal" class="w-5 h-5 text-blue-600"></i>
+                            Обратная сторона
+                        </h4>
+                        <div id="back-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors cursor-pointer h-48 flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="scan-text" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-1">Перетащите изображение</p>
+                            <p class="text-xs text-gray-400">Подписи, провенанс, штампы</p>
+                            <input type="file" accept="image/*" class="hidden" id="back-upload">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadata -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Название произведения</label>
+                        <input type="text" placeholder="Введите название или оставьте для AI" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Художник</label>
+                        <input type="text" placeholder="Имя художника или 'Неизвестен'" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                </div>
+
+                <!-- Watermark Options -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-600"></i>
+                        Защита авторских прав
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-amber-600" checked>
+                            <span class="text-sm text-gray-600">Видимый водяной знак</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-amber-600" checked>
+                            <span class="text-sm text-gray-600">Невидимая метка</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-amber-600">
+                            <span class="text-sm text-gray-600">NFT метаданные</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    Оцифровать и проанализировать
+                </button>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="content-history" class="tab-content hidden">
+            <div class="glass-card rounded-2xl p-6 art-shadow border border-gray-100">
+                <h3 class="text-xl font-display font-semibold mb-6">История загрузок</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                        <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=80&h=80&fit=crop" class="w-16 h-16 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">Пейзаж с рекой</p>
+                            <p class="text-sm text-gray-500">Импрессионизм, XIX век</p>
+                        </div>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Одобрено</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                        <img src="https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=80&h=80&fit=crop" class="w-16 h-16 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">Портрет неизвестной</p>
+                            <p class="text-sm text-gray-500">Классицизм, XVIII век</p>
+                        </div>
+                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">На проверке</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                        <img src="https://images.unsplash.com/photo-1549887534-1541e9326642?w=80&h=80&fit=crop" class="w-16 h-16 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">Натюрморт с фруктами</p>
+                            <p class="text-sm text-gray-500">Барокко, XVII век</p>
+                        </div>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Одобрено</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab-btn');
+        const contents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('text-green-600', 'border-b-2', 'border-green-600');
+                    t.classList.add('text-gray-500');
+                });
+                tab.classList.add('text-green-600', 'border-b-2', 'border-green-600');
+                tab.classList.remove('text-gray-500');
+
+                const contentId = 'content-' + tab.id.replace('tab-', '');
+                contents.forEach(c => c.classList.add('hidden'));
+                document.getElementById(contentId).classList.remove('hidden');
+            });
+        });
+
+        // Drop zone handling
+        const dropZone = document.getElementById('drop-zone');
+        const imageUpload = document.getElementById('image-upload');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+
+        dropZone.addEventListener('click', () => imageUpload.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-green-400', 'bg-green-50');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-green-400', 'bg-green-50');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-green-400', 'bg-green-50');
+            if (e.dataTransfer.files.length > 0) {
+                handleImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+
+        imageUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        function handleImageUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                dropZone.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('remove-image').addEventListener('click', () => {
+            dropZone.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+            imageUpload.value = '';
+        });
+    </script>
+</body>
+</html>

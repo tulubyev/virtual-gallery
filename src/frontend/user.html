@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Virtual Art Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'accent': {
+                            50: '#f0f4ff', 100: '#e0e9ff', 200: '#c7d6fe', 300: '#a5b9fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .art-shadow { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-display font-bold text-gray-900">Личный кабинет</h1>
+                        <span class="text-xs text-blue-600 font-medium">Virtual Gallery</span>
+                    </div>
+                </a>
+
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Главная</a>
+                    <a href="/gallery.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
+                    <a href="/auction-participant.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    <span class="hidden sm:flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        Посетитель
+                    </span>
+                    <button class="p-2 text-gray-600 hover:text-gray-900">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <div class="mb-8">
+            <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Добро пожаловать!</h1>
+            <p class="text-gray-600">Исследуйте виртуальную галерею искусства</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <a href="/gallery.html" class="glass-card rounded-2xl p-6 art-shadow border border-gray-100 hover:border-blue-200 transition-all group">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                    <i data-lucide="image" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-display font-semibold mb-2">Галерея</h3>
+                <p class="text-gray-600 text-sm">Просмотр коллекции произведений искусства в 3D-пространстве</p>
+            </a>
+
+            <a href="/auction-participant.html" class="glass-card rounded-2xl p-6 art-shadow border border-gray-100 hover:border-amber-200 transition-all group">
+                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-200 transition-colors">
+                    <i data-lucide="gavel" class="w-6 h-6 text-amber-600"></i>
+                </div>
+                <h3 class="text-xl font-display font-semibold mb-2">Аукционы</h3>
+                <p class="text-gray-600 text-sm">Участвуйте в торгах за уникальные произведения</p>
+            </a>
+
+            <a href="/knowledge-base.html" class="glass-card rounded-2xl p-6 art-shadow border border-gray-100 hover:border-purple-200 transition-all group">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+                    <i data-lucide="bot" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <h3 class="text-xl font-display font-semibold mb-2">AI Ассистент</h3>
+                <p class="text-gray-600 text-sm">Задавайте вопросы об искусстве и истории</p>
+            </a>
+        </div>
+
+        <!-- Favorites -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-display font-semibold mb-6">Избранное</h2>
+            <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="heart" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <p class="text-gray-500 mb-4">У вас пока нет избранных произведений</p>
+                <a href="/gallery.html" class="inline-flex items-center gap-2 bg-accent-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-accent-700 transition-colors">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    Перейти в галерею
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Views -->
+        <div>
+            <h2 class="text-2xl font-display font-semibold mb-6">Недавно просмотренные</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card rounded-xl overflow-hidden border border-gray-100 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=300&h=200&fit=crop" class="w-full h-32 object-cover group-hover:scale-105 transition-transform">
+                    <div class="p-3">
+                        <p class="font-medium text-sm truncate">Пейзаж с рекой</p>
+                        <p class="text-xs text-gray-500">Импрессионизм</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-gray-100 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=300&h=200&fit=crop" class="w-full h-32 object-cover group-hover:scale-105 transition-transform">
+                    <div class="p-3">
+                        <p class="font-medium text-sm truncate">Портрет дамы</p>
+                        <p class="text-xs text-gray-500">Классицизм</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-gray-100 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1549887534-1541e9326642?w=300&h=200&fit=crop" class="w-full h-32 object-cover group-hover:scale-105 transition-transform">
+                    <div class="p-3">
+                        <p class="font-medium text-sm truncate">Натюрморт</p>
+                        <p class="text-xs text-gray-500">Барокко</p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-gray-100 group cursor-pointer">
+                    <img src="https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=300&h=200&fit=crop" class="w-full h-32 object-cover group-hover:scale-105 transition-transform">
+                    <div class="p-3">
+                        <p class="font-medium text-sm truncate">Абстракция</p>
+                        <p class="text-xs text-gray-500">Модернизм</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
