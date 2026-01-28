@@ -10,6 +10,79 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
+### Microservices Architecture
+
+The project uses a **microservices architecture** with two separate components:
+
+```
+┌─────────────────────────────────────┐     ┌─────────────────────────────────────┐
+│     Virtual Gallery (Node.js)       │     │      AI/ML Service (Python)         │
+│         Port: 5000                  │     │         Port: 8001                  │
+├─────────────────────────────────────┤     ├─────────────────────────────────────┤
+│ • Frontend (HTML/CSS/JS)            │     │ • FastAPI application               │
+│ • Express server                    │     │ • GPT-4 Vision analysis             │
+│ • API proxy to AI/ML                │     │ • RAG system                        │
+│ • Gallery/Auction logic             │     │ • PDF processing                    │
+│ • User authentication               │     │ • Vector embeddings                 │
+└──────────────┬──────────────────────┘     └──────────────┬──────────────────────┘
+               │                                           │
+               │         HTTP API (REST)                   │
+               └───────────────────────────────────────────┘
+                                   │
+                    ┌──────────────┴──────────────┐
+                    │                             │
+              ┌─────┴─────┐              ┌────────┴────────┐
+              │ PostgreSQL │              │    Qdrant       │
+              │ (Shared)   │              │  (Vector DB)    │
+              └───────────┘              └─────────────────┘
+```
+
+### Why Separate Services?
+
+1. **Independent Scaling**: AI/ML tasks (RAG training, image analysis) are resource-intensive and can be scaled separately
+2. **Technology Optimization**: Node.js for web serving, Python for AI/ML (better ML ecosystem)
+3. **Deployment Flexibility**: AI/ML service can run on GPU-enabled infrastructure
+4. **Development Independence**: Teams can work on services independently
+5. **Fault Isolation**: AI service downtime doesn't affect gallery browsing
+
+### Communication Between Services
+
+| Method | Use Case | Example |
+|--------|----------|---------|
+| **HTTP API** | Direct requests | Image analysis, RAG queries |
+| **PostgreSQL** | Shared data | Artworks, users, metadata |
+| **Redis** | Task queues | Background PDF processing, model training |
+
+### API Endpoints (Virtual Gallery → AI/ML)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Gallery health check |
+| `/api/ai/health` | GET | AI/ML service connection status |
+| `/api/ai/analyze-image` | POST | Analyze artwork image (style, period, technique) |
+| `/api/ai/process-pdf` | POST | Process PDF for RAG system |
+| `/api/ai/rag-query` | POST | Query knowledge base |
+| `/api/ai/describe-artwork` | POST | Generate AI description |
+| `/api/ai/similar-artworks` | POST | Find similar artworks |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AI_CORE_URL` | `http://localhost:8001` | AI/ML service URL |
+| `DATABASE_URL` | - | PostgreSQL connection string |
+| `QDRANT_URL` | - | Qdrant vector database URL |
+| `REDIS_URL` | - | Redis connection string |
+| `OPENROUTER_API_KEY` | - | OpenRouter API key for AI models |
+
+### Demo Mode
+
+When AI/ML service is unavailable, the gallery operates in **demo mode**:
+- Chat assistant provides pre-defined responses
+- Image analysis shows random demo results
+- PDF processing is disabled
+- Status indicator shows "Демо-режим"
+
 ### Backend Architecture
 - **Runtime**: Node.js with Express framework
 - **Language**: TypeScript with strict typing disabled for flexibility
@@ -35,6 +108,8 @@ The frontend consists of role-specific HTML pages with modern responsive design:
 - **index.html** - Main landing page with AI dashboard, hero section, and assistant chat
 - **admin.html** - Admin panel with sidebar navigation, user/artwork management, analytics, knowledge base management (RAG stats, reindexing, external source imports)
 - **curator.html** - Curator dashboard for collections, exhibitions, AI-curation, digitized artworks review/approval workflow
+- **staff.html** - Staff dashboard for artwork upload, AI analysis, digitization
+- **knowledge-base.html** - RAG system interface with PDF upload and AI assistant chat
 - **auction-participant.html** - Auction interface with live bidding, watchlist, transactions
 
 All dashboard pages feature:
@@ -43,7 +118,8 @@ All dashboard pages feature:
 - Tab-based content switching via vanilla JS
 - Consistent color schemes per role (indigo/purple for admin, purple/pink for curator, amber/yellow for auction)
 
-### AI/ML Service
+### AI/ML Service (Separate Project)
+
 A separate Python FastAPI microservice (`ai-ml-service/`) provides:
 - Image analysis via OpenAI GPT-4 Vision through OpenRouter
 - PDF processing with OCR and text chunking
@@ -54,6 +130,8 @@ A separate Python FastAPI microservice (`ai-ml-service/`) provides:
 - **NFT Metadata**: ERC-721 compliant TAE (Token Art Edition) generation for limited editions
 - **External Sources**: Parsing from WikiArt, MET Museum, Rijksmuseum, Harvard Art Museums APIs
 - **PDF Categorization**: AI-powered extraction of styles, artists, techniques, periods
+
+GitHub Repository: https://github.com/tulubyev/ai-ml-service
 
 ### Database Design
 - **Primary Database**: PostgreSQL for relational data (users, artworks, galleries, rooms)
@@ -72,6 +150,31 @@ Three Qdrant collections for RAG:
 - Role-based access control (admin, curator, staff, tour_guide, user)
 - Session-based CSRF protection
 - bcrypt for password hashing
+
+## Deployment
+
+### Virtual Gallery (This Project)
+```bash
+# Development
+node server.js
+
+# Production
+npm run build && npm start
+```
+
+### AI/ML Service (Separate)
+```bash
+# Clone the AI/ML service repository
+git clone https://github.com/tulubyev/ai-ml-service.git
+cd ai-ml-service
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Start with Docker
+docker-compose up -d
+```
 
 ## External Dependencies
 
@@ -98,8 +201,9 @@ Three Qdrant collections for RAG:
 - `sentence-transformers` - Embedding generation
 - `PyPDF2`, `pytesseract` - PDF and OCR processing
 
-### Development Tools
-- `typescript` - Type checking
-- `jest` - Testing framework
-- `eslint` / `prettier` - Code quality
-- `nodemon` - Development server
+## Recent Changes
+
+- **2025-01-28**: Added API proxy endpoints in server.js for AI/ML service integration
+- **2025-01-28**: Updated knowledge-base.html with real API integration and demo mode fallback
+- **2025-01-28**: Updated staff.html with AI image analysis integration
+- **2025-01-28**: Documented microservices architecture and integration patterns

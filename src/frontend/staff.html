@@ -310,7 +310,9 @@
     <script>
         lucide.createIcons();
 
-        // Tab switching
+        let selectedImageFile = null;
+        let selectedImageDataUrl = null;
+
         const tabs = document.querySelectorAll('.tab-btn');
         const contents = document.querySelectorAll('.tab-content');
 
@@ -329,11 +331,12 @@
             });
         });
 
-        // Drop zone handling
         const dropZone = document.getElementById('drop-zone');
         const imageUpload = document.getElementById('image-upload');
         const previewContainer = document.getElementById('preview-container');
         const imagePreview = document.getElementById('image-preview');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const analysisResults = document.getElementById('analysis-results');
 
         dropZone.addEventListener('click', () => imageUpload.click());
         dropZone.addEventListener('dragover', (e) => {
@@ -358,8 +361,10 @@
         });
 
         function handleImageUpload(file) {
+            selectedImageFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
+                selectedImageDataUrl = e.target.result;
                 imagePreview.src = e.target.result;
                 dropZone.classList.add('hidden');
                 previewContainer.classList.remove('hidden');
@@ -368,10 +373,179 @@
         }
 
         document.getElementById('remove-image').addEventListener('click', () => {
+            selectedImageFile = null;
+            selectedImageDataUrl = null;
             dropZone.classList.remove('hidden');
             previewContainer.classList.add('hidden');
             imageUpload.value = '';
+            resetAnalysisResults();
         });
+
+        function resetAnalysisResults() {
+            analysisResults.innerHTML = `
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="info" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-gray-400">Результаты анализа</h3>
+                </div>
+                <p class="text-gray-500 text-center py-8">Загрузите изображение для анализа</p>
+            `;
+            lucide.createIcons();
+        }
+
+        analyzeBtn.addEventListener('click', async () => {
+            if (!selectedImageDataUrl) {
+                alert('Пожалуйста, загрузите изображение');
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Анализируем...';
+            lucide.createIcons();
+
+            analysisResults.innerHTML = `
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center animate-pulse">
+                        <i data-lucide="brain" class="w-5 h-5 text-accent-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-accent-600">AI Анализ...</h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div class="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const response = await fetch('/api/ai/analyze-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageUrl: selectedImageDataUrl,
+                        artworkId: 'artwork_' + Date.now()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.analysis) {
+                    showAnalysisResults(data);
+                } else if (data.hint) {
+                    showDemoAnalysis();
+                } else {
+                    showDemoAnalysis();
+                }
+            } catch (error) {
+                showDemoAnalysis();
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i data-lucide="sparkles" class="w-5 h-5"></i> Анализировать';
+                lucide.createIcons();
+            }
+        });
+
+        function showAnalysisResults(data) {
+            const analysis = data.analysis || {};
+            analysisResults.innerHTML = `
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-green-700">Анализ завершён</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="palette" class="w-4 h-4 text-accent-600"></i>
+                            Стиль
+                        </h4>
+                        <p class="text-gray-600">${analysis.style || 'Не определён'}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                            Период
+                        </h4>
+                        <p class="text-gray-600">${analysis.period || 'Не определён'}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="brush" class="w-4 h-4 text-amber-600"></i>
+                            Техника
+                        </h4>
+                        <p class="text-gray-600">${analysis.technique || 'Не определена'}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4 text-green-600"></i>
+                            Описание
+                        </h4>
+                        <p class="text-gray-600">${analysis.description || 'Описание недоступно'}</p>
+                    </div>
+                </div>
+                <button class="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    Сохранить карточку
+                </button>
+            `;
+            lucide.createIcons();
+        }
+
+        function showDemoAnalysis() {
+            const demoStyles = ['Импрессионизм', 'Реализм', 'Барокко', 'Классицизм', 'Модернизм'];
+            const demoPeriods = ['XIX век', 'XVIII век', 'XVII век', 'XX век'];
+            const demoTechniques = ['Масляная живопись', 'Акварель', 'Темпера', 'Смешанная техника'];
+            
+            analysisResults.innerHTML = `
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-display font-semibold text-amber-700">Демо-анализ</h3>
+                        <p class="text-xs text-amber-600">AI/ML сервис не подключен</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="palette" class="w-4 h-4 text-accent-600"></i>
+                            Стиль (примерный)
+                        </h4>
+                        <p class="text-gray-600">${demoStyles[Math.floor(Math.random() * demoStyles.length)]}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                            Период (примерный)
+                        </h4>
+                        <p class="text-gray-600">${demoPeriods[Math.floor(Math.random() * demoPeriods.length)]}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="brush" class="w-4 h-4 text-amber-600"></i>
+                            Техника (примерная)
+                        </h4>
+                        <p class="text-gray-600">${demoTechniques[Math.floor(Math.random() * demoTechniques.length)]}</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                        <h4 class="text-sm font-semibold text-amber-700 mb-2 flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                            Для точного анализа
+                        </h4>
+                        <p class="text-amber-600 text-sm">Запустите AI/ML сервис (Python FastAPI на порту 8001) для получения реального анализа с использованием GPT-4 Vision.</p>
+                    </div>
+                </div>
+                <button class="mt-6 w-full bg-gray-400 text-white py-3 px-4 rounded-xl font-medium cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    Сохранить (требуется AI анализ)
+                </button>
+            `;
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>
