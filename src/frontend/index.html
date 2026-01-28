@@ -84,6 +84,50 @@
         .floating {
             animation: float 6s ease-in-out infinite;
         }
+        .slider-container {
+            position: relative;
+        }
+        .slider-track {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 1rem 0;
+        }
+        .slider-track::-webkit-scrollbar {
+            display: none;
+        }
+        .slider-card {
+            flex: 0 0 320px;
+            min-width: 320px;
+        }
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .slider-btn:hover {
+            background: #f3f4f6;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .slider-btn-left { left: -24px; }
+        .slider-btn-right { right: -24px; }
+        @media (max-width: 768px) {
+            .slider-btn { display: none; }
+        }
     </style>
 </head>
 <body class="font-sans bg-gallery-50 text-gray-900">
@@ -186,119 +230,174 @@
                 <p class="text-gray-600 max-w-2xl mx-auto">Мощные инструменты для анализа и исследования искусства</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Image Analysis Card -->
-                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="scan-eye" class="w-6 h-6 text-blue-600"></i>
+            <div class="slider-container">
+                <button class="slider-btn slider-btn-left" id="slider-prev">
+                    <i data-lucide="chevron-left" class="w-6 h-6 text-gray-700"></i>
+                </button>
+                <button class="slider-btn slider-btn-right" id="slider-next">
+                    <i data-lucide="chevron-right" class="w-6 h-6 text-gray-700"></i>
+                </button>
+                
+                <div class="slider-track" id="features-slider">
+                    <!-- Image Analysis Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="scan-eye" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">Анализ изображений</h3>
                         </div>
-                        <h3 class="text-xl font-display font-semibold">Анализ изображений</h3>
+                        <p class="text-gray-600 mb-4">
+                            Анализируйте произведения искусства с помощью AI для определения стиля, техники и исторического контекста.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="cpu" class="w-4 h-4"></i>
+                                GPT-4 Vision
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                ~30 сек
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">
-                        Анализируйте произведения искусства с помощью AI для определения стиля, техники и исторического контекста.
-                    </p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="cpu" class="w-4 h-4"></i>
-                            GPT-4 Vision
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="clock" class="w-4 h-4"></i>
-                            ~30 сек
-                        </span>
-                    </div>
-                </div>
 
-                <!-- Document Processing Card -->
-                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="file-text" class="w-6 h-6 text-green-600"></i>
+                    <!-- Document Processing Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="file-text" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">Обработка документов</h3>
                         </div>
-                        <h3 class="text-xl font-display font-semibold">Обработка документов</h3>
+                        <p class="text-gray-600 mb-4">
+                            Загружайте PDF документы об истории искусства для AI-поиска и интеллектуального анализа.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="file" class="w-4 h-4"></i>
+                                PDF до 50MB
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="layers" class="w-4 h-4"></i>
+                                OCR + Chunking
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">
-                        Загружайте PDF документы об истории искусства для AI-поиска и интеллектуального анализа.
-                    </p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="file" class="w-4 h-4"></i>
-                            PDF до 50MB
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="layers" class="w-4 h-4"></i>
-                            OCR + Chunking
-                        </span>
-                    </div>
-                </div>
 
-                <!-- Art Assistant Card -->
-                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="bot" class="w-6 h-6 text-purple-600"></i>
+                    <!-- Art Assistant Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="bot" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">AI Ассистент</h3>
                         </div>
-                        <h3 class="text-xl font-display font-semibold">AI Ассистент</h3>
+                        <p class="text-gray-600 mb-4">
+                            Задавайте вопросы об искусстве и получайте точные ответы на основе базы знаний.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="brain" class="w-4 h-4"></i>
+                                RAG + Claude
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="database" class="w-4 h-4"></i>
+                                База знаний
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">
-                        Задавайте вопросы об искусстве и получайте точные ответы на основе базы знаний.
-                    </p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="brain" class="w-4 h-4"></i>
-                            RAG + Claude
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="database" class="w-4 h-4"></i>
-                            База знаний
-                        </span>
-                    </div>
-                </div>
 
-                <!-- Digitization Card -->
-                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="scan" class="w-6 h-6 text-amber-600"></i>
+                    <!-- Digitization Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="scan" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">Оцифровка</h3>
                         </div>
-                        <h3 class="text-xl font-display font-semibold">Оцифровка</h3>
+                        <p class="text-gray-600 mb-4">
+                            Загрузите сканы картин для AI-анализа, создания карточки и защиты авторских прав.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                Watermark
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="coins" class="w-4 h-4"></i>
+                                NFT Ready
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">
-                        Загрузите сканы картин для AI-анализа, создания карточки и защиты авторских прав.
-                    </p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i>
-                            Watermark
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="coins" class="w-4 h-4"></i>
-                            NFT Ready
-                        </span>
-                    </div>
-                </div>
 
-                <!-- Knowledge Base Card -->
-                <div class="feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
-                            <i data-lucide="library" class="w-6 h-6 text-rose-600"></i>
+                    <!-- Knowledge Base Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="library" class="w-6 h-6 text-rose-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">База знаний</h3>
                         </div>
-                        <h3 class="text-xl font-display font-semibold">База знаний</h3>
+                        <p class="text-gray-600 mb-4">
+                            RAG-обучение на документах, стилях, художниках и внешних источниках искусства.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="globe" class="w-4 h-4"></i>
+                                WikiArt
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                                Семантический поиск
+                            </span>
+                        </div>
                     </div>
-                    <p class="text-gray-600 mb-4">
-                        RAG-обучение на документах, стилях, художниках и внешних источниках искусства.
-                    </p>
-                    <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="globe" class="w-4 h-4"></i>
-                            WikiArt
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="search" class="w-4 h-4"></i>
-                            Семантический поиск
-                        </span>
+
+                    <!-- VR Gallery Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="glasses" class="w-6 h-6 text-indigo-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">VR Галерея</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Погрузитесь в виртуальное пространство для просмотра шедевров в 3D-залах.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="box" class="w-4 h-4"></i>
+                                Three.js
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="headphones" class="w-4 h-4"></i>
+                                WebXR
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Auction Card -->
+                    <div class="slider-card feature-card glass-card rounded-2xl p-6 art-shadow transition-all duration-300 border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="gavel" class="w-6 h-6 text-yellow-600"></i>
+                            </div>
+                            <h3 class="text-xl font-display font-semibold">Аукционы</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">
+                            Участвуйте в торгах за уникальные произведения искусства и NFT-сертификаты.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="timer" class="w-4 h-4"></i>
+                                Live торги
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="wallet" class="w-4 h-4"></i>
+                                TAE токены
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -742,6 +841,28 @@
 
     <script>
         lucide.createIcons();
+
+        // Slider functionality
+        const slider = document.getElementById('features-slider');
+        const sliderPrev = document.getElementById('slider-prev');
+        const sliderNext = document.getElementById('slider-next');
+        const cardWidth = 344; // 320px card + 24px gap
+
+        sliderPrev.addEventListener('click', () => {
+            slider.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+
+        sliderNext.addEventListener('click', () => {
+            slider.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+
+        // Update button visibility based on scroll position
+        function updateSliderButtons() {
+            sliderPrev.style.opacity = slider.scrollLeft <= 0 ? '0.3' : '1';
+            sliderNext.style.opacity = slider.scrollLeft >= slider.scrollWidth - slider.clientWidth - 10 ? '0.3' : '1';
+        }
+        slider.addEventListener('scroll', updateSliderButtons);
+        updateSliderButtons();
 
         // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
