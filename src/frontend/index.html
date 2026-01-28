@@ -148,18 +148,16 @@
 
                 <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center gap-8">
-                    <a href="#overview" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Обзор</a>
-                    <a href="#analysis" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Анализ</a>
-                    <a href="#digitization" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Оцифровка</a>
+                    <a href="/gallery.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
                     <a href="/auction-participant.html" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
-                    <a href="#assistant" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">Ассистент</a>
+                    <a href="#knowledge-base" class="nav-link text-gray-600 hover:text-gray-900 font-medium transition-colors">База знаний</a>
                 </nav>
 
                 <!-- Right side -->
                 <div class="flex items-center gap-4">
                     <a href="/admin" class="hidden sm:flex items-center gap-2 text-gray-600 hover:text-accent-600 transition-colors">
-                        <i data-lucide="settings" class="w-4 h-4"></i>
-                        <span class="text-sm font-medium">Админ</span>
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span class="text-sm font-medium">Дашборд</span>
                     </a>
                     <button class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium transition-all hover:shadow-lg flex items-center gap-2">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
@@ -177,12 +175,10 @@
         <!-- Mobile Navigation -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
             <nav class="px-4 py-4 space-y-3">
-                <a href="#overview" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Обзор</a>
-                <a href="#analysis" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Анализ</a>
-                <a href="#digitization" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Оцифровка</a>
-                <a href="#documents" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Документы</a>
-                <a href="#assistant" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Ассистент</a>
-                <a href="/admin" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Админ панель</a>
+                <a href="/gallery.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Галерея</a>
+                <a href="/auction-participant.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Аукцион</a>
+                <a href="#knowledge-base" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">База знаний</a>
+                <a href="/admin" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Дашборд</a>
             </nav>
         </div>
     </header>
@@ -404,10 +400,11 @@
         </section>
 
         <!-- Image Analysis Section -->
-        <section id="analysis" class="mb-20">
+        <section id="gallery-formation" class="mb-20">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Анализ произведений</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Загрузите изображение для AI-анализа стиля и техники</p>
+                <span class="inline-block bg-amber-100 text-amber-700 px-4 py-1 rounded-full text-sm font-medium mb-4">Для сотрудников галереи</span>
+                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Формирование галереи</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Загрузка, оцифровка и AI-анализ произведений для создания карточек</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -499,11 +496,13 @@
             </div>
         </section>
 
-        <!-- Digitization Section -->
-        <section id="digitization" class="mb-20">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Оцифровка произведений</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Загрузите сканы произведения для AI-анализа и создания карточки в галерее</p>
+        <!-- Digitization subsection of Gallery Formation -->
+        <div id="digitization" class="mb-12">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <i data-lucide="scan" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <h3 class="text-2xl font-display font-semibold text-gray-900">Оцифровка произведений</h3>
             </div>
 
             <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100 max-w-5xl mx-auto">
@@ -692,14 +691,24 @@
                     </div>
                 </div>
             </div>
+        </div>
         </section>
 
-        <!-- Documents Section -->
-        <section id="documents" class="mb-20">
+        <!-- Knowledge Base Section -->
+        <section id="knowledge-base" class="mb-20">
             <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">Обработка документов</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Загрузите PDF для создания базы знаний</p>
+                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">База знаний</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Обработка документов и AI-ассистент для исследования искусства</p>
             </div>
+
+            <!-- Documents subsection -->
+            <div id="documents" class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-gray-900">Обработка документов</h3>
+                </div>
 
             <div class="glass-card rounded-2xl p-8 art-shadow border border-gray-100 max-w-2xl mx-auto">
                 <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors cursor-pointer mb-6">
@@ -717,14 +726,16 @@
                     <span id="process-text">Обработать документ</span>
                 </button>
             </div>
-        </section>
-
-        <!-- Art Assistant Section -->
-        <section id="assistant" class="mb-20">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-4">AI Ассистент</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Задайте любой вопрос об искусстве</p>
             </div>
+
+            <!-- AI Assistant subsection -->
+            <div id="assistant">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <i data-lucide="bot" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-semibold text-gray-900">AI Ассистент</h3>
+                </div>
 
             <div class="glass-card rounded-2xl art-shadow border border-gray-100 overflow-hidden max-w-4xl mx-auto">
                 <!-- Chat Header -->
@@ -775,6 +786,7 @@
                     </div>
                 </div>
             </div>
+            </div>
         </section>
     </main>
 
@@ -810,11 +822,11 @@
                 <div>
                     <h4 class="text-white font-semibold mb-4">Разделы</h4>
                     <ul class="space-y-3">
-                        <li><a href="#overview" class="hover:text-white transition-colors">Обзор</a></li>
-                        <li><a href="#analysis" class="hover:text-white transition-colors">Анализ</a></li>
-                        <li><a href="#digitization" class="hover:text-white transition-colors">Оцифровка</a></li>
-                        <li><a href="#documents" class="hover:text-white transition-colors">Документы</a></li>
-                        <li><a href="#assistant" class="hover:text-white transition-colors">Ассистент</a></li>
+                        <li><a href="/gallery.html" class="hover:text-white transition-colors">Галерея</a></li>
+                        <li><a href="/auction-participant.html" class="hover:text-white transition-colors">Аукцион</a></li>
+                        <li><a href="#gallery-formation" class="hover:text-white transition-colors">Формирование галереи</a></li>
+                        <li><a href="#knowledge-base" class="hover:text-white transition-colors">База знаний</a></li>
+                        <li><a href="/admin" class="hover:text-white transition-colors">Дашборд</a></li>
                     </ul>
                 </div>
 
