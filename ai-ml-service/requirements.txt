@@ -1,7 +1,7 @@
 # AI/ML Core dependencies (Python)
 
 # Web Framework
-fastapi==0.104.1
+fastapi==0.109.0
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
@@ -13,7 +13,7 @@ sqlalchemy==2.0.23
 alembic==1.12.1
 
 # Vector Databases
-qdrant-client==1.6.9
+qdrant-client==1.9.0
 pgvector==0.2.4
 
 # AI/ML Libraries
@@ -21,14 +21,14 @@ openai==1.3.7
 anthropic==0.7.8
 cohere==4.45
 sentence-transformers==2.2.2
-torch==2.1.1
-torchvision==0.16.1
-transformers==4.35.2
-tokenizers==0.15.0
+torch==2.6.0
+torchvision==0.21.0
+transformers==4.36.0
+tokenizers==0.15.2
 
 # Computer Vision
 opencv-python==4.8.1.78
-Pillow==10.1.0
+Pillow==10.2.0
 scikit-image==0.22.0
 
 # PDF Processing
@@ -48,11 +48,11 @@ celery==5.3.4
 redis==5.0.1
 
 # HTTP Client
-aiohttp==3.9.1
+aiohttp==3.9.4
 
 # Utilities
-python-multipart==0.0.6
-python-jose[cryptography]==3.3.0
+python-multipart==0.0.22
+python-jose[cryptography]==3.4.0
 psutil==5.9.6
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
