@@ -258,14 +258,38 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-gradient pt-32 pb-20 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-30">
-            <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full filter blur-3xl"></div>
-            <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl"></div>
+    <!-- Hero Section with Gallery Slideshow -->
+    <section class="pt-20 pb-16 relative overflow-hidden bg-gray-900">
+        <!-- Background Slideshow -->
+        <div id="hero-slideshow" class="absolute inset-0">
+            <div class="hero-slide absolute inset-0 opacity-100 transition-opacity duration-1000" data-gallery="Лувр, Париж">
+                <img src="https://images.unsplash.com/photo-1564399579883-451a5d44ec08?w=1920&q=80" alt="Лувр" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Эрмитаж, Санкт-Петербург">
+                <img src="https://images.unsplash.com/photo-1547448415-e9f5b28e570d?w=1920&q=80" alt="Эрмитаж" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Третьяковская галерея, Москва">
+                <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=1920&q=80" alt="Третьяковская галерея" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Галерея Лины Ермонтович, Иркутск">
+                <img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=1920&q=80" alt="Галерея Лины Ермонтович" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Галерея Ольги Бронштейн, Иркутск">
+                <img src="https://images.unsplash.com/photo-1577720643272-265f09367456?w=1920&q=80" alt="Галерея Ольги Бронштейн" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Галерея Дианы Салацкой, Иркутск">
+                <img src="https://images.unsplash.com/photo-1574182245530-498d971f86fd?w=1920&q=80" alt="Галерея Дианы Салацкой" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Музей Метрополитен, Нью-Йорк">
+                <img src="https://images.unsplash.com/photo-1575223970966-76ae61ee7838?w=1920&q=80" alt="MET Museum" class="w-full h-full object-cover">
+            </div>
+            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Русский музей, Санкт-Петербург">
+                <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1920&q=80" alt="Русский музей" class="w-full h-full object-cover">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80"></div>
         </div>
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-16">
             <div class="text-center max-w-3xl mx-auto">
                 <span class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium mb-6">
                     <i data-lucide="sparkles" class="w-4 h-4"></i>
@@ -278,15 +302,33 @@
                 <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
                     Исследуйте шедевры мирового искусства с помощью AI-кураторства, VR-туров и умных рекомендаций
                 </p>
-                <div class="flex flex-wrap gap-4 justify-center">
+                <div class="flex flex-wrap gap-4 justify-center mb-12">
                     <button class="bg-white text-gray-900 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all hover:shadow-xl flex items-center gap-2">
                         <i data-lucide="layout" class="w-5 h-5"></i>
                         Войти в галерею
                     </button>
-                    <a href="#analysis" class="bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/20 flex items-center gap-2">
-                        <i data-lucide="image" class="w-5 h-5"></i>
-                        Анализ
+                    <a href="#ai-assistant" class="bg-white/10 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/20 flex items-center gap-2">
+                        <i data-lucide="bot" class="w-5 h-5"></i>
+                        AI Ассистент
                     </a>
+                </div>
+
+                <!-- Gallery indicator -->
+                <div class="flex flex-col items-center gap-3">
+                    <p id="current-gallery" class="text-white/80 text-sm font-medium backdrop-blur-sm bg-white/10 px-4 py-2 rounded-full">
+                        <i data-lucide="map-pin" class="w-4 h-4 inline mr-1"></i>
+                        <span>Лувр, Париж</span>
+                    </p>
+                    <div class="flex gap-2" id="slideshow-dots">
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                        <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -715,6 +757,43 @@
                 sendMessage();
             });
         });
+
+        // Hero Slideshow
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.slideshow-dot');
+        const galleryLabel = document.querySelector('#current-gallery span');
+        let currentSlide = 0;
+        let slideshowInterval;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.style.opacity = i === index ? '1' : '0';
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('bg-white', i === index);
+                dot.classList.toggle('bg-white/40', i !== index);
+            });
+            galleryLabel.textContent = slides[index].dataset.gallery;
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            showSlide((currentSlide + 1) % slides.length);
+        }
+
+        function startSlideshow() {
+            slideshowInterval = setInterval(nextSlide, 5000);
+        }
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                clearInterval(slideshowInterval);
+                showSlide(i);
+                startSlideshow();
+            });
+        });
+
+        startSlideshow();
     </script>
 </body>
 </html>
