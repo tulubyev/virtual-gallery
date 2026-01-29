@@ -67,8 +67,19 @@
                     <button class="p-2 text-gray-600 hover:text-gray-900">
                         <i data-lucide="log-out" class="w-5 h-5"></i>
                     </button>
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
                 </div>
             </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
+            <nav class="px-4 py-4 space-y-3">
+                <a href="/" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Главная</a>
+                <a href="/gallery.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">Галерея</a>
+                <a href="/knowledge-base.html" class="block px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">База знаний</a>
+            </nav>
         </div>
     </header>
 
@@ -546,6 +557,12 @@
             `;
             lucide.createIcons();
         }
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
     </script>
 </body>
 </html>
