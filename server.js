@@ -378,6 +378,36 @@ app.get('/api/gallery/rooms', (req, res) => {
   res.json(rooms);
 });
 
+let galleryConfiguration = null;
+
+app.post('/api/gallery/config', (req, res) => {
+  try {
+    galleryConfiguration = req.body;
+    console.log('Gallery configuration saved:', JSON.stringify(galleryConfiguration, null, 2));
+    res.json({ success: true, message: 'Configuration saved successfully' });
+  } catch (error) {
+    console.error('Error saving gallery config:', error);
+    res.status(500).json({ success: false, error: 'Failed to save configuration' });
+  }
+});
+
+app.get('/api/gallery/config', (req, res) => {
+  if (galleryConfiguration) {
+    res.json(galleryConfiguration);
+  } else {
+    res.json({
+      rooms: [
+        { id: 'main_hall', name: 'Главный холл', theme: 'classic', width: 20, depth: 25, height: 6, wallColor: '#f5f0e6', lighting: 70, slots: 5, connections: ['impressionism', 'modern_art'] },
+        { id: 'impressionism', name: 'Импрессионизм', theme: 'classic', width: 18, depth: 20, height: 5, wallColor: '#faf5f0', lighting: 80, slots: 6, connections: ['main_hall'] },
+        { id: 'modern_art', name: 'Современное искусство', theme: 'modern', width: 15, depth: 15, height: 4, wallColor: '#ffffff', lighting: 90, slots: 4, connections: ['main_hall'] },
+        { id: 'renaissance', name: 'Ренессанс', theme: 'classic', width: 22, depth: 28, height: 7, wallColor: '#f0e8d8', lighting: 60, slots: 6, connections: ['main_hall'] },
+        { id: 'contemporary', name: 'Современность', theme: 'dark', width: 16, depth: 16, height: 4, wallColor: '#2a2a2a', lighting: 50, slots: 5, connections: ['main_hall'] }
+      ],
+      currentRoom: 'main_hall'
+    });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Virtual Gallery server running at http://0.0.0.0:${PORT}`);
   console.log(`AI/ML Service configured at: ${AI_CORE_URL}`);

@@ -82,6 +82,10 @@
                     <span class="font-medium">Оцифрованные</span>
                     <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span class="font-medium">Конструктор галереи</span>
+                </button>
             </nav>
 
             <div class="p-4 border-t border-gray-100">
@@ -405,6 +409,252 @@
                             <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 animate-spin"></i>
                         </div>
                         <p>Загрузка оцифрованных работ...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gallery Builder -->
+            <section id="gallery-builder" class="tab-content">
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Конструктор галереи</h1>
+                        <p class="text-gray-600">Создание и настройка виртуальных залов</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <a href="/gallery-3d" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                            Предпросмотр 3D
+                        </a>
+                        <button id="saveGalleryConfig" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Сохранить
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Rooms List -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Залы галереи</h3>
+                                <button id="addRoomBtn" class="p-2 bg-purple-100 hover:bg-purple-200 rounded-lg transition-colors">
+                                    <i data-lucide="plus" class="w-5 h-5 text-purple-600"></i>
+                                </button>
+                            </div>
+                            <div id="roomsList" class="space-y-2">
+                                <div class="room-item p-3 bg-purple-50 border border-purple-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="main_hall">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="home" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Главный холл</p>
+                                            <p class="text-xs text-gray-500">5 слотов</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                                <div class="room-item p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="impressionism">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="sun" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Импрессионизм</p>
+                                            <p class="text-xs text-gray-500">6 слотов</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                                <div class="room-item p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="modern_art">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="square" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Современное искусство</p>
+                                            <p class="text-xs text-gray-500">4 слота</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                                <div class="room-item p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="renaissance">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="crown" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Ренессанс</p>
+                                            <p class="text-xs text-gray-500">6 слотов</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                                <div class="room-item p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="contemporary">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
+                                            <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Современность</p>
+                                            <p class="text-xs text-gray-500">5 слотов</p>
+                                        </div>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Editor -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <i data-lucide="settings" class="w-5 h-5 text-purple-600"></i>
+                                Настройки зала
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Название зала</label>
+                                    <input type="text" id="roomName" value="Главный холл" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Тема/стиль</label>
+                                    <select id="roomTheme" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="classic">Классический</option>
+                                        <option value="modern">Современный</option>
+                                        <option value="minimal">Минимализм</option>
+                                        <option value="dark">Темный</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ширина (м)</label>
+                                    <input type="number" id="roomWidth" value="20" min="10" max="50" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Глубина (м)</label>
+                                    <input type="number" id="roomDepth" value="25" min="10" max="50" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Высота (м)</label>
+                                    <input type="number" id="roomHeight" value="6" min="3" max="15" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Цвет стен</label>
+                                    <div class="flex gap-2">
+                                        <input type="color" id="wallColor" value="#f5f0e6" class="w-12 h-12 rounded-lg border border-gray-200 cursor-pointer">
+                                        <input type="text" id="wallColorHex" value="#f5f0e6" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Освещение</label>
+                                    <input type="range" id="roomLighting" min="0" max="100" value="70" class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>Приглушенное</span>
+                                        <span>Яркое</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Layout -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <i data-lucide="layout" class="w-5 h-5 text-purple-600"></i>
+                                    Схема размещения
+                                </h3>
+                                <button id="addSlotBtn" class="text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Добавить слот
+                                </button>
+                            </div>
+                            
+                            <!-- Visual Room Layout -->
+                            <div id="roomLayout" class="relative bg-gray-100 rounded-xl p-4 min-h-[400px] border-2 border-dashed border-gray-300">
+                                <div class="absolute top-2 left-2 text-xs text-gray-500">Левая стена</div>
+                                <div class="absolute top-2 right-2 text-xs text-gray-500">Правая стена</div>
+                                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">Задняя стена</div>
+                                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-gray-400">Вход</div>
+                                
+                                <!-- Artwork Slots -->
+                                <div class="grid grid-cols-3 gap-4 mt-8">
+                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-purple-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group" data-slot="1">
+                                        <div class="w-full h-full p-2 flex flex-col">
+                                            <div class="flex-1 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-lg"></div>
+                                            <p class="text-xs text-center mt-2 text-gray-700 truncate">Звездная ночь</p>
+                                        </div>
+                                        <button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-purple-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group" data-slot="2">
+                                        <div class="w-full h-full p-2 flex flex-col">
+                                            <div class="flex-1 bg-gradient-to-br from-amber-100 to-yellow-200 rounded-lg"></div>
+                                            <p class="text-xs text-center mt-2 text-gray-700 truncate">Мона Лиза</p>
+                                        </div>
+                                        <button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="3">
+                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
+                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
+                                    </div>
+                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="4">
+                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
+                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
+                                    </div>
+                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="5">
+                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
+                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Connections -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <i data-lucide="git-branch" class="w-5 h-5 text-purple-600"></i>
+                                Связи с другими залами
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="door-open" class="w-5 h-5 text-gray-600"></i>
+                                        <span class="font-medium text-gray-700">Импрессионизм</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-500">Левая стена</span>
+                                        <button class="p-1.5 hover:bg-gray-200 rounded-lg">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="door-open" class="w-5 h-5 text-gray-600"></i>
+                                        <span class="font-medium text-gray-700">Современное искусство</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-500">Правая стена</span>
+                                        <button class="p-1.5 hover:bg-gray-200 rounded-lg">
+                                            <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button id="addConnectionBtn" class="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Добавить переход
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -826,6 +1076,198 @@
 
         document.querySelector('[data-tab="digitized"]')?.addEventListener('click', () => {
             setTimeout(() => loadDigitizedArtworks(), 100);
+        });
+
+        // Gallery Builder Logic
+        let galleryConfig = {
+            rooms: [
+                { id: 'main_hall', name: 'Главный холл', theme: 'classic', width: 20, depth: 25, height: 6, wallColor: '#f5f0e6', lighting: 70, slots: 5, connections: ['impressionism', 'modern_art'] },
+                { id: 'impressionism', name: 'Импрессионизм', theme: 'classic', width: 18, depth: 20, height: 5, wallColor: '#faf5f0', lighting: 80, slots: 6, connections: ['main_hall'] },
+                { id: 'modern_art', name: 'Современное искусство', theme: 'modern', width: 15, depth: 15, height: 4, wallColor: '#ffffff', lighting: 90, slots: 4, connections: ['main_hall'] },
+                { id: 'renaissance', name: 'Ренессанс', theme: 'classic', width: 22, depth: 28, height: 7, wallColor: '#f0e8d8', lighting: 60, slots: 6, connections: ['main_hall'] },
+                { id: 'contemporary', name: 'Современность', theme: 'dark', width: 16, depth: 16, height: 4, wallColor: '#2a2a2a', lighting: 50, slots: 5, connections: ['main_hall'] }
+            ],
+            currentRoom: 'main_hall'
+        };
+
+        async function loadGalleryConfig() {
+            try {
+                const response = await fetch('/api/gallery/config');
+                if (response.ok) {
+                    const savedConfig = await response.json();
+                    if (savedConfig && savedConfig.rooms) {
+                        galleryConfig = savedConfig;
+                        renderRoomsList();
+                        selectRoom(galleryConfig.currentRoom || 'main_hall');
+                    }
+                }
+            } catch (error) {
+                console.log('Using default gallery configuration');
+            }
+        }
+
+        document.querySelector('[data-tab="gallery-builder"]')?.addEventListener('click', () => {
+            setTimeout(() => loadGalleryConfig(), 100);
+        });
+
+        function selectRoom(roomId) {
+            galleryConfig.currentRoom = roomId;
+            const room = galleryConfig.rooms.find(r => r.id === roomId);
+            if (!room) return;
+
+            document.querySelectorAll('.room-item').forEach(item => {
+                if (item.dataset.room === roomId) {
+                    item.classList.remove('bg-gray-50', 'hover:bg-gray-100', 'border-gray-200');
+                    item.classList.add('bg-purple-50', 'border-purple-200');
+                } else {
+                    item.classList.remove('bg-purple-50', 'border-purple-200');
+                    item.classList.add('bg-gray-50', 'hover:bg-gray-100', 'border-gray-200');
+                }
+            });
+
+            document.getElementById('roomName').value = room.name;
+            document.getElementById('roomTheme').value = room.theme;
+            document.getElementById('roomWidth').value = room.width;
+            document.getElementById('roomDepth').value = room.depth;
+            document.getElementById('roomHeight').value = room.height;
+            document.getElementById('wallColor').value = room.wallColor;
+            document.getElementById('wallColorHex').value = room.wallColor;
+            document.getElementById('roomLighting').value = room.lighting;
+        }
+
+        document.querySelectorAll('.room-item').forEach(item => {
+            item.addEventListener('click', () => selectRoom(item.dataset.room));
+        });
+
+        document.getElementById('wallColor')?.addEventListener('input', (e) => {
+            document.getElementById('wallColorHex').value = e.target.value;
+            updateCurrentRoom('wallColor', e.target.value);
+        });
+
+        document.getElementById('wallColorHex')?.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                document.getElementById('wallColor').value = e.target.value;
+                updateCurrentRoom('wallColor', e.target.value);
+            }
+        });
+
+        ['roomName', 'roomTheme', 'roomWidth', 'roomDepth', 'roomHeight', 'roomLighting'].forEach(fieldId => {
+            document.getElementById(fieldId)?.addEventListener('input', (e) => {
+                const key = fieldId.replace('room', '').toLowerCase();
+                const value = e.target.type === 'number' || e.target.type === 'range' ? parseInt(e.target.value) : e.target.value;
+                updateCurrentRoom(key, value);
+            });
+        });
+
+        function updateCurrentRoom(key, value) {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (room) room[key] = value;
+        }
+
+        document.getElementById('addRoomBtn')?.addEventListener('click', () => {
+            const newId = 'room_' + Date.now();
+            const newRoom = {
+                id: newId,
+                name: 'Новый зал',
+                theme: 'classic',
+                width: 15,
+                depth: 15,
+                height: 5,
+                wallColor: '#f5f0e6',
+                lighting: 70,
+                slots: 4,
+                connections: []
+            };
+            galleryConfig.rooms.push(newRoom);
+            renderRoomsList();
+            selectRoom(newId);
+        });
+
+        function renderRoomsList() {
+            const roomStyles = {
+                main_hall: { icon: 'home', bgColor: 'background-color: #7c3aed;' },
+                impressionism: { icon: 'sun', bgColor: 'background-color: #ec4899;' },
+                modern_art: { icon: 'square', bgColor: 'background-color: #06b6d4;' },
+                renaissance: { icon: 'crown', bgColor: 'background-color: #f59e0b;' },
+                contemporary: { icon: 'zap', bgColor: 'background-color: #374151;' }
+            };
+            
+            const list = document.getElementById('roomsList');
+            list.innerHTML = galleryConfig.rooms.map(room => {
+                const isActive = room.id === galleryConfig.currentRoom;
+                const style = roomStyles[room.id] || { icon: 'box', bgColor: 'background-color: #6b7280;' };
+                return `
+                    <div class="room-item p-3 ${isActive ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'} border rounded-xl cursor-pointer flex items-center justify-between" data-room="${room.id}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="${style.bgColor}">
+                                <i data-lucide="${style.icon}" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">${room.name}</p>
+                                <p class="text-xs text-gray-500">${room.slots} слотов</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+            
+            document.querySelectorAll('.room-item').forEach(item => {
+                item.addEventListener('click', () => selectRoom(item.dataset.room));
+            });
+        }
+
+        document.getElementById('saveGalleryConfig')?.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/gallery/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(galleryConfig)
+                });
+                if (response.ok) {
+                    alert('Конфигурация галереи сохранена!');
+                } else {
+                    alert('Ошибка сохранения конфигурации');
+                }
+            } catch (error) {
+                console.error('Save config error:', error);
+                alert('Ошибка сохранения');
+            }
+        });
+
+        document.getElementById('addSlotBtn')?.addEventListener('click', () => {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (room) {
+                room.slots++;
+                renderRoomsList();
+            }
+        });
+
+        document.querySelectorAll('.artwork-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                alert('Выберите экспонат для размещения в слоте ' + slot.dataset.slot);
+            });
+        });
+
+        document.getElementById('addConnectionBtn')?.addEventListener('click', () => {
+            const currentRoom = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            const availableRooms = galleryConfig.rooms.filter(r => r.id !== galleryConfig.currentRoom && !currentRoom.connections.includes(r.id));
+            
+            if (availableRooms.length === 0) {
+                alert('Нет доступных залов для создания связи');
+                return;
+            }
+            
+            const roomName = prompt('Выберите зал для связи:\n' + availableRooms.map((r, i) => `${i + 1}. ${r.name}`).join('\n'));
+            const index = parseInt(roomName) - 1;
+            
+            if (index >= 0 && index < availableRooms.length) {
+                currentRoom.connections.push(availableRooms[index].id);
+                availableRooms[index].connections.push(galleryConfig.currentRoom);
+                alert(`Связь с залом "${availableRooms[index].name}" создана`);
+            }
         });
     </script>
 </body>

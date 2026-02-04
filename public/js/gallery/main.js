@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-const GALLERY_CONFIG = {
+let GALLERY_CONFIG = {
   building: {
     name: "Virtual Art Museum",
     theme: "modern",
@@ -662,6 +662,8 @@ class VirtualGallery {
   }
 
   async init() {
+    await this.loadConfigFromAPI();
+    
     this.setupScene();
     this.setupCamera();
     this.setupRenderer();
@@ -942,6 +944,55 @@ class VirtualGallery {
       this.artworkLODManager.update();
     }
     this.renderer.render(this.scene, this.camera);
+  }
+
+  async loadConfigFromAPI() {
+    try {
+      const response = await fetch('/api/gallery/config');
+      if (response.ok) {
+        const savedConfig = await response.json();
+        if (savedConfig && savedConfig.rooms && savedConfig.rooms.length > 0) {
+          this.applyAPIConfig(savedConfig);
+          console.log('Loaded gallery configuration from API');
+        }
+      }
+    } catch (error) {
+      console.log('Using default gallery configuration');
+    }
+  }
+
+  applyAPIConfig(apiConfig) {
+    const themeColors = {
+      classic: { floor: 0x4a3f35, walls: 0xd4c5b9, ceiling: 0xffffff },
+      modern: { floor: 0x2a2a2a, walls: 0xffffff, ceiling: 0xf0f0f0 },
+      minimal: { floor: 0xf5f5f5, walls: 0xffffff, ceiling: 0xffffff },
+      dark: { floor: 0x1a1a1a, walls: 0x2a2a2a, ceiling: 0x1a1a1a }
+    };
+
+    apiConfig.rooms.forEach(apiRoom => {
+      const existingRoom = GALLERY_CONFIG.rooms.find(r => r.id === apiRoom.id);
+      if (existingRoom) {
+        existingRoom.name = apiRoom.name || existingRoom.name;
+        if (apiRoom.width) existingRoom.dimensions.width = apiRoom.width;
+        if (apiRoom.depth) existingRoom.dimensions.depth = apiRoom.depth;
+        if (apiRoom.height) existingRoom.dimensions.height = apiRoom.height;
+        
+        if (apiRoom.wallColor) {
+          const hex = parseInt(apiRoom.wallColor.replace('#', ''), 16);
+          existingRoom.walls.color = hex;
+        }
+        
+        if (apiRoom.theme && themeColors[apiRoom.theme]) {
+          const colors = themeColors[apiRoom.theme];
+          existingRoom.floor.color = colors.floor;
+          existingRoom.ceiling.color = colors.ceiling;
+        }
+        
+        if (apiRoom.lighting !== undefined) {
+          existingRoom.lighting.ambient = apiRoom.lighting / 100;
+        }
+      }
+    });
   }
 }
 
