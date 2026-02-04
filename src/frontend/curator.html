@@ -84,7 +84,7 @@
                 </button>
                 <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder">
                     <i data-lucide="building-2" class="w-5 h-5"></i>
-                    <span class="font-medium">Конструктор галереи</span>
+                    <span class="font-medium">Галерея</span>
                 </button>
             </nav>
 
@@ -417,7 +417,7 @@
             <section id="gallery-builder" class="tab-content">
                 <div class="mb-8 flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Конструктор галереи</h1>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Галерея</h1>
                         <p class="text-gray-600">Создание и настройка виртуальных залов</p>
                     </div>
                     <div class="flex gap-3">
@@ -1193,30 +1193,104 @@
             };
             
             const list = document.getElementById('roomsList');
-            list.innerHTML = galleryConfig.rooms.map(room => {
+            list.innerHTML = galleryConfig.rooms.map((room, index) => {
                 const isActive = room.id === galleryConfig.currentRoom;
                 const style = roomStyles[room.id] || { icon: 'box', bgColor: 'background-color: #6b7280;' };
+                const isFirst = index === 0;
+                const isLast = index === galleryConfig.rooms.length - 1;
                 return `
-                    <div class="room-item p-3 ${isActive ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'} border rounded-xl cursor-pointer flex items-center justify-between" data-room="${room.id}">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="${style.bgColor}">
-                                <i data-lucide="${style.icon}" class="w-5 h-5 text-white"></i>
+                    <div class="room-item p-3 ${isActive ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 hover:bg-gray-100 border-gray-200'} border rounded-xl cursor-pointer" data-room="${room.id}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3 flex-1" data-action="select">
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="${style.bgColor}">
+                                    <i data-lucide="${style.icon}" class="w-5 h-5 text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">${room.name}</p>
+                                    <p class="text-xs text-gray-500">${room.slots} слотов</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-900">${room.name}</p>
-                                <p class="text-xs text-gray-500">${room.slots} слотов</p>
+                            <div class="flex items-center gap-1">
+                                <button class="move-up-btn p-1.5 rounded hover:bg-gray-200 ${isFirst ? 'opacity-30 cursor-not-allowed' : ''}" data-room="${room.id}" ${isFirst ? 'disabled' : ''} title="Переместить вверх">
+                                    <i data-lucide="chevron-up" class="w-4 h-4 text-gray-500"></i>
+                                </button>
+                                <button class="move-down-btn p-1.5 rounded hover:bg-gray-200 ${isLast ? 'opacity-30 cursor-not-allowed' : ''}" data-room="${room.id}" ${isLast ? 'disabled' : ''} title="Переместить вниз">
+                                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                                </button>
+                                <button class="delete-room-btn p-1.5 rounded hover:bg-red-100" data-room="${room.id}" title="Удалить зал">
+                                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                </button>
                             </div>
                         </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
                     </div>
                 `;
             }).join('');
             
             lucide.createIcons();
             
-            document.querySelectorAll('.room-item').forEach(item => {
-                item.addEventListener('click', () => selectRoom(item.dataset.room));
+            document.querySelectorAll('.room-item [data-action="select"]').forEach(item => {
+                item.addEventListener('click', () => selectRoom(item.closest('.room-item').dataset.room));
             });
+            
+            document.querySelectorAll('.move-up-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    moveRoom(btn.dataset.room, -1);
+                });
+            });
+            
+            document.querySelectorAll('.move-down-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    moveRoom(btn.dataset.room, 1);
+                });
+            });
+            
+            document.querySelectorAll('.delete-room-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteRoom(btn.dataset.room);
+                });
+            });
+        }
+        
+        function moveRoom(roomId, direction) {
+            const index = galleryConfig.rooms.findIndex(r => r.id === roomId);
+            if (index === -1) return;
+            
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= galleryConfig.rooms.length) return;
+            
+            const temp = galleryConfig.rooms[index];
+            galleryConfig.rooms[index] = galleryConfig.rooms[newIndex];
+            galleryConfig.rooms[newIndex] = temp;
+            
+            renderRoomsList();
+        }
+        
+        function deleteRoom(roomId) {
+            if (galleryConfig.rooms.length <= 1) {
+                alert('Нельзя удалить последний зал');
+                return;
+            }
+            
+            if (!confirm('Удалить этот зал?')) return;
+            
+            const index = galleryConfig.rooms.findIndex(r => r.id === roomId);
+            if (index === -1) return;
+            
+            galleryConfig.rooms.splice(index, 1);
+            
+            galleryConfig.rooms.forEach(room => {
+                room.connections = room.connections.filter(c => c !== roomId);
+            });
+            
+            if (galleryConfig.currentRoom === roomId) {
+                galleryConfig.currentRoom = galleryConfig.rooms[0].id;
+                selectRoom(galleryConfig.currentRoom);
+            }
+            
+            renderRoomsList();
         }
 
         document.getElementById('saveGalleryConfig')?.addEventListener('click', async () => {
