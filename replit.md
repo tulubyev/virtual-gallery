@@ -239,6 +239,16 @@ docker-compose up -d
 
 ## Recent Changes
 
+- **2026-02-04**: Added Gallery Builder to Curator Dashboard
+  - New "Галерея" section in curator sidebar for managing 3D gallery spaces
+  - Room management interface: create, edit, delete, and reorder rooms
+  - Room settings: name, theme (classic/modern/minimal/dark), dimensions, wall color, lighting
+  - Visual layout editor with artwork slots grid
+  - Room connections configuration for navigation between halls
+  - Preview button opens 3D gallery with current configuration
+  - API endpoints: `POST/GET /api/gallery/config` for configuration persistence
+  - 3D gallery loads configuration from API on initialization
+  - Slots = artwork placement positions on walls (each slot can hold one painting)
 - **2026-02-04**: Implemented 3D Gallery Building with Procedural Generation
   - Created `/gallery-3d` route for immersive 3D experience
   - GalleryBuilder class for procedural room generation from JSON config
