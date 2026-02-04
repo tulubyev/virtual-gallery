@@ -64,6 +64,7 @@ The project uses a **microservices architecture** with two separate components:
 | `/api/ai/rag-query` | POST | Query knowledge base |
 | `/api/ai/describe-artwork` | POST | Generate AI description |
 | `/api/ai/similar-artworks` | POST | Find similar artworks |
+| `/api/infra/status` | GET | Check all infrastructure services status |
 
 ### Environment Variables
 
@@ -238,6 +239,12 @@ docker-compose up -d
 
 ## Recent Changes
 
+- **2026-02-04**: Added DevOps/Infrastructure monitoring section to admin dashboard
+  - New "Инфраструктура" menu item in admin sidebar
+  - Status cards for: Virtual Gallery, AI/ML Service, PostgreSQL, S3 Storage, Qdrant, Redis, OpenRouter
+  - New API endpoint `/api/infra/status` for comprehensive infrastructure health check
+  - Real-time status monitoring with color-coded badges and terminal-style logs
+  - Automatic checks on tab open with manual refresh button
 - **2026-02-04**: Added React + TypeScript + shadcn/ui integration
   - Installed React 19, Vite, Tailwind CSS v3.4, Radix UI primitives
   - Created shadcn/ui components (button, card, badge, progress, alert, textarea, scroll-area)

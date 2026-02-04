@@ -83,6 +83,10 @@
                     <i data-lucide="settings" class="w-5 h-5"></i>
                     <span class="font-medium">Настройки</span>
                 </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="devops">
+                    <i data-lucide="server" class="w-5 h-5"></i>
+                    <span class="font-medium">Инфраструктура</span>
+                </button>
             </nav>
 
             <!-- User section -->
@@ -697,6 +701,158 @@
                     </div>
                 </div>
             </section>
+
+            <!-- DevOps / Infrastructure -->
+            <section id="devops" class="tab-content">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Инфраструктура</h1>
+                    <p class="text-gray-600">Мониторинг и управление системными компонентами</p>
+                </div>
+
+                <!-- Status Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div id="galleryStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="globe" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <span id="galleryStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">Virtual Gallery</p>
+                        <p class="text-gray-500 text-sm">Node.js API сервер</p>
+                    </div>
+
+                    <div id="aimlStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="brain" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                            <span id="aimlStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">AI/ML Service</p>
+                        <p class="text-gray-500 text-sm">Python FastAPI</p>
+                    </div>
+
+                    <div id="dbStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="database" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                            <span id="dbStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">PostgreSQL</p>
+                        <p class="text-gray-500 text-sm">Основная база данных</p>
+                    </div>
+
+                    <div id="storageStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="hard-drive" class="w-6 h-6 text-orange-600"></i>
+                            </div>
+                            <span id="storageStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">S3 Storage</p>
+                        <p class="text-gray-500 text-sm">Объектное хранилище</p>
+                    </div>
+                </div>
+
+                <!-- Additional Services -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div id="qdrantStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="box" class="w-6 h-6 text-indigo-600"></i>
+                            </div>
+                            <span id="qdrantStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">Qdrant Cloud</p>
+                        <p class="text-gray-500 text-sm">Векторная база данных</p>
+                    </div>
+
+                    <div id="redisStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="zap" class="w-6 h-6 text-red-600"></i>
+                            </div>
+                            <span id="redisStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">Redis</p>
+                        <p class="text-gray-500 text-sm">Кэш и очереди задач</p>
+                    </div>
+
+                    <div id="openrouterStatus" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                                <i data-lucide="cpu" class="w-6 h-6 text-teal-600"></i>
+                            </div>
+                            <span id="openrouterStatusBadge" class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">Проверка...</span>
+                        </div>
+                        <p class="font-bold text-gray-900">OpenRouter API</p>
+                        <p class="text-gray-500 text-sm">AI модели (GPT-4, Claude)</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-4 mb-8">
+                    <button id="refreshInfraBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        Обновить статусы
+                    </button>
+                    <button id="testAllBtn" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors">
+                        <i data-lucide="play" class="w-5 h-5"></i>
+                        Тест всех подключений
+                    </button>
+                </div>
+
+                <!-- Detailed Logs -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="terminal" class="w-5 h-5 text-indigo-600"></i>
+                        Журнал проверок
+                    </h3>
+                    <div id="infraLogs" class="bg-gray-900 rounded-xl p-4 max-h-64 overflow-y-auto font-mono text-sm">
+                        <p class="text-gray-400">Нажмите "Обновить статусы" для начала проверки...</p>
+                    </div>
+                </div>
+
+                <!-- API Endpoints Reference -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="code" class="w-5 h-5 text-indigo-600"></i>
+                        API Endpoints
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+                                <code class="text-sm text-gray-700">/api/health</code>
+                            </div>
+                            <p class="text-sm text-gray-500">Проверка состояния Gallery API</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+                                <code class="text-sm text-gray-700">/api/ai/health</code>
+                            </div>
+                            <p class="text-sm text-gray-500">Проверка AI/ML сервиса</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-mono rounded">GET</span>
+                                <code class="text-sm text-gray-700">/api/infra/status</code>
+                            </div>
+                            <p class="text-sm text-gray-500">Полный статус инфраструктуры</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-mono rounded">POST</span>
+                                <code class="text-sm text-gray-700">/api/ai/analyze-image</code>
+                            </div>
+                            <p class="text-sm text-gray-500">Анализ изображения через AI</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -917,6 +1073,114 @@
 
         // Load stats on knowledge tab open
         document.querySelector('[data-tab="knowledge"]')?.addEventListener('click', loadKnowledgeStats);
+
+        // DevOps Infrastructure Monitoring
+        function updateStatusBadge(elementId, status, latency) {
+            const badge = document.getElementById(elementId);
+            if (!badge) return;
+            
+            badge.className = 'px-3 py-1 text-xs font-medium rounded-full ';
+            
+            switch(status) {
+                case 'ok':
+                case 'connected':
+                    badge.className += 'bg-green-100 text-green-700';
+                    badge.textContent = latency ? `OK (${latency}ms)` : 'Подключено';
+                    break;
+                case 'configured':
+                    badge.className += 'bg-blue-100 text-blue-700';
+                    badge.textContent = 'Настроено';
+                    break;
+                case 'not_configured':
+                    badge.className += 'bg-yellow-100 text-yellow-700';
+                    badge.textContent = 'Не настроено';
+                    break;
+                case 'disconnected':
+                case 'error':
+                    badge.className += 'bg-red-100 text-red-700';
+                    badge.textContent = 'Отключено';
+                    break;
+                default:
+                    badge.className += 'bg-gray-100 text-gray-600';
+                    badge.textContent = 'Неизвестно';
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const logsEl = document.getElementById('infraLogs');
+            if (!logsEl) return;
+            
+            const time = new Date().toLocaleTimeString();
+            const colors = {
+                'info': 'text-blue-400',
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warn': 'text-yellow-400'
+            };
+            
+            const logLine = document.createElement('p');
+            logLine.className = colors[type] || 'text-gray-300';
+            logLine.textContent = `[${time}] ${message}`;
+            logsEl.appendChild(logLine);
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        function clearLogs() {
+            const logsEl = document.getElementById('infraLogs');
+            if (logsEl) logsEl.innerHTML = '';
+        }
+
+        async function checkInfrastructure() {
+            clearLogs();
+            addLog('Начинаем проверку инфраструктуры...', 'info');
+
+            try {
+                addLog('Проверка Virtual Gallery API...', 'info');
+                const galleryResponse = await fetch('/api/health');
+                const galleryData = await galleryResponse.json();
+                updateStatusBadge('galleryStatusBadge', galleryData.status);
+                addLog(`Virtual Gallery: ${galleryData.status === 'ok' ? 'работает' : 'ошибка'}`, galleryData.status === 'ok' ? 'success' : 'error');
+
+                addLog('Проверка AI/ML сервиса...', 'info');
+                const aiResponse = await fetch('/api/ai/health');
+                const aiData = await aiResponse.json();
+                updateStatusBadge('aimlStatusBadge', aiData.status);
+                addLog(`AI/ML Service: ${aiData.status === 'connected' ? 'подключен' : 'отключен'}`, aiData.status === 'connected' ? 'success' : 'error');
+
+                addLog('Получение полного статуса инфраструктуры...', 'info');
+                const infraResponse = await fetch('/api/infra/status');
+                const infraData = await infraResponse.json();
+
+                if (infraData.services) {
+                    const s = infraData.services;
+                    
+                    updateStatusBadge('dbStatusBadge', s.database?.status, s.database?.latency);
+                    addLog(`PostgreSQL: ${s.database?.status === 'ok' ? 'подключен' : s.database?.error || 'отключен'}`, s.database?.status === 'ok' ? 'success' : 'error');
+                    
+                    updateStatusBadge('storageStatusBadge', s.storage?.status, s.storage?.latency);
+                    addLog(`S3 Storage: ${s.storage?.status === 'ok' ? 'подключен' : s.storage?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.storage?.status === 'ok' ? 'success' : s.storage?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('qdrantStatusBadge', s.qdrant?.status, s.qdrant?.latency);
+                    addLog(`Qdrant Cloud: ${s.qdrant?.status === 'ok' ? 'подключен' : s.qdrant?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.qdrant?.status === 'ok' ? 'success' : s.qdrant?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('redisStatusBadge', s.redis?.status, s.redis?.latency);
+                    addLog(`Redis: ${s.redis?.status === 'ok' ? 'подключен' : s.redis?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.redis?.status === 'ok' ? 'success' : s.redis?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('openrouterStatusBadge', s.openrouter?.status);
+                    addLog(`OpenRouter API: ${s.openrouter?.status === 'configured' ? 'настроен' : 'не настроен'}`, s.openrouter?.status === 'configured' ? 'success' : 'warn');
+                }
+
+                addLog('Проверка завершена', 'success');
+            } catch (error) {
+                addLog(`Ошибка проверки: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('refreshInfraBtn')?.addEventListener('click', checkInfrastructure);
+        document.getElementById('testAllBtn')?.addEventListener('click', checkInfrastructure);
+        document.querySelector('[data-tab="devops"]')?.addEventListener('click', () => {
+            setTimeout(checkInfrastructure, 100);
+        });
     </script>
 </body>
 </html>

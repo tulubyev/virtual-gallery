@@ -94,6 +94,104 @@ app.get('/api/ai/health', async (req, res) => {
   }
 });
 
+function createTimeout(ms) {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
+app.get('/api/infra/status', async (req, res) => {
+  const results = {
+    timestamp: new Date().toISOString(),
+    services: {}
+  };
+
+  results.services.gallery = { status: 'ok', latency: 0 };
+
+  const startAi = Date.now();
+  try {
+    const aiResponse = await fetch(`${AI_CORE_URL}/health`, { signal: createTimeout(5000) });
+    results.services.aiml = { 
+      status: aiResponse.ok ? 'ok' : 'error', 
+      latency: Date.now() - startAi,
+      url: AI_CORE_URL
+    };
+  } catch (error) {
+    results.services.aiml = { status: 'disconnected', error: error.message, url: AI_CORE_URL };
+  }
+
+  const startDb = Date.now();
+  if (process.env.DATABASE_URL) {
+    try {
+      const { Pool } = require('pg');
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 });
+      await pool.query('SELECT 1');
+      await pool.end();
+      results.services.database = { status: 'ok', latency: Date.now() - startDb };
+    } catch (error) {
+      results.services.database = { status: 'disconnected', error: error.message };
+    }
+  } else {
+    results.services.database = { status: 'not_configured' };
+  }
+
+  const startS3 = Date.now();
+  if (process.env.S3_ENDPOINT) {
+    try {
+      const AWS = require('aws-sdk');
+      const s3 = new AWS.S3({
+        endpoint: process.env.S3_ENDPOINT,
+        accessKeyId: process.env.S3_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.S3_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
+        s3ForcePathStyle: true,
+        httpOptions: { timeout: 5000 }
+      });
+      await s3.listBuckets().promise();
+      results.services.storage = { status: 'ok', latency: Date.now() - startS3 };
+    } catch (error) {
+      results.services.storage = { status: 'disconnected', error: error.message };
+    }
+  } else {
+    results.services.storage = { status: 'not_configured' };
+  }
+
+  const startQdrant = Date.now();
+  if (process.env.QDRANT_URL) {
+    try {
+      const qdrantResponse = await fetch(`${process.env.QDRANT_URL}/collections`, { 
+        signal: createTimeout(5000),
+        headers: { 'api-key': process.env.QDRANT_API_KEY || '' }
+      });
+      results.services.qdrant = { status: qdrantResponse.ok ? 'ok' : 'error', latency: Date.now() - startQdrant };
+    } catch (error) {
+      results.services.qdrant = { status: 'disconnected', error: error.message };
+    }
+  } else {
+    results.services.qdrant = { status: 'not_configured' };
+  }
+
+  const startRedis = Date.now();
+  if (process.env.REDIS_URL) {
+    try {
+      const Redis = require('ioredis');
+      const redis = new Redis(process.env.REDIS_URL, { connectTimeout: 5000, lazyConnect: true });
+      await redis.ping();
+      await redis.quit();
+      results.services.redis = { status: 'ok', latency: Date.now() - startRedis };
+    } catch (error) {
+      results.services.redis = { status: 'disconnected', error: error.message };
+    }
+  } else {
+    results.services.redis = { status: 'not_configured' };
+  }
+
+  results.services.openrouter = { 
+    status: process.env.OPENROUTER_API_KEY ? 'configured' : 'not_configured' 
+  };
+
+  res.json(results);
+});
+
 app.post('/api/ai/analyze-image', async (req, res) => {
   const { imageUrl, artworkId, userId } = req.body;
 
