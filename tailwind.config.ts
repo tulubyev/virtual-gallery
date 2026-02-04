@@ -2,13 +2,14 @@
 import type { Config } from 'tailwindcss';
 
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    './src/frontend/*.html',
+    './src/frontend/components/**/*.tsx',
+    './src/frontend/lib/**/*.ts',
+    './src/frontend/services/**/*.ts',
+    './src/frontend/*.tsx',
+  ],
   theme: {
     container: {
       center: true,
@@ -60,16 +61,16 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" },
         },
         "fade-in": {
-          from: { opacity: 0 },
-          to: { opacity: 1 },
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
         "slide-in-from-top": {
           from: { transform: "translateY(-100%)" },
@@ -80,8 +81,8 @@ export default {
           to: { transform: "translateY(0)" },
         },
         "pulse-slow": {
-          "0%, 100%": { opacity: 1 },
-          "50%": { opacity: 0.5 },
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
       },
       animation: {

@@ -98,11 +98,46 @@ The backend uses a layered architecture:
 A custom dependency injection container (`src/container.ts`) manages service instantiation and dependencies.
 
 ### Frontend Architecture
-- **Rendering**: Static HTML files served by Express
+- **Rendering**: Static HTML files served by Express + React components
+- **React Integration**: Vite-built React widgets with shadcn/ui components
 - **3D Graphics**: Three.js with WebXR for VR support
-- **Styling**: Tailwind CSS (CDN) with Lucide Icons
+- **Styling**: Tailwind CSS (CDN for HTML, v3.4 for React) with Lucide Icons
 - **Fonts**: Playfair Display (headings), Inter (body)
-- **Build Tools**: Webpack and Vite configurations available
+- **Build Tools**: Vite for React component bundling
+
+#### React + TypeScript + shadcn/ui Setup
+
+The project uses a hybrid architecture where React components are embedded in static HTML pages:
+
+**React Components** (`src/frontend/components/`):
+- `PDFUploadProcessor.tsx` - PDF upload with progress and AI processing
+- `ArtworkAnalysisResult.tsx` - Display AI artwork analysis results
+- `ArtRAGChat.tsx` - RAG-powered art assistant chat
+
+**shadcn/ui Components** (`src/frontend/components/ui/`):
+- button, card, badge, progress, alert, textarea, scroll-area
+
+**Build Output**:
+- `dist/frontend/react-widgets.js` - IIFE bundle for embedding
+- `dist/frontend/react-widgets.css` - Tailwind styles
+
+**Usage in HTML Pages**:
+```html
+<!-- Add in <head> -->
+<link rel="stylesheet" href="/react/react-widgets.css">
+
+<!-- Add before </body> -->
+<script src="/react/react-widgets.js"></script>
+
+<!-- Container for React widget -->
+<div id="react-rag-chat"></div>
+```
+
+**Build Commands**:
+```bash
+npm run build:react    # Build React bundle
+npm run dev:client     # Vite dev server for React
+```
 
 The frontend consists of role-specific HTML pages with modern responsive design:
 - **index.html** - Main landing page with AI dashboard, hero section, and assistant chat
@@ -203,6 +238,12 @@ docker-compose up -d
 
 ## Recent Changes
 
+- **2026-02-04**: Added React + TypeScript + shadcn/ui integration
+  - Installed React 19, Vite, Tailwind CSS v3.4, Radix UI primitives
+  - Created shadcn/ui components (button, card, badge, progress, alert, textarea, scroll-area)
+  - Set up IIFE bundle build for embedding React widgets in HTML pages
+  - Added aiService.ts for AI/ML API integration
+  - React widgets available at `/react/react-widgets.js` and `/react/react-widgets.css`
 - **2025-01-28**: Added API proxy endpoints in server.js for AI/ML service integration
 - **2025-01-28**: Updated knowledge-base.html with real API integration and demo mode fallback
 - **2025-01-28**: Updated staff.html with AI image analysis integration

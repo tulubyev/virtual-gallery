@@ -181,6 +181,7 @@ app.post('/api/ai/similar-artworks', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'src/frontend')));
 app.use('/assets', express.static(path.join(__dirname, 'src/frontend/assets')));
+app.use('/react', express.static(path.join(__dirname, 'dist/frontend')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/index.html'));
