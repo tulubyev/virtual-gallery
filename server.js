@@ -17,6 +17,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+
 async function proxyToAiService(endpoint, method, body, res) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -308,6 +310,10 @@ app.get('/gallery', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/index.html'));
 });
 
+app.get('/gallery-3d', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src/frontend/gallery-3d.html'));
+});
+
 app.get('/knowledge-base', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/knowledge-base.html'));
 });
@@ -318,6 +324,58 @@ app.get('/staff', (req, res) => {
 
 app.get('/user', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/frontend/user.html'));
+});
+
+app.get('/api/rooms/:roomId/artworks', async (req, res) => {
+  const { roomId } = req.params;
+  
+  const demoArtworks = {
+    main_hall: [],
+    impressionism: [
+      { id: 'imp_1', slot_id: 'slot_1', title: 'Водяные лилии', artist: 'Клод Моне', year: 1906, style: 'Импрессионизм', medium: 'Масло, холст', description: 'Одна из серии картин Моне, изображающих его сад в Живерни.' },
+      { id: 'imp_2', slot_id: 'slot_2', title: 'Звездная ночь', artist: 'Винсент Ван Гог', year: 1889, style: 'Постимпрессионизм', medium: 'Масло, холст', description: 'Знаменитый ночной пейзаж с закручивающимися облаками.' },
+      { id: 'imp_3', slot_id: 'slot_3', title: 'Бал в Мулен де ла Галетт', artist: 'Пьер-Огюст Ренуар', year: 1876, style: 'Импрессионизм', medium: 'Масло, холст', description: 'Сцена парижской жизни XIX века.' },
+      { id: 'imp_4', slot_id: 'slot_4', title: 'Впечатление. Восходящее солнце', artist: 'Клод Моне', year: 1872, style: 'Импрессионизм', medium: 'Масло, холст', description: 'Картина, давшая название всему движению импрессионизма.' },
+      { id: 'imp_5', slot_id: 'slot_5', title: 'Подсолнухи', artist: 'Винсент Ван Гог', year: 1888, style: 'Постимпрессионизм', medium: 'Масло, холст', description: 'Серия натюрмортов с подсолнухами в вазе.' },
+      { id: 'imp_6', slot_id: 'slot_6', title: 'Танец в Буживале', artist: 'Пьер-Огюст Ренуар', year: 1883, style: 'Импрессионизм', medium: 'Масло, холст', description: 'Романтическая сцена танца на открытом воздухе.' }
+    ],
+    modern_art: [
+      { id: 'mod_1', slot_id: 'slot_1', title: 'Композиция VIII', artist: 'Василий Кандинский', year: 1923, style: 'Абстракционизм', medium: 'Масло, холст', description: 'Яркий пример геометрической абстракции.' },
+      { id: 'mod_2', slot_id: 'slot_2', title: 'Черный квадрат', artist: 'Казимир Малевич', year: 1915, style: 'Супрематизм', medium: 'Масло, холст', description: 'Манифест супрематизма и новой эры в искусстве.' },
+      { id: 'mod_3', slot_id: 'slot_3', title: 'Номер 5, 1948', artist: 'Джексон Поллок', year: 1948, style: 'Абстрактный экспрессионизм', medium: 'Масло, оргалит', description: 'Знаменитая работа в технике дриппинга.' },
+      { id: 'mod_4', slot_id: 'slot_4', title: 'Желтый, красный, синий', artist: 'Василий Кандинский', year: 1925, style: 'Абстракционизм', medium: 'Масло, холст', description: 'Исследование взаимодействия основных цветов и форм.' },
+      { id: 'mod_5', slot_id: 'slot_5', title: 'Красный супрематический квадрат', artist: 'Казимир Малевич', year: 1915, style: 'Супрематизм', medium: 'Масло, холст', description: 'Продолжение исследований чистой формы.' }
+    ],
+    renaissance: [
+      { id: 'ren_1', slot_id: 'slot_1', title: 'Мона Лиза', artist: 'Леонардо да Винчи', year: 1503, style: 'Высокое Возрождение', medium: 'Масло, тополь', description: 'Самый известный портрет в истории искусства.' },
+      { id: 'ren_2', slot_id: 'slot_2', title: 'Тайная вечеря', artist: 'Леонардо да Винчи', year: 1498, style: 'Высокое Возрождение', medium: 'Темпера, гипс', description: 'Монументальная фреска в Милане.' },
+      { id: 'ren_3', slot_id: 'slot_3', title: 'Рождение Венеры', artist: 'Сандро Боттичелли', year: 1485, style: 'Раннее Возрождение', medium: 'Темпера, холст', description: 'Изображение богини любви, выходящей из моря.' },
+      { id: 'ren_4', slot_id: 'slot_4', title: 'Сотворение Адама', artist: 'Микеланджело', year: 1512, style: 'Высокое Возрождение', medium: 'Фреска', description: 'Фрагмент росписи Сикстинской капеллы.' },
+      { id: 'ren_5', slot_id: 'slot_5', title: 'Весна', artist: 'Сандро Боттичелли', year: 1482, style: 'Раннее Возрождение', medium: 'Темпера, дерево', description: 'Аллегорическое изображение весны.' },
+      { id: 'ren_6', slot_id: 'slot_6', title: 'Давид', artist: 'Микеланджело', year: 1504, style: 'Высокое Возрождение', medium: 'Мрамор', description: 'Шедевр скульптуры, символ Флоренции.' }
+    ],
+    contemporary: [
+      { id: 'con_1', slot_id: 'slot_1', title: 'Девочка с воздушным шаром', artist: 'Бэнкси', year: 2002, style: 'Стрит-арт', medium: 'Трафарет', description: 'Один из самых узнаваемых образов современного искусства.' },
+      { id: 'con_2', slot_id: 'slot_2', title: 'Кролик', artist: 'Джефф Кунс', year: 1986, style: 'Неопоп', medium: 'Нержавеющая сталь', description: 'Отражающая скульптура кролика.' },
+      { id: 'con_3', slot_id: 'slot_3', title: 'Бесконечная тыквенная комната', artist: 'Яёи Кусама', year: 2016, style: 'Инсталляция', medium: 'Смешанная техника', description: 'Иммерсивная инсталляция с зеркалами и тыквами.' },
+      { id: 'con_4', slot_id: 'slot_4', title: 'Физическая невозможность смерти', artist: 'Дэмиен Херст', year: 1991, style: 'Инсталляция', medium: 'Акула, формальдегид', description: 'Провокационная работа с тигровой акулой.' },
+      { id: 'con_5', slot_id: 'slot_5', title: 'Love Is in the Bin', artist: 'Бэнкси', year: 2018, style: 'Концептуальное искусство', medium: 'Смешанная техника', description: 'Самоуничтожившаяся картина на аукционе.' }
+    ]
+  };
+
+  const artworks = demoArtworks[roomId] || [];
+  res.json(artworks);
+});
+
+app.get('/api/gallery/rooms', (req, res) => {
+  const rooms = [
+    { id: 'main_hall', name: 'Главный холл', theme: 'neutral', artworks_count: 0 },
+    { id: 'impressionism', name: 'Импрессионизм', theme: 'impressionism', artworks_count: 6 },
+    { id: 'modern_art', name: 'Современное искусство', theme: 'modern', artworks_count: 5 },
+    { id: 'renaissance', name: 'Ренессанс', theme: 'classical', artworks_count: 6 },
+    { id: 'contemporary', name: 'Современное искусство XXI века', theme: 'contemporary', artworks_count: 5 }
+  ];
+  res.json(rooms);
 });
 
 app.listen(PORT, '0.0.0.0', () => {

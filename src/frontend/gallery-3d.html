@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Art Gallery - 3D Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: #111111;
+        }
+        
+        #gallery-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .controls-hint span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .controls-hint kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+        
+        .room-select {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .room-btn {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .room-btn:hover {
+            background: rgba(99, 102, 241, 0.6);
+            border-color: rgba(99, 102, 241, 0.8);
+        }
+        
+        .room-btn.active {
+            background: rgba(99, 102, 241, 0.8);
+            border-color: #6366f1;
+        }
+        
+        @media (max-width: 768px) {
+            .controls-hint {
+                flex-direction: column;
+                gap: 8px;
+                font-size: 12px;
+            }
+            
+            .room-select {
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 0 20px;
+            }
+            
+            .room-btn {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div style="text-align: center; color: white;">
+            <div style="margin-bottom: 30px;">
+                <svg width="80" height="80" viewBox="0 0 100 100" style="animation: spin 2s linear infinite;">
+                    <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"/>
+                    <circle cx="50" cy="50" r="40" stroke="#6366f1" stroke-width="8" fill="none" 
+                            stroke-dasharray="251" stroke-dashoffset="200" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h2 style="font-size: 24px; margin-bottom: 10px; font-weight: 600; font-family: 'Playfair Display', serif;">
+                Virtual Art Gallery
+            </h2>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
+                Загрузка 3D галереи...
+            </p>
+        </div>
+        <style>
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        </style>
+    </div>
+
+    <canvas id="gallery-canvas"></canvas>
+
+    <a href="/" class="back-button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        На главную
+    </a>
+
+    <div class="room-select" id="room-select">
+        <button class="room-btn active" data-room="main_hall">Холл</button>
+        <button class="room-btn" data-room="impressionism">Импрессионизм</button>
+        <button class="room-btn" data-room="modern_art">Модерн</button>
+        <button class="room-btn" data-room="renaissance">Ренессанс</button>
+        <button class="room-btn" data-room="contemporary">XXI век</button>
+    </div>
+
+    <div class="controls-hint">
+        <span><kbd>ЛКМ + Drag</kbd> Вращение</span>
+        <span><kbd>Колесо</kbd> Масштаб</span>
+        <span><kbd>M</kbd> Мини-карта</span>
+        <span><kbd>1-5</kbd> Переход в зал</span>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js",
+            "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js",
+            "three/examples/jsm/environments/RoomEnvironment.js": "https://unpkg.com/three@0.160.0/examples/jsm/environments/RoomEnvironment.js"
+        }
+    }
+    </script>
+    
+    <script type="module" src="/js/gallery/main.js"></script>
+
+    <script>
+        document.querySelectorAll('.room-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const roomId = btn.dataset.room;
+                if (window.virtualGallery && window.virtualGallery.roomNavigator) {
+                    window.virtualGallery.roomNavigator.navigateToRoom(roomId);
+                    
+                    document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+            });
+        });
+
+        window.addEventListener('roomChanged', (event) => {
+            const roomId = event.detail.roomId;
+            document.querySelectorAll('.room-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.room === roomId);
+            });
+        });
+    </script>
+</body>
+</html>

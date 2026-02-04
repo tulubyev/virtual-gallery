@@ -239,6 +239,18 @@ docker-compose up -d
 
 ## Recent Changes
 
+- **2026-02-04**: Implemented 3D Gallery Building with Procedural Generation
+  - Created `/gallery-3d` route for immersive 3D experience
+  - GalleryBuilder class for procedural room generation from JSON config
+  - 5 themed rooms: Main Hall, Impressionism, Modern Art, Renaissance, Contemporary
+  - TextureManager with LRU cache for lazy loading textures
+  - ArtworkLODManager for progressive image loading (placeholder → thumbnail → full)
+  - RoomNavigator with smooth camera transitions between rooms
+  - Interactive artwork slots with click-to-view details
+  - Room selection UI with keyboard shortcuts (1-5)
+  - Demo artworks with famous paintings metadata
+  - API endpoints: `/api/rooms/:roomId/artworks`, `/api/gallery/rooms`
+  - Three.js with ES modules via CDN import maps
 - **2026-02-04**: Added DevOps/Infrastructure monitoring section to admin dashboard
   - New "Инфраструктура" menu item in admin sidebar
   - Status cards for: Virtual Gallery, AI/ML Service, PostgreSQL, S3 Storage, Qdrant, Redis, OpenRouter
