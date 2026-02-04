@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 
@@ -136,18 +137,24 @@ app.get('/api/infra/status', async (req, res) => {
   }
 
   const startS3 = Date.now();
-  if (process.env.S3_ENDPOINT) {
+  const s3Endpoint = process.env.S3_ENDPOINT;
+  const s3AccessKey = process.env.S3_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID;
+  const s3SecretKey = process.env.S3_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+  
+  if (s3Endpoint && s3AccessKey && s3SecretKey) {
     try {
-      const AWS = require('aws-sdk');
-      const s3 = new AWS.S3({
-        endpoint: process.env.S3_ENDPOINT,
-        accessKeyId: process.env.S3_ACCESS_KEY || process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_KEY || process.env.AWS_SECRET_ACCESS_KEY,
-        s3ForcePathStyle: true,
-        httpOptions: { timeout: 5000 }
+      const { S3Client, ListBucketsCommand } = require('@aws-sdk/client-s3');
+      const s3Client = new S3Client({
+        endpoint: s3Endpoint,
+        credentials: {
+          accessKeyId: s3AccessKey,
+          secretAccessKey: s3SecretKey
+        },
+        forcePathStyle: true,
+        region: process.env.S3_REGION || 'us-east-1'
       });
-      await s3.listBuckets().promise();
-      results.services.storage = { status: 'ok', latency: Date.now() - startS3 };
+      await s3Client.send(new ListBucketsCommand({}));
+      results.services.storage = { status: 'ok', latency: Date.now() - startS3, bucket: process.env.S3_BUCKET_NAME };
     } catch (error) {
       results.services.storage = { status: 'disconnected', error: error.message };
     }
