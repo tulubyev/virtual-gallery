@@ -1329,29 +1329,25 @@
             resetImageView('back');
         }
 
-        function updateStats() {
-            const counts = {
-                pending_review: 0,
-                approved: 0,
-                rejected: 0,
-                published: 0
-            };
-            
-            digitizedArtworks.forEach(a => {
-                if (counts[a.status] !== undefined) counts[a.status]++;
-            });
-            
-            document.getElementById('pendingCount').textContent = counts.pending_review;
-            document.getElementById('approvedCount').textContent = counts.approved;
-            document.getElementById('rejectedCount').textContent = counts.rejected;
-            document.getElementById('publishedCount').textContent = counts.published;
-            
-            const badge = document.getElementById('pendingBadge');
-            if (counts.pending_review > 0) {
-                badge.textContent = counts.pending_review;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/artworks/stats');
+                const counts = await response.json();
+                
+                document.getElementById('pendingCount').textContent = counts.pending || 0;
+                document.getElementById('approvedCount').textContent = counts.approved || 0;
+                document.getElementById('rejectedCount').textContent = counts.rejected || 0;
+                document.getElementById('publishedCount').textContent = counts.published || 0;
+                
+                const badge = document.getElementById('pendingBadge');
+                if (counts.pending > 0) {
+                    badge.textContent = counts.pending;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
             }
         }
 

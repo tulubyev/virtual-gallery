@@ -509,6 +509,30 @@ app.post('/api/gallery/config', (req, res) => {
   }
 });
 
+// Artworks Stats API (for Napolnenie section)
+app.get('/api/artworks/stats', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COUNT(*) FILTER (WHERE status = 'pending') as pending,
+        COUNT(*) FILTER (WHERE status = 'approved') as approved,
+        COUNT(*) FILTER (WHERE status = 'rejected') as rejected,
+        COUNT(*) FILTER (WHERE status = 'published') as published
+      FROM artworks
+    `);
+    
+    res.json({
+      pending: parseInt(result.rows[0]?.pending || 0),
+      approved: parseInt(result.rows[0]?.approved || 0),
+      rejected: parseInt(result.rows[0]?.rejected || 0),
+      published: parseInt(result.rows[0]?.published || 0)
+    });
+  } catch (error) {
+    console.error('Artworks stats error:', error);
+    res.json({ pending: 0, approved: 0, rejected: 0, published: 0 });
+  }
+});
+
 // Dashboard Stats API
 app.get('/api/stats/dashboard', async (req, res) => {
   try {
