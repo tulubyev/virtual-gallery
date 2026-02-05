@@ -110,6 +110,14 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-05**: Migrated to beget.com PostgreSQL database
+  - Database connection now uses DB_STRING environment variable (beget.com)
+  - Synced artworks data from Replit database to beget.com
+  - Updated queries to use correct column names: `artwork_id` → `id`, `artist_name` → `artist`
+  - Added missing columns to beget DB: status, country, epoch, technique, curator_notes, rejection_reason, collection
+  - Removed pexels.com fallback images, now using S3 images only
+  - Production environment configured with DB_STRING, S3 credentials
+
 - **2026-02-05**: Enhanced curator dashboard "Наполнение" section
   - Added interactive image zoom/pan in artwork modal (mouse wheel, +/− buttons, drag to pan)
   - Support for touch screens (pinch-to-zoom, touch drag)

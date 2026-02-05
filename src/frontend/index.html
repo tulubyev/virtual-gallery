@@ -720,9 +720,9 @@
 
         function loadFallbackSlides() {
             heroSlides = [
-                { title: 'Виртуальная галерея', artist: 'Virtual Gallery', image_url: 'https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Россия' },
-                { title: 'Искусство без границ', artist: 'Art Collection', image_url: 'https://images.pexels.com/photos/1839919/pexels-photo-1839919.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Мир' },
-                { title: 'Мировые шедевры', artist: 'World Art', image_url: 'https://images.pexels.com/photos/2372978/pexels-photo-2372978.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Европа' }
+                { title: 'Леонардо Да Винси', artist: 'Леонардо Да Винси', image_url: 'https://0a011f8d633a-gifted-saul.s3.ru1.storage.beget.cloud/artworks/artwork-1770257627848-825297009.jpg', country: 'Италия' },
+                { title: 'Тайная Вечеря', artist: 'Леонардо да Винси', image_url: 'https://0a011f8d633a-gifted-saul.s3.ru1.storage.beget.cloud/artworks/artwork-1770261355426-573567682.jpg', country: 'Италия' },
+                { title: 'Девушка', artist: 'Леонардо да Вини', image_url: 'https://0a011f8d633a-gifted-saul.s3.ru1.storage.beget.cloud/artworks/artwork-1770296998182-69105174.jpg', country: 'Италия' }
             ];
             renderHeroSlides();
         }
@@ -736,7 +736,7 @@
                 slide.className = `hero-slide absolute inset-0 transition-opacity duration-1000 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
                 slide.style.zIndex = '0';
                 slide.dataset.gallery = `${artwork.title || 'Произведение'} — ${artwork.artist || 'Автор'}`;
-                slide.innerHTML = `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" onerror="this.src='https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=1920'">`;
+                slide.innerHTML = `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" onerror="this.style.display='none'">`;
                 slideshow.appendChild(slide);
             });
             
