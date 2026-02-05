@@ -703,7 +703,7 @@
 
         async function loadHeroSlides() {
             try {
-                const response = await fetch('/api/artworks/random?limit=7');
+                const response = await fetch('/api/artworks/random?limit=10');
                 const data = await response.json();
                 
                 if (data.artworks && data.artworks.length > 0) {
