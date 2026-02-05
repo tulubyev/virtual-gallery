@@ -575,7 +575,7 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-app.get('/api/artworks', async (req, res) => {
+async function getArtworks(req, res) {
   try {
     const { status, style, country, epoch, limit = 50, offset = 0 } = req.query;
     
@@ -613,6 +613,44 @@ app.get('/api/artworks', async (req, res) => {
   } catch (error) {
     console.error('Fetch artworks error:', error);
     res.status(500).json({ error: 'Failed to fetch artworks', details: error.message });
+  }
+}
+
+app.get('/api/artworks', getArtworks);
+
+app.get('/api/v1/artworks', async (req, res) => {
+  try {
+    const { status, style, country, epoch, limit = 50, offset = 0 } = req.query;
+    
+    let query = 'SELECT * FROM artworks WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+    
+    if (status) {
+      query += ` AND status = $${paramIndex++}`;
+      params.push(status);
+    }
+    if (style) {
+      query += ` AND style = $${paramIndex++}`;
+      params.push(style);
+    }
+    if (country) {
+      query += ` AND country = $${paramIndex++}`;
+      params.push(country);
+    }
+    if (epoch) {
+      query += ` AND epoch = $${paramIndex++}`;
+      params.push(epoch);
+    }
+    
+    query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
+    params.push(parseInt(limit), parseInt(offset));
+    
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Fetch artworks v1 error:', error);
+    res.status(500).json([]);
   }
 });
 
