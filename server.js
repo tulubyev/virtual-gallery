@@ -533,6 +533,24 @@ app.get('/api/artworks/random', async (req, res) => {
   }
 });
 
+// Debug: Check database schema
+app.get('/api/debug/schema', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT column_name, data_type FROM information_schema.columns 
+      WHERE table_name = 'artworks' ORDER BY ordinal_position
+    `);
+    const dbInfo = await pool.query(`SELECT current_database(), current_user`);
+    res.json({ 
+      database: dbInfo.rows[0],
+      columns: result.rows.map(r => r.column_name),
+      connection: process.env.DB_STRING ? 'beget.com' : 'Replit'
+    });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 // Artworks Stats API (for Napolnenie section and Staff dashboard)
 app.get('/api/artworks/stats', async (req, res) => {
   try {
@@ -730,9 +748,9 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
     console.log('Inserting artwork:', { title, artist, year, style, country, epoch });
     
     const result = await pool.query(
-      `INSERT INTO artworks (title, artist, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
+      `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active')
-       RETURNING *`,
+       RETURNING artwork_id as id, title, artist_name as artist, image_url, status`,
       [
         title || 'Untitled',
         artist || 'Unknown',
