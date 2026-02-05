@@ -110,6 +110,13 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-05**: Added direct artwork upload without AI service
+  - Staff dashboard now supports manual upload with metadata form
+  - Fields: title, artist, year, style, country, epoch, description
+  - API endpoints: `POST /api/artworks/upload`, `GET /api/artworks`, `DELETE /api/artworks/:id`
+  - Upload history shows recently added artworks
+  - Database table `artworks` created in PostgreSQL
+  
 - **2026-02-05**: Enhanced artwork modal in 3D gallery
   - Added interactive image viewer with zoom (mouse wheel, +/− buttons) and pan (drag to move)
   - Added action buttons: Избранное, Аукцион, Вопрос (ask moderator)

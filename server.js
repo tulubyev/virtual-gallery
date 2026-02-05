@@ -1,9 +1,41 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = 5000;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/uploads');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, 'artwork-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Only image files are allowed'));
+  }
+});
 
 const AI_CORE_URL = process.env.AI_CORE_URL || 'http://localhost:8001';
 
@@ -18,6 +50,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 async function proxyToAiService(endpoint, method, body, res) {
   const controller = new AbortController();
@@ -461,6 +494,118 @@ app.get('/api/gallery/config', (req, res) => {
   }
 });
 
+// Artworks API - Direct upload without AI service
+app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+    
+    const { title, artist, year, medium, dimensions, style, country, epoch, description, tags } = req.body;
+    
+    const imageUrl = '/uploads/' + req.file.filename;
+    
+    const result = await pool.query(
+      `INSERT INTO artworks (title, artist, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active')
+       RETURNING *`,
+      [
+        title || 'Untitled',
+        artist || 'Unknown',
+        year ? parseInt(year) : null,
+        medium || null,
+        dimensions || null,
+        style || null,
+        country || null,
+        epoch || null,
+        description || null,
+        imageUrl,
+        tags ? tags.split(',').map(t => t.trim()) : null
+      ]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Artwork uploaded successfully',
+      artwork: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload artwork', details: error.message });
+  }
+});
+
+app.get('/api/artworks', async (req, res) => {
+  try {
+    const { status, style, country, epoch, limit = 50, offset = 0 } = req.query;
+    
+    let query = 'SELECT * FROM artworks WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+    
+    if (status) {
+      query += ` AND status = $${paramIndex++}`;
+      params.push(status);
+    }
+    if (style) {
+      query += ` AND style = $${paramIndex++}`;
+      params.push(style);
+    }
+    if (country) {
+      query += ` AND country = $${paramIndex++}`;
+      params.push(country);
+    }
+    if (epoch) {
+      query += ` AND epoch = $${paramIndex++}`;
+      params.push(epoch);
+    }
+    
+    query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
+    params.push(parseInt(limit), parseInt(offset));
+    
+    const result = await pool.query(query, params);
+    
+    res.json({
+      success: true,
+      artworks: result.rows,
+      total: result.rows.length
+    });
+  } catch (error) {
+    console.error('Fetch artworks error:', error);
+    res.status(500).json({ error: 'Failed to fetch artworks', details: error.message });
+  }
+});
+
+app.get('/api/artworks/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM artworks WHERE id = $1', [req.params.id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+    
+    res.json({ success: true, artwork: result.rows[0] });
+  } catch (error) {
+    console.error('Fetch artwork error:', error);
+    res.status(500).json({ error: 'Failed to fetch artwork', details: error.message });
+  }
+});
+
+app.delete('/api/artworks/:id', async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM artworks WHERE id = $1 RETURNING *', [req.params.id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+    
+    res.json({ success: true, message: 'Artwork deleted', artwork: result.rows[0] });
+  } catch (error) {
+    console.error('Delete artwork error:', error);
+    res.status(500).json({ error: 'Failed to delete artwork', details: error.message });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Virtual Gallery server running at http://0.0.0.0:${PORT}`);
   console.log(`AI/ML Service configured at: ${AI_CORE_URL}`);
@@ -473,4 +618,6 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('  POST /api/ai/rag-query     - RAG query for knowledge base');
   console.log('  POST /api/ai/describe-artwork - Generate AI description');
   console.log('  POST /api/ai/similar-artworks - Find similar artworks');
+  console.log('  POST /api/artworks/upload  - Direct artwork upload (no AI)');
+  console.log('  GET  /api/artworks         - List all artworks');
 });
