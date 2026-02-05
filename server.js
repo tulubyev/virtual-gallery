@@ -11,8 +11,12 @@ const app = express();
 const watermarkService = new WatermarkService();
 const PORT = 5000;
 
+// Database connection - prioritize DB_STRING (beget.com) over DATABASE_URL (Replit)
+const dbConnectionString = process.env.DB_STRING || process.env.DATABASE_URL;
+console.log('Database connection:', process.env.DB_STRING ? 'Using DB_STRING (beget.com)' : 'Using DATABASE_URL (Replit)');
+
 const pool = new Pool({
-  connectionString: process.env.DB_STRING || process.env.DATABASE_URL,
+  connectionString: dbConnectionString,
   ssl: { rejectUnauthorized: false }
 });
 
@@ -515,7 +519,7 @@ app.get('/api/artworks/random', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 7;
     const result = await pool.query(`
-      SELECT id, title, artist, image_url, country, epoch 
+      SELECT artwork_id as id, title, artist_name as artist, image_url, country, epoch 
       FROM artworks 
       WHERE image_url IS NOT NULL AND status = 'published'
       ORDER BY RANDOM() 
@@ -753,7 +757,7 @@ async function getArtworks(req, res) {
   try {
     const { status, style, country, epoch, search, limit = 50, offset = 0 } = req.query;
     
-    let query = 'SELECT * FROM artworks WHERE 1=1';
+    let query = 'SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE 1=1';
     const params = [];
     let paramIndex = 1;
     
@@ -774,7 +778,7 @@ async function getArtworks(req, res) {
       params.push(epoch);
     }
     if (search) {
-      query += ` AND (LOWER(title) LIKE $${paramIndex} OR LOWER(artist) LIKE $${paramIndex} OR LOWER(style) LIKE $${paramIndex} OR LOWER(description) LIKE $${paramIndex})`;
+      query += ` AND (LOWER(title) LIKE $${paramIndex} OR LOWER(artist_name) LIKE $${paramIndex} OR LOWER(style) LIKE $${paramIndex} OR LOWER(description) LIKE $${paramIndex})`;
       params.push(`%${search.toLowerCase()}%`);
       paramIndex++;
     }
@@ -801,7 +805,7 @@ app.get('/api/v1/artworks', async (req, res) => {
   try {
     const { status, style, country, epoch, limit = 50, offset = 0 } = req.query;
     
-    let query = 'SELECT * FROM artworks WHERE 1=1';
+    let query = 'SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE 1=1';
     const params = [];
     let paramIndex = 1;
     
@@ -833,9 +837,9 @@ app.get('/api/v1/artworks', async (req, res) => {
     const result = await pool.query(query, params);
     
     const mappedArtworks = result.rows.map(artwork => ({
-      id: artwork.id,
+      id: artwork.artwork_id || artwork.id,
       title: artwork.title,
-      artist: artwork.artist,
+      artist: artwork.artist_name || artwork.artist,
       front_url: artwork.image_url,
       front_watermarked_url: artwork.image_url,
       style: artwork.style,
@@ -881,7 +885,7 @@ app.patch('/api/artworks/:id', async (req, res) => {
     updates.push(`updated_at = NOW()`);
     values.push(id);
     
-    const query = `UPDATE artworks SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+    const query = `UPDATE artworks SET ${updates.join(', ')} WHERE artwork_id = $${paramIndex} RETURNING *`;
     const result = await pool.query(query, values);
     
     if (result.rows.length === 0) {
@@ -897,7 +901,7 @@ app.patch('/api/artworks/:id', async (req, res) => {
 
 app.get('/api/artworks/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM artworks WHERE id = $1', [req.params.id]);
+    const result = await pool.query('SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE artwork_id = $1', [req.params.id]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Artwork not found' });
@@ -934,7 +938,7 @@ app.patch('/api/artworks/:id/status', async (req, res) => {
       values.push(rejection_reason);
     }
     
-    query += ` WHERE id = $${paramIndex} RETURNING *`;
+    query += ` WHERE artwork_id = $${paramIndex} RETURNING *, artwork_id as id, artist_name as artist`;
     values.push(id);
     
     const result = await pool.query(query, values);
@@ -952,7 +956,7 @@ app.patch('/api/artworks/:id/status', async (req, res) => {
 
 app.delete('/api/artworks/:id', async (req, res) => {
   try {
-    const result = await pool.query('DELETE FROM artworks WHERE id = $1 RETURNING *', [req.params.id]);
+    const result = await pool.query('DELETE FROM artworks WHERE artwork_id = $1 RETURNING *', [req.params.id]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Artwork not found' });
