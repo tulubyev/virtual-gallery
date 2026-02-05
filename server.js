@@ -513,7 +513,7 @@ app.post('/api/gallery/config', (req, res) => {
 app.get('/api/stats/dashboard', async (req, res) => {
   try {
     const [collections, rooms, artworks, pending] = await Promise.all([
-      pool.query('SELECT COUNT(*) as count FROM collections'),
+      pool.query('SELECT COUNT(*) as count FROM collections WHERE is_active = true'),
       pool.query("SELECT COUNT(*) as count FROM gallery_rooms WHERE id IS NOT NULL"),
       pool.query('SELECT COUNT(*) as count FROM artworks'),
       pool.query("SELECT COUNT(*) as count FROM artworks WHERE status = 'pending'")
@@ -588,6 +588,40 @@ app.post('/api/collections', async (req, res) => {
     res.json({ success: true, collection: result.rows[0] });
   } catch (error) {
     console.error('Create collection error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.patch('/api/collections/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_active, name, description, epoch, country } = req.body;
+    
+    const updates = [];
+    const values = [];
+    let idx = 1;
+    
+    if (is_active !== undefined) { updates.push(`is_active = $${idx++}`); values.push(is_active); }
+    if (name !== undefined) { updates.push(`name = $${idx++}`); values.push(name); }
+    if (description !== undefined) { updates.push(`description = $${idx++}`); values.push(description); }
+    if (epoch !== undefined) { updates.push(`epoch = $${idx++}`); values.push(epoch); }
+    if (country !== undefined) { updates.push(`country = $${idx++}`); values.push(country); }
+    
+    if (updates.length === 0) {
+      return res.json({ success: true });
+    }
+    
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+    
+    const result = await pool.query(
+      `UPDATE collections SET ${updates.join(', ')} WHERE id = $${idx} RETURNING *`,
+      values
+    );
+    
+    res.json({ success: true, collection: result.rows[0] });
+  } catch (error) {
+    console.error('Update collection error:', error);
     res.status(500).json({ error: error.message });
   }
 });

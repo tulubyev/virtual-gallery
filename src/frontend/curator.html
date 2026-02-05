@@ -1933,15 +1933,26 @@
                 }
                 
                 grid.innerHTML = allCollections.map(col => `
-                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="${col.slug}" onclick="openCollection('${col.slug}')">
+                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group ${col.is_active === false ? 'opacity-60' : ''}" data-collection="${col.slug}" onclick="openCollection('${col.slug}')">
                         <div class="h-40 bg-gradient-to-br ${col.cover_gradient || 'from-purple-400 to-pink-500'} relative">
                             ${col.epoch ? `<span class="absolute top-3 right-3 bg-white/90 text-purple-700 text-xs px-2 py-1 rounded-full">Эпоха: ${col.epoch}</span>` : ''}
-                            <button onclick="event.stopPropagation(); deleteCollection(${col.id}, '${col.name}')" class="absolute top-3 left-3 bg-white/90 text-red-500 hover:text-red-700 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                <i data-lucide="trash-2" class="w-3 h-3"></i>
-                            </button>
+                            <div class="absolute top-3 left-3 flex gap-2">
+                                <button onclick="event.stopPropagation(); toggleCollectionActive(${col.id}, ${col.is_active !== false})" 
+                                    class="bg-white/90 ${col.is_active === false ? 'text-gray-400' : 'text-green-500'} hover:bg-white p-1.5 rounded-full transition-colors" 
+                                    title="${col.is_active === false ? 'Активировать' : 'Деактивировать'}">
+                                    <i data-lucide="${col.is_active === false ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteCollection(${col.id}, '${col.name}')" 
+                                    class="bg-white/90 text-red-500 hover:text-red-700 hover:bg-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="p-6">
-                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">${col.name}</h3>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-display font-semibold text-lg text-gray-900">${col.name}</h3>
+                                ${col.is_active === false ? '<span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Скрыта</span>' : '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Активна</span>'}
+                            </div>
                             <p class="text-gray-600 text-sm mb-3">${col.description || 'Описание отсутствует'}</p>
                             <div class="flex flex-wrap gap-1 mb-4">
                                 ${col.country ? `<span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">${col.country}</span>` : ''}
@@ -2082,6 +2093,23 @@
             }
         });
 
+        async function toggleCollectionActive(id, currentlyActive) {
+            try {
+                const response = await fetch(`/api/collections/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_active: !currentlyActive })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update');
+                loadCollections();
+                loadDashboardStats();
+            } catch (error) {
+                console.error('Toggle collection error:', error);
+                alert('Ошибка при изменении статуса коллекции');
+            }
+        }
+
         async function deleteCollection(id, name) {
             if (!confirm(`Удалить коллекцию "${name}"?`)) return;
             
@@ -2089,6 +2117,7 @@
                 const response = await fetch(`/api/collections/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Failed to delete');
                 loadCollections();
+                loadDashboardStats();
             } catch (error) {
                 console.error('Delete collection error:', error);
                 alert('Ошибка при удалении коллекции');
