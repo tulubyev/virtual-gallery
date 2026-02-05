@@ -1,5 +1,7 @@
 # Virtual Art Gallery
 
+**Domain:** virtgal.ru
+
 ## Overview
 
 A comprehensive virtual art gallery web application featuring VR support, AI-powered curation, and IoT integration. The platform allows users to explore a 3D gallery environment, view artworks, and receive personalized recommendations. The system supports multiple user roles (admin, curator, staff, tour guide, visitors) with role-based access control. The project aims to revolutionize art appreciation and management through advanced technology.

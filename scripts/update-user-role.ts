@@ -12,18 +12,18 @@ async function updateUserRole() {
   });
 
   try {
-    console.log('Обновление роли пользователя admin@example.com на admin...');
+    console.log('Обновление роли пользователя admin@virtgal.ru на admin...');
     const client = await pool.connect();
 
     const result = await client.query(
       'UPDATE users SET role = $1 WHERE email = $2 RETURNING user_id, username, email, role',
-      ['admin', 'admin@example.com']
+      ['admin', 'admin@virtgal.ru']
     );
 
     if (result.rows.length > 0) {
       console.log('Роль пользователя обновлена:', result.rows[0]);
     } else {
-      console.log('Пользователь с email admin@example.com не найден');
+      console.log('Пользователь с email admin@virtgal.ru не найден');
     }
 
     client.release();

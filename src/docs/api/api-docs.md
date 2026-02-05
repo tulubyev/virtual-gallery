@@ -186,7 +186,7 @@ Register a new user
 ```json
 {
   "username": "newuser",
-  "email": "newuser@example.com",
+  "email": "newuser@virtgal.ru",
   "password": "securepassword"
 }
 ```
@@ -196,7 +196,7 @@ Register a new user
 {
   "user_id": 2,
   "username": "newuser",
-  "email": "newuser@example.com",
+  "email": "newuser@virtgal.ru",
   "token": "jwt_token_here"
 }
 ```
@@ -207,7 +207,7 @@ Login a user
 **Request Body:**
 ```json
 {
-  "email": "user@example.com",
+  "email": "user@virtgal.ru",
   "password": "securepassword"
 }
 ```
@@ -217,7 +217,7 @@ Login a user
 {
   "user_id": 1,
   "username": "art_lover",
-  "email": "art@example.com",
+  "email": "art@virtgal.ru",
   "token": "jwt_token_here"
 }
 ```
@@ -230,7 +230,7 @@ Get user profile (requires authentication)
 {
   "user_id": 1,
   "username": "art_lover",
-  "email": "art@example.com",
+  "email": "art@virtgal.ru",
   "preferences": {
     "favorite_styles": ["impressionism", "abstract"]
   }

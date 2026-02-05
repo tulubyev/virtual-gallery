@@ -16,10 +16,10 @@ async function checkAndAddAdminUser() {
     console.log('Проверка наличия администратора в базе данных...');
     const client = await pool.connect();
 
-    // Проверим, существует ли пользователь с email admin@example.com
+    // Проверим, существует ли пользователь с email admin@virtgal.ru
     const result = await client.query(
       'SELECT user_id, email, password_hash FROM users WHERE email = $1',
-      ['admin@example.com']
+      ['admin@virtgal.ru']
     );
 
     if (result.rows.length > 0) {
@@ -35,7 +35,7 @@ async function checkAndAddAdminUser() {
         `INSERT INTO users (username, email, password_hash, role, first_name, last_name) 
          VALUES ($1, $2, $3, $4, $5, $6) 
          RETURNING user_id, username, email, role`,
-        ['admin_user', 'admin@example.com', hashedPassword, 'admin', 'Админ', 'Главный']
+        ['admin_user', 'admin@virtgal.ru', hashedPassword, 'admin', 'Админ', 'Главный']
       );
       
       console.log('Новый администратор создан:', insertResult.rows[0]);
