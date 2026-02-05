@@ -444,8 +444,8 @@
                 
                 if (data.success && data.artworks.length > 0) {
                     uploadHistory.innerHTML = data.artworks.map(artwork => `
-                        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                            <img src="${artwork.image_url}" class="w-12 h-12 object-cover rounded" alt="${artwork.title}">
+                        <div class="artwork-item flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-description="${artwork.description || ''}">
+                            <img src="${artwork.image_url}" class="w-12 h-12 object-cover rounded" alt="${artwork.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22>?</text></svg>'">
                             <div class="flex-1 min-w-0">
                                 <p class="font-medium text-gray-900 truncate">${artwork.title}</p>
                                 <p class="text-sm text-gray-500">${artwork.artist || 'Неизвестный'} ${artwork.year_created ? '• ' + artwork.year_created : ''}</p>
@@ -453,12 +453,48 @@
                             <span class="px-2 py-1 text-xs rounded-full ${artwork.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${artwork.status}</span>
                         </div>
                     `).join('');
+                    
+                    document.querySelectorAll('.artwork-item').forEach(item => {
+                        item.addEventListener('click', () => showArtworkModal(item.dataset));
+                    });
                 } else {
                     uploadHistory.innerHTML = '<p class="text-gray-500 text-center py-8">Загруженные произведения появятся здесь</p>';
                 }
             } catch (error) {
-                uploadHistory.innerHTML = '<p class="text-gray-500 text-center py-8">Загруженные произведения появятся здесь</p>';
+                console.error('Load history error:', error);
+                uploadHistory.innerHTML = '<p class="text-red-500 text-center py-8">Ошибка загрузки истории</p>';
             }
+        }
+        
+        function showArtworkModal(data) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
+                    <div class="flex-1 bg-gray-900 flex items-center justify-center p-4">
+                        <img src="${data.image}" alt="${data.title}" class="max-w-full max-h-[60vh] object-contain rounded-lg">
+                    </div>
+                    <div class="w-full md:w-80 p-6 overflow-y-auto">
+                        <h2 class="text-2xl font-display font-bold mb-2">${data.title}</h2>
+                        <p class="text-lg text-gray-600 mb-4">${data.artist}</p>
+                        ${data.year ? `<p class="text-sm text-gray-500 mb-2"><strong>Год:</strong> ${data.year}</p>` : ''}
+                        ${data.style ? `<p class="text-sm text-gray-500 mb-2"><strong>Стиль:</strong> ${data.style}</p>` : ''}
+                        ${data.country ? `<p class="text-sm text-gray-500 mb-2"><strong>Страна:</strong> ${data.country}</p>` : ''}
+                        ${data.description ? `<p class="text-sm text-gray-700 mt-4">${data.description}</p>` : ''}
+                        <button class="close-modal mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors">
+                            Закрыть
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('close-modal')) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
         }
 
         loadUploadHistory();
