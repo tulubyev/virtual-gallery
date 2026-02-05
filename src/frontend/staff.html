@@ -196,7 +196,24 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Стиль</label>
-                                <input type="text" id="artwork-style" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Импрессионизм">
+                                <select id="artwork-style" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Выберите стиль</option>
+                                    <option value="Реализм">Реализм</option>
+                                    <option value="Импрессионизм">Импрессионизм</option>
+                                    <option value="Постимпрессионизм">Постимпрессионизм</option>
+                                    <option value="Экспрессионизм">Экспрессионизм</option>
+                                    <option value="Абстракционизм">Абстракционизм</option>
+                                    <option value="Сюрреализм">Сюрреализм</option>
+                                    <option value="Кубизм">Кубизм</option>
+                                    <option value="Романтизм">Романтизм</option>
+                                    <option value="Барокко">Барокко</option>
+                                    <option value="Ренессанс">Ренессанс</option>
+                                    <option value="Классицизм">Классицизм</option>
+                                    <option value="Модернизм">Модернизм</option>
+                                    <option value="Поп-арт">Поп-арт</option>
+                                    <option value="Минимализм">Минимализм</option>
+                                    <option value="Другое">Другое</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Страна</label>
@@ -204,7 +221,20 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Эпоха</label>
-                                <input type="text" id="artwork-epoch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="XIX век">
+                                <select id="artwork-epoch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Выберите эпоху</option>
+                                    <option value="Античность">Античность</option>
+                                    <option value="Средневековье">Средневековье</option>
+                                    <option value="Возрождение">Возрождение</option>
+                                    <option value="XVII век">XVII век</option>
+                                    <option value="XVIII век">XVIII век</option>
+                                    <option value="XIX век">XIX век</option>
+                                    <option value="Начало XX века">Начало XX века</option>
+                                    <option value="Середина XX века">Середина XX века</option>
+                                    <option value="Конец XX века">Конец XX века</option>
+                                    <option value="XXI век">XXI век</option>
+                                    <option value="Современность">Современность</option>
+                                </select>
                             </div>
                         </div>
                         
@@ -427,18 +457,34 @@
                 
                 if (data.success && data.artworks.length > 0) {
                     uploadHistory.innerHTML = data.artworks.map(artwork => `
-                        <div class="artwork-item flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-description="${artwork.description || ''}">
+                        <div class="artwork-item flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-epoch="${artwork.epoch || ''}" data-description="${artwork.description || ''}">
                             <img src="${artwork.image_url}" class="w-12 h-12 object-cover rounded" alt="${artwork.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22>?</text></svg>'">
                             <div class="flex-1 min-w-0">
                                 <p class="font-medium text-gray-900 truncate">${artwork.title}</p>
                                 <p class="text-sm text-gray-500">${artwork.artist || 'Неизвестный'} ${artwork.year_created ? '• ' + artwork.year_created : ''}</p>
                             </div>
                             <span class="px-2 py-1 text-xs rounded-full ${artwork.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${artwork.status}</span>
+                            <button class="edit-artwork-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-id="${artwork.id}" title="Редактировать">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     `).join('');
+                    lucide.createIcons();
                     
                     document.querySelectorAll('.artwork-item').forEach(item => {
-                        item.addEventListener('click', () => showArtworkModal(item.dataset));
+                        item.addEventListener('click', (e) => {
+                            if (!e.target.closest('.edit-artwork-btn')) {
+                                showArtworkModal(item.dataset);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.edit-artwork-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const item = btn.closest('.artwork-item');
+                            showArtworkModal(item.dataset, true);
+                        });
                     });
                 } else {
                     uploadHistory.innerHTML = '<p class="text-gray-500 text-center py-8">Загруженные произведения появятся здесь</p>';
@@ -449,7 +495,7 @@
             }
         }
         
-        function showArtworkModal(data) {
+        function showArtworkModal(data, editMode = false) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4';
             modal.innerHTML = `
@@ -457,19 +503,144 @@
                     <div class="flex-1 bg-gray-900 flex items-center justify-center p-4">
                         <img src="${data.image}" alt="${data.title}" class="max-w-full max-h-[60vh] object-contain rounded-lg">
                     </div>
-                    <div class="w-full md:w-80 p-6 overflow-y-auto">
-                        <h2 class="text-2xl font-display font-bold mb-2">${data.title}</h2>
+                    <div class="w-full md:w-96 p-6 overflow-y-auto">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-display font-bold">${data.title}</h2>
+                            <button class="toggle-edit-btn p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Редактировать">
+                                <i data-lucide="pencil" class="w-5 h-5"></i>
+                            </button>
+                        </div>
                         <p class="text-lg text-gray-600 mb-4">${data.artist}</p>
-                        ${data.year ? `<p class="text-sm text-gray-500 mb-2"><strong>Год:</strong> ${data.year}</p>` : ''}
-                        ${data.style ? `<p class="text-sm text-gray-500 mb-2"><strong>Стиль:</strong> ${data.style}</p>` : ''}
-                        ${data.country ? `<p class="text-sm text-gray-500 mb-2"><strong>Страна:</strong> ${data.country}</p>` : ''}
-                        ${data.description ? `<p class="text-sm text-gray-700 mt-4">${data.description}</p>` : ''}
-                        <button class="close-modal mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors">
+                        
+                        <div id="view-mode" class="${editMode ? 'hidden' : ''}">
+                            ${data.year ? `<p class="text-sm text-gray-500 mb-2"><strong>Год:</strong> ${data.year}</p>` : ''}
+                            ${data.style ? `<p class="text-sm text-gray-500 mb-2"><strong>Стиль:</strong> ${data.style}</p>` : ''}
+                            ${data.epoch ? `<p class="text-sm text-gray-500 mb-2"><strong>Эпоха:</strong> ${data.epoch}</p>` : ''}
+                            ${data.country ? `<p class="text-sm text-gray-500 mb-2"><strong>Страна:</strong> ${data.country}</p>` : ''}
+                            ${data.description ? `<div class="mt-4 p-3 bg-gray-50 rounded-lg"><p class="text-sm text-gray-700">${data.description}</p></div>` : ''}
+                        </div>
+                        
+                        <div id="edit-mode" class="${editMode ? '' : 'hidden'}">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Название</label>
+                                    <input type="text" id="edit-title" value="${data.title || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Художник</label>
+                                    <input type="text" id="edit-artist" value="${data.artist || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Год</label>
+                                        <input type="number" id="edit-year" value="${data.year || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Страна</label>
+                                        <input type="text" id="edit-country" value="${data.country || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Стиль</label>
+                                    <select id="edit-style" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Выберите стиль</option>
+                                        <option value="Реализм" ${data.style === 'Реализм' ? 'selected' : ''}>Реализм</option>
+                                        <option value="Импрессионизм" ${data.style === 'Импрессионизм' ? 'selected' : ''}>Импрессионизм</option>
+                                        <option value="Постимпрессионизм" ${data.style === 'Постимпрессионизм' ? 'selected' : ''}>Постимпрессионизм</option>
+                                        <option value="Экспрессионизм" ${data.style === 'Экспрессионизм' ? 'selected' : ''}>Экспрессионизм</option>
+                                        <option value="Абстракционизм" ${data.style === 'Абстракционизм' ? 'selected' : ''}>Абстракционизм</option>
+                                        <option value="Сюрреализм" ${data.style === 'Сюрреализм' ? 'selected' : ''}>Сюрреализм</option>
+                                        <option value="Кубизм" ${data.style === 'Кубизм' ? 'selected' : ''}>Кубизм</option>
+                                        <option value="Романтизм" ${data.style === 'Романтизм' ? 'selected' : ''}>Романтизм</option>
+                                        <option value="Барокко" ${data.style === 'Барокко' ? 'selected' : ''}>Барокко</option>
+                                        <option value="Ренессанс" ${data.style === 'Ренессанс' ? 'selected' : ''}>Ренессанс</option>
+                                        <option value="Классицизм" ${data.style === 'Классицизм' ? 'selected' : ''}>Классицизм</option>
+                                        <option value="Модернизм" ${data.style === 'Модернизм' ? 'selected' : ''}>Модернизм</option>
+                                        <option value="Другое" ${data.style === 'Другое' ? 'selected' : ''}>Другое</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Эпоха</label>
+                                    <select id="edit-epoch" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Выберите эпоху</option>
+                                        <option value="Античность" ${data.epoch === 'Античность' ? 'selected' : ''}>Античность</option>
+                                        <option value="Средневековье" ${data.epoch === 'Средневековье' ? 'selected' : ''}>Средневековье</option>
+                                        <option value="Возрождение" ${data.epoch === 'Возрождение' ? 'selected' : ''}>Возрождение</option>
+                                        <option value="XVII век" ${data.epoch === 'XVII век' ? 'selected' : ''}>XVII век</option>
+                                        <option value="XVIII век" ${data.epoch === 'XVIII век' ? 'selected' : ''}>XVIII век</option>
+                                        <option value="XIX век" ${data.epoch === 'XIX век' ? 'selected' : ''}>XIX век</option>
+                                        <option value="Начало XX века" ${data.epoch === 'Начало XX века' ? 'selected' : ''}>Начало XX века</option>
+                                        <option value="Середина XX века" ${data.epoch === 'Середина XX века' ? 'selected' : ''}>Середина XX века</option>
+                                        <option value="Конец XX века" ${data.epoch === 'Конец XX века' ? 'selected' : ''}>Конец XX века</option>
+                                        <option value="XXI век" ${data.epoch === 'XXI век' ? 'selected' : ''}>XXI век</option>
+                                        <option value="Современность" ${data.epoch === 'Современность' ? 'selected' : ''}>Современность</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Описание</label>
+                                    <textarea id="edit-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">${data.description || ''}</textarea>
+                                </div>
+                            </div>
+                            <button id="save-edit-btn" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                Сохранить изменения
+                            </button>
+                        </div>
+                        
+                        <button class="close-modal mt-4 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors">
                             Закрыть
                         </button>
                     </div>
                 </div>
             `;
+            
+            lucide.createIcons();
+            
+            const toggleEditBtn = modal.querySelector('.toggle-edit-btn');
+            const viewMode = modal.querySelector('#view-mode');
+            const editModeDiv = modal.querySelector('#edit-mode');
+            
+            toggleEditBtn.addEventListener('click', () => {
+                viewMode.classList.toggle('hidden');
+                editModeDiv.classList.toggle('hidden');
+            });
+            
+            const saveEditBtn = modal.querySelector('#save-edit-btn');
+            saveEditBtn.addEventListener('click', async () => {
+                saveEditBtn.disabled = true;
+                saveEditBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Сохраняем...';
+                
+                try {
+                    const updates = {
+                        title: modal.querySelector('#edit-title').value,
+                        artist: modal.querySelector('#edit-artist').value,
+                        year: modal.querySelector('#edit-year').value,
+                        country: modal.querySelector('#edit-country').value,
+                        style: modal.querySelector('#edit-style').value,
+                        period: modal.querySelector('#edit-epoch').value,
+                        description: modal.querySelector('#edit-description').value
+                    };
+                    
+                    const response = await fetch(`/api/artworks/${data.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updates)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to save');
+                    
+                    alert('Изменения сохранены!');
+                    modal.remove();
+                    loadUploadHistory();
+                } catch (error) {
+                    console.error('Save error:', error);
+                    alert('Ошибка сохранения: ' + error.message);
+                } finally {
+                    saveEditBtn.disabled = false;
+                    saveEditBtn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Сохранить изменения';
+                    lucide.createIcons();
+                }
+            });
             
             modal.addEventListener('click', (e) => {
                 if (e.target === modal || e.target.classList.contains('close-modal')) {
@@ -478,6 +649,7 @@
             });
             
             document.body.appendChild(modal);
+            lucide.createIcons();
         }
 
         loadUploadHistory();
@@ -699,18 +871,34 @@
                 
                 if (data.success && data.artworks.length > 0) {
                     historyList.innerHTML = data.artworks.map(artwork => `
-                        <div class="artwork-history-item flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer transition-colors" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-description="${artwork.description || ''}">
+                        <div class="artwork-history-item flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer transition-colors" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-epoch="${artwork.epoch || ''}" data-description="${artwork.description || ''}">
                             <img src="${artwork.image_url}" class="w-16 h-16 rounded-lg object-cover" alt="${artwork.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22>?</text></svg>'">
                             <div class="flex-1">
                                 <p class="font-medium text-gray-900">${artwork.title}</p>
                                 <p class="text-sm text-gray-500">${artwork.style || 'Без стиля'}${artwork.epoch ? ', ' + artwork.epoch : ''}</p>
                             </div>
                             <span class="px-3 py-1 rounded-full text-sm ${artwork.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">${artwork.status === 'active' ? 'Активно' : artwork.status}</span>
+                            <button class="edit-history-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Редактировать">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     `).join('');
+                    lucide.createIcons();
                     
                     document.querySelectorAll('.artwork-history-item').forEach(item => {
-                        item.addEventListener('click', () => showArtworkModal(item.dataset));
+                        item.addEventListener('click', (e) => {
+                            if (!e.target.closest('.edit-history-btn')) {
+                                showArtworkModal(item.dataset);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.edit-history-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const item = btn.closest('.artwork-history-item');
+                            showArtworkModal(item.dataset, true);
+                        });
                     });
                 } else {
                     historyList.innerHTML = '<p class="text-gray-500 text-center py-8">Нет загруженных произведений</p>';
