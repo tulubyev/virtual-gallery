@@ -701,18 +701,47 @@
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Front Image -->
+                            <!-- Front Image with Zoom/Pan -->
                             <div>
-                                <p class="text-sm font-medium text-gray-500 mb-2">Лицевая сторона</p>
-                                <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden">
-                                    <img id="modalFrontImage" src="" alt="Front" class="w-full h-full object-contain">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-medium text-gray-500">Лицевая сторона</p>
+                                    <div class="flex items-center gap-1">
+                                        <button id="zoomOutFront" class="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="Уменьшить">
+                                            <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                                        </button>
+                                        <span id="zoomLevelFront" class="text-xs text-gray-500 min-w-[40px] text-center">100%</span>
+                                        <button id="zoomInFront" class="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="Увеличить">
+                                            <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                                        </button>
+                                        <button id="resetZoomFront" class="p-1.5 hover:bg-gray-100 rounded text-gray-600 ml-1" title="Сбросить">
+                                            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </div>
+                                <div id="frontImageContainer" class="aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-grab relative select-none" style="touch-action: none;">
+                                    <img id="modalFrontImage" src="" alt="Front" class="w-full h-full object-contain pointer-events-none" style="transform-origin: center center;">
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1 text-center">Колёсико мыши: увеличение | Перетаскивание: перемещение</p>
                             </div>
-                            <!-- Back Image -->
+                            <!-- Back Image with Zoom/Pan -->
                             <div>
-                                <p class="text-sm font-medium text-gray-500 mb-2">Обратная сторона</p>
-                                <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden">
-                                    <img id="modalBackImage" src="" alt="Back" class="w-full h-full object-contain">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-sm font-medium text-gray-500">Обратная сторона</p>
+                                    <div class="flex items-center gap-1">
+                                        <button id="zoomOutBack" class="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="Уменьшить">
+                                            <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                                        </button>
+                                        <span id="zoomLevelBack" class="text-xs text-gray-500 min-w-[40px] text-center">100%</span>
+                                        <button id="zoomInBack" class="p-1.5 hover:bg-gray-100 rounded text-gray-600" title="Увеличить">
+                                            <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                                        </button>
+                                        <button id="resetZoomBack" class="p-1.5 hover:bg-gray-100 rounded text-gray-600 ml-1" title="Сбросить">
+                                            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="backImageContainer" class="aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-grab relative select-none" style="touch-action: none;">
+                                    <img id="modalBackImage" src="" alt="Back" class="w-full h-full object-contain pointer-events-none" style="transform-origin: center center;">
                                 </div>
                             </div>
                         </div>
@@ -1038,6 +1067,141 @@
             return labels[status] || status;
         }
 
+        // Image Zoom/Pan functionality
+        const imageViewers = {
+            front: { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 },
+            back: { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 }
+        };
+        const MIN_SCALE = 0.5;
+        const MAX_SCALE = 5;
+        const SCALE_STEP = 0.25;
+
+        function updateImageTransform(type) {
+            const viewer = imageViewers[type];
+            const img = document.getElementById(type === 'front' ? 'modalFrontImage' : 'modalBackImage');
+            const levelEl = document.getElementById(type === 'front' ? 'zoomLevelFront' : 'zoomLevelBack');
+            
+            if (img) {
+                img.style.transform = `translate(${viewer.panX}px, ${viewer.panY}px) scale(${viewer.scale})`;
+            }
+            if (levelEl) {
+                levelEl.textContent = Math.round(viewer.scale * 100) + '%';
+            }
+        }
+
+        function zoomImage(type, delta) {
+            const viewer = imageViewers[type];
+            const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, viewer.scale + delta));
+            
+            if (newScale !== viewer.scale) {
+                const scaleRatio = newScale / viewer.scale;
+                viewer.panX *= scaleRatio;
+                viewer.panY *= scaleRatio;
+                viewer.scale = newScale;
+                updateImageTransform(type);
+            }
+        }
+
+        function resetImageView(type) {
+            imageViewers[type] = { scale: 1, panX: 0, panY: 0, isDragging: false, startX: 0, startY: 0 };
+            updateImageTransform(type);
+        }
+
+        function setupImageViewer(type) {
+            const container = document.getElementById(type === 'front' ? 'frontImageContainer' : 'backImageContainer');
+            if (!container) return;
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+                zoomImage(type, delta);
+            }, { passive: false });
+
+            container.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                const viewer = imageViewers[type];
+                viewer.isDragging = true;
+                viewer.startX = e.clientX - viewer.panX;
+                viewer.startY = e.clientY - viewer.panY;
+                container.style.cursor = 'grabbing';
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                const viewer = imageViewers[type];
+                if (!viewer.isDragging) return;
+                viewer.panX = e.clientX - viewer.startX;
+                viewer.panY = e.clientY - viewer.startY;
+                updateImageTransform(type);
+            });
+
+            container.addEventListener('mouseup', () => {
+                imageViewers[type].isDragging = false;
+                container.style.cursor = 'grab';
+            });
+
+            container.addEventListener('mouseleave', () => {
+                imageViewers[type].isDragging = false;
+                container.style.cursor = 'grab';
+            });
+
+            // Touch support
+            let lastTouchDistance = 0;
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    const viewer = imageViewers[type];
+                    viewer.isDragging = true;
+                    viewer.startX = e.touches[0].clientX - viewer.panX;
+                    viewer.startY = e.touches[0].clientY - viewer.panY;
+                } else if (e.touches.length === 2) {
+                    lastTouchDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const viewer = imageViewers[type];
+                if (e.touches.length === 1 && viewer.isDragging) {
+                    viewer.panX = e.touches[0].clientX - viewer.startX;
+                    viewer.panY = e.touches[0].clientY - viewer.startY;
+                    updateImageTransform(type);
+                } else if (e.touches.length === 2) {
+                    const newDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const delta = (newDistance - lastTouchDistance) * 0.01;
+                    zoomImage(type, delta);
+                    lastTouchDistance = newDistance;
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchend', () => {
+                imageViewers[type].isDragging = false;
+            });
+        }
+
+        // Initialize zoom controls
+        document.addEventListener('DOMContentLoaded', () => {
+            setupImageViewer('front');
+            setupImageViewer('back');
+
+            document.getElementById('zoomInFront')?.addEventListener('click', () => zoomImage('front', SCALE_STEP));
+            document.getElementById('zoomOutFront')?.addEventListener('click', () => zoomImage('front', -SCALE_STEP));
+            document.getElementById('resetZoomFront')?.addEventListener('click', () => resetImageView('front'));
+
+            document.getElementById('zoomInBack')?.addEventListener('click', () => zoomImage('back', SCALE_STEP));
+            document.getElementById('zoomOutBack')?.addEventListener('click', () => zoomImage('back', -SCALE_STEP));
+            document.getElementById('resetZoomBack')?.addEventListener('click', () => resetImageView('back'));
+        });
+
+        function resetAllImageViewers() {
+            resetImageView('front');
+            resetImageView('back');
+        }
+
         function updateStats() {
             const counts = {
                 pending_review: 0,
@@ -1151,6 +1315,7 @@
         function closeModal() {
             document.getElementById('artworkModal').classList.add('hidden');
             currentArtwork = null;
+            resetAllImageViewers();
         }
 
         async function approveArtwork() {
