@@ -110,6 +110,17 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-05**: Enhanced curator dashboard "Наполнение" section
+  - Added interactive image zoom/pan in artwork modal (mouse wheel, +/− buttons, drag to pan)
+  - Support for touch screens (pinch-to-zoom, touch drag)
+  - Zoom range: 50% to 500%, hint text for controls
+  - Auto-reset zoom on modal close
+  - Added year, country, description fields to metadata form
+  - Style and epoch now use dropdown selects
+  - Status badge shows current artwork status with color coding
+  - Fixed CORS issue for watermark protection (new server-side image fetch)
+  - New API endpoint: `POST /api/watermark/apply` - applies protection by image URL
+
 - **2026-02-05**: Implemented copyright protection system (watermarks)
   - Visible watermark: text overlay with configurable opacity and position
   - Tiled watermark: diagonal repeating pattern across image
