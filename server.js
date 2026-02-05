@@ -509,6 +509,78 @@ app.post('/api/gallery/config', (req, res) => {
   }
 });
 
+// Collections API
+app.get('/api/collections', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT c.*, 
+        (SELECT COUNT(*) FROM artworks WHERE collection LIKE '%' || c.slug || '%') as artwork_count
+      FROM collections c 
+      ORDER BY c.name
+    `);
+    res.json({ collections: result.rows });
+  } catch (error) {
+    console.error('Get collections error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/collections/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const collectionResult = await pool.query('SELECT * FROM collections WHERE slug = $1', [slug]);
+    if (collectionResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Collection not found' });
+    }
+    
+    const artworksResult = await pool.query(`
+      SELECT * FROM artworks 
+      WHERE collection LIKE '%' || $1 || '%' 
+      ORDER BY created_at DESC
+    `, [slug]);
+    
+    res.json({ 
+      collection: collectionResult.rows[0],
+      artworks: artworksResult.rows
+    });
+  } catch (error) {
+    console.error('Get collection error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/collections', async (req, res) => {
+  try {
+    const { name, description, epoch, country, cover_gradient } = req.body;
+    const slug = name.toLowerCase()
+      .replace(/[а-яё]/g, c => ({ 'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'j','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya' }[c] || c))
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    
+    const result = await pool.query(
+      `INSERT INTO collections (name, slug, description, epoch, country, cover_gradient) 
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [name, slug, description || '', epoch || '', country || '', cover_gradient || 'from-purple-400 to-pink-500']
+    );
+    
+    res.json({ success: true, collection: result.rows[0] });
+  } catch (error) {
+    console.error('Create collection error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/collections/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM collections WHERE id = $1', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete collection error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/gallery/config', (req, res) => {
   if (galleryConfiguration) {
     res.json(galleryConfiguration);

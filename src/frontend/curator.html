@@ -211,58 +211,73 @@
 
                 <!-- Collections Grid -->
                 <div id="collectionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="impressionism">
-                        <div class="h-40 bg-gradient-to-br from-purple-400 to-pink-500 relative">
-                            <span class="absolute top-3 right-3 bg-white/90 text-purple-700 text-xs px-2 py-1 rounded-full">Эпоха: XIX век</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Импрессионизм</h3>
-                            <p class="text-gray-600 text-sm mb-3">Коллекция работ импрессионистов XIX века</p>
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">Франция</span>
-                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Живопись</span>
-                                <span class="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded">свет</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500">45 экспонатов</span>
-                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
-                            </div>
-                        </div>
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                        <p>Загрузка коллекций...</p>
                     </div>
-                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="modern">
-                        <div class="h-40 bg-gradient-to-br from-blue-400 to-cyan-500 relative">
-                            <span class="absolute top-3 right-3 bg-white/90 text-blue-700 text-xs px-2 py-1 rounded-full">Эпоха: XX-XXI век</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Современное искусство</h3>
-                            <p class="text-gray-600 text-sm mb-3">Работы современных художников</p>
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">Международная</span>
-                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Инсталляции</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500">78 экспонатов</span>
-                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
+                </div>
+
+                <!-- Collection Detail View -->
+                <div id="collectionDetailView" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <button id="backToCollections" class="text-gray-500 hover:text-gray-700">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            </button>
+                            <div>
+                                <h3 id="collectionDetailName" class="text-xl font-semibold text-gray-900"></h3>
+                                <p id="collectionDetailDescription" class="text-sm text-gray-600"></p>
                             </div>
                         </div>
+                        <span id="collectionDetailCount" class="text-sm text-gray-500"></span>
                     </div>
-                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="renaissance">
-                        <div class="h-40 bg-gradient-to-br from-amber-400 to-orange-500 relative">
-                            <span class="absolute top-3 right-3 bg-white/90 text-amber-700 text-xs px-2 py-1 rounded-full">Эпоха: XIV-XVI век</span>
+                    <div id="collectionDetailArtworks" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                </div>
+
+                <!-- New Collection Modal -->
+                <div id="newCollectionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Новая коллекция</h3>
+                            <button id="closeNewCollectionModal" class="text-gray-400 hover:text-gray-600">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
                         </div>
-                        <div class="p-6">
-                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Ренессанс</h3>
-                            <p class="text-gray-600 text-sm mb-3">Шедевры эпохи Возрождения</p>
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">Италия</span>
-                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Живопись</span>
-                                <span class="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded">религия</span>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Название *</label>
+                                <input type="text" id="newCollectionName" placeholder="Например: Барокко" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500">32 экспоната</span>
-                                <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+                                <textarea id="newCollectionDescription" rows="2" placeholder="Краткое описание коллекции..." class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Эпоха</label>
+                                    <input type="text" id="newCollectionEpoch" placeholder="XVII век" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Страна</label>
+                                    <input type="text" id="newCollectionCountry" placeholder="Италия" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Цвет обложки</label>
+                                <select id="newCollectionGradient" class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="from-purple-400 to-pink-500">Фиолетово-розовый</option>
+                                    <option value="from-blue-400 to-cyan-500">Сине-голубой</option>
+                                    <option value="from-amber-400 to-orange-500">Оранжевый</option>
+                                    <option value="from-green-400 to-emerald-500">Зелёный</option>
+                                    <option value="from-red-400 to-rose-500">Красный</option>
+                                    <option value="from-indigo-400 to-violet-500">Индиго</option>
+                                    <option value="from-gray-400 to-slate-500">Серый</option>
+                                </select>
                             </div>
                         </div>
+                        <button id="saveNewCollection" class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium">
+                            Создать коллекцию
+                        </button>
                     </div>
                 </div>
 
@@ -1818,8 +1833,209 @@
         });
 
         document.querySelector('[data-tab="collections"]')?.addEventListener('click', () => {
-            setTimeout(() => loadCollectionArtworks(document.getElementById('collectionArtworkStatus')?.value || 'approved'), 100);
+            setTimeout(() => {
+                loadCollections();
+                loadCollectionArtworks(document.getElementById('collectionArtworkStatus')?.value || 'approved');
+            }, 100);
         });
+
+        // Collections Management
+        let allCollections = [];
+
+        async function loadCollections() {
+            const grid = document.getElementById('collectionsGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-8 text-gray-500">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                    <p>Загрузка коллекций...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const response = await fetch('/api/collections');
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const data = await response.json();
+                allCollections = data.collections || [];
+                
+                // Update collections list in assign modal
+                updateCollectionsList();
+                
+                if (allCollections.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            <i data-lucide="folder" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                            <p>Нет коллекций</p>
+                            <p class="text-xs mt-1">Нажмите "+ Новая коллекция" для создания</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                grid.innerHTML = allCollections.map(col => `
+                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="${col.slug}" onclick="openCollection('${col.slug}')">
+                        <div class="h-40 bg-gradient-to-br ${col.cover_gradient || 'from-purple-400 to-pink-500'} relative">
+                            ${col.epoch ? `<span class="absolute top-3 right-3 bg-white/90 text-purple-700 text-xs px-2 py-1 rounded-full">Эпоха: ${col.epoch}</span>` : ''}
+                            <button onclick="event.stopPropagation(); deleteCollection(${col.id}, '${col.name}')" class="absolute top-3 left-3 bg-white/90 text-red-500 hover:text-red-700 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">${col.name}</h3>
+                            <p class="text-gray-600 text-sm mb-3">${col.description || 'Описание отсутствует'}</p>
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${col.country ? `<span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">${col.country}</span>` : ''}
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">${col.artwork_count || 0} экспонатов</span>
+                                <span class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Load collections error:', error);
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-red-500">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>Ошибка загрузки коллекций</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function updateCollectionsList() {
+            const list = document.getElementById('collectionsList');
+            if (!list || allCollections.length === 0) return;
+            
+            list.innerHTML = allCollections.map(col => `
+                <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer">
+                    <input type="checkbox" name="collection" value="${col.slug}" class="w-4 h-4 text-purple-600 rounded">
+                    <span class="text-sm font-medium">${col.name}</span>
+                </label>
+            `).join('');
+        }
+
+        async function openCollection(slug) {
+            try {
+                const response = await fetch(`/api/collections/${slug}`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const data = await response.json();
+                const collection = data.collection;
+                const artworks = data.artworks || [];
+                
+                document.getElementById('collectionsGrid').classList.add('hidden');
+                document.getElementById('collectionDetailView').classList.remove('hidden');
+                
+                document.getElementById('collectionDetailName').textContent = collection.name;
+                document.getElementById('collectionDetailDescription').textContent = collection.description || '';
+                document.getElementById('collectionDetailCount').textContent = `${artworks.length} произведений`;
+                
+                const grid = document.getElementById('collectionDetailArtworks');
+                if (artworks.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            <i data-lucide="image-off" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                            <p>В коллекции нет произведений</p>
+                            <p class="text-xs mt-1">Добавьте произведения из секции ниже</p>
+                        </div>
+                    `;
+                } else {
+                    grid.innerHTML = artworks.map(artwork => `
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                            <div class="h-32 bg-gray-200">
+                                ${artwork.image_url ? 
+                                    `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover">` :
+                                    `<div class="w-full h-full bg-gradient-to-br from-purple-200 to-pink-200"></div>`
+                                }
+                            </div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 text-sm truncate">${artwork.title || 'Без названия'}</h4>
+                                <p class="text-xs text-gray-500">${artwork.artist || 'Неизвестен'}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Open collection error:', error);
+                alert('Ошибка при открытии коллекции');
+            }
+        }
+
+        document.getElementById('backToCollections')?.addEventListener('click', () => {
+            document.getElementById('collectionDetailView').classList.add('hidden');
+            document.getElementById('collectionsGrid').classList.remove('hidden');
+        });
+
+        // New Collection Modal
+        document.getElementById('newCollectionBtn')?.addEventListener('click', () => {
+            document.getElementById('newCollectionModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeNewCollectionModal')?.addEventListener('click', () => {
+            document.getElementById('newCollectionModal').classList.add('hidden');
+        });
+
+        document.getElementById('newCollectionModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'newCollectionModal') {
+                document.getElementById('newCollectionModal').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('saveNewCollection')?.addEventListener('click', async () => {
+            const name = document.getElementById('newCollectionName').value.trim();
+            if (!name) {
+                alert('Введите название коллекции');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/collections', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        description: document.getElementById('newCollectionDescription').value.trim(),
+                        epoch: document.getElementById('newCollectionEpoch').value.trim(),
+                        country: document.getElementById('newCollectionCountry').value.trim(),
+                        cover_gradient: document.getElementById('newCollectionGradient').value
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create');
+                
+                document.getElementById('newCollectionModal').classList.add('hidden');
+                document.getElementById('newCollectionName').value = '';
+                document.getElementById('newCollectionDescription').value = '';
+                document.getElementById('newCollectionEpoch').value = '';
+                document.getElementById('newCollectionCountry').value = '';
+                
+                loadCollections();
+                alert('Коллекция создана успешно!');
+            } catch (error) {
+                console.error('Create collection error:', error);
+                alert('Ошибка при создании коллекции');
+            }
+        });
+
+        async function deleteCollection(id, name) {
+            if (!confirm(`Удалить коллекцию "${name}"?`)) return;
+            
+            try {
+                const response = await fetch(`/api/collections/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete');
+                loadCollections();
+            } catch (error) {
+                console.error('Delete collection error:', error);
+                alert('Ошибка при удалении коллекции');
+            }
+        }
 
         // Gallery Builder Logic
         let galleryConfig = {
