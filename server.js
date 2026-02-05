@@ -12,15 +12,15 @@ const watermarkService = new WatermarkService();
 const PORT = 5000;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: process.env.DB_STRING || process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY,
-    secretAccessKey: process.env.S3_SECRET_KEY
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY
   },
   region: process.env.S3_REGION || 'us-east-1',
   forcePathStyle: true
@@ -189,10 +189,11 @@ app.get('/api/infra/status', async (req, res) => {
   }
 
   const startDb = Date.now();
-  if (process.env.DATABASE_URL) {
+  const dbConnString = process.env.DB_STRING || process.env.DATABASE_URL;
+  if (dbConnString) {
     try {
       const { Pool } = require('pg');
-      const pool = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5000 });
+      const pool = new Pool({ connectionString: dbConnString, connectionTimeoutMillis: 5000, ssl: { rejectUnauthorized: false } });
       await pool.query('SELECT 1');
       await pool.end();
       results.services.database = { status: 'ok', latency: Date.now() - startDb };
