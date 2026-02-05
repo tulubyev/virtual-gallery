@@ -107,3 +107,42 @@ The system uses JWT tokens for API authentication and implements role-based acce
 - `qdrant-client`: Vector database client.
 - `sentence-transformers`: Embedding generation.
 - `PyPDF2`, `pytesseract`: PDF and OCR processing.
+
+## Recent Changes
+
+- **2026-02-05**: Enhanced artwork modal in 3D gallery
+  - Added interactive image viewer with zoom (mouse wheel, +/− buttons) and pan (drag to move)
+  - Added action buttons: Избранное, Аукцион, Вопрос (ask moderator)
+  - Image auto-centers and fits container on load
+  - Reset button to restore original view
+  
+- **2026-02-05**: Reorganized curator dashboard menu
+  - New menu order: Главная → Галерея → Коллекции → Наполнение → AI-курирование
+  - Removed separate Экспонаты and Выставки sections
+  - Merged artworks management into Коллекции with category filters (теги, виды, авторы, страны, эпохи)
+  - Renamed Оцифрованные → Наполнение
+  
+- **2026-02-05**: Fixed overlapping UI controls on gallery-3d page
+  - Room selection buttons centered at bottom
+  - Control hints moved to bottom-left corner
+  
+- **2026-02-05**: Updated all email addresses to virtgal.ru domain
+  - admin@virtgal.ru, curator@virtgal.ru, staff@virtgal.ru, etc.
+
+- **2026-02-05**: Added AI-powered slot calculation for gallery rooms
+  - "Рассчитать с ИИ" button calculates optimal number of artwork slots
+  - Uses room dimensions to recommend slot count and wall distribution
+  - API endpoint: `POST /api/ai/calculate-slots`
+
+- **2026-02-04**: Added Gallery Builder to Curator Dashboard
+  - "Галерея" section for managing 3D gallery spaces
+  - Room management: create, edit, delete, reorder rooms
+  - Room settings: theme, dimensions, wall color, lighting
+  - Visual layout editor with artwork slots
+  - API endpoints: `POST/GET /api/gallery/config`
+
+- **2026-02-04**: Implemented 3D Gallery with Procedural Generation
+  - `/gallery-3d` route with immersive 3D experience
+  - 5 themed rooms with TextureManager (LRU cache) and ArtworkLODManager
+  - RoomNavigator with smooth camera transitions
+  - Interactive artwork slots with click-to-view details
