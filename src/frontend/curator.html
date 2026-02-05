@@ -1451,42 +1451,39 @@
             btn.disabled = true;
             
             try {
-                const imageBlob = await fetchImageAsBlob(currentArtwork.front_url);
-                const formData = new FormData();
-                formData.append('image', imageBlob, 'artwork.png');
-                formData.append('artworkId', currentArtwork.id);
-                formData.append('owner', 'VirtGal');
-                formData.append('title', currentArtwork.title || '');
-                formData.append('artist', currentArtwork.artist || '');
+                const imageUrl = currentArtwork.front_url || currentArtwork.image_url;
+                if (!imageUrl) throw new Error('No image URL available');
                 
-                let endpoint;
+                let protectionType;
                 switch(type) {
-                    case 'VisibleWatermark': endpoint = '/api/watermark/visible'; break;
-                    case 'InvisibleWatermark': endpoint = '/api/watermark/invisible'; break;
-                    case 'Steganography': endpoint = '/api/watermark/steganography'; break;
-                    case 'FullProtection': endpoint = '/api/watermark/protect'; break;
+                    case 'VisibleWatermark': protectionType = 'visible'; break;
+                    case 'InvisibleWatermark': protectionType = 'invisible'; break;
+                    case 'Steganography': protectionType = 'steganography'; break;
+                    case 'FullProtection': protectionType = 'full'; break;
                 }
                 
-                const response = await fetch(endpoint, {
+                const response = await fetch('/api/watermark/apply', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageUrl,
+                        artworkId: currentArtwork.id,
+                        type: protectionType,
+                        owner: 'VirtGal',
+                        title: currentArtwork.title || '',
+                        artist: currentArtwork.artist || ''
+                    })
                 });
                 
                 if (!response.ok) throw new Error('Failed to apply protection');
                 
-                const protectedBlob = await response.blob();
-                const protectedUrl = URL.createObjectURL(protectedBlob);
+                const result = await response.json();
+                if (!result.success) throw new Error(result.error || 'Unknown error');
                 
-                document.getElementById('modalArtworkImage').src = protectedUrl;
-                
-                const metadata = response.headers.get('X-Protection-Metadata') || response.headers.get('X-Steg-Metadata');
-                if (metadata) {
-                    const data = JSON.parse(metadata);
-                    document.getElementById('modalVerificationHash').textContent = data.hash || data.id || '-';
-                }
+                document.getElementById('modalFrontImage').src = result.image;
                 
                 updateProtectionStatus(type);
-                alert('Защита применена успешно!');
+                alert('Защита применена успешно! Изображение обновлено.');
             } catch (error) {
                 console.error('Protection error:', error);
                 alert('Ошибка при применении защиты: ' + error.message);

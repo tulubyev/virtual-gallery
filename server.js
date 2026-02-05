@@ -858,6 +858,71 @@ app.get('/api/admin/uploads-info', async (req, res) => {
   }
 });
 
+async function fetchImageBuffer(imageUrl) {
+  const https = require('https');
+  const http = require('http');
+  const protocol = imageUrl.startsWith('https') ? https : http;
+  
+  return new Promise((resolve, reject) => {
+    protocol.get(imageUrl, (response) => {
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        fetchImageBuffer(response.headers.location).then(resolve).catch(reject);
+        return;
+      }
+      const chunks = [];
+      response.on('data', chunk => chunks.push(chunk));
+      response.on('end', () => resolve(Buffer.concat(chunks)));
+      response.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+app.post('/api/watermark/apply', async (req, res) => {
+  try {
+    const { imageUrl, artworkId, type, text, opacity, position, owner, title, artist } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ success: false, error: 'No image URL provided' });
+    }
+    
+    const imageBuffer = await fetchImageBuffer(imageUrl);
+    let result;
+    let metadata = { artworkId, owner: owner || 'VirtGal', title, artist };
+    
+    switch(type) {
+      case 'visible':
+        result = await watermarkService.applyVisibleWatermark(imageBuffer, {
+          text: text || 'VirtGal.ru',
+          opacity: parseFloat(opacity) || 0.3,
+          position: position || 'bottom-right'
+        });
+        break;
+      case 'invisible':
+        result = await watermarkService.applyInvisibleWatermark(imageBuffer, metadata);
+        break;
+      case 'steganography':
+        result = await watermarkService.applySteganography(imageBuffer, metadata);
+        break;
+      case 'full':
+        result = await watermarkService.applyFullProtection(imageBuffer, metadata);
+        break;
+      default:
+        return res.status(400).json({ success: false, error: 'Invalid protection type' });
+    }
+    
+    const base64Image = result.toString('base64');
+    res.json({ 
+      success: true, 
+      image: `data:image/png;base64,${base64Image}`,
+      type,
+      artworkId
+    });
+  } catch (error) {
+    console.error('Watermark apply error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.post('/api/watermark/visible', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
