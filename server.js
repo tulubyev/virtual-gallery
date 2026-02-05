@@ -726,6 +726,9 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
       imageUrl = '/uploads/' + req.file.filename;
     }
     
+    console.log('DB Connection:', process.env.DB_STRING ? 'beget.com' : 'Replit');
+    console.log('Inserting artwork:', { title, artist, year, style, country, epoch });
+    
     const result = await pool.query(
       `INSERT INTO artworks (title, artist, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active')
