@@ -879,7 +879,7 @@ async function fetchImageBuffer(imageUrl) {
 
 app.post('/api/watermark/apply', async (req, res) => {
   try {
-    const { imageUrl, artworkId, type, text, opacity, position, owner, title, artist } = req.body;
+    const { imageUrl, artworkId, type, text, opacity, position, owner, title, artist, metadata: extraMetadata } = req.body;
     
     if (!imageUrl) {
       return res.status(400).json({ success: false, error: 'No image URL provided' });
@@ -887,7 +887,13 @@ app.post('/api/watermark/apply', async (req, res) => {
     
     const imageBuffer = await fetchImageBuffer(imageUrl);
     let result;
-    let metadata = { artworkId, owner: owner || 'VirtGal', title, artist };
+    let protectionMetadata = { 
+      artworkId, 
+      owner: owner || 'VirtGal.ru', 
+      title, 
+      artist,
+      extra: extraMetadata || ''
+    };
     
     switch(type) {
       case 'visible':
@@ -898,13 +904,17 @@ app.post('/api/watermark/apply', async (req, res) => {
         });
         break;
       case 'invisible':
-        result = await watermarkService.applyInvisibleWatermark(imageBuffer, metadata);
+        result = await watermarkService.applyInvisibleWatermark(imageBuffer, protectionMetadata);
         break;
       case 'steganography':
-        result = await watermarkService.applySteganography(imageBuffer, metadata);
+        result = await watermarkService.applySteganography(imageBuffer, protectionMetadata);
         break;
       case 'full':
-        result = await watermarkService.applyFullProtection(imageBuffer, metadata);
+        result = await watermarkService.applyFullProtection(imageBuffer, protectionMetadata, {
+          text: text || 'VirtGal.ru',
+          opacity: parseFloat(opacity) || 0.3,
+          position: position || 'bottom-right'
+        });
         break;
       default:
         return res.status(400).json({ success: false, error: 'Invalid protection type' });
@@ -915,7 +925,8 @@ app.post('/api/watermark/apply', async (req, res) => {
       success: true, 
       image: `data:image/png;base64,${base64Image}`,
       type,
-      artworkId
+      artworkId,
+      appliedAt: new Date().toISOString()
     });
   } catch (error) {
     console.error('Watermark apply error:', error);

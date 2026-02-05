@@ -837,7 +837,9 @@
                                 <i data-lucide="shield-check" class="w-4 h-4"></i>
                                 Защита авторских прав
                             </h4>
-                            <div class="flex flex-wrap gap-3 text-sm mb-3">
+                            
+                            <!-- Protection Status -->
+                            <div class="flex flex-wrap gap-3 text-sm mb-4">
                                 <div id="visibleWatermarkStatus" class="flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-gray-300"></span>
                                     Видимый знак
@@ -851,7 +853,43 @@
                                     Стеганография
                                 </div>
                             </div>
-                            <div class="flex flex-wrap gap-2 mb-3">
+                            
+                            <!-- Editable Protection Data -->
+                            <div class="bg-white rounded-lg p-3 mb-4 border border-gray-200">
+                                <p class="text-xs font-medium text-gray-600 mb-2">Данные для защиты (редактируемые):</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Владелец</label>
+                                        <input type="text" id="protectionOwner" value="VirtGal.ru" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Текст водяного знака</label>
+                                        <input type="text" id="protectionText" value="VirtGal.ru" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Позиция</label>
+                                        <select id="protectionPosition" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                            <option value="bottom-right">Справа внизу</option>
+                                            <option value="bottom-left">Слева внизу</option>
+                                            <option value="top-right">Справа вверху</option>
+                                            <option value="top-left">Слева вверху</option>
+                                            <option value="center">По центру</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Прозрачность</label>
+                                        <input type="range" id="protectionOpacity" min="10" max="80" value="30" class="w-full">
+                                        <span id="opacityValue" class="text-xs text-gray-500">30%</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="block text-xs text-gray-500 mb-1">Дополнительные метаданные</label>
+                                    <input type="text" id="protectionMetadata" placeholder="Любые дополнительные данные..." class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            
+                            <!-- Apply Protection Buttons -->
+                            <div class="flex flex-wrap gap-2 mb-4">
                                 <button id="applyVisibleWatermark" class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm flex items-center gap-1">
                                     <i data-lucide="eye" class="w-3 h-3"></i>
                                     Видимый
@@ -868,16 +906,38 @@
                                     <i data-lucide="shield" class="w-3 h-3"></i>
                                     Полная защита
                                 </button>
-                                <button id="verifyProtection" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm flex items-center gap-1">
-                                    <i data-lucide="search" class="w-3 h-3"></i>
-                                    Проверить
-                                </button>
                             </div>
-                            <div id="protectionResult" class="hidden bg-white rounded-lg p-3 text-xs border">
-                                <p class="font-medium mb-1">Результат проверки:</p>
-                                <pre id="protectionResultData" class="text-gray-600 whitespace-pre-wrap"></pre>
+                            
+                            <!-- Verify Protection Section -->
+                            <div class="border-t border-gray-200 pt-4">
+                                <p class="text-xs font-medium text-gray-600 mb-2">Проверка защиты:</p>
+                                <div class="flex gap-2 mb-3">
+                                    <button id="verifyProtection" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm flex items-center gap-1">
+                                        <i data-lucide="search" class="w-3 h-3"></i>
+                                        Проверить текущее
+                                    </button>
+                                    <label class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm flex items-center gap-1 cursor-pointer">
+                                        <i data-lucide="upload" class="w-3 h-3"></i>
+                                        Загрузить для проверки
+                                        <input type="file" id="verifyFileInput" accept="image/*" class="hidden">
+                                    </label>
+                                </div>
+                                <div id="protectionResult" class="hidden bg-white rounded-lg p-3 text-xs border">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <p class="font-medium">Результат проверки:</p>
+                                        <button id="closeProtectionResult" class="text-gray-400 hover:text-gray-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <div id="protectionResultSummary" class="mb-2"></div>
+                                    <details class="text-gray-500">
+                                        <summary class="cursor-pointer hover:text-gray-700">Подробные данные</summary>
+                                        <pre id="protectionResultData" class="mt-2 text-gray-600 whitespace-pre-wrap bg-gray-50 p-2 rounded text-xs overflow-auto max-h-40"></pre>
+                                    </details>
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">Hash: <code id="modalVerificationHash" class="bg-gray-200 px-1 rounded">-</code></p>
+                            
+                            <p class="text-xs text-gray-500 mt-3">Hash: <code id="modalVerificationHash" class="bg-gray-200 px-1 rounded">-</code></p>
                         </div>
 
                         <!-- Actions -->
@@ -1442,6 +1502,10 @@
             return await response.blob();
         }
 
+        document.getElementById('protectionOpacity')?.addEventListener('input', (e) => {
+            document.getElementById('opacityValue').textContent = e.target.value + '%';
+        });
+
         async function applyWatermark(type) {
             if (!currentArtwork) return;
             
@@ -1453,6 +1517,12 @@
             try {
                 const imageUrl = currentArtwork.front_url || currentArtwork.image_url;
                 if (!imageUrl) throw new Error('No image URL available');
+                
+                const owner = document.getElementById('protectionOwner')?.value || 'VirtGal.ru';
+                const text = document.getElementById('protectionText')?.value || 'VirtGal.ru';
+                const position = document.getElementById('protectionPosition')?.value || 'bottom-right';
+                const opacity = (document.getElementById('protectionOpacity')?.value || 30) / 100;
+                const metadata = document.getElementById('protectionMetadata')?.value || '';
                 
                 let protectionType;
                 switch(type) {
@@ -1469,9 +1539,13 @@
                         imageUrl,
                         artworkId: currentArtwork.id,
                         type: protectionType,
-                        owner: 'VirtGal',
+                        owner,
+                        text,
+                        position,
+                        opacity,
                         title: currentArtwork.title || '',
-                        artist: currentArtwork.artist || ''
+                        artist: currentArtwork.artist || '',
+                        metadata
                     })
                 });
                 
@@ -1512,27 +1586,32 @@
             });
         }
 
-        async function verifyProtection() {
-            if (!currentArtwork) return;
-            
+        async function verifyProtection(imageBlob = null) {
             const btn = document.getElementById('verifyProtection');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> ...';
             btn.disabled = true;
             
             try {
-                const imgSrc = document.getElementById('modalArtworkImage').src;
-                let imageBlob;
+                let blobToVerify = imageBlob;
                 
-                if (imgSrc.startsWith('blob:')) {
-                    const response = await fetch(imgSrc);
-                    imageBlob = await response.blob();
-                } else {
-                    imageBlob = await fetchImageAsBlob(imgSrc);
+                if (!blobToVerify) {
+                    const imgSrc = document.getElementById('modalFrontImage')?.src;
+                    if (!imgSrc) throw new Error('Нет изображения для проверки');
+                    
+                    if (imgSrc.startsWith('data:')) {
+                        const res = await fetch(imgSrc);
+                        blobToVerify = await res.blob();
+                    } else if (imgSrc.startsWith('blob:')) {
+                        const res = await fetch(imgSrc);
+                        blobToVerify = await res.blob();
+                    } else {
+                        blobToVerify = await fetchImageAsBlob(imgSrc);
+                    }
                 }
                 
                 const formData = new FormData();
-                formData.append('image', imageBlob, 'artwork.png');
+                formData.append('image', blobToVerify, 'artwork.png');
                 
                 const response = await fetch('/api/watermark/verify', {
                     method: 'POST',
@@ -1543,21 +1622,40 @@
                 
                 const resultDiv = document.getElementById('protectionResult');
                 const resultData = document.getElementById('protectionResultData');
+                const resultSummary = document.getElementById('protectionResultSummary');
                 
                 resultDiv.classList.remove('hidden');
                 resultData.textContent = JSON.stringify(result, null, 2);
                 
+                let summaryHtml = '';
                 if (result.isProtected) {
+                    summaryHtml = '<div class="flex items-center gap-2 text-green-700 font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> Изображение защищено</div>';
+                    summaryHtml += '<ul class="mt-2 space-y-1 text-gray-600">';
+                    
                     if (result.invisibleWatermark?.found) {
+                        summaryHtml += '<li class="flex items-center gap-1"><span class="w-2 h-2 bg-purple-500 rounded-full"></span> Невидимый водяной знак</li>';
                         updateProtectionStatus('InvisibleWatermark');
                     }
                     if (result.steganography?.found) {
+                        summaryHtml += '<li class="flex items-center gap-1"><span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Стеганография</li>';
                         updateProtectionStatus('Steganography');
-                        if (result.steganography.metadata?.hash) {
-                            document.getElementById('modalVerificationHash').textContent = result.steganography.metadata.hash;
+                        if (result.steganography.metadata) {
+                            const meta = result.steganography.metadata;
+                            if (meta.owner) summaryHtml += `<li class="ml-4 text-xs">Владелец: ${meta.owner}</li>`;
+                            if (meta.id) summaryHtml += `<li class="ml-4 text-xs">ID: ${meta.id}</li>`;
+                            if (meta.hash) {
+                                document.getElementById('modalVerificationHash').textContent = meta.hash.substring(0, 16) + '...';
+                            }
                         }
                     }
+                    summaryHtml += '</ul>';
+                } else {
+                    summaryHtml = '<div class="flex items-center gap-2 text-amber-600 font-medium"><i data-lucide="alert-triangle" class="w-4 h-4"></i> Защита не обнаружена</div>';
+                    summaryHtml += '<p class="mt-1 text-xs text-gray-500">Изображение не содержит скрытых меток защиты или они были удалены.</p>';
                 }
+                
+                resultSummary.innerHTML = summaryHtml;
+                lucide.createIcons();
             } catch (error) {
                 console.error('Verify error:', error);
                 alert('Ошибка при проверке: ' + error.message);
@@ -1572,7 +1670,19 @@
         document.getElementById('applyInvisibleWatermark')?.addEventListener('click', () => applyWatermark('InvisibleWatermark'));
         document.getElementById('applySteganography')?.addEventListener('click', () => applyWatermark('Steganography'));
         document.getElementById('applyFullProtection')?.addEventListener('click', () => applyWatermark('FullProtection'));
-        document.getElementById('verifyProtection')?.addEventListener('click', verifyProtection);
+        document.getElementById('verifyProtection')?.addEventListener('click', () => verifyProtection());
+        
+        document.getElementById('verifyFileInput')?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                await verifyProtection(file);
+                e.target.value = '';
+            }
+        });
+        
+        document.getElementById('closeProtectionResult')?.addEventListener('click', () => {
+            document.getElementById('protectionResult')?.classList.add('hidden');
+        });
 
         document.querySelector('[data-tab="digitized"]')?.addEventListener('click', () => {
             setTimeout(() => loadDigitizedArtworks(), 100);
