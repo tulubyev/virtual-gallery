@@ -627,8 +627,13 @@ app.get('/api/v1/artworks', async (req, res) => {
     let paramIndex = 1;
     
     if (status) {
+      const statusMap = {
+        'pending_review': 'pending',
+        'approved': 'active',
+        'published': 'active'
+      };
       query += ` AND status = $${paramIndex++}`;
-      params.push(status);
+      params.push(statusMap[status] || status);
     }
     if (style) {
       query += ` AND style = $${paramIndex++}`;
@@ -647,7 +652,23 @@ app.get('/api/v1/artworks', async (req, res) => {
     params.push(parseInt(limit), parseInt(offset));
     
     const result = await pool.query(query, params);
-    res.json(result.rows);
+    
+    const mappedArtworks = result.rows.map(artwork => ({
+      id: artwork.id,
+      title: artwork.title,
+      artist: artwork.artist,
+      front_url: artwork.image_url,
+      front_watermarked_url: artwork.image_url,
+      style: artwork.style,
+      period: artwork.epoch,
+      country: artwork.country,
+      year: artwork.year_created,
+      description: artwork.description,
+      status: artwork.status === 'active' ? 'approved' : 'pending_review',
+      created_at: artwork.created_at
+    }));
+    
+    res.json(mappedArtworks);
   } catch (error) {
     console.error('Fetch artworks v1 error:', error);
     res.status(500).json([]);
