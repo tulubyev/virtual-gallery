@@ -509,6 +509,28 @@ app.post('/api/gallery/config', (req, res) => {
   }
 });
 
+// Dashboard Stats API
+app.get('/api/stats/dashboard', async (req, res) => {
+  try {
+    const [collections, rooms, artworks, pending] = await Promise.all([
+      pool.query('SELECT COUNT(*) as count FROM collections'),
+      pool.query("SELECT COUNT(*) as count FROM gallery_rooms WHERE id IS NOT NULL"),
+      pool.query('SELECT COUNT(*) as count FROM artworks'),
+      pool.query("SELECT COUNT(*) as count FROM artworks WHERE status = 'pending'")
+    ]);
+    
+    res.json({
+      collections: parseInt(collections.rows[0]?.count || 0),
+      rooms: parseInt(rooms.rows[0]?.count || 0),
+      artworks: parseInt(artworks.rows[0]?.count || 0),
+      pending: parseInt(pending.rows[0]?.count || 0)
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.json({ collections: 0, rooms: 5, artworks: 0, pending: 0 });
+  }
+});
+
 // Collections API
 app.get('/api/collections', async (req, res) => {
   try {

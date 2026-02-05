@@ -108,33 +108,33 @@
 
                 <!-- Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('collections')">
                         <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="folder" class="w-6 h-6 text-purple-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">12</p>
+                        <p id="statCollections" class="text-3xl font-bold text-gray-900">-</p>
                         <p class="text-gray-500 text-sm">Активных коллекций</p>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('gallery')">
                         <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="layout-grid" class="w-6 h-6 text-pink-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">5</p>
-                        <p class="text-gray-500 text-sm">Созданных выставок</p>
+                        <p id="statRooms" class="text-3xl font-bold text-gray-900">-</p>
+                        <p class="text-gray-500 text-sm">Залов галереи</p>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('digitized')">
                         <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="image" class="w-6 h-6 text-indigo-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">248</p>
-                        <p class="text-gray-500 text-sm">Подобранных экспонатов</p>
+                        <p id="statArtworks" class="text-3xl font-bold text-gray-900">-</p>
+                        <p class="text-gray-500 text-sm">Произведений в базе</p>
                     </div>
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                            <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">1,847</p>
-                        <p class="text-gray-500 text-sm">Посетителей сегодня</p>
+                        <p id="statPending" class="text-3xl font-bold text-gray-900">-</p>
+                        <p class="text-gray-500 text-sm">Ожидают модерации</p>
                     </div>
                 </div>
 
@@ -142,29 +142,29 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Быстрые действия</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button class="flex flex-col items-center gap-3 p-6 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-colors">
+                        <button id="quickNewCollection" class="flex flex-col items-center gap-3 p-6 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-colors">
                             <div class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center">
                                 <i data-lucide="folder-plus" class="w-7 h-7 text-white"></i>
                             </div>
                             <span class="font-medium text-gray-900">Создать коллекцию</span>
                         </button>
-                        <button class="flex flex-col items-center gap-3 p-6 bg-pink-50 hover:bg-pink-100 rounded-2xl transition-colors">
+                        <button id="quickGalleryBuilder" class="flex flex-col items-center gap-3 p-6 bg-pink-50 hover:bg-pink-100 rounded-2xl transition-colors">
                             <div class="w-14 h-14 bg-pink-600 rounded-2xl flex items-center justify-center">
                                 <i data-lucide="layout-template" class="w-7 h-7 text-white"></i>
                             </div>
-                            <span class="font-medium text-gray-900">Создать выставку</span>
+                            <span class="font-medium text-gray-900">Редактор галереи</span>
                         </button>
-                        <button class="flex flex-col items-center gap-3 p-6 bg-indigo-50 hover:bg-indigo-100 rounded-2xl transition-colors">
+                        <button id="quickAICuration" class="flex flex-col items-center gap-3 p-6 bg-indigo-50 hover:bg-indigo-100 rounded-2xl transition-colors">
                             <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center">
                                 <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
                             </div>
                             <span class="font-medium text-gray-900">AI-курирование</span>
                         </button>
-                        <button class="flex flex-col items-center gap-3 p-6 bg-green-50 hover:bg-green-100 rounded-2xl transition-colors">
-                            <div class="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center">
-                                <i data-lucide="compass" class="w-7 h-7 text-white"></i>
+                        <button id="quickModeration" class="flex flex-col items-center gap-3 p-6 bg-amber-50 hover:bg-amber-100 rounded-2xl transition-colors">
+                            <div class="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="check-circle" class="w-7 h-7 text-white"></i>
                             </div>
-                            <span class="font-medium text-gray-900">Назначить тур</span>
+                            <span class="font-medium text-gray-900">Модерация</span>
                         </button>
                     </div>
                 </div>
@@ -976,6 +976,64 @@
 
     <script>
         lucide.createIcons();
+
+        // Load Dashboard Stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/stats/dashboard');
+                const stats = await response.json();
+                
+                document.getElementById('statCollections').textContent = stats.collections || 0;
+                document.getElementById('statRooms').textContent = stats.rooms || 0;
+                document.getElementById('statArtworks').textContent = stats.artworks || 0;
+                document.getElementById('statPending').textContent = stats.pending || 0;
+                
+                // Update pending badge
+                const pendingBadge = document.getElementById('pendingBadge');
+                if (pendingBadge && stats.pending > 0) {
+                    pendingBadge.textContent = stats.pending;
+                    pendingBadge.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Load stats error:', error);
+            }
+        }
+
+        // Switch to tab helper
+        function switchToTab(tabName) {
+            const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (tabBtn) tabBtn.click();
+        }
+
+        // Quick action handlers
+        document.getElementById('quickNewCollection')?.addEventListener('click', () => {
+            switchToTab('collections');
+            setTimeout(() => {
+                document.getElementById('newCollectionModal')?.classList.remove('hidden');
+            }, 200);
+        });
+
+        document.getElementById('quickGalleryBuilder')?.addEventListener('click', () => {
+            switchToTab('gallery');
+        });
+
+        document.getElementById('quickAICuration')?.addEventListener('click', () => {
+            switchToTab('ai-curation');
+        });
+
+        document.getElementById('quickModeration')?.addEventListener('click', () => {
+            switchToTab('digitized');
+            setTimeout(() => {
+                const filter = document.getElementById('digitizedStatusFilter');
+                if (filter) {
+                    filter.value = 'pending';
+                    filter.dispatchEvent(new Event('change'));
+                }
+            }, 200);
+        });
+
+        // Load stats on page load
+        loadDashboardStats();
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileOverlay');
