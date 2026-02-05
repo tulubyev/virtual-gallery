@@ -509,6 +509,25 @@ app.post('/api/gallery/config', (req, res) => {
   }
 });
 
+// Random artworks for Hero slideshow
+app.get('/api/artworks/random', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 7;
+    const result = await pool.query(`
+      SELECT id, title, artist, image_url, country, epoch 
+      FROM artworks 
+      WHERE image_url IS NOT NULL AND status = 'published'
+      ORDER BY RANDOM() 
+      LIMIT $1
+    `, [limit]);
+    
+    res.json({ artworks: result.rows });
+  } catch (error) {
+    console.error('Random artworks error:', error);
+    res.json({ artworks: [] });
+  }
+});
+
 // Artworks Stats API (for Napolnenie section)
 app.get('/api/artworks/stats', async (req, res) => {
   try {

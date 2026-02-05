@@ -262,28 +262,8 @@
     <section class="pt-20 pb-16 relative overflow-hidden bg-gray-900">
         <!-- Background Slideshow -->
         <div id="hero-slideshow" class="absolute inset-0">
-            <div class="hero-slide absolute inset-0 opacity-100 transition-opacity duration-1000" data-gallery="Лувр, Париж">
-                <img src="https://images.unsplash.com/photo-1564399579883-451a5d44ec08?w=1920&q=80" alt="Лувр" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Эрмитаж, Санкт-Петербург">
-                <img src="https://images.unsplash.com/photo-1547448415-e9f5b28e570d?w=1920&q=80" alt="Эрмитаж" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Третьяковская галерея, Москва">
-                <img src="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=1920&q=80" alt="Третьяковская галерея" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Галерея Лины Ермонтович, Иркутск">
-                <img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=1920&q=80" alt="Галерея Лины Ермонтович" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Галерея Ольги Бронштейн, Иркутск">
-                <img src="https://images.unsplash.com/photo-1577720643272-265f09367456?w=1920&q=80" alt="Галерея Ольги Бронштейн" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Музей Метрополитен, Нью-Йорк">
-                <img src="https://images.unsplash.com/photo-1575223970966-76ae61ee7838?w=1920&q=80" alt="MET Museum" class="w-full h-full object-cover">
-            </div>
-            <div class="hero-slide absolute inset-0 opacity-0 transition-opacity duration-1000" data-gallery="Русский музей, Санкт-Петербург">
-                <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1920&q=80" alt="Русский музей" class="w-full h-full object-cover">
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80"></div>
+            <!-- Slides will be loaded dynamically from database -->
+            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 z-10"></div>
         </div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[70vh] flex flex-col">
@@ -713,14 +693,85 @@
             });
         });
 
-        // Hero Slideshow
-        const slides = document.querySelectorAll('.hero-slide');
-        const dots = document.querySelectorAll('.slideshow-dot');
-        const galleryLabel = document.querySelector('#current-gallery span');
+        // Hero Slideshow - Dynamic loading from database
+        let heroSlides = [];
         let currentSlide = 0;
         let slideshowInterval;
+        const slideshow = document.getElementById('hero-slideshow');
+        const dotsContainer = document.getElementById('slideshow-dots');
+        const galleryLabel = document.querySelector('#current-gallery span');
+
+        async function loadHeroSlides() {
+            try {
+                const response = await fetch('/api/artworks/random?limit=7');
+                const data = await response.json();
+                
+                if (data.artworks && data.artworks.length > 0) {
+                    heroSlides = data.artworks;
+                    renderHeroSlides();
+                } else {
+                    loadFallbackSlides();
+                }
+            } catch (error) {
+                console.error('Failed to load hero slides:', error);
+                loadFallbackSlides();
+            }
+        }
+
+        function loadFallbackSlides() {
+            heroSlides = [
+                { title: 'Виртуальная галерея', artist: 'Virtual Gallery', image_url: 'https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Россия' },
+                { title: 'Искусство без границ', artist: 'Art Collection', image_url: 'https://images.pexels.com/photos/1839919/pexels-photo-1839919.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Мир' },
+                { title: 'Мировые шедевры', artist: 'World Art', image_url: 'https://images.pexels.com/photos/2372978/pexels-photo-2372978.jpeg?auto=compress&cs=tinysrgb&w=1920', country: 'Европа' }
+            ];
+            renderHeroSlides();
+        }
+
+        function renderHeroSlides() {
+            const gradient = slideshow.querySelector('.z-10');
+            slideshow.innerHTML = '';
+            
+            heroSlides.forEach((artwork, i) => {
+                const slide = document.createElement('div');
+                slide.className = `hero-slide absolute inset-0 transition-opacity duration-1000 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
+                slide.dataset.gallery = `${artwork.title || 'Произведение'} — ${artwork.artist || 'Автор'}`;
+                slide.innerHTML = `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" onerror="this.src='https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=1920'">`;
+                slideshow.appendChild(slide);
+            });
+            
+            slideshow.appendChild(gradient || createGradient());
+            
+            if (dotsContainer) {
+                dotsContainer.innerHTML = heroSlides.map((_, i) => 
+                    `<button class="slideshow-dot w-2 h-2 rounded-full ${i === 0 ? 'bg-white' : 'bg-white/40'} transition-colors" data-index="${i}"></button>`
+                ).join('');
+                
+                dotsContainer.querySelectorAll('.slideshow-dot').forEach((dot, i) => {
+                    dot.addEventListener('click', () => {
+                        clearInterval(slideshowInterval);
+                        showSlide(i);
+                        startSlideshow();
+                    });
+                });
+            }
+            
+            if (galleryLabel && heroSlides.length > 0) {
+                galleryLabel.textContent = heroSlides[0].title + ' — ' + (heroSlides[0].artist || 'Автор');
+            }
+            
+            startSlideshow();
+        }
+
+        function createGradient() {
+            const div = document.createElement('div');
+            div.className = 'absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 z-10';
+            return div;
+        }
 
         function showSlide(index) {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.slideshow-dot');
+            
             slides.forEach((slide, i) => {
                 slide.style.opacity = i === index ? '1' : '0';
             });
@@ -728,27 +779,24 @@
                 dot.classList.toggle('bg-white', i === index);
                 dot.classList.toggle('bg-white/40', i !== index);
             });
-            galleryLabel.textContent = slides[index].dataset.gallery;
+            if (galleryLabel && heroSlides[index]) {
+                galleryLabel.textContent = heroSlides[index].title + ' — ' + (heroSlides[index].artist || 'Автор');
+            }
             currentSlide = index;
         }
 
         function nextSlide() {
-            showSlide((currentSlide + 1) % slides.length);
+            if (heroSlides.length > 0) {
+                showSlide((currentSlide + 1) % heroSlides.length);
+            }
         }
 
         function startSlideshow() {
+            clearInterval(slideshowInterval);
             slideshowInterval = setInterval(nextSlide, 5000);
         }
 
-        dots.forEach((dot, i) => {
-            dot.addEventListener('click', () => {
-                clearInterval(slideshowInterval);
-                showSlide(i);
-                startSlideshow();
-            });
-        });
-
-        startSlideshow();
+        loadHeroSlides();
     </script>
 </body>
 </html>
