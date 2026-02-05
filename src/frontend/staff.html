@@ -99,7 +99,7 @@
                         <i data-lucide="upload" class="w-5 h-5 text-green-600"></i>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-gray-900">24</p>
+                        <p id="stat-today" class="text-2xl font-bold text-gray-900">—</p>
                         <p class="text-xs text-gray-500">Загружено сегодня</p>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                         <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-gray-900">8</p>
+                        <p id="stat-pending" class="text-2xl font-bold text-gray-900">—</p>
                         <p class="text-xs text-gray-500">На проверке</p>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
                         <i data-lucide="check-circle" class="w-5 h-5 text-blue-600"></i>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-gray-900">156</p>
+                        <p id="stat-approved" class="text-2xl font-bold text-gray-900">—</p>
                         <p class="text-xs text-gray-500">Одобрено</p>
                     </div>
                 </div>
@@ -132,7 +132,7 @@
                         <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-gray-900">892</p>
+                        <p id="stat-total" class="text-2xl font-bold text-gray-900">—</p>
                         <p class="text-xs text-gray-500">Всего в галерее</p>
                     </div>
                 </div>
@@ -373,6 +373,20 @@
 
     <script>
         lucide.createIcons();
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/artworks/stats');
+                const data = await response.json();
+                document.getElementById('stat-today').textContent = data.today || 0;
+                document.getElementById('stat-pending').textContent = data.pending || 0;
+                document.getElementById('stat-approved').textContent = data.approved || 0;
+                document.getElementById('stat-total').textContent = data.total || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+        loadStats();
 
         let selectedImageFile = null;
         let selectedImageDataUrl = null;
