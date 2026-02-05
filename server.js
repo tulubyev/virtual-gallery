@@ -579,7 +579,7 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
 
 async function getArtworks(req, res) {
   try {
-    const { status, style, country, epoch, limit = 50, offset = 0 } = req.query;
+    const { status, style, country, epoch, search, limit = 50, offset = 0 } = req.query;
     
     let query = 'SELECT * FROM artworks WHERE 1=1';
     const params = [];
@@ -600,6 +600,11 @@ async function getArtworks(req, res) {
     if (epoch) {
       query += ` AND epoch = $${paramIndex++}`;
       params.push(epoch);
+    }
+    if (search) {
+      query += ` AND (LOWER(title) LIKE $${paramIndex} OR LOWER(artist) LIKE $${paramIndex} OR LOWER(style) LIKE $${paramIndex} OR LOWER(description) LIKE $${paramIndex})`;
+      params.push(`%${search.toLowerCase()}%`);
+      paramIndex++;
     }
     
     query += ` ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
@@ -729,6 +734,46 @@ app.get('/api/artworks/:id', async (req, res) => {
   } catch (error) {
     console.error('Fetch artwork error:', error);
     res.status(500).json({ error: 'Failed to fetch artwork', details: error.message });
+  }
+});
+
+app.patch('/api/artworks/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, curator_notes, rejection_reason } = req.body;
+    
+    const validStatuses = ['pending', 'approved', 'rejected', 'published', 'active'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, error: 'Invalid status' });
+    }
+    
+    let query = 'UPDATE artworks SET status = $1, updated_at = NOW()';
+    const values = [status];
+    let paramIndex = 2;
+    
+    if (curator_notes !== undefined) {
+      query += `, curator_notes = $${paramIndex++}`;
+      values.push(curator_notes);
+    }
+    
+    if (rejection_reason !== undefined) {
+      query += `, rejection_reason = $${paramIndex++}`;
+      values.push(rejection_reason);
+    }
+    
+    query += ` WHERE id = $${paramIndex} RETURNING *`;
+    values.push(id);
+    
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Artwork not found' });
+    }
+    
+    res.json({ success: true, artwork: result.rows[0] });
+  } catch (error) {
+    console.error('Update artwork status error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

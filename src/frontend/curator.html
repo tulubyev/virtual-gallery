@@ -382,15 +382,19 @@
 
             <!-- Digitized Artworks -->
             <section id="digitized" class="tab-content">
-                <div class="mb-8 flex items-center justify-between">
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Наполнение</h1>
-                        <p class="text-gray-600">Оцифровка, модерация и добавление произведений в базу данных</p>
+                        <p class="text-gray-600">Модерация и публикация произведений</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
+                        <div class="relative flex-1 md:flex-none md:w-64">
+                            <input type="text" id="artworkSearchInput" placeholder="Поиск по названию, автору, стилю..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        </div>
                         <select id="digitizedStatusFilter" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
                             <option value="">Все статусы</option>
-                            <option value="pending_review">Ожидают проверки</option>
+                            <option value="pending">Ожидают проверки</option>
                             <option value="approved">Одобренные</option>
                             <option value="rejected">Отклоненные</option>
                             <option value="published">Опубликованные</option>
@@ -804,16 +808,20 @@
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex gap-3">
-                            <button id="approveArtwork" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                        <div class="flex flex-wrap gap-3">
+                            <button id="approveArtwork" class="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
                                 <i data-lucide="check" class="w-5 h-5"></i>
                                 Одобрить
                             </button>
-                            <button id="rejectArtwork" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <button id="rejectArtwork" class="flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
                                 <i data-lucide="x" class="w-5 h-5"></i>
                                 Отклонить
                             </button>
-                            <button id="saveChanges" class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <button id="publishArtwork" class="flex-1 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                                <i data-lucide="globe" class="w-5 h-5"></i>
+                                Опубликовать
+                            </button>
+                            <button id="saveChanges" class="flex-1 min-w-[120px] bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
                                 <i data-lucide="save" class="w-5 h-5"></i>
                                 Сохранить
                             </button>
@@ -863,9 +871,10 @@
         });
 
         // Digitized Artworks Management
-        const AI_ML_API = '/api/v1';
         let currentArtwork = null;
         let digitizedArtworks = [];
+        let allArtworks = [];
+        let searchQuery = '';
 
         async function loadDigitizedArtworks(status = '') {
             const grid = document.getElementById('digitizedGrid');
@@ -874,18 +883,26 @@
                     <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
                         <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 animate-spin"></i>
                     </div>
-                    <p>Загрузка оцифрованных работ...</p>
+                    <p>Загрузка произведений...</p>
                 </div>
             `;
             lucide.createIcons();
 
             try {
-                const url = status ? `${AI_ML_API}/artworks?status=${status}` : `${AI_ML_API}/artworks`;
-                const response = await fetch(url);
+                let url = '/api/artworks?limit=100';
+                if (status) url += `&status=${status}`;
+                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch artworks');
                 
-                digitizedArtworks = await response.json();
+                const data = await response.json();
+                allArtworks = data.artworks || [];
+                digitizedArtworks = allArtworks.map(a => ({
+                    ...a,
+                    front_url: a.image_url,
+                    period: a.epoch
+                }));
                 renderDigitizedArtworks();
                 updateStats();
             } catch (error) {
@@ -902,6 +919,16 @@
                 lucide.createIcons();
             }
         }
+        
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('artworkSearchInput')?.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = e.target.value.trim();
+                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+            }, 300);
+        });
 
         function renderDigitizedArtworks() {
             const grid = document.getElementById('digitizedGrid');
@@ -943,10 +970,12 @@
 
         function getStatusBadgeClass(status) {
             const classes = {
+                'pending': 'bg-amber-100 text-amber-700',
                 'pending_review': 'bg-amber-100 text-amber-700',
                 'approved': 'bg-green-100 text-green-700',
                 'rejected': 'bg-red-100 text-red-700',
                 'published': 'bg-blue-100 text-blue-700',
+                'active': 'bg-green-100 text-green-700',
                 'needs_revision': 'bg-orange-100 text-orange-700'
             };
             return classes[status] || 'bg-gray-100 text-gray-700';
@@ -954,10 +983,12 @@
 
         function getStatusLabel(status) {
             const labels = {
+                'pending': 'На проверке',
                 'pending_review': 'На проверке',
                 'approved': 'Одобрено',
                 'rejected': 'Отклонено',
                 'published': 'Опубликовано',
+                'active': 'Активно',
                 'needs_revision': 'Требует правок'
             };
             return labels[status] || status;
@@ -1044,17 +1075,18 @@
         async function approveArtwork() {
             if (!currentArtwork) return;
             
-            const notes = document.getElementById('modalCuratorNotes').value;
+            const notes = document.getElementById('modalCuratorNotes')?.value || '';
             
             try {
-                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}/approve`, {
+                const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ curator_notes: notes })
+                    body: JSON.stringify({ status: 'approved', curator_notes: notes })
                 });
                 
                 if (!response.ok) throw new Error('Failed to approve');
                 
+                alert('Работа одобрена');
                 closeModal();
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
@@ -1070,19 +1102,43 @@
             if (!reason) return;
             
             try {
-                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}/reject`, {
+                const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rejection_reason: reason })
+                    body: JSON.stringify({ status: 'rejected', rejection_reason: reason })
                 });
                 
                 if (!response.ok) throw new Error('Failed to reject');
                 
+                alert('Работа отклонена');
                 closeModal();
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
                 console.error('Reject error:', error);
                 alert('Ошибка при отклонении работы');
+            }
+        }
+        
+        async function publishArtwork() {
+            if (!currentArtwork) return;
+            
+            if (!confirm('Опубликовать это произведение? Оно станет доступно в 3D галерее.')) return;
+            
+            try {
+                const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'published' })
+                });
+                
+                if (!response.ok) throw new Error('Failed to publish');
+                
+                alert('Работа опубликована!');
+                closeModal();
+                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
+            } catch (error) {
+                console.error('Publish error:', error);
+                alert('Ошибка при публикации работы');
             }
         }
 
@@ -1119,6 +1175,7 @@
         document.getElementById('closeModal')?.addEventListener('click', closeModal);
         document.getElementById('approveArtwork')?.addEventListener('click', approveArtwork);
         document.getElementById('rejectArtwork')?.addEventListener('click', rejectArtwork);
+        document.getElementById('publishArtwork')?.addEventListener('click', publishArtwork);
         document.getElementById('saveChanges')?.addEventListener('click', saveChanges);
         document.getElementById('refreshDigitized')?.addEventListener('click', () => {
             loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
