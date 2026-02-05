@@ -675,6 +675,46 @@ app.get('/api/v1/artworks', async (req, res) => {
   }
 });
 
+app.patch('/api/artworks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, artist, style, period, technique, curator_notes, description, country, year } = req.body;
+    
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+    
+    if (title !== undefined) { updates.push(`title = $${paramIndex++}`); values.push(title); }
+    if (artist !== undefined) { updates.push(`artist = $${paramIndex++}`); values.push(artist); }
+    if (style !== undefined) { updates.push(`style = $${paramIndex++}`); values.push(style); }
+    if (period !== undefined) { updates.push(`epoch = $${paramIndex++}`); values.push(period); }
+    if (technique !== undefined) { updates.push(`technique = $${paramIndex++}`); values.push(technique); }
+    if (curator_notes !== undefined) { updates.push(`curator_notes = $${paramIndex++}`); values.push(curator_notes); }
+    if (description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(description); }
+    if (country !== undefined) { updates.push(`country = $${paramIndex++}`); values.push(country); }
+    if (year !== undefined) { updates.push(`year_created = $${paramIndex++}`); values.push(year); }
+    
+    if (updates.length === 0) {
+      return res.json({ success: true, message: 'No updates provided' });
+    }
+    
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+    
+    const query = `UPDATE artworks SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Artwork not found' });
+    }
+    
+    res.json({ success: true, artwork: result.rows[0] });
+  } catch (error) {
+    console.error('Update artwork error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.get('/api/artworks/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM artworks WHERE id = $1', [req.params.id]);

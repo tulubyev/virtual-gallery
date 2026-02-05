@@ -1064,12 +1064,12 @@
                 artist: document.getElementById('modalArtworkArtist').value,
                 style: document.getElementById('modalArtworkStyle').value,
                 period: document.getElementById('modalArtworkPeriod').value,
-                technique: document.getElementById('modalArtworkTechnique').value,
-                curator_notes: document.getElementById('modalCuratorNotes').value
+                technique: document.getElementById('modalArtworkTechnique')?.value || '',
+                curator_notes: document.getElementById('modalCuratorNotes')?.value || ''
             };
             
             try {
-                const response = await fetch(`${AI_ML_API}/artworks/${currentArtwork.id}`, {
+                const response = await fetch(`/api/artworks/${currentArtwork.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updates)
