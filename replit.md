@@ -110,6 +110,16 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-05**: Implemented copyright protection system (watermarks)
+  - Visible watermark: text overlay with configurable opacity and position
+  - Tiled watermark: diagonal repeating pattern across image
+  - Invisible watermark: LSB encoding with encrypted payload (AES)
+  - Steganography: hidden metadata in bottom pixels (ID, owner, hash, timestamp)
+  - Full protection endpoint: applies all three methods at once
+  - Verification endpoint: extracts and validates hidden marks
+  - API endpoints: `/api/watermark/visible`, `/api/watermark/invisible`, `/api/watermark/steganography`, `/api/watermark/protect`, `/api/watermark/verify`
+  - Service: `src/services/watermark.js` using sharp, jimp, crypto-js
+
 - **2026-02-05**: Added direct artwork upload with S3 storage
   - Staff dashboard now supports manual upload with metadata form
   - Fields: title, artist, year, style, country, epoch, description

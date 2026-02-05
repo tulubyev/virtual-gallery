@@ -5,8 +5,10 @@ const fs = require('fs');
 const multer = require('multer');
 const { Pool } = require('pg');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const WatermarkService = require('./src/services/watermark');
 
 const app = express();
+const watermarkService = new WatermarkService();
 const PORT = 5000;
 
 const pool = new Pool({
@@ -808,6 +810,146 @@ app.get('/api/admin/uploads-info', async (req, res) => {
   } catch (error) {
     console.error('Uploads info error:', error);
     res.status(500).json({ error: 'Failed to get uploads info', details: error.message });
+  }
+});
+
+app.post('/api/watermark/visible', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image provided' });
+    }
+    
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const { text, opacity, position, tiled } = req.body;
+    
+    let result;
+    if (tiled === 'true') {
+      result = await watermarkService.applyTiledWatermark(imageBuffer, text || 'VirtGal.ru', {
+        opacity: parseFloat(opacity) || 0.15
+      });
+    } else {
+      result = await watermarkService.applyVisibleWatermark(imageBuffer, {
+        text: text || 'VirtGal.ru',
+        opacity: parseFloat(opacity) || 0.3,
+        position: position || 'bottom-right'
+      });
+    }
+    
+    fs.unlinkSync(req.file.path);
+    
+    res.set('Content-Type', 'image/png');
+    res.send(result);
+  } catch (error) {
+    console.error('Visible watermark error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/watermark/invisible', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image provided' });
+    }
+    
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const { artworkId, owner } = req.body;
+    
+    const result = await watermarkService.applyInvisibleWatermark(imageBuffer, {
+      artworkId: artworkId || 'unknown',
+      owner: owner || 'VirtGal',
+      timestamp: new Date().toISOString()
+    });
+    
+    fs.unlinkSync(req.file.path);
+    
+    res.set('Content-Type', 'image/png');
+    res.send(result);
+  } catch (error) {
+    console.error('Invisible watermark error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/watermark/steganography', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image provided' });
+    }
+    
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const metadata = {
+      id: req.body.artworkId,
+      owner: req.body.owner || 'VirtGal',
+      title: req.body.title,
+      artist: req.body.artist
+    };
+    
+    const result = await watermarkService.applySteganography(imageBuffer, metadata);
+    
+    fs.unlinkSync(req.file.path);
+    
+    res.set('Content-Type', 'image/png');
+    res.set('X-Steg-Metadata', JSON.stringify(result.metadata));
+    res.send(result.buffer);
+  } catch (error) {
+    console.error('Steganography error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/watermark/protect', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image provided' });
+    }
+    
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const metadata = {
+      id: req.body.artworkId || `art_${Date.now()}`,
+      owner: req.body.owner || 'VirtGal',
+      title: req.body.title,
+      artist: req.body.artist
+    };
+    
+    const options = {
+      visibleWatermark: req.body.visibleWatermark !== 'false',
+      watermarkText: req.body.watermarkText || 'VirtGal.ru',
+      opacity: parseFloat(req.body.opacity) || 0.25,
+      position: req.body.position || 'bottom-right'
+    };
+    
+    const result = await watermarkService.applyAllProtection(imageBuffer, metadata, options);
+    
+    fs.unlinkSync(req.file.path);
+    
+    res.set('Content-Type', 'image/png');
+    res.set('X-Protection-Metadata', JSON.stringify(result.metadata));
+    res.set('X-Protection-Applied', JSON.stringify(result.protection));
+    res.send(result.buffer);
+  } catch (error) {
+    console.error('Full protection error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/watermark/verify', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No image provided' });
+    }
+    
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const verification = await watermarkService.verifyProtection(imageBuffer);
+    
+    fs.unlinkSync(req.file.path);
+    
+    res.json({
+      success: true,
+      ...verification
+    });
+  } catch (error) {
+    console.error('Verify protection error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
