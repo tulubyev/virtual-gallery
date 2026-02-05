@@ -907,14 +907,16 @@ app.post('/api/watermark/apply', async (req, res) => {
         result = await watermarkService.applyInvisibleWatermark(imageBuffer, protectionMetadata);
         break;
       case 'steganography':
-        result = await watermarkService.applySteganography(imageBuffer, protectionMetadata);
+        const stegResult = await watermarkService.applySteganography(imageBuffer, protectionMetadata);
+        result = stegResult.buffer;
         break;
       case 'full':
-        result = await watermarkService.applyFullProtection(imageBuffer, protectionMetadata, {
-          text: text || 'VirtGal.ru',
+        const fullResult = await watermarkService.applyAllProtection(imageBuffer, protectionMetadata, {
+          watermarkText: text || 'VirtGal.ru',
           opacity: parseFloat(opacity) || 0.3,
           position: position || 'bottom-right'
         });
+        result = fullResult.buffer;
         break;
       default:
         return res.status(400).json({ success: false, error: 'Invalid protection type' });
