@@ -268,69 +268,63 @@
 
                 <!-- Artworks Section within Collections -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                             <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
-                            Экспонаты для добавления в коллекции
+                            Одобренные произведения
+                            <span id="approvedCount" class="text-sm font-normal text-gray-500">(0)</span>
                         </h3>
-                        <button id="addArtworkBtn" class="text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            Добавить экспонат
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <select id="collectionArtworkStatus" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white">
+                                <option value="approved">Одобренные</option>
+                                <option value="published">Опубликованные</option>
+                                <option value="">Все</option>
+                            </select>
+                            <button id="refreshCollectionArtworks" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                Обновить
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
-                            <div class="h-36 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
-                            <div class="p-3">
-                                <h4 class="font-semibold text-gray-900 text-sm">Звездная ночь</h4>
-                                <p class="text-xs text-gray-500 mb-2">Ван Гог, 1889 • Нидерланды</p>
-                                <div class="flex flex-wrap gap-1 mb-2">
-                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">постимпрессионизм</span>
-                                </div>
-                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
-                                    В коллекцию
-                                </button>
-                            </div>
+                    <div id="collectionArtworksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                            <p>Загрузка произведений...</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
-                            <div class="h-36 bg-gradient-to-br from-amber-100 to-yellow-200"></div>
-                            <div class="p-3">
-                                <h4 class="font-semibold text-gray-900 text-sm">Мона Лиза</h4>
-                                <p class="text-xs text-gray-500 mb-2">Да Винчи, 1503 • Италия</p>
-                                <div class="flex flex-wrap gap-1 mb-2">
-                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">ренессанс</span>
-                                </div>
-                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
-                                    В коллекцию
-                                </button>
-                            </div>
+                    </div>
+                </div>
+
+                <!-- Collection Assignment Modal -->
+                <div id="collectionAssignModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Добавить в коллекцию</h3>
+                            <button id="closeAssignModal" class="text-gray-400 hover:text-gray-600">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
                         </div>
-                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
-                            <div class="h-36 bg-gradient-to-br from-blue-200 to-indigo-300"></div>
-                            <div class="p-3">
-                                <h4 class="font-semibold text-gray-900 text-sm">Девушка с жемчужной серёжкой</h4>
-                                <p class="text-xs text-gray-500 mb-2">Вермеер, 1665 • Нидерланды</p>
-                                <div class="flex flex-wrap gap-1 mb-2">
-                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">барокко</span>
-                                </div>
-                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
-                                    В коллекцию
-                                </button>
-                            </div>
+                        <p id="assignArtworkName" class="text-sm text-gray-600 mb-4"></p>
+                        <div class="space-y-2 max-h-60 overflow-y-auto mb-4" id="collectionsList">
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" name="collection" value="impressionism" class="w-4 h-4 text-purple-600 rounded">
+                                <span class="text-sm font-medium">Импрессионизм</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" name="collection" value="modern" class="w-4 h-4 text-purple-600 rounded">
+                                <span class="text-sm font-medium">Современное искусство</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" name="collection" value="renaissance" class="w-4 h-4 text-purple-600 rounded">
+                                <span class="text-sm font-medium">Ренессанс</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 cursor-pointer">
+                                <input type="checkbox" name="collection" value="sculpture" class="w-4 h-4 text-purple-600 rounded">
+                                <span class="text-sm font-medium">Скульптура</span>
+                            </label>
                         </div>
-                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
-                            <div class="h-36 bg-gradient-to-br from-pink-200 to-rose-300"></div>
-                            <div class="p-3">
-                                <h4 class="font-semibold text-gray-900 text-sm">Кувшинки</h4>
-                                <p class="text-xs text-gray-500 mb-2">Моне, 1906 • Франция</p>
-                                <div class="flex flex-wrap gap-1 mb-2">
-                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">импрессионизм</span>
-                                </div>
-                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
-                                    В коллекцию
-                                </button>
-                            </div>
-                        </div>
+                        <button id="saveCollectionAssign" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium">
+                            Сохранить
+                        </button>
                     </div>
                 </div>
             </section>
@@ -1686,6 +1680,145 @@
 
         document.querySelector('[data-tab="digitized"]')?.addEventListener('click', () => {
             setTimeout(() => loadDigitizedArtworks(), 100);
+        });
+
+        // Collections - Load Approved Artworks
+        let collectionArtworks = [];
+        let currentAssignArtwork = null;
+
+        async function loadCollectionArtworks(status = 'approved') {
+            const grid = document.getElementById('collectionArtworksGrid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-8 text-gray-500">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                    <p>Загрузка произведений...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                let url = '/api/artworks?limit=100';
+                if (status) url += `&status=${status}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const data = await response.json();
+                collectionArtworks = data.artworks || [];
+                
+                document.getElementById('approvedCount').textContent = `(${collectionArtworks.length})`;
+                
+                if (collectionArtworks.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            <i data-lucide="image-off" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                            <p>Нет произведений со статусом "${status || 'любой'}"</p>
+                            <p class="text-xs mt-1">Одобрите произведения в разделе "Наполнение"</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                grid.innerHTML = collectionArtworks.map(artwork => `
+                    <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
+                        <div class="h-36 bg-gray-200 relative">
+                            ${artwork.image_url ? 
+                                `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover">` :
+                                `<div class="w-full h-full bg-gradient-to-br from-purple-200 to-pink-200"></div>`
+                            }
+                            <span class="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full ${
+                                artwork.status === 'published' ? 'bg-green-100 text-green-700' : 
+                                artwork.status === 'approved' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+                            }">${artwork.status || 'pending'}</span>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="font-semibold text-gray-900 text-sm truncate">${artwork.title || 'Без названия'}</h4>
+                            <p class="text-xs text-gray-500 mb-2">${artwork.artist || 'Неизвестен'}${artwork.year ? `, ${artwork.year}` : ''}${artwork.country ? ` • ${artwork.country}` : ''}</p>
+                            <div class="flex flex-wrap gap-1 mb-2">
+                                ${artwork.style ? `<span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">${artwork.style}</span>` : ''}
+                                ${artwork.epoch ? `<span class="text-xs bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">${artwork.epoch}</span>` : ''}
+                            </div>
+                            <button onclick="openAssignModal(${artwork.id})" class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
+                                В коллекцию
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Load collection artworks error:', error);
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-red-500">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>Ошибка загрузки</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+
+        function openAssignModal(artworkId) {
+            currentAssignArtwork = collectionArtworks.find(a => a.id === artworkId);
+            if (!currentAssignArtwork) return;
+            
+            document.getElementById('assignArtworkName').textContent = `"${currentAssignArtwork.title || 'Без названия'}" — ${currentAssignArtwork.artist || 'Неизвестен'}`;
+            document.getElementById('collectionAssignModal').classList.remove('hidden');
+            
+            document.querySelectorAll('#collectionsList input[type="checkbox"]').forEach(cb => {
+                cb.checked = (currentAssignArtwork.collection || '').includes(cb.value);
+            });
+        }
+
+        document.getElementById('closeAssignModal')?.addEventListener('click', () => {
+            document.getElementById('collectionAssignModal').classList.add('hidden');
+            currentAssignArtwork = null;
+        });
+
+        document.getElementById('collectionAssignModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'collectionAssignModal') {
+                document.getElementById('collectionAssignModal').classList.add('hidden');
+                currentAssignArtwork = null;
+            }
+        });
+
+        document.getElementById('saveCollectionAssign')?.addEventListener('click', async () => {
+            if (!currentAssignArtwork) return;
+            
+            const selectedCollections = [];
+            document.querySelectorAll('#collectionsList input[type="checkbox"]:checked').forEach(cb => {
+                selectedCollections.push(cb.value);
+            });
+            
+            try {
+                const response = await fetch(`/api/artworks/${currentAssignArtwork.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collection: selectedCollections.join(',') })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update');
+                
+                alert('Произведение добавлено в коллекции');
+                document.getElementById('collectionAssignModal').classList.add('hidden');
+                currentAssignArtwork = null;
+                loadCollectionArtworks(document.getElementById('collectionArtworkStatus').value);
+            } catch (error) {
+                console.error('Assign error:', error);
+                alert('Ошибка при сохранении');
+            }
+        });
+
+        document.getElementById('refreshCollectionArtworks')?.addEventListener('click', () => {
+            loadCollectionArtworks(document.getElementById('collectionArtworkStatus').value);
+        });
+
+        document.getElementById('collectionArtworkStatus')?.addEventListener('change', (e) => {
+            loadCollectionArtworks(e.target.value);
+        });
+
+        document.querySelector('[data-tab="collections"]')?.addEventListener('click', () => {
+            setTimeout(() => loadCollectionArtworks(document.getElementById('collectionArtworkStatus')?.value || 'approved'), 100);
         });
 
         // Gallery Builder Logic

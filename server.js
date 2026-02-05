@@ -685,7 +685,7 @@ app.get('/api/v1/artworks', async (req, res) => {
 app.patch('/api/artworks/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, artist, style, period, technique, curator_notes, description, country, year } = req.body;
+    const { title, artist, style, period, technique, curator_notes, description, country, year, collection } = req.body;
     
     const updates = [];
     const values = [];
@@ -700,6 +700,7 @@ app.patch('/api/artworks/:id', async (req, res) => {
     if (description !== undefined) { updates.push(`description = $${paramIndex++}`); values.push(description); }
     if (country !== undefined) { updates.push(`country = $${paramIndex++}`); values.push(country); }
     if (year !== undefined) { updates.push(`year_created = $${paramIndex++}`); values.push(year); }
+    if (collection !== undefined) { updates.push(`collection = $${paramIndex++}`); values.push(collection); }
     
     if (updates.length === 0) {
       return res.json({ success: true, message: 'No updates provided' });
