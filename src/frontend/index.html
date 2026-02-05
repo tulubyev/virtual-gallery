@@ -263,7 +263,7 @@
         <!-- Background Slideshow -->
         <div id="hero-slideshow" class="absolute inset-0">
             <!-- Slides will be loaded dynamically from database -->
-            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 z-10"></div>
+            <div id="hero-gradient" class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 pointer-events-none" style="z-index: 1;"></div>
         </div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[70vh] flex flex-col">
@@ -728,12 +728,13 @@
         }
 
         function renderHeroSlides() {
-            const gradient = slideshow.querySelector('.z-10');
+            const gradient = document.getElementById('hero-gradient');
             slideshow.innerHTML = '';
             
             heroSlides.forEach((artwork, i) => {
                 const slide = document.createElement('div');
                 slide.className = `hero-slide absolute inset-0 transition-opacity duration-1000 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
+                slide.style.zIndex = '0';
                 slide.dataset.gallery = `${artwork.title || 'Произведение'} — ${artwork.artist || 'Автор'}`;
                 slide.innerHTML = `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" onerror="this.src='https://images.pexels.com/photos/1674049/pexels-photo-1674049.jpeg?auto=compress&cs=tinysrgb&w=1920'">`;
                 slideshow.appendChild(slide);
