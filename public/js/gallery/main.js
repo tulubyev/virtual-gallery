@@ -865,33 +865,75 @@ class VirtualGallery {
       document.body.appendChild(modal);
     }
 
+    const imageUrl = artworkData.imageUrl || artworkData.thumbnail || '';
+    
     modal.innerHTML = `
-      <div style="background:#1a1a2e;border-radius:16px;max-width:800px;width:90%;max-height:90vh;overflow-y:auto;color:white;font-family:'Inter',sans-serif;">
-        <div style="padding:30px;">
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px;">
+      <div style="background:#1a1a2e;border-radius:16px;max-width:1000px;width:95%;max-height:95vh;overflow-y:auto;color:white;font-family:'Inter',sans-serif;">
+        <div style="padding:25px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:15px;">
             <div>
-              <h2 style="font-size:28px;margin:0 0 8px 0;font-family:'Playfair Display',serif;">${artworkData.title || 'Без названия'}</h2>
-              <p style="font-size:18px;color:rgba(255,255,255,0.7);margin:0;">${artworkData.artist || 'Неизвестный художник'}</p>
+              <h2 style="font-size:24px;margin:0 0 6px 0;font-family:'Playfair Display',serif;">${artworkData.title || 'Без названия'}</h2>
+              <p style="font-size:16px;color:rgba(255,255,255,0.7);margin:0;">${artworkData.artist || 'Неизвестный художник'}</p>
             </div>
-            <button id="close-modal" style="background:none;border:none;color:white;font-size:28px;cursor:pointer;padding:5px;">&times;</button>
+            <button id="close-modal" style="background:none;border:none;color:white;font-size:28px;cursor:pointer;padding:5px;line-height:1;">&times;</button>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px;">
-            <div style="background:#2a2a4e;padding:15px;border-radius:8px;">
-              <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:0 0 5px 0;">Год</p>
-              <p style="font-size:18px;margin:0;">${artworkData.year || 'Неизвестно'}</p>
+          
+          <!-- Image Viewer -->
+          <div id="image-viewer-container" style="position:relative;background:#0a0a15;border-radius:12px;margin-bottom:15px;overflow:hidden;height:350px;">
+            <div id="image-viewer" style="width:100%;height:100%;overflow:hidden;cursor:grab;position:relative;">
+              <img id="artwork-image" src="${imageUrl}" alt="${artworkData.title}" 
+                   style="position:absolute;transform-origin:0 0;transition:transform 0.1s ease-out;max-width:none;"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);">
+                <span>Изображение недоступно</span>
+              </div>
             </div>
-            <div style="background:#2a2a4e;padding:15px;border-radius:8px;">
-              <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:0 0 5px 0;">Стиль</p>
-              <p style="font-size:18px;margin:0;">${artworkData.style || 'Не определен'}</p>
+            <div style="position:absolute;bottom:10px;right:10px;display:flex;gap:8px;">
+              <button id="zoom-in" style="background:rgba(0,0,0,0.7);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">+</button>
+              <button id="zoom-out" style="background:rgba(0,0,0,0.7);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">−</button>
+              <button id="zoom-reset" style="background:rgba(0,0,0,0.7);border:none;color:white;padding:0 12px;height:36px;border-radius:8px;cursor:pointer;font-size:12px;">Сброс</button>
             </div>
-            <div style="background:#2a2a4e;padding:15px;border-radius:8px;">
-              <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:0 0 5px 0;">Техника</p>
-              <p style="font-size:18px;margin:0;">${artworkData.medium || 'Не указана'}</p>
+            <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);color:rgba(255,255,255,0.7);padding:6px 10px;border-radius:6px;font-size:11px;">
+              Перетаскивайте для перемещения • Колесо мыши для масштаба
             </div>
           </div>
-          <div style="background:#2a2a4e;padding:20px;border-radius:8px;">
-            <h3 style="font-size:16px;margin:0 0 10px 0;">Описание</h3>
-            <p style="color:rgba(255,255,255,0.8);line-height:1.6;margin:0;">${artworkData.description || 'Описание отсутствует.'}</p>
+          
+          <!-- Action Buttons -->
+          <div style="display:flex;gap:10px;margin-bottom:15px;">
+            <button id="btn-favorite" style="flex:1;background:linear-gradient(135deg,#ec4899,#f43f5e);border:none;color:white;padding:12px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              Избранное
+            </button>
+            <button id="btn-auction" style="flex:1;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;color:white;padding:12px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              Аукцион
+            </button>
+            <button id="btn-question" style="flex:1;background:linear-gradient(135deg,#14b8a6,#06b6d4);border:none;color:white;padding:12px 16px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.2s,box-shadow 0.2s;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Вопрос
+            </button>
+          </div>
+          
+          <!-- Info Grid -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:15px;">
+            <div style="background:#2a2a4e;padding:12px;border-radius:8px;">
+              <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 4px 0;">Год</p>
+              <p style="font-size:16px;margin:0;">${artworkData.year || 'Неизвестно'}</p>
+            </div>
+            <div style="background:#2a2a4e;padding:12px;border-radius:8px;">
+              <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 4px 0;">Стиль</p>
+              <p style="font-size:16px;margin:0;">${artworkData.style || 'Не определен'}</p>
+            </div>
+            <div style="background:#2a2a4e;padding:12px;border-radius:8px;">
+              <p style="font-size:11px;color:rgba(255,255,255,0.5);margin:0 0 4px 0;">Техника</p>
+              <p style="font-size:16px;margin:0;">${artworkData.medium || 'Не указана'}</p>
+            </div>
+          </div>
+          
+          <!-- Description -->
+          <div style="background:#2a2a4e;padding:15px;border-radius:8px;">
+            <h3 style="font-size:14px;margin:0 0 8px 0;">Описание</h3>
+            <p style="color:rgba(255,255,255,0.8);line-height:1.5;margin:0;font-size:13px;">${artworkData.description || 'Описание отсутствует.'}</p>
           </div>
         </div>
       </div>`;
@@ -905,6 +947,78 @@ class VirtualGallery {
     };
     modal.querySelector('#close-modal').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+    // Image viewer zoom/pan functionality
+    const img = modal.querySelector('#artwork-image');
+    const viewer = modal.querySelector('#image-viewer');
+    let scale = 1, posX = 0, posY = 0, isDragging = false, startX, startY;
+
+    const updateTransform = () => {
+      img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    };
+
+    const centerImage = () => {
+      if (img.naturalWidth) {
+        const containerW = viewer.offsetWidth, containerH = viewer.offsetHeight;
+        const imgW = img.naturalWidth, imgH = img.naturalHeight;
+        const fitScale = Math.min(containerW / imgW, containerH / imgH, 1);
+        scale = fitScale;
+        posX = (containerW - imgW * scale) / 2;
+        posY = (containerH - imgH * scale) / 2;
+        updateTransform();
+      }
+    };
+
+    img.onload = centerImage;
+    if (img.complete) centerImage();
+
+    modal.querySelector('#zoom-in').addEventListener('click', () => { scale = Math.min(scale * 1.3, 5); updateTransform(); });
+    modal.querySelector('#zoom-out').addEventListener('click', () => { scale = Math.max(scale / 1.3, 0.2); updateTransform(); });
+    modal.querySelector('#zoom-reset').addEventListener('click', centerImage);
+
+    viewer.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      scale = Math.min(Math.max(scale * delta, 0.2), 5);
+      updateTransform();
+    });
+
+    viewer.addEventListener('mousedown', e => {
+      isDragging = true;
+      startX = e.clientX - posX;
+      startY = e.clientY - posY;
+      viewer.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      posX = e.clientX - startX;
+      posY = e.clientY - startY;
+      updateTransform();
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      viewer.style.cursor = 'grab';
+    });
+
+    // Action button handlers
+    modal.querySelector('#btn-favorite').addEventListener('click', () => {
+      const btn = modal.querySelector('#btn-favorite');
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> В избранном';
+      btn.style.background = '#be185d';
+    });
+
+    modal.querySelector('#btn-auction').addEventListener('click', () => {
+      alert('Функция "Аукцион" позволяет выставить работу на торги. Для участия требуется регистрация.');
+    });
+
+    modal.querySelector('#btn-question').addEventListener('click', () => {
+      const question = prompt('Введите ваш вопрос модератору о данной работе:');
+      if (question) {
+        alert('Ваш вопрос отправлен модератору. Ответ придёт на вашу почту.');
+      }
+    });
   }
 
   createRoomInfoUI() {
