@@ -286,6 +286,59 @@ app.post('/api/ai/similar-artworks', async (req, res) => {
   }, res);
 });
 
+app.post('/api/ai/calculate-slots', async (req, res) => {
+  const { roomId, roomName, roomDimensions, collectionId, artworks } = req.body;
+
+  if (!roomDimensions) {
+    return res.status(400).json({ error: 'roomDimensions is required' });
+  }
+
+  try {
+    const aiResponse = await fetch(`${AI_CORE_URL}/health`, { signal: createTimeout(3000) });
+    
+    if (aiResponse.ok) {
+      await proxyToAiService('/api/v1/gallery/calculate-slots', 'POST', {
+        room_id: roomId,
+        room_name: roomName,
+        room_dimensions: roomDimensions,
+        collection_id: collectionId,
+        artworks: artworks || []
+      }, res);
+    } else {
+      throw new Error('AI service unavailable');
+    }
+  } catch (error) {
+    const { width, depth, height } = roomDimensions;
+    const wallArea = 2 * (width * height) + 2 * (depth * height);
+    const avgArtworkArea = 2.5;
+    const usableWallRatio = 0.4;
+    const recommendedSlots = Math.floor((wallArea * usableWallRatio) / avgArtworkArea);
+    const optimalSlots = Math.min(Math.max(recommendedSlots, 4), 12);
+    
+    const slotsPerWall = Math.ceil(optimalSlots / 3);
+    const layout = {
+      leftWall: slotsPerWall,
+      rightWall: slotsPerWall,
+      backWall: optimalSlots - (slotsPerWall * 2)
+    };
+
+    res.json({
+      success: true,
+      demo_mode: true,
+      recommendation: {
+        total_slots: optimalSlots,
+        layout: layout,
+        reasoning: `На основе размеров зала (${width}x${depth}x${height}м) рекомендуется ${optimalSlots} слотов. Расчёт: площадь стен ${wallArea.toFixed(0)}м², используемая площадь 40%, средний размер картины 2.5м².`,
+        distribution: [
+          { wall: 'left', slots: layout.leftWall, spacing: 'равномерно' },
+          { wall: 'right', slots: layout.rightWall, spacing: 'равномерно' },
+          { wall: 'back', slots: layout.backWall, spacing: 'по центру' }
+        ]
+      }
+    });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'src/frontend')));
 app.use('/assets', express.static(path.join(__dirname, 'src/frontend/assets')));
 app.use('/react', express.static(path.join(__dirname, 'dist/frontend')));
