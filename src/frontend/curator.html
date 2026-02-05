@@ -717,6 +717,12 @@
                             </div>
                         </div>
 
+                        <!-- Current Status -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="text-sm text-gray-500">Статус:</span>
+                            <span id="modalStatusBadge" class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">-</span>
+                        </div>
+
                         <!-- Metadata Form -->
                         <div class="space-y-4 mb-6">
                             <div class="grid grid-cols-2 gap-4">
@@ -729,23 +735,61 @@
                                     <input type="text" id="modalArtworkArtist" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-4">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Год</label>
+                                    <input type="number" id="modalArtworkYear" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Страна</label>
+                                    <input type="text" id="modalArtworkCountry" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Стиль</label>
-                                    <input type="text" id="modalArtworkStyle" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <select id="modalArtworkStyle" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Выберите</option>
+                                        <option value="Реализм">Реализм</option>
+                                        <option value="Импрессионизм">Импрессионизм</option>
+                                        <option value="Постимпрессионизм">Постимпрессионизм</option>
+                                        <option value="Экспрессионизм">Экспрессионизм</option>
+                                        <option value="Абстракционизм">Абстракционизм</option>
+                                        <option value="Сюрреализм">Сюрреализм</option>
+                                        <option value="Кубизм">Кубизм</option>
+                                        <option value="Романтизм">Романтизм</option>
+                                        <option value="Барокко">Барокко</option>
+                                        <option value="Ренессанс">Ренессанс</option>
+                                        <option value="Классицизм">Классицизм</option>
+                                        <option value="Модернизм">Модернизм</option>
+                                        <option value="Другое">Другое</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Период</label>
-                                    <input type="text" id="modalArtworkPeriod" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Техника</label>
-                                    <input type="text" id="modalArtworkTechnique" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Эпоха</label>
+                                    <select id="modalArtworkPeriod" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Выберите</option>
+                                        <option value="Античность">Античность</option>
+                                        <option value="Средневековье">Средневековье</option>
+                                        <option value="Возрождение">Возрождение</option>
+                                        <option value="XVII век">XVII век</option>
+                                        <option value="XVIII век">XVIII век</option>
+                                        <option value="XIX век">XIX век</option>
+                                        <option value="XX век">XX век</option>
+                                        <option value="XXI век">XXI век</option>
+                                        <option value="Современность">Современность</option>
+                                    </select>
                                 </div>
                             </div>
                             <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Техника</label>
+                                <input type="text" id="modalArtworkTechnique" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Холст, масло">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+                                <textarea id="modalArtworkDescription" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Описание произведения..."></textarea>
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Заметки куратора</label>
-                                <textarea id="modalCuratorNotes" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Добавьте комментарий к работе..."></textarea>
+                                <textarea id="modalCuratorNotes" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Добавьте комментарий к работе..."></textarea>
                             </div>
                         </div>
 
@@ -1022,20 +1066,35 @@
 
         async function openArtworkModal(artworkId) {
             const artwork = digitizedArtworks.find(a => a.id === artworkId);
-            if (!artwork) return;
+            if (!artwork) {
+                console.error('Artwork not found:', artworkId);
+                return;
+            }
             
             currentArtwork = artwork;
             
             document.getElementById('modalTitle').textContent = artwork.title || 'Детали работы';
-            document.getElementById('modalFrontImage').src = artwork.front_watermarked_url || artwork.front_url;
+            
+            const frontImage = artwork.front_watermarked_url || artwork.front_url || artwork.image_url;
+            document.getElementById('modalFrontImage').src = frontImage || '';
             document.getElementById('modalBackImage').src = artwork.back_watermarked_url || artwork.back_url || '';
             
             document.getElementById('modalArtworkTitle').value = artwork.title || '';
             document.getElementById('modalArtworkArtist').value = artwork.artist || '';
             document.getElementById('modalArtworkStyle').value = artwork.style || '';
-            document.getElementById('modalArtworkPeriod').value = artwork.period || '';
+            document.getElementById('modalArtworkPeriod').value = artwork.period || artwork.epoch || '';
             document.getElementById('modalArtworkTechnique').value = artwork.technique || '';
             document.getElementById('modalCuratorNotes').value = artwork.curator_notes || '';
+            
+            if (document.getElementById('modalArtworkYear')) {
+                document.getElementById('modalArtworkYear').value = artwork.year_created || '';
+            }
+            if (document.getElementById('modalArtworkCountry')) {
+                document.getElementById('modalArtworkCountry').value = artwork.country || '';
+            }
+            if (document.getElementById('modalArtworkDescription')) {
+                document.getElementById('modalArtworkDescription').value = artwork.description || '';
+            }
             
             const analysis = artwork.ai_analysis || {};
             let analysisHtml = '';
@@ -1045,22 +1104,44 @@
             if (analysis.back && analysis.back.provenance) {
                 analysisHtml += `<p class="mt-2"><strong>Провенанс:</strong> ${analysis.back.provenance}</p>`;
             }
-            document.getElementById('modalAIAnalysis').innerHTML = analysisHtml || 'AI-анализ недоступен';
+            const aiAnalysisEl = document.getElementById('modalAIAnalysis');
+            if (aiAnalysisEl) aiAnalysisEl.innerHTML = analysisHtml || 'AI-анализ недоступен';
             
             const visibleEl = document.querySelector('#visibleWatermark span');
             const invisibleEl = document.querySelector('#invisibleWatermark span');
-            visibleEl.className = `w-3 h-3 rounded-full ${artwork.visible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
-            invisibleEl.className = `w-3 h-3 rounded-full ${artwork.invisible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
-            document.getElementById('modalVerificationHash').textContent = artwork.verification_hash || '-';
+            if (visibleEl) visibleEl.className = `w-3 h-3 rounded-full ${artwork.visible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
+            if (invisibleEl) invisibleEl.className = `w-3 h-3 rounded-full ${artwork.invisible_watermark_applied ? 'bg-green-500' : 'bg-gray-300'}`;
+            const hashEl = document.getElementById('modalVerificationHash');
+            if (hashEl) hashEl.textContent = artwork.verification_hash || '-';
             
             const approveBtn = document.getElementById('approveArtwork');
             const rejectBtn = document.getElementById('rejectArtwork');
-            if (artwork.status === 'approved' || artwork.status === 'published') {
-                approveBtn.disabled = true;
-                approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                approveBtn.disabled = false;
-                approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            const publishBtn = document.getElementById('publishArtwork');
+            
+            if (approveBtn) {
+                if (artwork.status === 'approved' || artwork.status === 'published') {
+                    approveBtn.disabled = true;
+                    approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    approveBtn.disabled = false;
+                    approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            if (publishBtn) {
+                if (artwork.status === 'published') {
+                    publishBtn.disabled = true;
+                    publishBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    publishBtn.disabled = false;
+                    publishBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            
+            const statusBadge = document.getElementById('modalStatusBadge');
+            if (statusBadge) {
+                statusBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(artwork.status)}`;
+                statusBadge.textContent = getStatusLabel(artwork.status);
             }
             
             document.getElementById('artworkModal').classList.remove('hidden');
@@ -1151,7 +1232,10 @@
                 style: document.getElementById('modalArtworkStyle').value,
                 period: document.getElementById('modalArtworkPeriod').value,
                 technique: document.getElementById('modalArtworkTechnique')?.value || '',
-                curator_notes: document.getElementById('modalCuratorNotes')?.value || ''
+                curator_notes: document.getElementById('modalCuratorNotes')?.value || '',
+                year: document.getElementById('modalArtworkYear')?.value || null,
+                country: document.getElementById('modalArtworkCountry')?.value || '',
+                description: document.getElementById('modalArtworkDescription')?.value || ''
             };
             
             try {
