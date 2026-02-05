@@ -110,10 +110,12 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
-- **2026-02-05**: Added direct artwork upload without AI service
+- **2026-02-05**: Added direct artwork upload with S3 storage
   - Staff dashboard now supports manual upload with metadata form
   - Fields: title, artist, year, style, country, epoch, description
+  - Images uploaded to S3 (beget.com), fallback to local storage if S3 fails
   - API endpoints: `POST /api/artworks/upload`, `GET /api/artworks`, `DELETE /api/artworks/:id`
+  - Manual cleanup: `POST /api/admin/clear-uploads`, `GET /api/admin/uploads-info`
   - Upload history shows recently added artworks
   - Database table `artworks` created in PostgreSQL
   

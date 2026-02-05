@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
 const { Pool } = require('pg');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 
 const app = express();
 const PORT = 5000;
@@ -11,6 +13,18 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
+
+const s3Client = new S3Client({
+  endpoint: process.env.S3_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY
+  },
+  region: process.env.S3_REGION || 'us-east-1',
+  forcePathStyle: true
+});
+
+const S3_BUCKET = process.env.S3_BUCKET;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -36,6 +50,22 @@ const upload = multer({
     cb(new Error('Only image files are allowed'));
   }
 });
+
+async function uploadToS3(filePath, fileName, contentType) {
+  const fileContent = fs.readFileSync(filePath);
+  const key = `artworks/${fileName}`;
+  
+  await s3Client.send(new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: fileContent,
+    ContentType: contentType,
+    ACL: 'public-read'
+  }));
+  
+  const endpoint = process.env.S3_ENDPOINT.replace('https://', '').replace('http://', '');
+  return `https://${S3_BUCKET}.${endpoint}/${key}`;
+}
 
 const AI_CORE_URL = process.env.AI_CORE_URL || 'http://localhost:8001';
 
@@ -494,7 +524,7 @@ app.get('/api/gallery/config', (req, res) => {
   }
 });
 
-// Artworks API - Direct upload without AI service
+// Artworks API - Direct upload without AI service (uploads to S3)
 app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -503,7 +533,16 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
     
     const { title, artist, year, medium, dimensions, style, country, epoch, description, tags } = req.body;
     
-    const imageUrl = '/uploads/' + req.file.filename;
+    let imageUrl;
+    const localPath = req.file.path;
+    
+    try {
+      imageUrl = await uploadToS3(localPath, req.file.filename, req.file.mimetype);
+      console.log('Uploaded to S3:', imageUrl);
+    } catch (s3Error) {
+      console.error('S3 upload failed, using local storage:', s3Error.message);
+      imageUrl = '/uploads/' + req.file.filename;
+    }
     
     const result = await pool.query(
       `INSERT INTO artworks (title, artist, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
@@ -527,7 +566,8 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
     res.json({
       success: true,
       message: 'Artwork uploaded successfully',
-      artwork: result.rows[0]
+      artwork: result.rows[0],
+      storage: imageUrl.startsWith('https://') ? 's3' : 'local'
     });
   } catch (error) {
     console.error('Upload error:', error);
@@ -606,9 +646,76 @@ app.delete('/api/artworks/:id', async (req, res) => {
   }
 });
 
+// Clear local uploads folder (manual cleanup)
+app.post('/api/admin/clear-uploads', async (req, res) => {
+  try {
+    const uploadsDir = path.join(__dirname, 'public/uploads');
+    const files = fs.readdirSync(uploadsDir);
+    
+    let deleted = 0;
+    let skipped = 0;
+    
+    for (const file of files) {
+      if (file === '.gitkeep') {
+        skipped++;
+        continue;
+      }
+      
+      const filePath = path.join(uploadsDir, file);
+      fs.unlinkSync(filePath);
+      deleted++;
+    }
+    
+    res.json({
+      success: true,
+      message: `Cleared ${deleted} files from uploads folder`,
+      deleted,
+      skipped
+    });
+  } catch (error) {
+    console.error('Clear uploads error:', error);
+    res.status(500).json({ error: 'Failed to clear uploads', details: error.message });
+  }
+});
+
+// Get uploads folder info
+app.get('/api/admin/uploads-info', async (req, res) => {
+  try {
+    const uploadsDir = path.join(__dirname, 'public/uploads');
+    const files = fs.readdirSync(uploadsDir);
+    
+    let totalSize = 0;
+    const fileList = [];
+    
+    for (const file of files) {
+      if (file === '.gitkeep') continue;
+      
+      const filePath = path.join(uploadsDir, file);
+      const stats = fs.statSync(filePath);
+      totalSize += stats.size;
+      fileList.push({
+        name: file,
+        size: stats.size,
+        created: stats.birthtime
+      });
+    }
+    
+    res.json({
+      success: true,
+      count: fileList.length,
+      totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2),
+      files: fileList
+    });
+  } catch (error) {
+    console.error('Uploads info error:', error);
+    res.status(500).json({ error: 'Failed to get uploads info', details: error.message });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Virtual Gallery server running at http://0.0.0.0:${PORT}`);
   console.log(`AI/ML Service configured at: ${AI_CORE_URL}`);
+  console.log(`S3 Storage: ${process.env.S3_BUCKET || 'not configured'}`);
   console.log('');
   console.log('API Endpoints:');
   console.log('  GET  /api/health           - Gallery health check');
@@ -618,6 +725,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('  POST /api/ai/rag-query     - RAG query for knowledge base');
   console.log('  POST /api/ai/describe-artwork - Generate AI description');
   console.log('  POST /api/ai/similar-artworks - Find similar artworks');
-  console.log('  POST /api/artworks/upload  - Direct artwork upload (no AI)');
+  console.log('  POST /api/artworks/upload  - Direct artwork upload (to S3)');
   console.log('  GET  /api/artworks         - List all artworks');
+  console.log('  POST /api/admin/clear-uploads - Clear local uploads folder');
+  console.log('  GET  /api/admin/uploads-info  - Get uploads folder info');
 });
