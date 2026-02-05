@@ -61,30 +61,22 @@
                     <i data-lucide="home" class="w-5 h-5"></i>
                     <span class="font-medium">Главная</span>
                 </button>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span class="font-medium">Галерея</span>
+                </button>
                 <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="collections">
                     <i data-lucide="folder" class="w-5 h-5"></i>
                     <span class="font-medium">Коллекции</span>
                 </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="exhibitions">
-                    <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                    <span class="font-medium">Выставки</span>
-                </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="artworks">
-                    <i data-lucide="image" class="w-5 h-5"></i>
-                    <span class="font-medium">Экспонаты</span>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="digitized">
+                    <i data-lucide="database" class="w-5 h-5"></i>
+                    <span class="font-medium">Формирование Базы</span>
+                    <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
                 <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="ai-curation">
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
                     <span class="font-medium">AI-курирование</span>
-                </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="digitized">
-                    <i data-lucide="scan" class="w-5 h-5"></i>
-                    <span class="font-medium">Оцифрованные</span>
-                    <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
-                </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder">
-                    <i data-lucide="building-2" class="w-5 h-5"></i>
-                    <span class="font-medium">Галерея</span>
                 </button>
             </nav>
 
@@ -180,45 +172,92 @@
 
             <!-- Collections -->
             <section id="collections" class="tab-content">
-                <div class="mb-8 flex items-center justify-between">
+                <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Коллекции</h1>
-                        <p class="text-gray-600">Управление тематическими коллекциями</p>
+                        <p class="text-gray-600">Управление коллекциями и экспонатами</p>
                     </div>
-                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                    <button id="newCollectionBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
                         <i data-lucide="plus" class="w-4 h-4"></i>
                         Новая коллекция
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="h-40 bg-gradient-to-br from-purple-400 to-pink-500"></div>
+                <!-- Filter Tabs -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button class="collection-filter active px-4 py-2 rounded-xl text-sm font-medium bg-purple-100 text-purple-700" data-filter="all">Все коллекции</button>
+                        <button class="collection-filter px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="tag">По тегам</button>
+                        <button class="collection-filter px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="type">По виду</button>
+                        <button class="collection-filter px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="author">По авторам</button>
+                        <button class="collection-filter px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="country">По странам</button>
+                        <button class="collection-filter px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="epoch">По эпохам</button>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1 relative">
+                            <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="collectionSearch" placeholder="Поиск коллекций и экспонатов..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <select id="collectionCategory" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
+                            <option value="">Все категории</option>
+                            <option value="painting">Живопись</option>
+                            <option value="sculpture">Скульптура</option>
+                            <option value="photography">Фотография</option>
+                            <option value="graphics">Графика</option>
+                            <option value="decorative">Декоративное искусство</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Collections Grid -->
+                <div id="collectionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="impressionism">
+                        <div class="h-40 bg-gradient-to-br from-purple-400 to-pink-500 relative">
+                            <span class="absolute top-3 right-3 bg-white/90 text-purple-700 text-xs px-2 py-1 rounded-full">Эпоха: XIX век</span>
+                        </div>
                         <div class="p-6">
                             <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Импрессионизм</h3>
-                            <p class="text-gray-600 text-sm mb-4">Коллекция работ импрессионистов XIX века</p>
+                            <p class="text-gray-600 text-sm mb-3">Коллекция работ импрессионистов XIX века</p>
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">Франция</span>
+                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Живопись</span>
+                                <span class="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded">свет</span>
+                            </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500">45 экспонатов</span>
                                 <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="h-40 bg-gradient-to-br from-blue-400 to-cyan-500"></div>
+                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="modern">
+                        <div class="h-40 bg-gradient-to-br from-blue-400 to-cyan-500 relative">
+                            <span class="absolute top-3 right-3 bg-white/90 text-blue-700 text-xs px-2 py-1 rounded-full">Эпоха: XX-XXI век</span>
+                        </div>
                         <div class="p-6">
                             <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Современное искусство</h3>
-                            <p class="text-gray-600 text-sm mb-4">Работы современных художников</p>
+                            <p class="text-gray-600 text-sm mb-3">Работы современных художников</p>
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">Международная</span>
+                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Инсталляции</span>
+                            </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500">78 экспонатов</span>
                                 <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="h-40 bg-gradient-to-br from-amber-400 to-orange-500"></div>
+                    <div class="collection-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" data-collection="renaissance">
+                        <div class="h-40 bg-gradient-to-br from-amber-400 to-orange-500 relative">
+                            <span class="absolute top-3 right-3 bg-white/90 text-amber-700 text-xs px-2 py-1 rounded-full">Эпоха: XIV-XVI век</span>
+                        </div>
                         <div class="p-6">
                             <h3 class="font-display font-semibold text-lg text-gray-900 mb-2">Ренессанс</h3>
-                            <p class="text-gray-600 text-sm mb-4">Шедевры эпохи Возрождения</p>
+                            <p class="text-gray-600 text-sm mb-3">Шедевры эпохи Возрождения</p>
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                <span class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">Италия</span>
+                                <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Живопись</span>
+                                <span class="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded">религия</span>
+                            </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500">32 экспоната</span>
                                 <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Открыть</button>
@@ -226,89 +265,71 @@
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Exhibitions -->
-            <section id="exhibitions" class="tab-content">
-                <div class="mb-8 flex items-center justify-between">
-                    <div>
-                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Выставки</h1>
-                        <p class="text-gray-600">Управление виртуальными выставками</p>
+                <!-- Artworks Section within Collections -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
+                            Экспонаты для добавления в коллекции
+                        </h3>
+                        <button id="addArtworkBtn" class="text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Добавить экспонат
+                        </button>
                     </div>
-                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        Новая выставка
-                    </button>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Выставка</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Тема</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Даты</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4 font-medium text-gray-900">Мир импрессионизма</td>
-                                <td class="px-6 py-4 text-gray-600">Живопись XIX века</td>
-                                <td class="px-6 py-4 text-gray-600">01.02 - 28.02.2025</td>
-                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Активна</span></td>
-                                <td class="px-6 py-4">
-                                    <div class="flex gap-2">
-                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="eye" class="w-4 h-4 text-gray-600"></i></button>
-                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="edit" class="w-4 h-4 text-gray-600"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Artworks -->
-            <section id="artworks" class="tab-content">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Экспонаты</h1>
-                    <p class="text-gray-600">Поиск и подбор экспонатов для коллекций</p>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
-                    <div class="flex-1 relative">
-                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" placeholder="Поиск экспонатов..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <select class="px-4 py-2 border border-gray-200 rounded-xl">
-                        <option value="">Все категории</option>
-                        <option value="painting">Живопись</option>
-                        <option value="sculpture">Скульптура</option>
-                        <option value="photography">Фотография</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
-                        <div class="p-4">
-                            <h4 class="font-semibold text-gray-900">Звездная ночь</h4>
-                            <p class="text-sm text-gray-500">Ван Гог, 1889</p>
-                            <button class="mt-3 w-full bg-purple-100 text-purple-700 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors text-sm">
-                                Добавить в коллекцию
-                            </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
+                            <div class="h-36 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 text-sm">Звездная ночь</h4>
+                                <p class="text-xs text-gray-500 mb-2">Ван Гог, 1889 • Нидерланды</p>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">постимпрессионизм</span>
+                                </div>
+                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
+                                    В коллекцию
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="h-48 bg-gradient-to-br from-amber-100 to-yellow-200"></div>
-                        <div class="p-4">
-                            <h4 class="font-semibold text-gray-900">Мона Лиза</h4>
-                            <p class="text-sm text-gray-500">Да Винчи, 1503</p>
-                            <button class="mt-3 w-full bg-purple-100 text-purple-700 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors text-sm">
-                                Добавить в коллекцию
-                            </button>
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
+                            <div class="h-36 bg-gradient-to-br from-amber-100 to-yellow-200"></div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 text-sm">Мона Лиза</h4>
+                                <p class="text-xs text-gray-500 mb-2">Да Винчи, 1503 • Италия</p>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">ренессанс</span>
+                                </div>
+                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
+                                    В коллекцию
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
+                            <div class="h-36 bg-gradient-to-br from-blue-200 to-indigo-300"></div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 text-sm">Девушка с жемчужной серёжкой</h4>
+                                <p class="text-xs text-gray-500 mb-2">Вермеер, 1665 • Нидерланды</p>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">барокко</span>
+                                </div>
+                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
+                                    В коллекцию
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200 hover:border-purple-300 transition-colors">
+                            <div class="h-36 bg-gradient-to-br from-pink-200 to-rose-300"></div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 text-sm">Кувшинки</h4>
+                                <p class="text-xs text-gray-500 mb-2">Моне, 1906 • Франция</p>
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">импрессионизм</span>
+                                </div>
+                                <button class="w-full bg-purple-100 text-purple-700 py-1.5 rounded-lg font-medium hover:bg-purple-200 transition-colors text-xs">
+                                    В коллекцию
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -363,8 +384,8 @@
             <section id="digitized" class="tab-content">
                 <div class="mb-8 flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Оцифрованные работы</h1>
-                        <p class="text-gray-600">Модерация и утверждение оцифрованных произведений</p>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Формирование Базы</h1>
+                        <p class="text-gray-600">Оцифровка, модерация и добавление произведений в базу данных</p>
                     </div>
                     <div class="flex gap-2">
                         <select id="digitizedStatusFilter" class="px-4 py-2 border border-gray-200 rounded-xl bg-white">
@@ -1409,6 +1430,43 @@
                 availableRooms[index].connections.push(galleryConfig.currentRoom);
                 alert(`Связь с залом "${availableRooms[index].name}" создана`);
             }
+        });
+
+        // Collections filter functionality
+        document.querySelectorAll('.collection-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.collection-filter').forEach(b => {
+                    b.classList.remove('active', 'bg-purple-100', 'text-purple-700');
+                    b.classList.add('bg-gray-100', 'text-gray-600');
+                });
+                btn.classList.add('active', 'bg-purple-100', 'text-purple-700');
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                
+                const filter = btn.dataset.filter;
+                filterCollections(filter);
+            });
+        });
+
+        function filterCollections(filter) {
+            const cards = document.querySelectorAll('.collection-card');
+            cards.forEach(card => {
+                card.style.display = 'block';
+            });
+            
+            if (filter !== 'all') {
+                console.log('Фильтр коллекций:', filter);
+            }
+        }
+
+        document.getElementById('newCollectionBtn')?.addEventListener('click', () => {
+            const name = prompt('Название новой коллекции:');
+            if (name) {
+                alert(`Коллекция "${name}" будет создана. Функционал в разработке.`);
+            }
+        });
+
+        document.getElementById('addArtworkBtn')?.addEventListener('click', () => {
+            alert('Добавление нового экспоната. Функционал в разработке.');
         });
     </script>
 </body>
