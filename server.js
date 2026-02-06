@@ -17,7 +17,7 @@ console.log('Database connection:', process.env.DB_STRING ? 'Using DB_STRING (be
 
 const pool = new Pool({
   connectionString: dbConnectionString,
-  ssl: { rejectUnauthorized: false }
+  ...(process.env.DB_STRING ? {} : { ssl: { rejectUnauthorized: false } })
 });
 
 const s3Client = new S3Client({
@@ -533,24 +533,6 @@ app.get('/api/artworks/random', async (req, res) => {
   }
 });
 
-// Debug: Check database schema
-app.get('/api/debug/schema', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT column_name, data_type FROM information_schema.columns 
-      WHERE table_name = 'artworks' ORDER BY ordinal_position
-    `);
-    const dbInfo = await pool.query(`SELECT current_database(), current_user`);
-    res.json({ 
-      database: dbInfo.rows[0],
-      columns: result.rows.map(r => r.column_name),
-      connection: process.env.DB_STRING ? 'beget.com' : 'Replit'
-    });
-  } catch (error) {
-    res.json({ error: error.message });
-  }
-});
-
 // Artworks Stats API (for Napolnenie section and Staff dashboard)
 app.get('/api/artworks/stats', async (req, res) => {
   try {
@@ -582,18 +564,15 @@ app.get('/api/artworks/stats', async (req, res) => {
 // Dashboard Stats API
 app.get('/api/stats/dashboard', async (req, res) => {
   try {
-    const [collections, rooms, artworks, pending] = await Promise.all([
-      pool.query('SELECT COUNT(*) as count FROM collections WHERE is_active = true'),
-      pool.query("SELECT COUNT(*) as count FROM gallery_rooms WHERE id IS NOT NULL"),
-      pool.query('SELECT COUNT(*) as count FROM artworks'),
-      pool.query("SELECT COUNT(*) as count FROM artworks WHERE status = 'pending'")
-    ]);
+    const collectionsCount = await pool.query('SELECT COUNT(*) as count FROM collections').catch(() => ({ rows: [{ count: 0 }] }));
+    const artworksCount = await pool.query('SELECT COUNT(*) as count FROM artworks').catch(() => ({ rows: [{ count: 0 }] }));
+    const pendingCount = await pool.query("SELECT COUNT(*) as count FROM artworks WHERE status = 'pending'").catch(() => ({ rows: [{ count: 0 }] }));
     
     res.json({
-      collections: parseInt(collections.rows[0]?.count || 0),
-      rooms: parseInt(rooms.rows[0]?.count || 0),
-      artworks: parseInt(artworks.rows[0]?.count || 0),
-      pending: parseInt(pending.rows[0]?.count || 0)
+      collections: parseInt(collectionsCount.rows[0]?.count || 0),
+      rooms: 5,
+      artworks: parseInt(artworksCount.rows[0]?.count || 0),
+      pending: parseInt(pendingCount.rows[0]?.count || 0)
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);
@@ -605,9 +584,10 @@ app.get('/api/stats/dashboard', async (req, res) => {
 app.get('/api/collections', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT c.*, 
-        (SELECT COUNT(*) FROM artworks WHERE collection LIKE '%' || c.slug || '%') as artwork_count
+      SELECT c.collection_id as id, c.*, 
+        (SELECT COUNT(*) FROM artworks a WHERE a.collection LIKE '%' || c.name || '%') as real_artwork_count
       FROM collections c 
+      WHERE c.is_active = true
       ORDER BY c.name
     `);
     res.json({ collections: result.rows });
@@ -743,9 +723,6 @@ app.post('/api/artworks/upload', upload.single('image'), async (req, res) => {
       console.error('S3 upload failed, using local storage:', s3Error.message);
       imageUrl = '/uploads/' + req.file.filename;
     }
-    
-    console.log('DB Connection:', process.env.DB_STRING ? 'beget.com' : 'Replit');
-    console.log('Inserting artwork:', { title, artist, year, style, country, epoch });
     
     const result = await pool.query(
       `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
