@@ -700,6 +700,52 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="mt-8">
+                    <h2 class="text-2xl font-display font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="archive" class="w-6 h-6 text-indigo-600"></i>
+                        Архивное хранилище
+                    </h2>
+                    <p class="text-gray-600 mb-6">Удалённые элементы перемещаются в архив и могут быть восстановлены или окончательно удалены.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+                            <p class="text-3xl font-bold text-indigo-600" id="archiveTotalCount">0</p>
+                            <p class="text-sm text-gray-500 mt-1">Всего в архиве</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+                            <p class="text-3xl font-bold text-blue-600" id="archiveArtworksCount">0</p>
+                            <p class="text-sm text-gray-500 mt-1">Экспонатов</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+                            <p class="text-3xl font-bold text-purple-600" id="archiveCollectionsCount">0</p>
+                            <p class="text-sm text-gray-500 mt-1">Коллекций</p>
+                        </div>
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+                            <p class="text-3xl font-bold text-amber-600" id="archiveRoomsCount">0</p>
+                            <p class="text-sm text-gray-500 mt-1">Залов</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mb-6">
+                        <button id="archiveFilterAll" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-100 text-indigo-700 archive-filter active" data-type="">Все</button>
+                        <button class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 archive-filter" data-type="artwork">Экспонаты</button>
+                        <button class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 archive-filter" data-type="collection">Коллекции</button>
+                        <button class="px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 archive-filter" data-type="room">Залы</button>
+                        <div class="flex-1"></div>
+                        <button id="clearArchiveBtn" class="px-4 py-2 rounded-xl text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            Очистить архив
+                        </button>
+                    </div>
+
+                    <div id="archiveList" class="space-y-3">
+                        <div class="text-center py-8 text-gray-400">
+                            <i data-lucide="archive" class="w-10 h-10 mx-auto mb-2"></i>
+                            <p>Нажмите на вкладку "Настройки" для загрузки архива</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- DevOps / Infrastructure -->
@@ -1181,6 +1227,164 @@
         document.querySelector('[data-tab="devops"]')?.addEventListener('click', () => {
             setTimeout(checkInfrastructure, 100);
         });
+
+        let currentArchiveFilter = '';
+
+        async function loadArchive(type = '') {
+            currentArchiveFilter = type;
+            const list = document.getElementById('archiveList');
+            list.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                    <p>Загрузка архива...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const url = type ? `/api/archive?type=${type}` : '/api/archive';
+                const [itemsRes, statsRes] = await Promise.all([
+                    fetch(url),
+                    fetch('/api/archive/stats')
+                ]);
+                const itemsData = await itemsRes.json();
+                const statsData = await statsRes.json();
+                const items = itemsData.items || [];
+                const stats = statsData.stats || { total: 0, by_type: [] };
+
+                document.getElementById('archiveTotalCount').textContent = stats.total;
+                const typeMap = {};
+                stats.by_type.forEach(t => typeMap[t.entity_type] = parseInt(t.count));
+                document.getElementById('archiveArtworksCount').textContent = typeMap.artwork || 0;
+                document.getElementById('archiveCollectionsCount').textContent = typeMap.collection || 0;
+                document.getElementById('archiveRoomsCount').textContent = typeMap.room || 0;
+
+                if (items.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center py-12 text-gray-400">
+                            <i data-lucide="archive" class="w-12 h-12 mx-auto mb-3"></i>
+                            <p class="text-lg font-medium">Архив пуст</p>
+                            <p class="text-sm mt-1">Удалённые элементы будут отображаться здесь</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                list.innerHTML = items.map(item => {
+                    const data = item.entity_data;
+                    const typeLabels = { artwork: 'Экспонат', collection: 'Коллекция', room: 'Зал' };
+                    const typeColors = { artwork: 'blue', collection: 'purple', room: 'amber' };
+                    const typeIcons = { artwork: 'image', collection: 'folder', room: 'layout-grid' };
+                    const color = typeColors[item.entity_type] || 'gray';
+                    const icon = typeIcons[item.entity_type] || 'archive';
+                    const label = typeLabels[item.entity_type] || item.entity_type;
+
+                    let title = '', subtitle = '', imgUrl = '';
+                    if (item.entity_type === 'artwork') {
+                        title = data.title || 'Без названия';
+                        subtitle = data.artist_name || data.artist || 'Неизвестен';
+                        imgUrl = data.image_url || '';
+                    } else if (item.entity_type === 'collection') {
+                        title = data.name || 'Без названия';
+                        subtitle = data.description || '';
+                    } else if (item.entity_type === 'room') {
+                        title = data.name || 'Без названия';
+                        subtitle = `${data.width || '?'}x${data.depth || '?'}x${data.height || '?'}м, тема: ${data.theme || '?'}`;
+                    }
+
+                    const date = new Date(item.archived_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    return `
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                            ${imgUrl ? `<img src="${imgUrl}" alt="" class="w-16 h-16 object-cover rounded-xl flex-shrink-0">` : 
+                              `<div class="w-16 h-16 bg-${color}-100 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="${icon}" class="w-7 h-7 text-${color}-600"></i></div>`}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 bg-${color}-100 text-${color}-700 text-xs font-medium rounded-full">${label}</span>
+                                    <span class="text-xs text-gray-400">${date}</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 truncate">${title}</h4>
+                                <p class="text-sm text-gray-500 truncate">${subtitle}</p>
+                                ${item.reason ? `<p class="text-xs text-gray-400 mt-1">Причина: ${item.reason}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                ${item.entity_type !== 'room' ? `
+                                <button onclick="restoreArchiveItem(${item.archive_id})" class="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1" title="Восстановить">
+                                    <i data-lucide="undo-2" class="w-4 h-4"></i>
+                                    Восстановить
+                                </button>` : ''}
+                                <button onclick="permanentlyDeleteArchiveItem(${item.archive_id})" class="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1" title="Удалить навсегда">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Load archive error:', error);
+                list.innerHTML = `<div class="text-center py-8 text-red-500"><p>Ошибка загрузки архива</p></div>`;
+            }
+        }
+
+        async function restoreArchiveItem(id) {
+            if (!confirm('Восстановить этот элемент из архива?')) return;
+            try {
+                const response = await fetch(`/api/archive/${id}/restore`, { method: 'POST' });
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to restore');
+                }
+                alert('Элемент успешно восстановлен');
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                alert('Ошибка при восстановлении: ' + error.message);
+            }
+        }
+
+        async function permanentlyDeleteArchiveItem(id) {
+            if (!confirm('Удалить элемент из архива навсегда? Это действие необратимо!')) return;
+            try {
+                const response = await fetch(`/api/archive/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete');
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                alert('Ошибка при удалении: ' + error.message);
+            }
+        }
+
+        document.getElementById('clearArchiveBtn')?.addEventListener('click', async () => {
+            const typeLabel = currentArchiveFilter ? { artwork: 'экспонаты', collection: 'коллекции', room: 'залы' }[currentArchiveFilter] || currentArchiveFilter : 'все элементы';
+            if (!confirm(`Вы уверены, что хотите удалить ${typeLabel} из архива навсегда?\n\nЭто действие необратимо!`)) return;
+            try {
+                const url = currentArchiveFilter ? `/api/archive?type=${currentArchiveFilter}` : '/api/archive';
+                const response = await fetch(url, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to clear');
+                const data = await response.json();
+                alert(`Удалено из архива: ${data.deleted} элементов`);
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                alert('Ошибка при очистке архива: ' + error.message);
+            }
+        });
+
+        document.querySelectorAll('.archive-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.archive-filter').forEach(b => {
+                    b.classList.remove('bg-indigo-100', 'text-indigo-700', 'active');
+                    b.classList.add('bg-gray-100', 'text-gray-600');
+                });
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                btn.classList.add('bg-indigo-100', 'text-indigo-700', 'active');
+                loadArchive(btn.dataset.type);
+            });
+        });
+
+        document.querySelector('[data-tab="settings"]')?.addEventListener('click', () => {
+            setTimeout(() => loadArchive(currentArchiveFilter), 100);
+        });
+
     </script>
 </body>
 </html>

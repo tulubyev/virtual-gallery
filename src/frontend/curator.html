@@ -2276,11 +2276,16 @@
         }
 
         async function deleteCollection(id, name) {
-            if (!confirm(`Удалить коллекцию "${name}"?`)) return;
+            if (!confirm(`Вы уверены, что хотите удалить коллекцию "${name}"?\n\nКоллекция будет перемещена в архив и может быть восстановлена администратором.`)) return;
             
             try {
-                const response = await fetch(`/api/collections/${id}`, { method: 'DELETE' });
+                const response = await fetch(`/api/collections/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ archived_by: 'curator', reason: 'Удалена куратором' })
+                });
                 if (!response.ok) throw new Error('Failed to delete');
+                alert('Коллекция перемещена в архив');
                 loadCollections();
                 loadDashboardStats();
             } catch (error) {
@@ -2479,16 +2484,25 @@
             renderRoomsList();
         }
         
-        function deleteRoom(roomId) {
+        async function deleteRoom(roomId) {
             if (galleryConfig.rooms.length <= 1) {
                 alert('Нельзя удалить последний зал');
                 return;
             }
             
-            if (!confirm('Удалить этот зал?')) return;
+            if (!confirm('Вы уверены, что хотите удалить этот зал?\n\nЗал будет перемещён в архив и может быть восстановлен администратором.')) return;
             
             const index = galleryConfig.rooms.findIndex(r => r.id === roomId);
             if (index === -1) return;
+
+            const room = galleryConfig.rooms[index];
+            try {
+                await fetch('/api/archive/room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ room, archived_by: 'curator', reason: 'Удалён куратором' })
+                });
+            } catch (e) {}
             
             galleryConfig.rooms.splice(index, 1);
             

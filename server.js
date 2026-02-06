@@ -25,6 +25,7 @@ app.use('/api/artworks', require('./src/routes/artworks'));
 app.use('/api/collections', require('./src/routes/collections'));
 app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/watermark', require('./src/routes/watermark'));
+app.use('/api/archive', require('./src/routes/archive'));
 
 // Frontend
 const pages = ['admin', 'curator', 'auction', 'gallery-3d', 'knowledge-base', 'staff', 'user'];

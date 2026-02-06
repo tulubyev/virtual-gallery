@@ -1,10 +1,8 @@
 # Virtual Art Gallery
 
-**Domain:** virtgal.ru
-
 ## Overview
 
-A comprehensive virtual art gallery web application featuring VR support, AI-powered curation, and IoT integration. The platform allows users to explore a 3D gallery environment, view artworks, and receive personalized recommendations. The system supports multiple user roles (admin, curator, staff, tour guide, visitors) with role-based access control. The project aims to revolutionize art appreciation and management through advanced technology.
+The Virtual Art Gallery is a web application designed to revolutionize art appreciation and management through advanced technology. It offers a comprehensive 3D gallery environment with VR support, AI-powered curation, and IoT integration. The platform enables users to explore artworks, receive personalized recommendations, and interact within a rich digital art space. It supports multiple user roles (admin, curator, staff, tour guide, visitors) with robust role-based access control. The project's vision is to leverage technology to enhance the accessibility and experience of art.
 
 ## User Preferences
 
@@ -14,70 +12,36 @@ Preferred communication style: Simple, everyday language.
 
 ### Microservices Architecture
 
-The project utilizes a **microservices architecture** comprising a Virtual Gallery (Node.js) and an AI/ML Service (Python). This separation enables independent scaling, technology optimization (Node.js for web serving, Python for AI/ML), deployment flexibility (GPU-enabled infrastructure for AI/ML), independent development, and fault isolation.
-
-```
-┌─────────────────────────────────────┐     ┌─────────────────────────────────────┐
-│     Virtual Gallery (Node.js)       │     │      AI/ML Service (Python)         │
-│         Port: 5000                  │     │         Port: 8001                  │
-├─────────────────────────────────────┤     ├─────────────────────────────────────┤
-│ • Frontend (HTML/CSS/JS)            │     │ • FastAPI application               │
-│ • Express server                    │     │ • GPT-4 Vision analysis             │
-│ • API proxy to AI/ML                │     │ • RAG system                        │
-│ • Gallery/Auction logic             │     │ • PDF processing                    │
-│ • User authentication               │     │ • Vector embeddings                 │
-└──────────────┬──────────────────────┘     └──────────────┬──────────────────────┘
-               │                                           │
-               │         HTTP API (REST)                   │
-               └───────────────────────────────────────────┘
-                                   │
-                    ┌──────────────┴──────────────┐
-                    │                             │
-              ┌─────┴─────┐              ┌────────┴────────┐
-              │ PostgreSQL │              │    Qdrant       │
-              │ (Shared)   │              │  (Vector DB)    │
-              └───────────┘              └─────────────────┘
-```
-
-Communication between services primarily occurs via HTTP API for direct requests (e.g., image analysis, RAG queries) and PostgreSQL for shared data like artworks and user metadata. Redis is used for task queues for background processing.
-
-### Demo Mode
-
-When the AI/ML service is unavailable, the gallery operates in a **demo mode**, providing pre-defined responses and disabling certain AI-dependent functionalities.
+The system employs a microservices architecture, separating the application into a Virtual Gallery service (Node.js) and an AI/ML Service (Python). This design allows for independent scaling, technology optimization (Node.js for web, Python for AI), flexible deployment, and fault isolation. Communication between services primarily uses HTTP APIs, with PostgreSQL for shared data and Redis for task queues. A demo mode is available if the AI/ML service is unavailable, providing pre-defined responses.
 
 ### Backend Architecture
 
-The backend is built with Node.js and Express, using a service-oriented architecture with dependency injection. It features RESTful endpoints with JWT-based authentication and a layered structure of controllers, services, models, and middleware.
+The backend is built with Node.js and Express, following a service-oriented architecture with dependency injection. It features RESTful endpoints, JWT-based authentication, and a layered structure of controllers, services, models, and middleware.
 
 ### Frontend Architecture
 
-The frontend uses static HTML pages served by Express, enhanced with Vite-built React widgets utilizing shadcn/ui components. Three.js with WebXR provides 3D graphics and VR support. Styling is handled with Tailwind CSS. The frontend is designed to be responsive and supports various user roles with distinct dashboards (admin, curator, staff, auction-participant, etc.), each with tailored functionalities and consistent design themes.
-
-Key frontend features include:
-- **3D Gallery Builder**: Allows curators to create and manage 3D gallery spaces, including room dimensions, themes, and artwork slots.
-- **Procedural Generation**: Dynamically generates 3D gallery environments from configuration.
-- **AI-powered Slot Calculation**: Recommends optimal artwork slot counts and distribution within gallery rooms.
+The frontend consists of static HTML pages served by Express, augmented with Vite-built React widgets using shadcn/ui. Three.js with WebXR provides 3D graphics and VR capabilities. Tailwind CSS is used for styling. The frontend supports various user roles with distinct, responsively designed dashboards. Key features include a 3D Gallery Builder for curators, procedural generation of gallery environments, and AI-powered recommendations for artwork slot placement.
 
 ### AI/ML Service
 
-A dedicated Python FastAPI microservice provides advanced AI capabilities, including:
+A dedicated Python FastAPI microservice provides advanced AI functionalities:
 - Image analysis via OpenAI GPT-4 Vision.
 - PDF processing with OCR and text chunking for a RAG system.
 - Artwork digitization, including dual-sided scanning and AI analysis.
-- Watermarking (visible and invisible steganographic) for copyright protection.
+- Visible and invisible (steganographic) watermarking for copyright protection.
 - NFT Metadata generation (ERC-721 compliant).
 - Integration with external art sources (e.g., WikiArt, MET Museum).
 - AI-powered categorization of PDF content.
 
 ### Database Design
 
-- **Primary Database**: PostgreSQL for relational data (users, artworks, galleries).
-- **Vector Database**: Qdrant Cloud for AI embeddings and similarity search, with collections for artworks, PDF chunks, and external artworks.
-- **Caching**: Redis for session management and job queues.
+- **Primary Database**: PostgreSQL for relational data such as users, artworks, and galleries.
+- **Vector Database**: Qdrant Cloud for AI embeddings and similarity search across artworks and PDF content.
+- **Caching**: Redis is utilized for session management and managing job queues for background processing.
 
 ### Authentication & Authorization
 
-The system uses JWT tokens for API authentication and implements role-based access control (admin, curator, staff, tour_guide, user). bcrypt is used for secure password hashing.
+The system uses JWT tokens for API authentication and implements role-based access control. `bcrypt` is used for secure password hashing.
 
 ## External Dependencies
 
@@ -90,113 +54,9 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ### Key NPM Packages (Virtual Gallery)
 
-- `express`: Web framework.
-- `pg`: PostgreSQL client.
-- `jsonwebtoken`: JWT authentication.
-- `bcrypt`: Password hashing.
-- `aws-sdk`: S3 storage integration.
-- `socket.io`: Real-time communication.
-- `sharp`: Image processing.
-- `multer`: File upload handling.
+- `express`, `pg`, `jsonwebtoken`, `bcrypt`, `aws-sdk`, `socket.io`, `sharp`, `multer`.
 - React, Vite, Tailwind CSS, shadcn/ui, Three.js, WebXR.
 
 ### Python Dependencies (AI/ML Service)
 
-- `fastapi`: Python API framework.
-- `openai`: OpenAI API client.
-- `qdrant-client`: Vector database client.
-- `sentence-transformers`: Embedding generation.
-- `PyPDF2`, `pytesseract`: PDF and OCR processing.
-
-## Recent Changes
-
-- **2026-02-06**: Исправлена работа кнопок в разделе "Наполнение" дашборда куратора
-  - Исправлен endpoint `PATCH /api/artworks/:id/status` — теперь обновляет только переданные поля (не затирает curator_notes при отклонении, не затирает rejection_reason при одобрении)
-  - Добавлен недостающий endpoint `PATCH /api/artworks/:id` для сохранения метаданных (название, автор, стиль, год, страна, описание и т.д.) — кнопка "Сохранить" ранее возвращала 404
-  - Добавлена серверная валидация статусов (pending, active, approved, rejected, published) и года
-  - Исправлена логика блокировки кнопок: "Одобрить" недоступна если уже одобрено/опубликовано, "Отклонить" недоступна если уже отклонено/опубликовано, "Опубликовать" доступна только для одобренных работ
-  - Добавлена кнопка "Вернуть" — сброс статуса обратно в "На рассмотрении" (pending) для ошибочно одобренных/отклоненных/опубликованных работ
-  - Добавлены индикаторы загрузки на кнопках (спиннер) во время запросов к серверу
-  - Улучшены сообщения об ошибках — теперь показывают текст ошибки с сервера
-
-- **2026-02-06**: Обновлен дизайн навигации слайд-шоу на главной странице
-  - Точки навигации перемещены в информационную панель под Hero-секцией
-  - Цвета обновлены на яркий акцентный фиолетовый (accent-500 для активной, accent-200 для неактивных)
-  - Активная точка увеличивается и имеет тень (scale-110, shadow-md)
-  - Информационная панель стилизована капсулой с accent-50 фоном, рамкой и тенью
-  - Текст описания произведения — accent-700, полужирный
-
-- **2026-02-05**: Migrated to beget.com PostgreSQL database
-  - Database connection now uses DB_STRING environment variable (beget.com)
-  - Synced artworks data from Replit database to beget.com
-  - Updated queries to use correct column names: `artwork_id` → `id`, `artist_name` → `artist`
-  - Added missing columns to beget DB: status, country, epoch, technique, curator_notes, rejection_reason, collection
-  - Removed pexels.com fallback images, now using S3 images only
-  - Production environment configured with DB_STRING, S3 credentials
-
-- **2026-02-05**: Enhanced curator dashboard "Наполнение" section
-  - Added interactive image zoom/pan in artwork modal (mouse wheel, +/− buttons, drag to pan)
-  - Support for touch screens (pinch-to-zoom, touch drag)
-  - Zoom range: 50% to 500%, hint text for controls
-  - Auto-reset zoom on modal close
-  - Added year, country, description fields to metadata form
-  - Style and epoch now use dropdown selects
-  - Status badge shows current artwork status with color coding
-  - Fixed CORS issue for watermark protection (new server-side image fetch)
-  - New API endpoint: `POST /api/watermark/apply` - applies protection by image URL
-
-- **2026-02-05**: Implemented copyright protection system (watermarks)
-  - Visible watermark: text overlay with configurable opacity and position
-  - Tiled watermark: diagonal repeating pattern across image
-  - Invisible watermark: LSB encoding with encrypted payload (AES)
-  - Steganography: hidden metadata in bottom pixels (ID, owner, hash, timestamp)
-  - Full protection endpoint: applies all three methods at once
-  - Verification endpoint: extracts and validates hidden marks
-  - API endpoints: `/api/watermark/visible`, `/api/watermark/invisible`, `/api/watermark/steganography`, `/api/watermark/protect`, `/api/watermark/verify`
-  - Service: `src/services/watermark.js` using sharp, jimp, crypto-js
-
-- **2026-02-05**: Added direct artwork upload with S3 storage
-  - Staff dashboard now supports manual upload with metadata form
-  - Fields: title, artist, year, style, country, epoch, description
-  - Images uploaded to S3 (beget.com), fallback to local storage if S3 fails
-  - API endpoints: `POST /api/artworks/upload`, `GET /api/artworks`, `DELETE /api/artworks/:id`
-  - Manual cleanup: `POST /api/admin/clear-uploads`, `GET /api/admin/uploads-info`
-  - Upload history shows recently added artworks
-  - Database table `artworks` created in PostgreSQL
-  
-- **2026-02-05**: Enhanced artwork modal in 3D gallery
-  - Added interactive image viewer with zoom (mouse wheel, +/− buttons) and pan (drag to move)
-  - Added action buttons: Избранное, Аукцион, Вопрос (ask moderator)
-  - Image auto-centers and fits container on load
-  - Reset button to restore original view
-  
-- **2026-02-05**: Reorganized curator dashboard menu
-  - New menu order: Главная → Галерея → Коллекции → Наполнение → AI-курирование
-  - Removed separate Экспонаты and Выставки sections
-  - Merged artworks management into Коллекции with category filters (теги, виды, авторы, страны, эпохи)
-  - Renamed Оцифрованные → Наполнение
-  
-- **2026-02-05**: Fixed overlapping UI controls on gallery-3d page
-  - Room selection buttons centered at bottom
-  - Control hints moved to bottom-left corner
-  
-- **2026-02-05**: Updated all email addresses to virtgal.ru domain
-  - admin@virtgal.ru, curator@virtgal.ru, staff@virtgal.ru, etc.
-
-- **2026-02-05**: Added AI-powered slot calculation for gallery rooms
-  - "Рассчитать с ИИ" button calculates optimal number of artwork slots
-  - Uses room dimensions to recommend slot count and wall distribution
-  - API endpoint: `POST /api/ai/calculate-slots`
-
-- **2026-02-04**: Added Gallery Builder to Curator Dashboard
-  - "Галерея" section for managing 3D gallery spaces
-  - Room management: create, edit, delete, reorder rooms
-  - Room settings: theme, dimensions, wall color, lighting
-  - Visual layout editor with artwork slots
-  - API endpoints: `POST/GET /api/gallery/config`
-
-- **2026-02-04**: Implemented 3D Gallery with Procedural Generation
-  - `/gallery-3d` route with immersive 3D experience
-  - 5 themed rooms with TextureManager (LRU cache) and ArtworkLODManager
-  - RoomNavigator with smooth camera transitions
-  - Interactive artwork slots with click-to-view details
+- `fastapi`, `openai`, `qdrant-client`, `sentence-transformers`, `PyPDF2`, `pytesseract`.

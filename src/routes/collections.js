@@ -112,14 +112,13 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const result = await pool.query(
-      'DELETE FROM collections WHERE collection_id = $1 RETURNING collection_id as id',
-      [req.params.id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Collection not found' });
-    }
-    res.json({ success: true });
+    const archiveService = require('../services/archive');
+    const collection = await pool.query('SELECT * FROM collections WHERE collection_id = $1', [req.params.id]);
+    if (collection.rows.length === 0) return res.status(404).json({ error: 'Collection not found' });
+
+    await archiveService.archiveEntity('collection', req.params.id, collection.rows[0], req.body.archived_by || 'curator', req.body.reason || null);
+    await pool.query('DELETE FROM collections WHERE collection_id = $1', [req.params.id]);
+    res.json({ success: true, archived: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

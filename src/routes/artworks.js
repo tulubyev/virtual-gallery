@@ -163,8 +163,13 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
+    const archiveService = require('../services/archive');
+    const artwork = await pool.query('SELECT * FROM artworks WHERE artwork_id = $1', [req.params.id]);
+    if (artwork.rows.length === 0) return res.status(404).json({ error: 'Artwork not found' });
+
+    await archiveService.archiveEntity('artwork', req.params.id, artwork.rows[0], req.body.archived_by || 'curator', req.body.reason || null);
     await pool.query('DELETE FROM artworks WHERE artwork_id = $1', [req.params.id]);
-    res.json({ success: true });
+    res.json({ success: true, archived: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
