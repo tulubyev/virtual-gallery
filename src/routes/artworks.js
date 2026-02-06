@@ -92,6 +92,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/stats', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT status, COUNT(*)::int as count FROM artworks GROUP BY status`
+    );
+    const counts = { pending: 0, approved: 0, rejected: 0, published: 0 };
+    result.rows.forEach(r => {
+      if (counts.hasOwnProperty(r.status)) {
+        counts[r.status] = r.count;
+      }
+    });
+    res.json(counts);
+  } catch (error) {
+    console.error('Artworks stats error:', error.message);
+    res.status(500).json({ error: 'Failed to load stats' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE artwork_id = $1', [req.params.id]);
