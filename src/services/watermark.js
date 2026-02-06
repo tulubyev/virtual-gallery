@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-const Jimp = require('jimp');
+const { Jimp, intToRGBA, rgbaToInt, JimpMime } = require('jimp');
 const CryptoJS = require('crypto-js');
 const path = require('path');
 const fs = require('fs');
@@ -107,9 +107,10 @@ class WatermarkService {
   }
 
   async applyInvisibleWatermark(imageBuffer, data) {
-    const image = await Jimp.read(imageBuffer);
-    const width = image.getWidth();
-    const height = image.getHeight();
+    const pngBuffer = await sharp(imageBuffer).png().toBuffer();
+    const image = await Jimp.fromBuffer(pngBuffer);
+    const width = image.width;
+    const height = image.height;
 
     const payload = typeof data === 'object' ? JSON.stringify(data) : String(data);
     const encrypted = CryptoJS.AES.encrypt(payload, this.secretKey).toString();
@@ -121,7 +122,7 @@ class WatermarkService {
     for (let y = 0; y < Math.min(height, 50); y++) {
       for (let x = 0; x < width && bitIndex < headerBits.length + binary.length; x++) {
         const pixelColor = image.getPixelColor(x, y);
-        const rgba = Jimp.intToRGBA(pixelColor);
+        const rgba = intToRGBA(pixelColor);
 
         if (bitIndex < headerBits.length) {
           rgba.b = (rgba.b & 0xFE) | parseInt(headerBits[bitIndex]);
@@ -132,20 +133,21 @@ class WatermarkService {
           }
         }
 
-        image.setPixelColor(Jimp.rgbaToInt(rgba.r, rgba.g, rgba.b, rgba.a), x, y);
+        image.setPixelColor(rgbaToInt(rgba.r, rgba.g, rgba.b, rgba.a), x, y);
         bitIndex++;
       }
     }
 
-    const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+    const buffer = await image.getBuffer(JimpMime.png);
     return buffer;
   }
 
   async extractInvisibleWatermark(imageBuffer) {
     try {
-      const image = await Jimp.read(imageBuffer);
-      const width = image.getWidth();
-      const height = image.getHeight();
+      const pngBuffer = await sharp(imageBuffer).png().toBuffer();
+      const image = await Jimp.fromBuffer(pngBuffer);
+      const width = image.width;
+      const height = image.height;
 
       let bits = '';
       const headerBits = this.textToBinary('VGAL');
@@ -154,7 +156,7 @@ class WatermarkService {
       for (let y = 0; y < Math.min(height, 50); y++) {
         for (let x = 0; x < width && bits.length < maxBits; x++) {
           const pixelColor = image.getPixelColor(x, y);
-          const rgba = Jimp.intToRGBA(pixelColor);
+          const rgba = intToRGBA(pixelColor);
           bits += (rgba.b & 1).toString();
         }
       }
@@ -189,9 +191,10 @@ class WatermarkService {
       ...metadata
     };
 
-    const image = await Jimp.read(imageBuffer);
-    const width = image.getWidth();
-    const height = image.getHeight();
+    const pngBuffer = await sharp(imageBuffer).png().toBuffer();
+    const image = await Jimp.fromBuffer(pngBuffer);
+    const width = image.width;
+    const height = image.height;
 
     const marker = 'STEG';
     const json = JSON.stringify(payload);
@@ -209,24 +212,25 @@ class WatermarkService {
           if (bitIndex >= binary.length) break outerLoop;
 
           const pixelColor = image.getPixelColor(x, y);
-          const rgba = Jimp.intToRGBA(pixelColor);
+          const rgba = intToRGBA(pixelColor);
 
           rgba[channel] = (rgba[channel] & 0xFE) | parseInt(binary[bitIndex]);
-          image.setPixelColor(Jimp.rgbaToInt(rgba.r, rgba.g, rgba.b, rgba.a), x, y);
+          image.setPixelColor(rgbaToInt(rgba.r, rgba.g, rgba.b, rgba.a), x, y);
           bitIndex++;
         }
       }
     }
 
-    const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+    const buffer = await image.getBuffer(JimpMime.png);
     return { buffer, metadata: payload };
   }
 
   async extractSteganography(imageBuffer) {
     try {
-      const image = await Jimp.read(imageBuffer);
-      const width = image.getWidth();
-      const height = image.getHeight();
+      const pngBuffer = await sharp(imageBuffer).png().toBuffer();
+      const image = await Jimp.fromBuffer(pngBuffer);
+      const width = image.width;
+      const height = image.height;
 
       let bits = '';
       const channels = ['r', 'g', 'b'];
@@ -239,7 +243,7 @@ class WatermarkService {
             if (bits.length >= maxBits) break outerLoop;
 
             const pixelColor = image.getPixelColor(x, y);
-            const rgba = Jimp.intToRGBA(pixelColor);
+            const rgba = intToRGBA(pixelColor);
             bits += (rgba[channel] & 1).toString();
           }
         }
