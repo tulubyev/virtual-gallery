@@ -6,6 +6,7 @@
     <title>Панель куратора - Virtual Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/toast.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1552,12 +1553,12 @@
                 }
 
                 const labels = { 'approved': 'Работа одобрена', 'rejected': 'Работа отклонена', 'published': 'Работа опубликована!', 'pending': 'Статус сброшен' };
-                alert(labels[newStatus] || 'Статус обновлен');
+                toastSuccess(labels[newStatus] || 'Статус обновлен');
 
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
                 console.error(`Status change error (${newStatus}):`, error);
-                alert('Ошибка: ' + error.message);
+                toastError('Ошибка: ' + error.message);
                 restoreButton(btn, newStatus);
                 updateButtonStates(currentArtwork.status);
             }
@@ -1579,7 +1580,7 @@
         async function publishArtwork() {
             if (!currentArtwork || document.getElementById('publishArtwork')?.disabled) return;
             if (currentArtwork.status !== 'approved') {
-                alert('Для публикации работа должна быть сначала одобрена');
+                toastWarning('Для публикации работа должна быть сначала одобрена');
                 return;
             }
             if (!confirm('Опубликовать это произведение? Оно станет доступно в 3D галерее.')) return;
@@ -1619,11 +1620,11 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Failed to save');
 
-                alert('Изменения сохранены');
+                toastSuccess('Изменения сохранены');
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
                 console.error('Save error:', error);
-                alert('Ошибка при сохранении: ' + error.message);
+                toastError('Ошибка при сохранении: ' + error.message);
             } finally {
                 if (btn) {
                     btn.disabled = false;
@@ -1713,10 +1714,10 @@
                 document.getElementById('modalFrontImage').src = result.image;
                 
                 updateProtectionStatus(type);
-                alert('Защита применена успешно! Изображение обновлено.');
+                toastSuccess('Защита применена успешно! Изображение обновлено.');
             } catch (error) {
                 console.error('Protection error:', error);
-                alert('Ошибка при применении защиты: ' + error.message);
+                toastError('Ошибка при применении защиты: ' + error.message);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -1890,7 +1891,7 @@
                 lucide.createIcons();
             } catch (error) {
                 console.error('Verify error:', error);
-                alert('Ошибка при проверке: ' + error.message);
+                toastError('Ошибка при проверке: ' + error.message);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -2038,13 +2039,13 @@
                 
                 if (!response.ok) throw new Error('Failed to update');
                 
-                alert('Произведение добавлено в коллекции');
+                toastSuccess('Произведение добавлено в коллекции');
                 document.getElementById('collectionAssignModal').classList.add('hidden');
                 currentAssignArtwork = null;
                 loadCollectionArtworks(document.getElementById('collectionArtworkStatus').value);
             } catch (error) {
                 console.error('Assign error:', error);
-                alert('Ошибка при сохранении');
+                toastError('Ошибка при сохранении');
             }
         });
 
@@ -2198,7 +2199,7 @@
                 lucide.createIcons();
             } catch (error) {
                 console.error('Open collection error:', error);
-                alert('Ошибка при открытии коллекции');
+                toastError('Ошибка при открытии коллекции');
             }
         }
 
@@ -2225,7 +2226,7 @@
         document.getElementById('saveNewCollection')?.addEventListener('click', async () => {
             const name = document.getElementById('newCollectionName').value.trim();
             if (!name) {
-                alert('Введите название коллекции');
+                toastWarning('Введите название коллекции');
                 return;
             }
             
@@ -2251,10 +2252,10 @@
                 document.getElementById('newCollectionCountry').value = '';
                 
                 loadCollections();
-                alert('Коллекция создана успешно!');
+                toastSuccess('Коллекция создана успешно!');
             } catch (error) {
                 console.error('Create collection error:', error);
-                alert('Ошибка при создании коллекции');
+                toastError('Ошибка при создании коллекции');
             }
         });
 
@@ -2271,7 +2272,7 @@
                 loadDashboardStats();
             } catch (error) {
                 console.error('Toggle collection error:', error);
-                alert('Ошибка при изменении статуса коллекции');
+                toastError('Ошибка при изменении статуса коллекции');
             }
         }
 
@@ -2285,12 +2286,12 @@
                     body: JSON.stringify({ archived_by: 'curator', reason: 'Удалена куратором' })
                 });
                 if (!response.ok) throw new Error('Failed to delete');
-                alert('Коллекция перемещена в архив');
+                toastSuccess('Коллекция перемещена в архив');
                 loadCollections();
                 loadDashboardStats();
             } catch (error) {
                 console.error('Delete collection error:', error);
-                alert('Ошибка при удалении коллекции');
+                toastError('Ошибка при удалении коллекции');
             }
         }
 
@@ -2486,7 +2487,7 @@
         
         async function deleteRoom(roomId) {
             if (galleryConfig.rooms.length <= 1) {
-                alert('Нельзя удалить последний зал');
+                toastWarning('Нельзя удалить последний зал');
                 return;
             }
             
@@ -2526,13 +2527,13 @@
                     body: JSON.stringify(galleryConfig)
                 });
                 if (response.ok) {
-                    alert('Конфигурация галереи сохранена!');
+                    toastSuccess('Конфигурация галереи сохранена!');
                 } else {
-                    alert('Ошибка сохранения конфигурации');
+                    toastError('Ошибка сохранения конфигурации');
                 }
             } catch (error) {
                 console.error('Save config error:', error);
-                alert('Ошибка сохранения');
+                toastError('Ошибка сохранения');
             }
         });
 
@@ -2590,14 +2591,14 @@
                         room.slots = rec.total_slots;
                         room.slotLayout = rec.layout;
                         renderRoomsList();
-                        alert('Рекомендация применена!');
+                        toastSuccess('Рекомендация применена!');
                     }
                 } else {
-                    alert('Не удалось получить рекомендацию от ИИ');
+                    toastError('Не удалось получить рекомендацию от ИИ');
                 }
             } catch (error) {
                 console.error('AI slots calculation error:', error);
-                alert('Ошибка при расчёте слотов');
+                toastError('Ошибка при расчёте слотов');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -2607,7 +2608,7 @@
 
         document.querySelectorAll('.artwork-slot').forEach(slot => {
             slot.addEventListener('click', () => {
-                alert('Выберите экспонат для размещения в слоте ' + slot.dataset.slot);
+                toastInfo('Выберите экспонат для размещения в слоте ' + slot.dataset.slot);
             });
         });
 
@@ -2616,7 +2617,7 @@
             const availableRooms = galleryConfig.rooms.filter(r => r.id !== galleryConfig.currentRoom && !currentRoom.connections.includes(r.id));
             
             if (availableRooms.length === 0) {
-                alert('Нет доступных залов для создания связи');
+                toastWarning('Нет доступных залов для создания связи');
                 return;
             }
             
@@ -2626,7 +2627,7 @@
             if (index >= 0 && index < availableRooms.length) {
                 currentRoom.connections.push(availableRooms[index].id);
                 availableRooms[index].connections.push(galleryConfig.currentRoom);
-                alert(`Связь с залом "${availableRooms[index].name}" создана`);
+                toastSuccess(`Связь с залом "${availableRooms[index].name}" создана`);
             }
         });
 

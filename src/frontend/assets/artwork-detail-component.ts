@@ -1,3 +1,8 @@
+declare function toastSuccess(msg: string, dur?: number): void;
+declare function toastError(msg: string, dur?: number): void;
+declare function toastWarning(msg: string, dur?: number): void;
+declare function toastInfo(msg: string, dur?: number): void;
+
 // Компонент для отображения деталей произведения искусства
 class ArtworkDetailComponent {
     container: HTMLElement;
@@ -67,7 +72,7 @@ class ArtworkDetailComponent {
     addToFavorites(artworkId: number) {
         console.log(`Добавление произведения ${artworkId} в избранное`);
         // Здесь будет вызов API для добавления в избранное
-        alert('Произведение добавлено в избранное!');
+        toastSuccess('Произведение добавлено в избранное!');
     }
 
     shareArtwork(artworkId: number) {
@@ -83,7 +88,7 @@ class ArtworkDetailComponent {
             // Резервный вариант для браузеров, не поддерживающих Web Share API
             const shareUrl = `${window.location.origin}/artwork/${artworkId}`;
             navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('Ссылка скопирована в буфер обмена!');
+                toastSuccess('Ссылка скопирована в буфер обмена!');
             });
         }
     }

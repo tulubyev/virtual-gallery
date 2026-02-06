@@ -1,3 +1,8 @@
+declare function toastSuccess(msg: string, dur?: number): void;
+declare function toastError(msg: string, dur?: number): void;
+declare function toastWarning(msg: string, dur?: number): void;
+declare function toastInfo(msg: string, dur?: number): void;
+
 // Основной JavaScript файл для виртуальной галереи
 document.addEventListener('DOMContentLoaded', function() {
     // Получаем элементы DOM
@@ -95,13 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Закрываем модальное окно
                 registerModal.style.display = 'none';
 
-                alert('Регистрация прошла успешно!');
+                toastSuccess('Регистрация прошла успешно!');
             } else {
-                alert(`Ошибка регистрации: ${result.error}`);
+                toastError(`Ошибка регистрации: ${result.error}`);
             }
         } catch (error) {
             console.error('Ошибка при регистрации:', error);
-            alert('Ошибка при регистрации');
+            toastError('Ошибка при регистрации');
         }
     });
 
@@ -139,13 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Закрываем модальное окно
                 loginModal.style.display = 'none';
 
-                alert('Вход выполнен успешно!');
+                toastSuccess('Вход выполнен успешно!');
             } else {
-                alert(`Ошибка входа: ${result.error}`);
+                toastError(`Ошибка входа: ${result.error}`);
             }
         } catch (error) {
             console.error('Ошибка при входе:', error);
-            alert('Ошибка при входе');
+            toastError('Ошибка при входе');
         }
     });
 
@@ -222,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadArtworks();
         } catch (error) {
             console.error('Error exploring artworks:', error);
-            alert('Ошибка при загрузке произведений искусства');
+            toastError('Ошибка при загрузке произведений искусства');
         }
     });
 
@@ -231,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         removeAuthToken();
         updateAuthUI();
-        alert('Вы успешно вышли из системы');
+        toastInfo('Вы успешно вышли из системы');
     });
 
     // Функция для загрузки произведений искусства

@@ -1,3 +1,8 @@
+declare function toastSuccess(msg: string, dur?: number): void;
+declare function toastError(msg: string, dur?: number): void;
+declare function toastWarning(msg: string, dur?: number): void;
+declare function toastInfo(msg: string, dur?: number): void;
+
 // JavaScript для админ-панели
 document.addEventListener('DOMContentLoaded', function() {
     // Элементы DOM
@@ -12,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Проверка аутентификации
     if (!localStorage.getItem('authToken') || localStorage.getItem('userRole') !== 'admin') {
-        alert('Доступ запрещен. Требуются права администратора.');
+        toastWarning('Доступ запрещен. Требуются права администратора.');
         window.location.href = '/';
         return;
     }
@@ -89,16 +94,16 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                alert('Роль пользователя успешно обновлена');
+                toastSuccess('Роль пользователя успешно обновлена');
                 roleModal.style.display = 'none';
                 loadUsers(); // Обновляем список пользователей
             } else {
                 const error = await response.json();
-                alert(`Ошибка: ${error.error}`);
+                toastError(`Ошибка: ${error.error}`);
             }
         } catch (error) {
             console.error('Ошибка при обновлении роли:', error);
-            alert('Ошибка при обновлении роли пользователя');
+            toastError('Ошибка при обновлении роли пользователя');
         }
     });
 
@@ -229,22 +234,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    alert('Пользователь успешно удален');
+                    toastSuccess('Пользователь успешно удален');
                     loadUsers(); // Обновляем список пользователей
                 } else {
                     const error = await response.json();
-                    alert(`Ошибка: ${error.error}`);
+                    toastError(`Ошибка: ${error.error}`);
                 }
             } catch (error) {
                 console.error('Ошибка при удалении пользователя:', error);
-                alert('Ошибка при удалении пользователя');
+                toastError('Ошибка при удалении пользователя');
             }
         }
     };
 
     // Функция для редактирования экспоната
     (window as any).editArtwork = function(artworkId: number) {
-        alert(`Редактирование экспоната с ID: ${artworkId}`);
+        toastInfo(`Редактирование экспоната с ID: ${artworkId}`);
         // Здесь будет реализация редактирования экспоната
     };
 
@@ -260,15 +265,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.ok) {
-                    alert('Экспонат успешно удален');
+                    toastSuccess('Экспонат успешно удален');
                     loadArtworks(); // Обновляем список экспонатов
                 } else {
                     const error = await response.json();
-                    alert(`Ошибка: ${error.error}`);
+                    toastError(`Ошибка: ${error.error}`);
                 }
             } catch (error) {
                 console.error('Ошибка при удалении экспоната:', error);
-                alert('Ошибка при удалении экспоната');
+                toastError('Ошибка при удалении экспоната');
             }
         }
     };

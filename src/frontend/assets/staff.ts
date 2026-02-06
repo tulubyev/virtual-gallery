@@ -1,3 +1,8 @@
+declare function toastSuccess(msg: string, dur?: number): void;
+declare function toastError(msg: string, dur?: number): void;
+declare function toastWarning(msg: string, dur?: number): void;
+declare function toastInfo(msg: string, dur?: number): void;
+
 // JavaScript для сотрудника
 document.addEventListener('DOMContentLoaded', function() {
     // Проверка аутентификации и роли
@@ -5,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userRole = localStorage.getItem('userRole');
     
     if (!token || (userRole !== 'staff' && userRole !== 'admin')) {
-        alert('Доступ запрещен. Требуется роль сотрудника.');
+        toastWarning('Доступ запрещен. Требуется роль сотрудника.');
         window.location.href = '/';
         return;
     }

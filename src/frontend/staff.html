@@ -6,6 +6,7 @@
     <title>Дашборд сотрудника - Virtual Art Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/toast.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -643,12 +644,12 @@
                     
                     if (!response.ok) throw new Error('Failed to save');
                     
-                    alert('Изменения сохранены!');
+                    toastSuccess('Изменения сохранены!');
                     modal.remove();
                     loadUploadHistory();
                 } catch (error) {
                     console.error('Save error:', error);
-                    alert('Ошибка сохранения: ' + error.message);
+                    toastError('Ошибка сохранения: ' + error.message);
                 } finally {
                     saveEditBtn.disabled = false;
                     saveEditBtn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Сохранить изменения';
@@ -671,7 +672,7 @@
         const saveDirectBtn = document.getElementById('save-direct-btn');
         saveDirectBtn.addEventListener('click', async () => {
             if (!selectedImageFile) {
-                alert('Пожалуйста, загрузите изображение');
+                toastWarning('Пожалуйста, загрузите изображение');
                 return;
             }
 
@@ -698,7 +699,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert('Произведение успешно сохранено!');
+                    toastSuccess('Произведение успешно сохранено!');
                     selectedImageFile = null;
                     selectedImageDataUrl = null;
                     dropZone.classList.remove('hidden');
@@ -713,10 +714,10 @@
                     document.getElementById('artwork-description').value = '';
                     loadUploadHistory();
                 } else {
-                    alert('Ошибка: ' + (data.error || 'Не удалось сохранить'));
+                    toastError('Ошибка: ' + (data.error || 'Не удалось сохранить'));
                 }
             } catch (error) {
-                alert('Ошибка сети: ' + error.message);
+                toastError('Ошибка сети: ' + error.message);
             } finally {
                 saveDirectBtn.disabled = false;
                 saveDirectBtn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> Сохранить';
@@ -726,7 +727,7 @@
 
         analyzeBtn.addEventListener('click', async () => {
             if (!selectedImageDataUrl) {
-                alert('Пожалуйста, загрузите изображение');
+                toastWarning('Пожалуйста, загрузите изображение');
                 return;
             }
 

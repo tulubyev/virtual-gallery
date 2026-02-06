@@ -6,6 +6,7 @@
     <title>База знаний - Virtual Art Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/toast.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -493,7 +494,7 @@
 
         processPdfBtn.addEventListener('click', async () => {
             if (!selectedPdfFile) {
-                alert('Пожалуйста, выберите PDF файл');
+                toastWarning('Пожалуйста, выберите PDF файл');
                 return;
             }
 
@@ -518,14 +519,14 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Документ успешно отправлен на обработку! ID: ' + documentId);
+                    toastSuccess('Документ успешно отправлен на обработку! ID: ' + documentId);
                     clearPdfSelection();
                 } else {
                     const hint = data.hint ? '\n\nПодсказка: ' + data.hint : '';
-                    alert('Ошибка: ' + (data.error || 'Неизвестная ошибка') + hint);
+                    toastError('Ошибка: ' + (data.error || 'Неизвестная ошибка') + hint);
                 }
             } catch (error) {
-                alert('AI/ML сервис недоступен. В демо-режиме документы не обрабатываются.\n\nДля полной функциональности запустите AI/ML сервис отдельно.');
+                toastWarning('AI/ML сервис недоступен. В демо-режиме документы не обрабатываются.');
             } finally {
                 processText.textContent = 'Обработать документ';
                 processPdfBtn.disabled = false;

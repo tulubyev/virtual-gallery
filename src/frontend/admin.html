@@ -6,6 +6,7 @@
     <title>Админ-панель - Virtual Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/toast.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1077,11 +1078,11 @@
                     method: 'POST'
                 });
                 if (response.ok) {
-                    alert('Переиндексация запущена');
+                    toastSuccess('Переиндексация запущена');
                     loadKnowledgeStats();
                 }
             } catch (error) {
-                alert('Ошибка переиндексации: ' + error.message);
+                toastError('Ошибка переиндексации: ' + error.message);
             }
         });
 
@@ -1093,11 +1094,11 @@
                     method: 'POST'
                 });
                 if (response.ok) {
-                    alert('Переиндексация запущена');
+                    toastSuccess('Переиндексация запущена');
                     loadKnowledgeStats();
                 }
             } catch (error) {
-                alert('Ошибка переиндексации: ' + error.message);
+                toastError('Ошибка переиндексации: ' + error.message);
             }
         });
 
@@ -1109,11 +1110,11 @@
                     method: 'POST'
                 });
                 if (response.ok) {
-                    alert('Переиндексация запущена');
+                    toastSuccess('Переиндексация запущена');
                     loadKnowledgeStats();
                 }
             } catch (error) {
-                alert('Ошибка переиндексации: ' + error.message);
+                toastError('Ошибка переиндексации: ' + error.message);
             }
         });
 
@@ -1336,10 +1337,10 @@
                     const errData = await response.json().catch(() => ({}));
                     throw new Error(errData.error || 'Failed to restore');
                 }
-                alert('Элемент успешно восстановлен');
+                toastSuccess('Элемент успешно восстановлен');
                 loadArchive(currentArchiveFilter);
             } catch (error) {
-                alert('Ошибка при восстановлении: ' + error.message);
+                toastError('Ошибка при восстановлении: ' + error.message);
             }
         }
 
@@ -1350,7 +1351,7 @@
                 if (!response.ok) throw new Error('Failed to delete');
                 loadArchive(currentArchiveFilter);
             } catch (error) {
-                alert('Ошибка при удалении: ' + error.message);
+                toastError('Ошибка при удалении: ' + error.message);
             }
         }
 
@@ -1362,10 +1363,10 @@
                 const response = await fetch(url, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Failed to clear');
                 const data = await response.json();
-                alert(`Удалено из архива: ${data.deleted} элементов`);
+                toastSuccess(`Удалено из архива: ${data.deleted} элементов`);
                 loadArchive(currentArchiveFilter);
             } catch (error) {
-                alert('Ошибка при очистке архива: ' + error.message);
+                toastError('Ошибка при очистке архива: ' + error.message);
             }
         });
 
