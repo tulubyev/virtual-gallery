@@ -118,7 +118,7 @@ router.patch('/:id/status', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
-    const { title, artist, style, period, technique, curator_notes, year, country, description } = req.body;
+    const { title, artist, style, period, technique, curator_notes, year, country, description, collection } = req.body;
 
     const setClauses = ['updated_at = NOW()'];
     const params = [];
@@ -139,6 +139,7 @@ router.patch('/:id', async (req, res) => {
     }
     if (country !== undefined) { setClauses.push(`country = $${idx++}`); params.push(country); }
     if (description !== undefined) { setClauses.push(`description = $${idx++}`); params.push(description); }
+    if (collection !== undefined) { setClauses.push(`collection = $${idx++}`); params.push(collection); }
 
     if (setClauses.length === 1) {
       return res.status(400).json({ error: 'No fields to update' });

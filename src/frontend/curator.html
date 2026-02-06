@@ -2004,7 +2004,8 @@
             document.getElementById('collectionAssignModal').classList.remove('hidden');
             
             document.querySelectorAll('#collectionsList input[type="checkbox"]').forEach(cb => {
-                cb.checked = (currentAssignArtwork.collection || '').includes(cb.value);
+                const colStr = ',' + (currentAssignArtwork.collection || '') + ',';
+                cb.checked = colStr.includes(',' + cb.value + ',');
             });
         }
 
@@ -2076,13 +2077,12 @@
             lucide.createIcons();
 
             try {
-                const response = await fetch('/api/collections');
+                const response = await fetch('/api/collections?all=true');
                 if (!response.ok) throw new Error('Failed to fetch');
                 
                 const data = await response.json();
                 allCollections = data.collections || [];
                 
-                // Update collections list in assign modal
                 updateCollectionsList();
                 
                 if (allCollections.length === 0) {
@@ -2632,26 +2632,28 @@
         });
 
         function filterCollections(filter) {
+            if (filter === 'all') {
+                loadCollections();
+                return;
+            }
+
             const cards = document.querySelectorAll('.collection-card');
             cards.forEach(card => {
-                card.style.display = 'block';
+                const slug = card.dataset.collection;
+                const col = allCollections.find(c => c.slug === slug);
+                if (!col) { card.style.display = 'none'; return; }
+
+                let show = true;
+                if (filter === 'epoch') { show = !!col.epoch; }
+                else if (filter === 'country') { show = !!col.country; }
+                else if (filter === 'tag') { show = !!(col.tags || col.style); }
+                else if (filter === 'type') { show = true; }
+                else if (filter === 'author') { show = true; }
+
+                card.style.display = show ? 'block' : 'none';
             });
-            
-            if (filter !== 'all') {
-                console.log('Фильтр коллекций:', filter);
-            }
         }
 
-        document.getElementById('newCollectionBtn')?.addEventListener('click', () => {
-            const name = prompt('Название новой коллекции:');
-            if (name) {
-                alert(`Коллекция "${name}" будет создана. Функционал в разработке.`);
-            }
-        });
-
-        document.getElementById('addArtworkBtn')?.addEventListener('click', () => {
-            alert('Добавление нового экспоната. Функционал в разработке.');
-        });
     </script>
 </body>
 </html>
