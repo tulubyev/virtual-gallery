@@ -60,3 +60,24 @@ The system uses JWT tokens for API authentication and implements role-based acce
 ### Python Dependencies (AI/ML Service)
 
 - `fastapi`, `openai`, `qdrant-client`, `sentence-transformers`, `PyPDF2`, `pytesseract`.
+
+## Recent Changes
+
+- **2026-02-06**: Система обработки изображений при загрузке
+  - При загрузке через дашборд сотрудника автоматически создаются 3 версии: оригинал, среднее (800px, вписанное), миниатюра (300px, обрезанная)
+  - Все версии загружаются в S3, thumbnail_url сохраняется в БД
+  - Сервис `src/services/image-processor.js` — генерация вариантов через sharp
+  - Временные файлы автоматически очищаются после загрузки
+
+- **2026-02-06**: Настройки отображения изображений
+  - Таблица `display_settings` — пропорции, режим отображения (cover/contain/fill), макс. высота для каждого раздела
+  - API: `GET /api/display-settings`, `PATCH /api/display-settings/:key`
+  - `src/frontend/assets/image-display.js` — автозагрузка настроек, генерация CSS по data-атрибутам
+  - Раздел «Отображение изображений» в Настройках админ-панели
+  - Контейнеры изображений используют CSS aspect-ratio вместо фиксированной высоты
+  - Списки/сетки используют thumbnail_url, детальные просмотры — оригинал
+
+- **2026-02-06**: Toast-уведомления вместо alert()
+  - `src/frontend/assets/toast.js` — всплывающие уведомления с автоисчезновением (5 сек)
+  - 4 типа: успех (зелёный), ошибка (красный), предупреждение (оранжевый), информация (фиолетовый)
+  - Заменены все alert() на всех страницах

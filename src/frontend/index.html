@@ -6,6 +6,7 @@
     <title>Virtual Art Gallery - AI Powered</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/image-display.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -261,7 +262,7 @@
     <!-- Hero Section with Gallery Slideshow -->
     <section class="pt-20 pb-16 relative overflow-hidden bg-gray-900">
         <!-- Background Slideshow -->
-        <div id="hero-slideshow" class="absolute inset-0">
+        <div id="hero-slideshow" class="absolute inset-0" data-img-section="homepage_carousel">
             <!-- Slides will be loaded dynamically from database -->
             <div id="hero-gradient" class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 pointer-events-none" style="z-index: 1;"></div>
         </div>
@@ -730,7 +731,7 @@
                 slide.className = `hero-slide absolute inset-0 transition-opacity duration-1000 ${i === 0 ? 'opacity-100' : 'opacity-0'}`;
                 slide.style.zIndex = '0';
                 slide.dataset.gallery = `${artwork.title || 'Произведение'} — ${artwork.artist || 'Автор'}`;
-                slide.innerHTML = `<img src="${artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover object-center" style="object-position: center 30%;" onerror="this.style.display='none'">`;
+                slide.innerHTML = `<img src="${artwork.thumbnail_url || artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover object-center" style="object-position: center 30%;" onerror="this.style.display='none'">`;
                 slideshow.appendChild(slide);
             });
             

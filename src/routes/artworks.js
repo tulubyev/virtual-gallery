@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
 
-// Artworks API - Direct upload without AI service (uploads to S3)
 const multer = require('multer');
 const path = require('path');
 const { uploadToS3 } = require('../services/s3-upload');
+const { processImage, cleanupFiles } = require('../services/image-processor');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads'),
@@ -21,31 +21,54 @@ const upload = multer({
 });
 
 router.post('/upload', upload.single('image'), async (req, res) => {
+  const filesToCleanup = [];
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file provided' });
     const { title, artist, year, medium, dimensions, style, country, epoch, description, tags } = req.body;
-    let imageUrl;
+
+    filesToCleanup.push(req.file.path);
+
+    let imageUrl, thumbnailUrl, mediumUrl;
+
+    const variants = await processImage(req.file.path, req.file.filename);
+    if (variants.thumbnail) filesToCleanup.push(variants.thumbnail.path);
+    if (variants.medium) filesToCleanup.push(variants.medium.path);
+
     try {
       imageUrl = await uploadToS3(req.file.path, req.file.filename, req.file.mimetype);
+      if (variants.thumbnail) {
+        thumbnailUrl = await uploadToS3(variants.thumbnail.path, variants.thumbnail.filename, variants.thumbnail.contentType);
+      }
+      if (variants.medium) {
+        mediumUrl = await uploadToS3(variants.medium.path, variants.medium.filename, variants.medium.contentType);
+      }
     } catch (s3Error) {
       imageUrl = '/uploads/' + req.file.filename;
+      if (variants.thumbnail) thumbnailUrl = '/uploads/' + variants.thumbnail.filename;
+      if (variants.medium) mediumUrl = '/uploads/' + variants.medium.filename;
     }
+
     const result = await pool.query(
-      `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, tags, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'active')
-       RETURNING artwork_id as id, title, artist_name as artist, image_url, status`,
-      [title || 'Untitled', artist || 'Unknown', year ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, tags ? tags.split(',') : null]
+      `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, thumbnail_url, tags, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active')
+       RETURNING artwork_id as id, title, artist_name as artist, image_url, thumbnail_url, status`,
+      [title || 'Untitled', artist || 'Unknown', year ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, thumbnailUrl || imageUrl, tags ? tags.split(',') : null]
     );
-    res.json({ success: true, artwork: result.rows[0] });
+
+    const artwork = result.rows[0];
+    if (mediumUrl) artwork.medium_url = mediumUrl;
+    res.json({ success: true, artwork });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  } finally {
+    cleanupFiles(filesToCleanup);
   }
 });
 
 router.get('/random', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 7;
-    const result = await pool.query(`SELECT artwork_id as id, title, artist_name as artist, image_url, country, epoch FROM artworks WHERE image_url IS NOT NULL AND status = 'published' ORDER BY RANDOM() LIMIT $1`, [limit]);
+    const result = await pool.query(`SELECT artwork_id as id, title, artist_name as artist, image_url, thumbnail_url, country, epoch FROM artworks WHERE image_url IS NOT NULL AND status = 'published' ORDER BY RANDOM() LIMIT $1`, [limit]);
     res.json({ artworks: result.rows });
   } catch (error) {
     res.json({ artworks: [] });

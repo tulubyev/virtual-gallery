@@ -704,6 +704,17 @@
 
                 <div class="mt-8">
                     <h2 class="text-2xl font-display font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="image" class="w-6 h-6 text-indigo-600"></i>
+                        Отображение изображений
+                    </h2>
+                    <p class="text-gray-600 mb-6">Настройте пропорции и способ отображения изображений для каждого раздела системы.</p>
+                    <div id="displaySettingsList" class="space-y-3 mb-6">
+                        <div class="text-center py-6 text-gray-400">Загрузка настроек...</div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-2xl font-display font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <i data-lucide="archive" class="w-6 h-6 text-indigo-600"></i>
                         Архивное хранилище
                     </h2>
@@ -1229,6 +1240,77 @@
             setTimeout(checkInfrastructure, 100);
         });
 
+        async function loadDisplaySettings() {
+            const container = document.getElementById('displaySettingsList');
+            try {
+                const response = await fetch('/api/display-settings');
+                const data = await response.json();
+                if (!data.settings || data.settings.length === 0) {
+                    container.innerHTML = '<div class="text-center py-6 text-gray-400">Нет настроек</div>';
+                    return;
+                }
+                const ratioOptions = ['1:1', '3:2', '4:3', '3:4', '16:9', '9:16', '2:3'];
+                const fitOptions = [
+                    { value: 'cover', label: 'Заполнение (cover)' },
+                    { value: 'contain', label: 'Вписать (contain)' },
+                    { value: 'fill', label: 'Растянуть (fill)' },
+                ];
+                container.innerHTML = data.settings.map(s => `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100" data-setting-key="${s.section_key}">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-gray-900">${s.section_label}</h3>
+                            <span class="text-xs text-gray-400">${s.section_key}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Пропорции</label>
+                                <select class="ds-ratio w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400">
+                                    ${ratioOptions.map(r => `<option value="${r}" ${r === s.aspect_ratio ? 'selected' : ''}>${r}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Режим отображения</label>
+                                <select class="ds-fit w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400">
+                                    ${fitOptions.map(f => `<option value="${f.value}" ${f.value === s.object_fit ? 'selected' : ''}>${f.label}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Макс. высота (px)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" class="ds-height flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400" value="${s.max_height}" min="48" max="1200">
+                                    <button onclick="saveDisplaySetting('${s.section_key}')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-1">
+                                        <i data-lucide="save" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-6 text-red-500">Ошибка загрузки настроек</div>';
+            }
+        }
+
+        async function saveDisplaySetting(key) {
+            const row = document.querySelector(`[data-setting-key="${key}"]`);
+            if (!row) return;
+            const aspect_ratio = row.querySelector('.ds-ratio').value;
+            const object_fit = row.querySelector('.ds-fit').value;
+            const max_height = row.querySelector('.ds-height').value;
+            try {
+                const response = await fetch(`/api/display-settings/${key}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aspect_ratio, object_fit, max_height: parseInt(max_height) })
+                });
+                if (!response.ok) throw new Error('Failed to save');
+                toastSuccess('Настройки отображения сохранены');
+            } catch (error) {
+                toastError('Ошибка сохранения: ' + error.message);
+            }
+        }
+
         let currentArchiveFilter = '';
 
         async function loadArchive(type = '') {
@@ -1383,7 +1465,10 @@
         });
 
         document.querySelector('[data-tab="settings"]')?.addEventListener('click', () => {
-            setTimeout(() => loadArchive(currentArchiveFilter), 100);
+            setTimeout(() => {
+                loadArchive(currentArchiveFilter);
+                loadDisplaySettings();
+            }, 100);
         });
 
     </script>
