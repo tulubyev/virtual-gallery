@@ -266,24 +266,9 @@
             <div id="hero-gradient" class="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/80 pointer-events-none" style="z-index: 1;"></div>
         </div>
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[75vh] flex flex-col">
-            <!-- Top label -->
-            <div class="text-center pt-8">
-                <span class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/90 px-4 py-2 rounded-full text-sm font-medium">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    Виртуальная галерея нового поколения
-                </span>
-            </div>
-
-            <!-- Spacer -->
-            <div class="flex-1"></div>
-
-            <!-- Bottom gallery indicator -->
-            <div class="flex flex-col items-center gap-3 pb-2">
-                <p id="current-gallery" class="text-white/80 text-sm font-medium backdrop-blur-sm bg-white/10 px-4 py-2 rounded-full">
-                    <i data-lucide="map-pin" class="w-4 h-4 inline mr-1"></i>
-                    <span>Лувр, Париж</span>
-                </p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[75vh] flex flex-col justify-end">
+            <!-- Bottom slideshow dots -->
+            <div class="flex flex-col items-center gap-3 pb-4">
                 <div class="flex gap-2" id="slideshow-dots">
                     <button class="slideshow-dot w-2 h-2 rounded-full bg-white transition-all"></button>
                     <button class="slideshow-dot w-2 h-2 rounded-full bg-white/40 hover:bg-white/60 transition-all"></button>
@@ -296,6 +281,16 @@
             </div>
         </div>
     </section>
+
+    <!-- Gallery Info Bar -->
+    <div class="bg-gray-100 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-center">
+            <p id="current-gallery" class="text-gray-600 text-sm font-medium flex items-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-gray-400"></i>
+                <span>Лувр, Париж</span>
+            </p>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
