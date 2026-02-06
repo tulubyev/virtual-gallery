@@ -82,10 +82,78 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status, curator_notes, rejection_reason } = req.body;
+    const validStatuses = ['pending', 'active', 'approved', 'rejected', 'published'];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    const setClauses = ['status = $1', 'updated_at = NOW()'];
+    const params = [status];
+    let idx = 2;
+
+    if (curator_notes !== undefined) {
+      setClauses.push(`curator_notes = $${idx++}`);
+      params.push(curator_notes);
+    }
+    if (rejection_reason !== undefined) {
+      setClauses.push(`rejection_reason = $${idx++}`);
+      params.push(rejection_reason);
+    }
+
+    params.push(req.params.id);
     const result = await pool.query(
-      'UPDATE artworks SET status = $1, curator_notes = $2, rejection_reason = $3, updated_at = NOW() WHERE artwork_id = $4 RETURNING *',
-      [status, curator_notes, rejection_reason, req.params.id]
+      `UPDATE artworks SET ${setClauses.join(', ')} WHERE artwork_id = $${idx} RETURNING *, artwork_id as id, artist_name as artist`,
+      params
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
+    res.json({ success: true, artwork: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.patch('/:id', async (req, res) => {
+  try {
+    const { title, artist, style, period, technique, curator_notes, year, country, description } = req.body;
+
+    const setClauses = ['updated_at = NOW()'];
+    const params = [];
+    let idx = 1;
+
+    if (title !== undefined) { setClauses.push(`title = $${idx++}`); params.push(title); }
+    if (artist !== undefined) { setClauses.push(`artist_name = $${idx++}`); params.push(artist); }
+    if (style !== undefined) { setClauses.push(`style = $${idx++}`); params.push(style); }
+    if (period !== undefined) { setClauses.push(`epoch = $${idx++}`); params.push(period); }
+    if (technique !== undefined) { setClauses.push(`technique = $${idx++}`); params.push(technique); }
+    if (curator_notes !== undefined) { setClauses.push(`curator_notes = $${idx++}`); params.push(curator_notes); }
+    if (year !== undefined) {
+      const parsedYear = year ? parseInt(year) : null;
+      if (parsedYear !== null && (isNaN(parsedYear) || parsedYear < 0 || parsedYear > new Date().getFullYear() + 1)) {
+        return res.status(400).json({ error: 'Invalid year value' });
+      }
+      setClauses.push(`year_created = $${idx++}`); params.push(parsedYear);
+    }
+    if (country !== undefined) { setClauses.push(`country = $${idx++}`); params.push(country); }
+    if (description !== undefined) { setClauses.push(`description = $${idx++}`); params.push(description); }
+
+    if (setClauses.length === 1) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    params.push(req.params.id);
+    const result = await pool.query(
+      `UPDATE artworks SET ${setClauses.join(', ')} WHERE artwork_id = $${idx} RETURNING *, artwork_id as id, artist_name as artist`,
+      params
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
     res.json({ success: true, artwork: result.rows[0] });
   } catch (error) {
     res.status(500).json({ error: error.message });

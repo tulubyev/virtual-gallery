@@ -950,22 +950,26 @@
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex flex-wrap gap-3">
-                            <button id="approveArtwork" class="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                        <div class="flex flex-wrap gap-3" id="actionButtons">
+                            <button id="approveArtwork" class="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600">
                                 <i data-lucide="check" class="w-5 h-5"></i>
-                                Одобрить
+                                <span>Одобрить</span>
                             </button>
-                            <button id="rejectArtwork" class="flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <button id="rejectArtwork" class="flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-600">
                                 <i data-lucide="x" class="w-5 h-5"></i>
-                                Отклонить
+                                <span>Отклонить</span>
                             </button>
-                            <button id="publishArtwork" class="flex-1 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <button id="publishArtwork" class="flex-1 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600">
                                 <i data-lucide="globe" class="w-5 h-5"></i>
-                                Опубликовать
+                                <span>Опубликовать</span>
                             </button>
-                            <button id="saveChanges" class="flex-1 min-w-[120px] bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <button id="resetArtwork" class="flex-1 min-w-[120px] bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all hidden disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i data-lucide="undo-2" class="w-5 h-5"></i>
+                                <span>Вернуть</span>
+                            </button>
+                            <button id="saveChanges" class="flex-1 min-w-[120px] bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i data-lucide="save" class="w-5 h-5"></i>
-                                Сохранить
+                                <span>Сохранить</span>
                             </button>
                         </div>
                     </div>
@@ -1438,29 +1442,7 @@
             const hashEl = document.getElementById('modalVerificationHash');
             if (hashEl) hashEl.textContent = artwork.verification_hash || '-';
             
-            const approveBtn = document.getElementById('approveArtwork');
-            const rejectBtn = document.getElementById('rejectArtwork');
-            const publishBtn = document.getElementById('publishArtwork');
-            
-            if (approveBtn) {
-                if (artwork.status === 'approved' || artwork.status === 'published') {
-                    approveBtn.disabled = true;
-                    approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    approveBtn.disabled = false;
-                    approveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-            }
-            
-            if (publishBtn) {
-                if (artwork.status === 'published') {
-                    publishBtn.disabled = true;
-                    publishBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    publishBtn.disabled = false;
-                    publishBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-            }
+            updateButtonStates(artwork.status);
             
             const statusBadge = document.getElementById('modalStatusBadge');
             if (statusBadge) {
@@ -1478,106 +1460,179 @@
             resetAllImageViewers();
         }
 
-        async function approveArtwork() {
-            if (!currentArtwork) return;
-            
-            const notes = document.getElementById('modalCuratorNotes')?.value || '';
-            
-            try {
-                const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'approved', curator_notes: notes })
-                });
-                
-                if (!response.ok) throw new Error('Failed to approve');
-                
-                alert('Работа одобрена');
-                closeModal();
-                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
-            } catch (error) {
-                console.error('Approve error:', error);
-                alert('Ошибка при одобрении работы');
+        function updateButtonStates(status) {
+            const approveBtn = document.getElementById('approveArtwork');
+            const rejectBtn = document.getElementById('rejectArtwork');
+            const publishBtn = document.getElementById('publishArtwork');
+            const resetBtn = document.getElementById('resetArtwork');
+
+            if (approveBtn) {
+                approveBtn.disabled = (status === 'approved' || status === 'published');
+            }
+            if (rejectBtn) {
+                rejectBtn.disabled = (status === 'rejected' || status === 'published');
+            }
+            if (publishBtn) {
+                publishBtn.disabled = (status !== 'approved');
+                if (status !== 'approved') {
+                    publishBtn.title = 'Сначала нужно одобрить работу';
+                } else {
+                    publishBtn.title = '';
+                }
+            }
+            if (resetBtn) {
+                const canReset = (status === 'approved' || status === 'rejected' || status === 'published');
+                resetBtn.classList.toggle('hidden', !canReset);
             }
         }
 
-        async function rejectArtwork() {
-            if (!currentArtwork) return;
-            
-            const reason = prompt('Укажите причину отклонения:');
-            if (!reason) return;
-            
-            try {
-                const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'rejected', rejection_reason: reason })
-                });
-                
-                if (!response.ok) throw new Error('Failed to reject');
-                
-                alert('Работа отклонена');
-                closeModal();
-                loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
-            } catch (error) {
-                console.error('Reject error:', error);
-                alert('Ошибка при отклонении работы');
+        function setButtonLoading(btn, loading) {
+            if (!btn) return;
+            btn.disabled = loading;
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            if (loading) {
+                if (icon) { icon.setAttribute('data-lucide', 'loader-2'); icon.classList.add('animate-spin'); }
+                if (span) span.textContent = '...';
+                lucide.createIcons();
             }
         }
-        
-        async function publishArtwork() {
+
+        const btnOriginalContent = {
+            'approved': { icon: 'check', text: 'Одобрить' },
+            'rejected': { icon: 'x', text: 'Отклонить' },
+            'published': { icon: 'globe', text: 'Опубликовать' },
+            'pending': { icon: 'undo-2', text: 'Вернуть' }
+        };
+
+        function restoreButton(btn, newStatus) {
+            if (!btn) return;
+            const orig = btnOriginalContent[newStatus];
+            if (orig) {
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span');
+                if (icon) { icon.setAttribute('data-lucide', orig.icon); icon.classList.remove('animate-spin'); }
+                if (span) span.textContent = orig.text;
+                lucide.createIcons();
+            }
+        }
+
+        async function changeStatus(newStatus, extraData = {}) {
             if (!currentArtwork) return;
-            
-            if (!confirm('Опубликовать это произведение? Оно станет доступно в 3D галерее.')) return;
-            
+
+            const btnMap = {
+                'approved': document.getElementById('approveArtwork'),
+                'rejected': document.getElementById('rejectArtwork'),
+                'published': document.getElementById('publishArtwork'),
+                'pending': document.getElementById('resetArtwork')
+            };
+            const btn = btnMap[newStatus];
+            setButtonLoading(btn, true);
+
             try {
+                const body = { status: newStatus, ...extraData };
                 const response = await fetch(`/api/artworks/${currentArtwork.id}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'published' })
+                    body: JSON.stringify(body)
                 });
-                
-                if (!response.ok) throw new Error('Failed to publish');
-                
-                alert('Работа опубликована!');
-                closeModal();
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Request failed');
+
+                currentArtwork.status = newStatus;
+
+                restoreButton(btn, newStatus);
+                updateButtonStates(newStatus);
+
+                const statusBadge = document.getElementById('modalStatusBadge');
+                if (statusBadge) {
+                    statusBadge.className = `px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(newStatus)}`;
+                    statusBadge.textContent = getStatusLabel(newStatus);
+                }
+
+                const labels = { 'approved': 'Работа одобрена', 'rejected': 'Работа отклонена', 'published': 'Работа опубликована!', 'pending': 'Статус сброшен' };
+                alert(labels[newStatus] || 'Статус обновлен');
+
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
-                console.error('Publish error:', error);
-                alert('Ошибка при публикации работы');
+                console.error(`Status change error (${newStatus}):`, error);
+                alert('Ошибка: ' + error.message);
+                restoreButton(btn, newStatus);
+                updateButtonStates(currentArtwork.status);
             }
+        }
+
+        async function approveArtwork() {
+            if (!currentArtwork || document.getElementById('approveArtwork')?.disabled) return;
+            const notes = document.getElementById('modalCuratorNotes')?.value || '';
+            await changeStatus('approved', { curator_notes: notes });
+        }
+
+        async function rejectArtwork() {
+            if (!currentArtwork || document.getElementById('rejectArtwork')?.disabled) return;
+            const reason = prompt('Укажите причину отклонения:');
+            if (!reason) return;
+            await changeStatus('rejected', { rejection_reason: reason });
+        }
+
+        async function publishArtwork() {
+            if (!currentArtwork || document.getElementById('publishArtwork')?.disabled) return;
+            if (currentArtwork.status !== 'approved') {
+                alert('Для публикации работа должна быть сначала одобрена');
+                return;
+            }
+            if (!confirm('Опубликовать это произведение? Оно станет доступно в 3D галерее.')) return;
+            await changeStatus('published');
+        }
+
+        async function resetArtwork() {
+            if (!currentArtwork) return;
+            if (!confirm('Вернуть работу в статус "На рассмотрении"?')) return;
+            await changeStatus('pending');
         }
 
         async function saveChanges() {
             if (!currentArtwork) return;
-            
+            const btn = document.getElementById('saveChanges');
+            setButtonLoading(btn, true);
+
             const updates = {
-                title: document.getElementById('modalArtworkTitle').value,
-                artist: document.getElementById('modalArtworkArtist').value,
-                style: document.getElementById('modalArtworkStyle').value,
-                period: document.getElementById('modalArtworkPeriod').value,
+                title: document.getElementById('modalArtworkTitle')?.value,
+                artist: document.getElementById('modalArtworkArtist')?.value,
+                style: document.getElementById('modalArtworkStyle')?.value,
+                period: document.getElementById('modalArtworkPeriod')?.value,
                 technique: document.getElementById('modalArtworkTechnique')?.value || '',
                 curator_notes: document.getElementById('modalCuratorNotes')?.value || '',
                 year: document.getElementById('modalArtworkYear')?.value || null,
                 country: document.getElementById('modalArtworkCountry')?.value || '',
                 description: document.getElementById('modalArtworkDescription')?.value || ''
             };
-            
+
             try {
                 const response = await fetch(`/api/artworks/${currentArtwork.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updates)
                 });
-                
-                if (!response.ok) throw new Error('Failed to save');
-                
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to save');
+
                 alert('Изменения сохранены');
-                closeModal();
                 loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
             } catch (error) {
                 console.error('Save error:', error);
-                alert('Ошибка при сохранении');
+                alert('Ошибка при сохранении: ' + error.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    const icon = btn.querySelector('i');
+                    const span = btn.querySelector('span');
+                    if (icon) { icon.setAttribute('data-lucide', 'save'); icon.classList.remove('animate-spin'); }
+                    if (span) span.textContent = 'Сохранить';
+                    lucide.createIcons();
+                }
             }
         }
 
@@ -1585,6 +1640,7 @@
         document.getElementById('approveArtwork')?.addEventListener('click', approveArtwork);
         document.getElementById('rejectArtwork')?.addEventListener('click', rejectArtwork);
         document.getElementById('publishArtwork')?.addEventListener('click', publishArtwork);
+        document.getElementById('resetArtwork')?.addEventListener('click', resetArtwork);
         document.getElementById('saveChanges')?.addEventListener('click', saveChanges);
         document.getElementById('refreshDigitized')?.addEventListener('click', () => {
             loadDigitizedArtworks(document.getElementById('digitizedStatusFilter').value);
