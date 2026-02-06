@@ -971,6 +971,43 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Verify Upload Modal -->
+            <div id="verifyUploadModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeVerifyModal()">
+                <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+                    <div class="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between z-10">
+                        <h3 class="text-lg font-display font-bold text-gray-900 flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-amber-500"></i>
+                            Проверка защиты
+                        </h3>
+                        <button onclick="closeVerifyModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                    </div>
+                    <div class="p-5">
+                        <div id="verifyModalImageWrap" class="mb-4 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center" style="max-height:300px">
+                            <img id="verifyModalImage" class="max-w-full max-h-[300px] object-contain" src="" alt="Загруженное изображение">
+                        </div>
+                        <div id="verifyModalFileName" class="text-xs text-gray-500 mb-4 text-center"></div>
+                        <div id="verifyModalLoading" class="hidden flex flex-col items-center gap-2 py-6">
+                            <i data-lucide="loader-2" class="w-8 h-8 text-purple-500 animate-spin"></i>
+                            <p class="text-sm text-gray-500">Анализ изображения...</p>
+                        </div>
+                        <div id="verifyModalResult" class="hidden">
+                            <div id="verifyModalSummary" class="mb-3"></div>
+                            <details class="text-gray-500 text-xs">
+                                <summary class="cursor-pointer hover:text-gray-700 font-medium">Подробные данные</summary>
+                                <pre id="verifyModalData" class="mt-2 text-gray-600 whitespace-pre-wrap bg-gray-50 p-3 rounded-lg text-xs overflow-auto max-h-40 border"></pre>
+                            </details>
+                        </div>
+                    </div>
+                    <div class="sticky bottom-0 bg-white border-t border-gray-100 p-4">
+                        <button onclick="closeVerifyModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium text-sm">
+                            Закрыть
+                        </button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1649,6 +1686,82 @@
             });
         }
 
+        function closeVerifyModal() {
+            const modal = document.getElementById('verifyUploadModal');
+            modal.classList.add('hidden');
+            document.getElementById('verifyModalImage').src = '';
+            document.getElementById('verifyModalResult').classList.add('hidden');
+            document.getElementById('verifyModalLoading').classList.add('hidden');
+            document.getElementById('verifyModalFileName').textContent = '';
+        }
+
+        async function openVerifyModal(file) {
+            const modal = document.getElementById('verifyUploadModal');
+            const img = document.getElementById('verifyModalImage');
+            const loading = document.getElementById('verifyModalLoading');
+            const resultDiv = document.getElementById('verifyModalResult');
+            const summaryDiv = document.getElementById('verifyModalSummary');
+            const dataDiv = document.getElementById('verifyModalData');
+            const fileNameDiv = document.getElementById('verifyModalFileName');
+
+            resultDiv.classList.add('hidden');
+            loading.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+
+            const reader = new FileReader();
+            reader.onload = (e) => { img.src = e.target.result; };
+            reader.readAsDataURL(file);
+            fileNameDiv.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' КБ)';
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file, file.name);
+
+                const response = await fetch('/api/watermark/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                loading.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+                dataDiv.textContent = JSON.stringify(result, null, 2);
+
+                let html = '';
+                if (result.isProtected) {
+                    html = '<div class="flex items-center gap-2 text-green-700 font-medium text-sm mb-2"><i data-lucide="shield-check" class="w-5 h-5"></i> Изображение защищено</div>';
+                    html += '<ul class="space-y-1.5 text-sm text-gray-600">';
+                    if (result.invisibleWatermark?.found) {
+                        html += '<li class="flex items-center gap-2"><span class="w-2 h-2 bg-purple-500 rounded-full"></span> Невидимый водяной знак</li>';
+                    }
+                    if (result.steganography?.found) {
+                        html += '<li class="flex items-center gap-2"><span class="w-2 h-2 bg-indigo-500 rounded-full"></span> Стеганография</li>';
+                        if (result.steganography.metadata) {
+                            const meta = result.steganography.metadata;
+                            if (meta.owner) html += '<li class="ml-5 text-xs text-gray-500">Владелец: ' + meta.owner + '</li>';
+                            if (meta.id) html += '<li class="ml-5 text-xs text-gray-500">ID: ' + meta.id + '</li>';
+                            if (meta.timestamp) html += '<li class="ml-5 text-xs text-gray-500">Дата: ' + new Date(meta.timestamp).toLocaleString('ru-RU') + '</li>';
+                            if (meta.hash) html += '<li class="ml-5 text-xs text-gray-500">Hash: ' + meta.hash + '</li>';
+                        }
+                    }
+                    html += '</ul>';
+                } else {
+                    html = '<div class="flex items-center gap-2 text-amber-600 font-medium text-sm mb-2"><i data-lucide="alert-triangle" class="w-5 h-5"></i> Защита не обнаружена</div>';
+                    html += '<p class="text-sm text-gray-500">Изображение не содержит скрытых меток защиты или они были удалены.</p>';
+                }
+
+                summaryDiv.innerHTML = html;
+                lucide.createIcons();
+            } catch (error) {
+                loading.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+                summaryDiv.innerHTML = '<div class="flex items-center gap-2 text-red-600 font-medium text-sm"><i data-lucide="alert-circle" class="w-5 h-5"></i> Ошибка: ' + error.message + '</div>';
+                lucide.createIcons();
+            }
+        }
+
         async function verifyProtection(imageBlob = null) {
             const btn = document.getElementById('verifyProtection');
             const originalText = btn.innerHTML;
@@ -1738,7 +1851,7 @@
         document.getElementById('verifyFileInput')?.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
-                await verifyProtection(file);
+                await openVerifyModal(file);
                 e.target.value = '';
             }
         });
