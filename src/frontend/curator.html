@@ -685,6 +685,10 @@
                                         <i data-lucide="plus" class="w-4 h-4"></i>
                                         Добавить слот
                                     </button>
+                                    <button id="removeSlotBtn" class="text-sm bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                                        <i data-lucide="minus" class="w-4 h-4"></i>
+                                        Удалить слот
+                                    </button>
                                 </div>
                             </div>
                             
@@ -695,6 +699,13 @@
                                 <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">Задняя стена</div>
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-gray-400">Вход</div>
                                 <div id="slotsGrid" class="grid grid-cols-3 gap-4 mt-8"></div>
+                            </div>
+
+                            <div class="flex justify-end mt-4 pt-4 border-t border-gray-100">
+                                <button id="saveGalleryConfigBottom" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl font-medium flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    Сохранить
+                                </button>
                             </div>
                         </div>
 
@@ -2709,7 +2720,7 @@
             renderRoomsList();
         }
 
-        document.getElementById('saveGalleryConfig')?.addEventListener('click', async () => {
+        async function saveGalleryConfigAction() {
             try {
                 const response = await fetch('/api/gallery/config', {
                     method: 'POST',
@@ -2725,7 +2736,9 @@
                 console.error('Save config error:', error);
                 toastError('Ошибка сохранения');
             }
-        });
+        }
+
+        document.getElementById('saveGalleryConfig')?.addEventListener('click', saveGalleryConfigAction);
 
         document.getElementById('addSlotBtn')?.addEventListener('click', () => {
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
@@ -2735,6 +2748,25 @@
                 renderRoomLayout();
             }
         });
+
+        document.getElementById('removeSlotBtn')?.addEventListener('click', () => {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (!room) return;
+            const slotsCount = parseInt(room.slots) || 0;
+            if (slotsCount <= 0) return;
+            const lastIndex = slotsCount - 1;
+            const assignment = room.artworkAssignments ? room.artworkAssignments[lastIndex] : null;
+            if (assignment) {
+                if (!confirm(`Слот #${slotsCount} содержит «${assignment.title || 'экспонат'}». Удалить слот?`)) return;
+                delete room.artworkAssignments[lastIndex];
+            }
+            room.slots = lastIndex;
+            renderRoomsList();
+            renderRoomLayout();
+            toastSuccess(`Слот #${slotsCount} удалён`);
+        });
+
+        document.getElementById('saveGalleryConfigBottom')?.addEventListener('click', saveGalleryConfigAction);
 
         document.getElementById('aiSlotsBtn')?.addEventListener('click', async () => {
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
