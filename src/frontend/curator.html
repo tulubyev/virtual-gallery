@@ -1782,19 +1782,28 @@
         }
 
         function openRoomSettingsModal() {
-            const activeRoomId = document.querySelector('.room-item.bg-purple-50')?.dataset.room;
-            if (!activeRoomId || !galleryConfiguration) return;
+            const activeRoomId = galleryConfig.currentRoom;
+            if (!activeRoomId || !galleryConfig) return;
 
-            const room = galleryConfiguration.rooms.find(r => r.id === activeRoomId);
+            const room = galleryConfig.rooms.find(r => r.id === activeRoomId);
             if (room) {
-                document.getElementById('roomName').value = room.name || '';
-                document.getElementById('roomTheme').value = room.theme || 'classic';
-                document.getElementById('roomWidth').value = room.width || 20;
-                document.getElementById('roomDepth').value = room.depth || 25;
-                document.getElementById('roomHeight').value = room.height || 6;
-                document.getElementById('wallColor').value = room.wallColor || '#f5f0e6';
-                document.getElementById('wallColorHex').value = room.wallColor || '#f5f0e6';
-                document.getElementById('roomLighting').value = room.lighting || 70;
+                const roomNameInput = document.getElementById('roomName');
+                const roomThemeInput = document.getElementById('roomTheme');
+                const roomWidthInput = document.getElementById('roomWidth');
+                const roomDepthInput = document.getElementById('roomDepth');
+                const roomHeightInput = document.getElementById('roomHeight');
+                const wallColorInput = document.getElementById('wallColor');
+                const wallColorHexInput = document.getElementById('wallColorHex');
+                const roomLightingInput = document.getElementById('roomLighting');
+
+                if (roomNameInput) roomNameInput.value = room.name || '';
+                if (roomThemeInput) roomThemeInput.value = room.theme || 'classic';
+                if (roomWidthInput) roomWidthInput.value = room.width || 20;
+                if (roomDepthInput) roomDepthInput.value = room.depth || 25;
+                if (roomHeightInput) roomHeightInput.value = room.height || 6;
+                if (wallColorInput) wallColorInput.value = room.wallColor || '#f5f0e6';
+                if (wallColorHexInput) wallColorHexInput.value = room.wallColor || '#f5f0e6';
+                if (roomLightingInput) roomLightingInput.value = room.lighting || 70;
             }
 
             document.getElementById('roomSettingsModal').classList.remove('hidden');
@@ -1806,10 +1815,10 @@
         }
 
         document.getElementById('saveRoomSettings')?.addEventListener('click', () => {
-            const activeRoomId = document.querySelector('.room-item.bg-purple-50')?.dataset.room;
-            if (!activeRoomId || !galleryConfiguration) return;
+            const activeRoomId = galleryConfig.currentRoom;
+            if (!activeRoomId || !galleryConfig) return;
 
-            const room = galleryConfiguration.rooms.find(r => r.id === activeRoomId);
+            const room = galleryConfig.rooms.find(r => r.id === activeRoomId);
             if (room) {
                 room.name = document.getElementById('roomName').value;
                 room.theme = document.getElementById('roomTheme').value;
@@ -1827,6 +1836,7 @@
                 
                 toastSuccess('Настройки зала применены локально. Не забудьте сохранить конфигурацию галереи.');
                 closeRoomSettingsModal();
+                renderRoomLayout();
             }
         });
 
@@ -2430,14 +2440,26 @@
                 }
             });
 
-            document.getElementById('roomName').value = room.name;
-            document.getElementById('roomTheme').value = room.theme;
-            document.getElementById('roomWidth').value = room.width;
-            document.getElementById('roomDepth').value = room.depth;
-            document.getElementById('roomHeight').value = room.height;
-            document.getElementById('wallColor').value = room.wallColor;
-            document.getElementById('wallColorHex').value = room.wallColor;
-            document.getElementById('roomLighting').value = room.lighting;
+            // Sync with modal inputs if modal is open or for consistency
+            const roomNameInput = document.getElementById('roomName');
+            const roomThemeInput = document.getElementById('roomTheme');
+            const roomWidthInput = document.getElementById('roomWidth');
+            const roomDepthInput = document.getElementById('roomDepth');
+            const roomHeightInput = document.getElementById('roomHeight');
+            const wallColorInput = document.getElementById('wallColor');
+            const wallColorHexInput = document.getElementById('wallColorHex');
+            const roomLightingInput = document.getElementById('roomLighting');
+
+            if (roomNameInput) roomNameInput.value = room.name || '';
+            if (roomThemeInput) roomThemeInput.value = room.theme || 'classic';
+            if (roomWidthInput) roomWidthInput.value = room.width || 20;
+            if (roomDepthInput) roomDepthInput.value = room.depth || 25;
+            if (roomHeightInput) roomHeightInput.value = room.height || 6;
+            if (wallColorInput) wallColorInput.value = room.wallColor || '#f5f0e6';
+            if (wallColorHexInput) wallColorHexInput.value = room.wallColor || '#f5f0e6';
+            if (roomLightingInput) roomLightingInput.value = room.lighting || 70;
+
+            renderRoomLayout();
         }
 
         document.querySelectorAll('.room-item').forEach(item => {
@@ -2628,8 +2650,9 @@
         document.getElementById('addSlotBtn')?.addEventListener('click', () => {
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
             if (room) {
-                room.slots++;
+                room.slots = (parseInt(room.slots) || 0) + 1;
                 renderRoomsList();
+                renderRoomLayout();
             }
         });
 
