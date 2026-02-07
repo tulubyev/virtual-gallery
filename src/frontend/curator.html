@@ -1781,6 +1781,65 @@
             document.getElementById('verifyModalFileName').textContent = '';
         }
 
+        function openRoomSettingsModal() {
+            const activeRoomId = document.querySelector('.room-item.bg-purple-50')?.dataset.room;
+            if (!activeRoomId || !galleryConfiguration) return;
+
+            const room = galleryConfiguration.rooms.find(r => r.id === activeRoomId);
+            if (room) {
+                document.getElementById('roomName').value = room.name || '';
+                document.getElementById('roomTheme').value = room.theme || 'classic';
+                document.getElementById('roomWidth').value = room.width || 20;
+                document.getElementById('roomDepth').value = room.depth || 25;
+                document.getElementById('roomHeight').value = room.height || 6;
+                document.getElementById('wallColor').value = room.wallColor || '#f5f0e6';
+                document.getElementById('wallColorHex').value = room.wallColor || '#f5f0e6';
+                document.getElementById('roomLighting').value = room.lighting || 70;
+            }
+
+            document.getElementById('roomSettingsModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeRoomSettingsModal() {
+            document.getElementById('roomSettingsModal').classList.add('hidden');
+        }
+
+        document.getElementById('saveRoomSettings')?.addEventListener('click', () => {
+            const activeRoomId = document.querySelector('.room-item.bg-purple-50')?.dataset.room;
+            if (!activeRoomId || !galleryConfiguration) return;
+
+            const room = galleryConfiguration.rooms.find(r => r.id === activeRoomId);
+            if (room) {
+                room.name = document.getElementById('roomName').value;
+                room.theme = document.getElementById('roomTheme').value;
+                room.width = parseInt(document.getElementById('roomWidth').value);
+                room.depth = parseInt(document.getElementById('roomDepth').value);
+                room.height = parseInt(document.getElementById('roomHeight').value);
+                room.wallColor = document.getElementById('wallColor').value;
+                room.lighting = parseInt(document.getElementById('roomLighting').value);
+                
+                const roomItem = document.querySelector(`.room-item[data-room="${activeRoomId}"]`);
+                if (roomItem) {
+                    const nameEl = roomItem.querySelector('p.font-medium');
+                    if (nameEl) nameEl.textContent = room.name;
+                }
+                
+                toastSuccess('Настройки зала применены локально. Не забудьте сохранить конфигурацию галереи.');
+                closeRoomSettingsModal();
+            }
+        });
+
+        document.getElementById('wallColor')?.addEventListener('input', (e) => {
+            document.getElementById('wallColorHex').value = e.target.value;
+        });
+
+        document.getElementById('wallColorHex')?.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                document.getElementById('wallColor').value = e.target.value;
+            }
+        });
+
         async function openVerifyModal(file) {
             const modal = document.getElementById('verifyUploadModal');
             const img = document.getElementById('verifyModalImage');
