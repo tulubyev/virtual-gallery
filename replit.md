@@ -63,6 +63,16 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-07**: Ленивая загрузка залов и оптимизация ресурсов 3D-галереи
+  - Ленивая загрузка залов: при старте строится только Главный холл + коридоры (~80 объектов вместо ~314)
+  - Остальные залы загружаются по требованию при переходе через дверь
+  - Фоновая предзагрузка смежных залов после навигации
+  - Плинтусы/молдинги: убраны `.clone()` — один материал на все залы (`_sharedBaseboardMat`, `_sharedMoldingMat`)
+  - Коридоры: общие геометрии и материалы (`_corridorGeos`, `_corridorMats`) — 12 лишних объектов убрано
+  - Таблица `gallery_configs` создаётся автоматически через `ensureTable()` с fail-fast
+  - Валидация загрузки текстур: только PNG/JPEG/WebP, макс 2MB, санитизация ключей
+  - Файлы: `public/js/gallery/main.js`, `src/services/gallery-config.js`, `src/routes/gallery.js`
+
 - **2026-02-07**: Оптимизация производительности 3D-галереи
   - Тени полностью отключены (`shadowMap.enabled = false`), убраны все `castShadow`/`receiveShadow` — экономия десятков shadow-рендер-проходов
   - Освещение: сетка потолочных PointLight (до 9 на комнату) заменена на 1 центральный PointLight, убраны дублирующие ambient/hemisphere в комнатах

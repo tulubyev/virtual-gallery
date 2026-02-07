@@ -477,9 +477,6 @@ class GalleryBuilder {
     for (const corridor of this.config.corridors) {
       this.buildCorridor(corridor);
     }
-    for (let i = 1; i < this.config.rooms.length; i++) {
-      await this.buildRoom(this.config.rooms[i]);
-    }
     return this.getLoadedRooms();
   }
 
@@ -580,7 +577,9 @@ class GalleryBuilder {
   addBaseboards(group, config) {
     const { width, height, depth } = config.dimensions;
     const bH = 0.15, bD = 0.04;
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.6 });
+    if (!this._sharedBaseboardMat) {
+      this._sharedBaseboardMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.6 });
+    }
 
     const positions = [
       { geo: [width, bH, bD], pos: [0, bH / 2, -depth / 2 + bD / 2], rot: [0, 0, 0] },
@@ -590,7 +589,7 @@ class GalleryBuilder {
     ];
 
     positions.forEach(({ geo, pos }) => {
-      const baseboard = new THREE.Mesh(new THREE.BoxGeometry(...geo), baseMat.clone());
+      const baseboard = new THREE.Mesh(new THREE.BoxGeometry(...geo), this._sharedBaseboardMat);
       baseboard.position.set(...pos);
       group.add(baseboard);
     });
@@ -599,7 +598,9 @@ class GalleryBuilder {
   addCrownMolding(group, config) {
     const { width, height, depth } = config.dimensions;
     const mH = 0.08, mD = 0.06;
-    const moldMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.5 });
+    if (!this._sharedMoldingMat) {
+      this._sharedMoldingMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.5 });
+    }
 
     const positions = [
       { geo: [width, mH, mD], pos: [0, height - mH / 2, -depth / 2 + mD / 2] },
@@ -609,7 +610,7 @@ class GalleryBuilder {
     ];
 
     positions.forEach(({ geo, pos }) => {
-      const molding = new THREE.Mesh(new THREE.BoxGeometry(...geo), moldMat.clone());
+      const molding = new THREE.Mesh(new THREE.BoxGeometry(...geo), this._sharedMoldingMat);
       molding.position.set(...pos);
       group.add(molding);
     });
@@ -881,25 +882,36 @@ class GalleryBuilder {
     
     const { width, height, length } = corridorConfig.dimensions;
 
-    const floorGeometry = new THREE.PlaneGeometry(width, length);
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: corridorConfig.floor.color, metalness: 0.1, roughness: 0.8 });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    if (!this._corridorGeos) {
+      this._corridorGeos = {
+        floor: new THREE.PlaneGeometry(width, length),
+        wall: new THREE.PlaneGeometry(length, height),
+        ceiling: new THREE.PlaneGeometry(width, length)
+      };
+    }
+    if (!this._corridorMats) {
+      this._corridorMats = {
+        floor: new THREE.MeshStandardMaterial({ color: corridorConfig.floor.color, metalness: 0.1, roughness: 0.8 }),
+        wall: new THREE.MeshStandardMaterial({ color: corridorConfig.walls.color, metalness: 0.05, roughness: 0.9 }),
+        ceiling: new THREE.MeshStandardMaterial({ color: 0x1a1a1a })
+      };
+    }
+
+    const floor = new THREE.Mesh(this._corridorGeos.floor, this._corridorMats.floor);
     floor.rotation.x = -Math.PI / 2;
     corridorGroup.add(floor);
 
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: corridorConfig.walls.color, metalness: 0.05, roughness: 0.9 });
-
-    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(length, height), wallMaterial.clone());
+    const leftWall = new THREE.Mesh(this._corridorGeos.wall, this._corridorMats.wall);
     leftWall.position.set(-width / 2, height / 2, 0);
     leftWall.rotation.y = Math.PI / 2;
     corridorGroup.add(leftWall);
 
-    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(length, height), wallMaterial.clone());
+    const rightWall = new THREE.Mesh(this._corridorGeos.wall, this._corridorMats.wall);
     rightWall.position.set(width / 2, height / 2, 0);
     rightWall.rotation.y = -Math.PI / 2;
     corridorGroup.add(rightWall);
 
-    const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(width, length), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
+    const ceiling = new THREE.Mesh(this._corridorGeos.ceiling, this._corridorMats.ceiling);
     ceiling.position.y = height;
     ceiling.rotation.x = Math.PI / 2;
     corridorGroup.add(ceiling);
@@ -998,6 +1010,10 @@ class RoomNavigator {
       return;
     }
 
+    if (!this.galleryBuilder.loadedRooms.has(roomId)) {
+      await this.galleryBuilder.buildRoom(roomConfig);
+    }
+
     const targetPosition = new THREE.Vector3(roomConfig.position.x, 1.6, roomConfig.position.z + 5);
     await this.animateCameraTo(targetPosition, roomConfig.position);
 
@@ -1006,6 +1022,18 @@ class RoomNavigator {
     
     window.dispatchEvent(new CustomEvent('roomChanged', { detail: { roomId } }));
     this.isTransitioning = false;
+
+    this._preloadAdjacentRooms(roomConfig);
+  }
+
+  _preloadAdjacentRooms(roomConfig) {
+    if (!roomConfig.doors) return;
+    for (const door of roomConfig.doors) {
+      const adjacentConfig = this.galleryBuilder.getRoomConfig(door.to);
+      if (adjacentConfig && !this.galleryBuilder.loadedRooms.has(door.to)) {
+        this.galleryBuilder.buildRoom(adjacentConfig).catch(() => {});
+      }
+    }
   }
 
   animateCameraTo(targetPosition, lookAtPosition) {
