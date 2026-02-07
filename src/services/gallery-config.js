@@ -4,22 +4,18 @@ let tableEnsured = false;
 
 async function ensureTable() {
   if (tableEnsured) return;
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS gallery_configs (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL DEFAULT 'default',
-        config JSONB NOT NULL,
-        texture_urls JSONB DEFAULT '{}',
-        is_active BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    tableEnsured = true;
-  } catch (e) {
-    console.error('Error ensuring gallery_configs table:', e.message);
-  }
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS gallery_configs (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL DEFAULT 'default',
+      config JSONB NOT NULL,
+      texture_urls JSONB DEFAULT '{}',
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  tableEnsured = true;
 }
 
 async function getActiveConfig() {

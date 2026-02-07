@@ -4,7 +4,21 @@ const router = express.Router();
 const { getActiveConfig, saveConfig, updateTextureUrls } = require('../services/gallery-config');
 const { uploadBufferToS3 } = require('../services/s3-upload');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const MAX_FILES = 20;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE, files: MAX_FILES },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PNG, JPEG and WebP images are allowed'));
+    }
+  }
+});
 
 const defaultConfig = {
   rooms: [
@@ -65,8 +79,10 @@ router.post('/textures', upload.any(), async (req, res) => {
 
     const textureUrls = {};
     const uploadPromises = req.files.map(async (file) => {
-      const textureKey = file.fieldname;
-      const ext = file.originalname.split('.').pop();
+      const textureKey = file.fieldname.replace(/[^a-zA-Z0-9_-]/g, '');
+      if (!textureKey) return;
+      const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
+      const ext = extMap[file.mimetype] || 'png';
       const fileName = `${textureKey}_${Date.now()}.${ext}`;
       const url = await uploadBufferToS3(file.buffer, fileName, file.mimetype);
       textureUrls[textureKey] = url;
