@@ -36,4 +36,45 @@ router.post('/config', (req, res) => {
   res.json({ success: true });
 });
 
+router.get('/rooms/:roomId/artworks', (req, res) => {
+  const { roomId } = req.params;
+  
+  if (!galleryConfiguration || !galleryConfiguration.rooms) {
+    return res.json([]);
+  }
+  
+  const room = galleryConfiguration.rooms.find(r => r.id === roomId);
+  if (!room || !room.artworkAssignments) {
+    return res.json([]);
+  }
+  
+  const artworks = [];
+  const defaultSlotIds = ['slot_1', 'slot_2', 'slot_3', 'slot_4', 'slot_5', 'slot_6', 'slot_7', 'slot_8', 'slot_9', 'slot_10'];
+  
+  Object.entries(room.artworkAssignments).forEach(([key, assignment]) => {
+    if (assignment) {
+      let slotIndex;
+      if (key.startsWith('slot_')) {
+        slotIndex = parseInt(key.replace('slot_', '')) - 1;
+      } else {
+        slotIndex = parseInt(key);
+      }
+      if (isNaN(slotIndex)) slotIndex = 0;
+      artworks.push({
+        id: assignment.id || `artwork_${slotIndex}`,
+        slot_id: defaultSlotIds[slotIndex] || `slot_${slotIndex + 1}`,
+        slot_index: slotIndex,
+        title: assignment.title || 'Без названия',
+        artist: assignment.artist || 'Неизвестный художник',
+        year: assignment.year || null,
+        image_url: assignment.image_url || '',
+        thumbnail_url: assignment.thumbnail_url || '',
+        medium_url: assignment.medium_url || assignment.image_url || ''
+      });
+    }
+  });
+  
+  res.json(artworks);
+});
+
 module.exports = router;

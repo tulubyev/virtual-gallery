@@ -125,6 +125,7 @@ let GALLERY_CONFIG = {
 class TextureManager {
   constructor(maxCacheSize = 50) {
     this.textureLoader = new THREE.TextureLoader();
+    this.textureLoader.crossOrigin = 'anonymous';
     this.cache = new Map();
     this.loadingQueue = new Map();
     this.maxCacheSize = maxCacheSize;
@@ -791,12 +792,14 @@ class VirtualGallery {
 
   async loadArtworksForRoom(roomId) {
     try {
-      const response = await fetch(`/api/rooms/${roomId}/artworks`);
+      const response = await fetch(`/api/gallery/rooms/${roomId}/artworks`);
       if (!response.ok) throw new Error('Failed to fetch');
       const artworks = await response.json();
-      this.placeArtworksInRoom(roomId, artworks);
+      if (artworks.length > 0) {
+        this.placeArtworksInRoom(roomId, artworks);
+      }
     } catch (error) {
-      console.log('Using demo artworks for room:', roomId);
+      console.log('No artworks assigned for room:', roomId);
     }
   }
 
@@ -808,13 +811,31 @@ class VirtualGallery {
         slotMesh.userData.artworkId = artwork.id;
         slotMesh.userData.artworkData = artwork;
 
-        const canvas = slotMesh.children.find(c => c.userData?.type === 'artwork_canvas');
-        if (canvas) this.applyDemoTexture(canvas, artwork);
+        const canvasMesh = slotMesh.children.find(c => c.userData?.type === 'artwork_canvas');
+        if (canvasMesh) {
+          const imageUrl = artwork.medium_url || artwork.image_url || artwork.thumbnail_url;
+          if (imageUrl) {
+            this.loadArtworkTexture(canvasMesh, imageUrl, artwork);
+          } else {
+            this.applyLabelTexture(canvasMesh, artwork);
+          }
+        }
       }
     });
   }
 
-  applyDemoTexture(mesh, artwork) {
+  async loadArtworkTexture(mesh, imageUrl, artwork) {
+    try {
+      const texture = await this.textureManager.loadTexture(imageUrl);
+      mesh.material.map = texture;
+      mesh.material.color.set(0xffffff);
+      mesh.material.needsUpdate = true;
+    } catch (error) {
+      this.applyLabelTexture(mesh, artwork);
+    }
+  }
+
+  applyLabelTexture(mesh, artwork) {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
@@ -865,7 +886,7 @@ class VirtualGallery {
       document.body.appendChild(modal);
     }
 
-    const imageUrl = artworkData.imageUrl || artworkData.thumbnail || '';
+    const imageUrl = artworkData.image_url || artworkData.imageUrl || artworkData.thumbnail_url || artworkData.thumbnail || '';
     
     modal.innerHTML = `
       <div style="background:#1a1a2e;border-radius:16px;max-width:1000px;width:95%;max-height:95vh;overflow-y:auto;color:white;font-family:'Inter',sans-serif;">
@@ -1105,8 +1126,53 @@ class VirtualGallery {
         if (apiRoom.lighting !== undefined) {
           existingRoom.lighting.ambient = apiRoom.lighting / 100;
         }
+
+        if (apiRoom.slots !== undefined) {
+          const slotsCount = parseInt(apiRoom.slots) || 0;
+          if (slotsCount > 0) {
+            existingRoom.artworkSlots = this.generateSlotPositions(existingRoom, slotsCount);
+          } else {
+            existingRoom.artworkSlots = [];
+          }
+        }
       }
     });
+  }
+
+  generateSlotPositions(room, slotsCount) {
+    const slots = [];
+    const { width, height, depth } = room.dimensions;
+    const wallY = height * 0.5;
+    const slotW = Math.min(2.5, (width - 2) / Math.ceil(slotsCount / 2));
+    const slotH = Math.min(2, height * 0.4);
+    
+    const walls = [
+      { name: 'left', xFn: () => -width / 2 + 0.1, zFn: (t) => (t - 0.5) * (depth - 4), rotWall: 'left' },
+      { name: 'right', xFn: () => width / 2 - 0.1, zFn: (t) => (t - 0.5) * (depth - 4), rotWall: 'right' },
+      { name: 'back', xFn: (t) => (t - 0.5) * (width - 4), zFn: () => -depth / 2 + 0.1, rotWall: 'back' }
+    ];
+
+    let slotIndex = 0;
+    for (let wallIdx = 0; wallIdx < walls.length && slotIndex < slotsCount; wallIdx++) {
+      const wall = walls[wallIdx];
+      const slotsOnWall = wallIdx < 2 ? Math.ceil(slotsCount / 3) : slotsCount - slotIndex;
+      
+      for (let i = 0; i < slotsOnWall && slotIndex < slotsCount; i++) {
+        const t = slotsOnWall === 1 ? 0.5 : i / (slotsOnWall - 1);
+        const x = typeof wall.xFn === 'function' ? wall.xFn(t) : wall.xFn;
+        const z = typeof wall.zFn === 'function' ? wall.zFn(t) : wall.zFn;
+        
+        slots.push({
+          id: `slot_${slotIndex + 1}`,
+          wall: wall.rotWall,
+          position: { x, y: wallY, z },
+          size: { w: slotW, h: slotH }
+        });
+        slotIndex++;
+      }
+    }
+    
+    return slots;
   }
 }
 
