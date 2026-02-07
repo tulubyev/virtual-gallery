@@ -650,40 +650,7 @@
                                 <div class="absolute top-2 right-2 text-xs text-gray-500">Правая стена</div>
                                 <div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-gray-500">Задняя стена</div>
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-gray-400">Вход</div>
-                                
-                                <!-- Artwork Slots -->
-                                <div class="grid grid-cols-3 gap-4 mt-8">
-                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-purple-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group" data-slot="1">
-                                        <div class="w-full h-full p-2 flex flex-col">
-                                            <div class="flex-1 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-lg"></div>
-                                            <p class="text-xs text-center mt-2 text-gray-700 truncate">Звездная ночь</p>
-                                        </div>
-                                        <button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <i data-lucide="x" class="w-3 h-3"></i>
-                                        </button>
-                                    </div>
-                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-purple-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group" data-slot="2">
-                                        <div class="w-full h-full p-2 flex flex-col">
-                                            <div class="flex-1 bg-gradient-to-br from-amber-100 to-yellow-200 rounded-lg"></div>
-                                            <p class="text-xs text-center mt-2 text-gray-700 truncate">Мона Лиза</p>
-                                        </div>
-                                        <button class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <i data-lucide="x" class="w-3 h-3"></i>
-                                        </button>
-                                    </div>
-                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="3">
-                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
-                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
-                                    </div>
-                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="4">
-                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
-                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
-                                    </div>
-                                    <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="5">
-                                        <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
-                                        <p class="text-xs text-gray-400 mt-2">Пустой слот</p>
-                                    </div>
-                                </div>
+                                <div id="slotsGrid" class="grid grid-cols-3 gap-4 mt-8"></div>
                             </div>
                         </div>
 
@@ -1041,6 +1008,44 @@
                     </div>
                 </div>
             </div>
+            <!-- Slot Artwork Selector Modal -->
+            <div id="slotSelectorModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+                    <div class="p-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+                        <div>
+                            <h3 class="text-lg font-display font-bold text-gray-900 flex items-center gap-2">
+                                <i data-lucide="image" class="w-5 h-5 text-purple-600"></i>
+                                <span id="slotSelectorTitle">Выбор экспоната для слота</span>
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">Выберите произведение для размещения</p>
+                        </div>
+                        <button id="closeSlotSelector" class="p-2 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+                        </button>
+                    </div>
+                    <div class="px-5 py-3 border-b border-gray-100 shrink-0">
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                                <input type="text" id="slotSearchInput" placeholder="Поиск по названию или автору..." 
+                                    class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <select id="slotFilterStatus" class="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="">Все статусы</option>
+                                <option value="approved" selected>Одобренные</option>
+                                <option value="published">Опубликованные</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="slotArtworksList" class="flex-1 overflow-y-auto p-5">
+                        <div class="text-center py-8 text-gray-500">
+                            <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                            <p>Загрузка произведений...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -2412,12 +2417,13 @@
                     const savedConfig = await response.json();
                     if (savedConfig && savedConfig.rooms) {
                         galleryConfig = savedConfig;
-                        renderRoomsList();
-                        selectRoom(galleryConfig.currentRoom || 'main_hall');
                     }
                 }
             } catch (error) {
                 console.log('Using default gallery configuration');
+            } finally {
+                renderRoomsList();
+                selectRoom(galleryConfig.currentRoom || 'main_hall');
             }
         }
 
@@ -2717,11 +2723,213 @@
             }
         });
 
-        document.querySelectorAll('.artwork-slot').forEach(slot => {
-            slot.addEventListener('click', () => {
-                toastInfo('Выберите экспонат для размещения в слоте ' + slot.dataset.slot);
+        let currentSlotIndex = null;
+        let slotArtworksCache = [];
+
+        function renderRoomLayout() {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (!room) return;
+
+            if (!room.artworkAssignments) room.artworkAssignments = {};
+
+            const grid = document.getElementById('slotsGrid');
+            if (!grid) return;
+
+            const slotsCount = parseInt(room.slots) || 0;
+            let html = '';
+
+            for (let i = 0; i < slotsCount; i++) {
+                const assignment = room.artworkAssignments[i];
+                if (assignment) {
+                    html += `
+                        <div class="artwork-slot relative aspect-[3/4] bg-white border-2 border-purple-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 hover:shadow-md transition-all group" data-slot="${i}">
+                            <div class="w-full h-full p-2 flex flex-col overflow-hidden">
+                                ${assignment.image_url ? 
+                                    `<img src="${assignment.thumbnail_url || assignment.image_url}" alt="${assignment.title || ''}" class="flex-1 object-cover rounded-lg min-h-0">` :
+                                    `<div class="flex-1 bg-gradient-to-br from-purple-200 to-pink-200 rounded-lg"></div>`
+                                }
+                                <p class="text-xs text-center mt-2 text-gray-700 truncate font-medium">${assignment.title || 'Без названия'}</p>
+                                <p class="text-[10px] text-center text-gray-400 truncate">${assignment.artist || ''}</p>
+                            </div>
+                            <button onclick="event.stopPropagation(); removeSlotArtwork(${i})" class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Убрать экспонат">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
+                            <span class="absolute bottom-1 left-1 text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">#${i + 1}</span>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="${i}">
+                            <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
+                            <p class="text-xs text-gray-400 mt-2">Слот #${i + 1}</p>
+                            <p class="text-[10px] text-gray-300 mt-0.5">Нажмите для выбора</p>
+                        </div>`;
+                }
+            }
+
+            if (slotsCount === 0) {
+                html = `
+                    <div class="col-span-3 text-center py-12 text-gray-400">
+                        <i data-lucide="frame" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                        <p class="text-sm">Нет слотов для размещения</p>
+                        <p class="text-xs mt-1">Нажмите «Добавить слот» выше</p>
+                    </div>`;
+            }
+
+            grid.innerHTML = html;
+            lucide.createIcons();
+
+            grid.querySelectorAll('.artwork-slot').forEach(slot => {
+                slot.addEventListener('click', () => {
+                    openSlotSelector(parseInt(slot.dataset.slot));
+                });
             });
+        }
+
+        function removeSlotArtwork(slotIndex) {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (!room || !room.artworkAssignments) return;
+            
+            const removed = room.artworkAssignments[slotIndex];
+            delete room.artworkAssignments[slotIndex];
+            renderRoomLayout();
+            toastSuccess(`«${removed?.title || 'Экспонат'}» убран из слота #${slotIndex + 1}`);
+        }
+
+        function openSlotSelector(slotIndex) {
+            currentSlotIndex = slotIndex;
+            document.getElementById('slotSelectorTitle').textContent = `Выбор экспоната для слота #${slotIndex + 1}`;
+            document.getElementById('slotSelectorModal').classList.remove('hidden');
+            document.getElementById('slotSearchInput').value = '';
+            lucide.createIcons();
+            loadSlotArtworks();
+        }
+
+        function closeSlotSelector() {
+            document.getElementById('slotSelectorModal').classList.add('hidden');
+            currentSlotIndex = null;
+        }
+
+        document.getElementById('closeSlotSelector')?.addEventListener('click', closeSlotSelector);
+        document.getElementById('slotSelectorModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'slotSelectorModal') closeSlotSelector();
         });
+
+        let slotSearchTimeout = null;
+        document.getElementById('slotSearchInput')?.addEventListener('input', () => {
+            clearTimeout(slotSearchTimeout);
+            slotSearchTimeout = setTimeout(() => filterSlotArtworks(), 300);
+        });
+        document.getElementById('slotFilterStatus')?.addEventListener('change', () => loadSlotArtworks());
+
+        async function loadSlotArtworks() {
+            const list = document.getElementById('slotArtworksList');
+            list.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-gray-400 mx-auto mb-2 animate-spin"></i>
+                    <p>Загрузка произведений...</p>
+                </div>`;
+            lucide.createIcons();
+
+            try {
+                const status = document.getElementById('slotFilterStatus').value;
+                let url = '/api/artworks?limit=200';
+                if (status) url += `&status=${status}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const data = await response.json();
+                slotArtworksCache = data.artworks || [];
+                filterSlotArtworks();
+            } catch (error) {
+                console.error('Load slot artworks error:', error);
+                list.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p>Ошибка загрузки</p>
+                    </div>`;
+                lucide.createIcons();
+            }
+        }
+
+        function filterSlotArtworks() {
+            const query = (document.getElementById('slotSearchInput')?.value || '').toLowerCase().trim();
+            const list = document.getElementById('slotArtworksList');
+
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            const assignedIds = new Set();
+            if (room?.artworkAssignments) {
+                Object.values(room.artworkAssignments).forEach(a => { if (a?.id) assignedIds.add(a.id); });
+            }
+
+            let filtered = slotArtworksCache;
+            if (query) {
+                filtered = filtered.filter(a => 
+                    (a.title || '').toLowerCase().includes(query) ||
+                    (a.artist || '').toLowerCase().includes(query) ||
+                    (a.style || '').toLowerCase().includes(query)
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="image-off" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <p>${query ? 'Ничего не найдено' : 'Нет доступных произведений'}</p>
+                        <p class="text-xs mt-1">Загрузите и одобрите произведения в разделе «Наполнение»</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            list.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">` + filtered.map(artwork => {
+                const isAssigned = assignedIds.has(artwork.id);
+                return `
+                    <div class="slot-artwork-option rounded-xl overflow-hidden border ${isAssigned ? 'border-green-300 bg-green-50/50' : 'border-gray-200 hover:border-purple-300'} transition-colors cursor-pointer ${isAssigned ? 'opacity-60' : ''}" 
+                         data-artwork-id="${artwork.id}" onclick="${isAssigned ? '' : `selectArtworkForSlot(${artwork.id})`}">
+                        <div class="bg-gray-100 relative" style="aspect-ratio: 3/4">
+                            ${artwork.image_url ? 
+                                `<img src="${artwork.thumbnail_url || artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" loading="lazy">` :
+                                `<div class="w-full h-full bg-gradient-to-br from-purple-200 to-pink-200"></div>`
+                            }
+                            ${isAssigned ? `<div class="absolute inset-0 bg-green-500/20 flex items-center justify-center"><i data-lucide="check-circle" class="w-8 h-8 text-green-600"></i></div>` : ''}
+                            <span class="absolute top-1 right-1 text-[10px] px-1.5 py-0.5 rounded-full ${
+                                artwork.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                            }">${artwork.status || 'pending'}</span>
+                        </div>
+                        <div class="p-2">
+                            <p class="text-xs font-semibold text-gray-900 truncate">${artwork.title || 'Без названия'}</p>
+                            <p class="text-[10px] text-gray-500 truncate">${artwork.artist || 'Неизвестен'}${artwork.year ? `, ${artwork.year}` : ''}</p>
+                            ${isAssigned ? `<p class="text-[10px] text-green-600 mt-0.5">Уже размещён</p>` : ''}
+                        </div>
+                    </div>`;
+            }).join('') + `</div>`;
+            lucide.createIcons();
+        }
+
+        function selectArtworkForSlot(artworkId) {
+            if (currentSlotIndex === null) return;
+
+            const artwork = slotArtworksCache.find(a => a.id === artworkId);
+            if (!artwork) return;
+
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (!room) return;
+
+            if (!room.artworkAssignments) room.artworkAssignments = {};
+            room.artworkAssignments[currentSlotIndex] = {
+                id: artwork.id,
+                title: artwork.title,
+                artist: artwork.artist,
+                image_url: artwork.image_url,
+                thumbnail_url: artwork.thumbnail_url,
+                year: artwork.year,
+                style: artwork.style
+            };
+
+            closeSlotSelector();
+            renderRoomLayout();
+            toastSuccess(`«${artwork.title || 'Экспонат'}» размещён в слоте #${currentSlotIndex + 1}`);
+        }
 
         document.getElementById('addConnectionBtn')?.addEventListener('click', () => {
             const currentRoom = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
