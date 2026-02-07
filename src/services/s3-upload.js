@@ -25,4 +25,17 @@ async function deleteFromS3(key) {
   }));
 }
 
-module.exports = { uploadToS3, deleteFromS3 };
+async function uploadBufferToS3(buffer, fileName, contentType) {
+  const key = `textures/${fileName}`;
+  await s3Client.send(new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+    ACL: 'public-read'
+  }));
+  const endpoint = process.env.S3_ENDPOINT.replace('https://', '').replace('http://', '');
+  return `https://${S3_BUCKET}.${endpoint}/${key}`;
+}
+
+module.exports = { uploadToS3, deleteFromS3, uploadBufferToS3 };

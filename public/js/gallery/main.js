@@ -448,20 +448,42 @@ class GalleryBuilder {
     this.artworkSlots = new Map();
     this.loadedRooms = new Set();
     this.config = GALLERY_CONFIG;
+    this._pregenTextureUrls = {};
+    this._pregenTextures = new Map();
+  }
+
+  setPregenTextureUrls(urls) {
+    this._pregenTextureUrls = urls || {};
+  }
+
+  async loadPregenTexture(key) {
+    if (this._pregenTextures.has(key)) return this._pregenTextures.get(key);
+    const url = this._pregenTextureUrls[key];
+    if (!url) return null;
+    try {
+      const texture = await this.textureManager.loadTexture(url);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      this._pregenTextures.set(key, texture);
+      return texture;
+    } catch (e) {
+      console.warn(`Failed to load pregen texture ${key}:`, e);
+      return null;
+    }
   }
 
   async buildEntireGallery() {
-    this.buildRoom(this.config.rooms[0]);
+    await this.buildRoom(this.config.rooms[0]);
     for (const corridor of this.config.corridors) {
       this.buildCorridor(corridor);
     }
     for (let i = 1; i < this.config.rooms.length; i++) {
-      this.buildRoom(this.config.rooms[i]);
+      await this.buildRoom(this.config.rooms[i]);
     }
     return this.getLoadedRooms();
   }
 
-  buildRoom(roomConfig) {
+  async buildRoom(roomConfig) {
     if (this.loadedRooms.has(roomConfig.id)) return this.rooms.get(roomConfig.id);
 
     const roomGroup = new THREE.Group();
@@ -471,8 +493,8 @@ class GalleryBuilder {
     const { width, height, depth } = roomConfig.dimensions;
     const pos = roomConfig.position;
 
-    this.createFloor(roomGroup, roomConfig);
-    this.createWalls(roomGroup, roomConfig);
+    await this.createFloor(roomGroup, roomConfig);
+    await this.createWalls(roomGroup, roomConfig);
     this.createCeiling(roomGroup, roomConfig);
     this.addRoomLighting(roomGroup, roomConfig);
     this.createArtworkSlots(roomGroup, roomConfig);
@@ -485,7 +507,7 @@ class GalleryBuilder {
     return roomGroup;
   }
 
-  getFloorTexture(config) {
+  getFloorTextureFallback(config) {
     const theme = config.theme || 'classic';
     const color = config.floor.color;
     if (theme === 'classical' || theme === 'impressionism') {
@@ -497,10 +519,13 @@ class GalleryBuilder {
     }
   }
 
-  createFloor(group, config) {
+  async createFloor(group, config) {
     const { width, depth } = config.dimensions;
     const geometry = new THREE.PlaneGeometry(width, depth);
-    const floorTexture = this.getFloorTexture(config);
+    let floorTexture = await this.loadPregenTexture(`floor_${config.id}`);
+    if (!floorTexture) {
+      floorTexture = this.getFloorTextureFallback(config);
+    }
     floorTexture.repeat.set(width / 4, depth / 4);
     const material = new THREE.MeshStandardMaterial({
       map: floorTexture,
@@ -514,9 +539,12 @@ class GalleryBuilder {
     group.add(floor);
   }
 
-  createWalls(group, config) {
+  async createWalls(group, config) {
     const { width, height, depth } = config.dimensions;
-    const wallTexture = ProceduralTextures.createWallTexture(config.walls.color);
+    let wallTexture = await this.loadPregenTexture(`wall_${config.id}`);
+    if (!wallTexture) {
+      wallTexture = ProceduralTextures.createWallTexture(config.walls.color);
+    }
     wallTexture.repeat.set(2, 2);
     const wallMaterial = new THREE.MeshStandardMaterial({
       map: wallTexture,
@@ -1043,6 +1071,9 @@ class VirtualGallery {
     this.updateLoadingProgress(30, 'Создание текстур...');
     this.textureManager = new TextureManager(100);
     this.galleryBuilder = new GalleryBuilder(this.scene, this.textureManager);
+    if (this._pregenTextureUrls) {
+      this.galleryBuilder.setPregenTextureUrls(this._pregenTextureUrls);
+    }
     
     this.updateLoadingProgress(40, 'Строим залы...');
     await this.galleryBuilder.buildEntireGallery();
@@ -1627,6 +1658,10 @@ class VirtualGallery {
         if (savedConfig && savedConfig.rooms && savedConfig.rooms.length > 0) {
           this.applyAPIConfig(savedConfig);
           console.log('Loaded gallery configuration from API');
+        }
+        if (savedConfig && savedConfig.texture_urls) {
+          this._pregenTextureUrls = savedConfig.texture_urls;
+          console.log(`Loaded ${Object.keys(savedConfig.texture_urls).length} pre-generated texture URLs`);
         }
       }
     } catch (error) {

@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/assets/toast.js"></script>
     <script src="/assets/image-display.js"></script>
+    <script src="/assets/texture-generator.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -573,6 +574,10 @@
                             <i data-lucide="eye" class="w-4 h-4"></i>
                             Предпросмотр 3D
                         </a>
+                        <button id="generateTexturesBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            <span>Сгенерировать текстуры</span>
+                        </button>
                         <button id="saveGalleryConfig" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2">
                             <i data-lucide="save" class="w-4 h-4"></i>
                             Сохранить
@@ -2740,6 +2745,36 @@
         }
 
         document.getElementById('saveGalleryConfig')?.addEventListener('click', saveGalleryConfigAction);
+
+        document.getElementById('generateTexturesBtn')?.addEventListener('click', async () => {
+            const btn = document.getElementById('generateTexturesBtn');
+            const btnText = btn.querySelector('span');
+            const originalText = btnText.textContent;
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+            
+            try {
+                btnText.textContent = 'Подготовка...';
+                
+                const textureUrls = await TextureGenerator.generateAndUploadAll(
+                    galleryConfig.rooms,
+                    (step, total, message) => {
+                        const pct = Math.round((step / total) * 100);
+                        btnText.textContent = `${message} (${pct}%)`;
+                    }
+                );
+
+                galleryConfig.textureUrls = textureUrls;
+                toastSuccess(`Текстуры сгенерированы и загружены (${Object.keys(textureUrls).length} шт.)`);
+            } catch (error) {
+                console.error('Texture generation error:', error);
+                toastError('Ошибка генерации текстур: ' + error.message);
+            } finally {
+                btnText.textContent = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            }
+        });
 
         document.getElementById('addSlotBtn')?.addEventListener('click', () => {
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
