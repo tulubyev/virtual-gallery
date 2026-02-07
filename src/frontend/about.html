@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>О нас — Virtual Gallery Services</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'accent': {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hero-gradient { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a78bfa 100%); }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i data-lucide="palette" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h1 class="text-lg font-display font-bold text-gray-900">Virtual Gallery Services</h1>
+                </a>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="/gallery-3d" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Галерея</a>
+                    <a href="/auction-participant.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
+                    <a href="/knowledge-base.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">База знаний</a>
+                    <a href="/about.html" class="text-accent-600 font-medium">О нас</a>
+                </nav>
+                <a href="/" class="bg-accent-600 hover:bg-accent-700 text-white px-5 py-2 rounded-xl font-medium transition-colors">На главную</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero-gradient text-white py-20 lg:py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl lg:text-5xl font-display font-bold mb-6">Искусство без границ</h1>
+            <p class="text-xl lg:text-2xl text-purple-100 max-w-3xl mx-auto leading-relaxed">
+                Мы создаём виртуальные галереи, чтобы шедевры мастеров со всего мира стали доступны каждому — независимо от расстояний и возможностей.
+            </p>
+        </div>
+    </section>
+
+    <!-- Mission -->
+    <section class="py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-display font-bold text-gray-900 mb-6">Наша миссия</h2>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    Virtual Gallery Services — это платформа для создания и размещения виртуальных объектов искусства. Мы верим, что каждый человек заслуживает возможности прикоснуться к прекрасному. Наша цель — сделать так, чтобы работы художников, скульпторов и мастеров разных направлений были доступны миллионам людей по всему миру.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-5">
+                        <i data-lucide="globe" class="w-7 h-7 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-gray-900 mb-3">Глобальный доступ</h3>
+                    <p class="text-gray-600">Любой человек из любой точки мира может посетить виртуальную выставку — нужен только интернет и браузер.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-5">
+                        <i data-lucide="box" class="w-7 h-7 text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-gray-900 mb-3">3D и VR</h3>
+                    <p class="text-gray-600">Иммерсивное погружение в трёхмерное пространство галереи с поддержкой виртуальной реальности для максимально реалистичного восприятия.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                    <div class="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-5">
+                        <i data-lucide="sparkles" class="w-7 h-7 text-pink-600"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold text-gray-900 mb-3">AI-курирование</h3>
+                    <p class="text-gray-600">Интеллектуальные алгоритмы помогают формировать экспозиции, анализировать работы и подбирать персональные рекомендации.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="py-16 lg:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-display font-bold text-gray-900 mb-4">Что мы предлагаем</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Полный цикл разработки и размещения виртуальных арт-объектов</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
+                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="image" class="w-6 h-6 text-accent-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Оцифровка произведений</h3>
+                        <p class="text-gray-600">Высококачественная оцифровка картин, скульптур и арт-объектов с сохранением мельчайших деталей и создание цифровых копий для виртуальных экспозиций.</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
+                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="layout" class="w-6 h-6 text-accent-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Создание виртуальных залов</h3>
+                        <p class="text-gray-600">Проектирование уникальных 3D-пространств для размещения коллекций — от классических галерей до авангардных инсталляций.</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
+                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="users" class="w-6 h-6 text-accent-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Курирование и модерация</h3>
+                        <p class="text-gray-600">Профессиональное курирование выставок с AI-поддержкой, подбор работ и формирование тематических экспозиций.</p>
+                    </div>
+                </div>
+                <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
+                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-accent-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Защита авторских прав</h3>
+                        <p class="text-gray-600">Водяные знаки, стеганография и NFT-метаданные для надёжной защиты интеллектуальной собственности авторов.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-accent-600 to-purple-700 rounded-3xl p-10 lg:p-16 text-center text-white">
+                <h2 class="text-3xl lg:text-4xl font-display font-bold mb-4">Хотите разместить свои работы?</h2>
+                <p class="text-lg text-purple-100 max-w-2xl mx-auto mb-8">
+                    Мы поможем оцифровать ваши произведения, создать виртуальную галерею и открыть доступ к ним для зрителей со всего мира.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/gallery-3d" class="bg-white text-accent-700 hover:bg-purple-50 px-8 py-3 rounded-xl font-semibold transition-colors">
+                        Посмотреть галерею
+                    </a>
+                    <a href="mailto:info@virtgal.ru" class="border-2 border-white/30 hover:bg-white/10 text-white px-8 py-3 rounded-xl font-semibold transition-colors">
+                        Связаться с нами
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-start">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                            <i data-lucide="palette" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="text-xl font-display font-bold text-white truncate">Virtual Gallery Services</span>
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">Виртуальная галерея нового поколения</p>
+                </div>
+                <div class="flex flex-col items-end text-right ml-4 flex-shrink-0">
+                    <div class="flex items-center h-10">
+                        <p class="text-gray-500 text-sm whitespace-nowrap">&copy; 2026 Virtual Gallery Services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
