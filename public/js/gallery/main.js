@@ -226,7 +226,29 @@ class TextureManager {
 }
 
 class ProceduralTextures {
-  static createParquetTexture(baseColor = 0x4a3f35, size = 512) {
+  static _cache = new Map();
+
+  static _getCached(key, createFn) {
+    if (this._cache.has(key)) return this._cache.get(key);
+    const texture = createFn();
+    this._cache.set(key, texture);
+    return texture;
+  }
+
+  static createParquetTexture(baseColor = 0x4a3f35, size = 256) {
+    return this._getCached(`parquet_${baseColor}_${size}`, () => this._genParquet(baseColor, size));
+  }
+  static createMarbleTexture(baseColor = 0xf0e8d8, size = 256) {
+    return this._getCached(`marble_${baseColor}_${size}`, () => this._genMarble(baseColor, size));
+  }
+  static createWallTexture(baseColor = 0xd4c5b9, size = 128) {
+    return this._getCached(`wall_${baseColor}_${size}`, () => this._genWall(baseColor, size));
+  }
+  static createConcreteTexture(baseColor = 0x2a2a2a, size = 128) {
+    return this._getCached(`concrete_${baseColor}_${size}`, () => this._genConcrete(baseColor, size));
+  }
+
+  static _genParquet(baseColor, size) {
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -246,14 +268,6 @@ class ProceduralTextures {
         ctx.strokeStyle = `rgba(0,0,0,0.15)`;
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, plankW, plankH);
-        for (let k = 0; k < 3; k++) {
-          const ly = y + Math.random() * plankH;
-          ctx.strokeStyle = `rgba(${r * 0.7},${g * 0.7},${b * 0.7},0.1)`;
-          ctx.beginPath();
-          ctx.moveTo(x + 2, ly);
-          ctx.lineTo(x + plankW - 2, ly + (Math.random() - 0.5) * 4);
-          ctx.stroke();
-        }
       }
     }
     const texture = new THREE.CanvasTexture(canvas);
@@ -263,7 +277,7 @@ class ProceduralTextures {
     return texture;
   }
 
-  static createMarbleTexture(baseColor = 0xf0e8d8, size = 512) {
+  static _genMarble(baseColor, size) {
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -271,16 +285,16 @@ class ProceduralTextures {
     const r = (baseColor >> 16) & 255, g = (baseColor >> 8) & 255, b = baseColor & 255;
     ctx.fillStyle = `rgb(${r},${g},${b})`;
     ctx.fillRect(0, 0, size, size);
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 10; i++) {
       const sx = Math.random() * size, sy = Math.random() * size;
       ctx.beginPath();
       ctx.moveTo(sx, sy);
-      for (let j = 0; j < 8; j++) {
-        const cx1 = sx + (Math.random() - 0.5) * size * 0.5;
-        const cy1 = sy + (Math.random() - 0.5) * size * 0.5;
-        const cx2 = sx + (Math.random() - 0.5) * size;
-        const cy2 = sy + (Math.random() - 0.5) * size;
-        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, sx + (Math.random() - 0.5) * size, sy + (Math.random() - 0.5) * size);
+      for (let j = 0; j < 5; j++) {
+        ctx.bezierCurveTo(
+          sx + (Math.random() - 0.5) * size * 0.5, sy + (Math.random() - 0.5) * size * 0.5,
+          sx + (Math.random() - 0.5) * size, sy + (Math.random() - 0.5) * size,
+          sx + (Math.random() - 0.5) * size, sy + (Math.random() - 0.5) * size
+        );
       }
       ctx.strokeStyle = `rgba(${r * 0.6},${g * 0.6},${b * 0.6},${0.04 + Math.random() * 0.06})`;
       ctx.lineWidth = 1 + Math.random() * 2;
@@ -293,7 +307,7 @@ class ProceduralTextures {
     return texture;
   }
 
-  static createWallTexture(baseColor = 0xd4c5b9, size = 256) {
+  static _genWall(baseColor, size) {
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -317,7 +331,7 @@ class ProceduralTextures {
     return texture;
   }
 
-  static createConcreteTexture(baseColor = 0x2a2a2a, size = 256) {
+  static _genConcrete(baseColor, size) {
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -347,6 +361,10 @@ class ArtworkLODManager {
     this.camera = camera;
     this.artworkMeshes = new Map();
     this.lodDistances = { high: 10, medium: 25, low: 50 };
+    this._frameCount = 0;
+    this._frustum = new THREE.Frustum();
+    this._projScreenMatrix = new THREE.Matrix4();
+    this._tempWorldPos = new THREE.Vector3();
   }
 
   registerArtwork(mesh, artworkData) {
@@ -375,7 +393,8 @@ class ArtworkLODManager {
   async updateLOD(mesh) {
     const info = this.artworkMeshes.get(mesh.uuid);
     if (!info) return;
-    const distance = this.camera.position.distanceTo(mesh.position);
+    mesh.getWorldPosition(this._tempWorldPos);
+    const distance = this.camera.position.distanceTo(this._tempWorldPos);
     let targetLOD;
     if (distance < this.lodDistances.high) targetLOD = 'high';
     else if (distance < this.lodDistances.medium) targetLOD = 'medium';
@@ -401,7 +420,18 @@ class ArtworkLODManager {
   }
 
   update() {
-    this.artworkMeshes.forEach((info) => this.updateLOD(info.mesh));
+    this._frameCount++;
+    if (this._frameCount % 30 !== 0) return;
+    this._projScreenMatrix.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
+    this._frustum.setFromProjectionMatrix(this._projScreenMatrix);
+    this.artworkMeshes.forEach((info) => {
+      if (info.mesh.parent) {
+        info.mesh.getWorldPosition(this._tempWorldPos);
+        if (this._frustum.containsPoint(this._tempWorldPos)) {
+          this.updateLOD(info.mesh);
+        }
+      }
+    });
   }
 
   unregisterArtwork(mesh) { this.artworkMeshes.delete(mesh.uuid); }
@@ -481,7 +511,6 @@ class GalleryBuilder {
     });
     const floor = new THREE.Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
     group.add(floor);
   }
 
@@ -497,27 +526,23 @@ class GalleryBuilder {
       side: THREE.DoubleSide
     });
 
-    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial.clone());
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial);
     backWall.position.set(0, height / 2, -depth / 2);
-    backWall.receiveShadow = true;
     group.add(backWall);
 
-    const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial.clone());
+    const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial);
     frontWall.position.set(0, height / 2, depth / 2);
     frontWall.rotation.y = Math.PI;
-    frontWall.receiveShadow = true;
     group.add(frontWall);
 
-    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial.clone());
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial);
     leftWall.position.set(-width / 2, height / 2, 0);
     leftWall.rotation.y = Math.PI / 2;
-    leftWall.receiveShadow = true;
     group.add(leftWall);
 
-    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial.clone());
+    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial);
     rightWall.position.set(width / 2, height / 2, 0);
     rightWall.rotation.y = -Math.PI / 2;
-    rightWall.receiveShadow = true;
     group.add(rightWall);
 
     this.addBaseboards(group, config);
@@ -539,7 +564,6 @@ class GalleryBuilder {
     positions.forEach(({ geo, pos }) => {
       const baseboard = new THREE.Mesh(new THREE.BoxGeometry(...geo), baseMat.clone());
       baseboard.position.set(...pos);
-      baseboard.receiveShadow = true;
       group.add(baseboard);
     });
   }
@@ -575,43 +599,35 @@ class GalleryBuilder {
 
   addRoomLighting(group, config) {
     const { width, height, depth } = config.dimensions;
-    const ambientIntensity = config.lighting.ambient * 0.6;
-    const ambient = new THREE.AmbientLight(0xfff5e6, ambientIntensity);
-    group.add(ambient);
 
-    const hemiLight = new THREE.HemisphereLight(0xfff8f0, 0x080820, 0.3);
-    hemiLight.position.set(0, height, 0);
-    group.add(hemiLight);
+    const pointLight = new THREE.PointLight(0xfff0e0, 0.6, Math.max(width, depth) * 1.5);
+    pointLight.position.set(0, height - 0.3, 0);
+    group.add(pointLight);
 
-    const ceilingLightCount = Math.max(2, Math.floor(Math.min(width, depth) / 8));
-    for (let i = 0; i < ceilingLightCount; i++) {
-      for (let j = 0; j < ceilingLightCount; j++) {
-        const lx = ((i + 0.5) / ceilingLightCount - 0.5) * (width * 0.7);
-        const lz = ((j + 0.5) / ceilingLightCount - 0.5) * (depth * 0.7);
-
-        const pointLight = new THREE.PointLight(0xfff0e0, 0.15, height * 3);
-        pointLight.position.set(lx, height - 0.3, lz);
-        group.add(pointLight);
-
-        const fixtureGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.08, 16);
-        const fixtureMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
-        const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
-        fixture.position.set(lx, height - 0.04, lz);
-        group.add(fixture);
-
-        const bulbGeo = new THREE.SphereGeometry(0.06, 8, 8);
-        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff8e8 });
-        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-        bulb.position.set(lx, height - 0.12, lz);
-        group.add(bulb);
-      }
+    if (!this._sharedFixtureGeo) {
+      this._sharedFixtureGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.08, 8);
+      this._sharedFixtureMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+      this._sharedBulbGeo = new THREE.SphereGeometry(0.06, 6, 6);
+      this._sharedBulbMat = new THREE.MeshBasicMaterial({ color: 0xfff8e8 });
     }
+
+    const fixturePositions = [
+      [width * 0.2, -width * 0.2],
+      [-width * 0.2, width * 0.2]
+    ];
+    fixturePositions.forEach(([fx, fz]) => {
+      const fixture = new THREE.Mesh(this._sharedFixtureGeo, this._sharedFixtureMat);
+      fixture.position.set(fx, height - 0.04, fz);
+      group.add(fixture);
+      const bulb = new THREE.Mesh(this._sharedBulbGeo, this._sharedBulbMat);
+      bulb.position.set(fx, height - 0.12, fz);
+      group.add(bulb);
+    });
 
     if (config.lighting.spotlights) {
       config.lighting.spotlights.forEach(spotConfig => {
         const spotlight = new THREE.SpotLight(0xfff5e6, spotConfig.intensity);
         spotlight.position.set(spotConfig.position.x, spotConfig.position.y, spotConfig.position.z);
-        spotlight.castShadow = true;
         spotlight.angle = Math.PI / 6;
         spotlight.penumbra = 0.3;
         group.add(spotlight);
@@ -637,15 +653,13 @@ class GalleryBuilder {
     spotlight.penumbra = 0.5;
     spotlight.decay = 1.5;
     spotlight.distance = roomHeight * 2;
-    spotlight.castShadow = true;
-    spotlight.shadow.mapSize.width = 512;
-    spotlight.shadow.mapSize.height = 512;
-    spotlight.shadow.bias = -0.001;
     group.add(spotlight);
 
-    const trackGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.3, 8);
-    const trackMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 });
-    const trackHead = new THREE.Mesh(trackGeo, trackMat);
+    if (!this._sharedTrackGeo) {
+      this._sharedTrackGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.3, 6);
+      this._sharedTrackMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 });
+    }
+    const trackHead = new THREE.Mesh(this._sharedTrackGeo, this._sharedTrackMat);
     trackHead.position.set(slotConfig.position.x, roomHeight - 0.15, slotConfig.position.z);
     trackHead.rotation.x = Math.PI / 6;
     group.add(trackHead);
@@ -661,31 +675,35 @@ class GalleryBuilder {
     });
   }
 
+  _getSlotMaterials() {
+    if (!this._slotMats) {
+      this._slotMats = {
+        frame: new THREE.MeshStandardMaterial({ color: 0x3d2817, metalness: 0.4, roughness: 0.5 }),
+        innerBorder: new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.3 }),
+        matte: new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0, roughness: 0.95 }),
+      };
+    }
+    return this._slotMats;
+  }
+
   createArtworkSlot(slotConfig, roomId) {
     const { w, h } = slotConfig.size;
     const frameDepth = 0.1;
     const frameWidth = 0.07;
+    const mats = this._getSlotMaterials();
 
     const slotGroup = new THREE.Group();
     slotGroup.name = `slot_${slotConfig.id}`;
     slotGroup.userData = { type: 'artwork_slot', slotId: slotConfig.id, roomId: roomId, wall: slotConfig.wall, isEmpty: true, artworkId: null };
 
-    const outerFrameGeo = new THREE.BoxGeometry(w + frameWidth * 2, h + frameWidth * 2, frameDepth);
-    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x3d2817, metalness: 0.4, roughness: 0.5 });
-    const outerFrame = new THREE.Mesh(outerFrameGeo, frameMaterial);
-    outerFrame.castShadow = true;
-    outerFrame.receiveShadow = true;
+    const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(w + frameWidth * 2, h + frameWidth * 2, frameDepth), mats.frame);
     slotGroup.add(outerFrame);
 
-    const innerBorderGeo = new THREE.BoxGeometry(w + 0.02, h + 0.02, frameDepth + 0.01);
-    const innerBorderMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.3 });
-    const innerBorder = new THREE.Mesh(innerBorderGeo, innerBorderMat);
+    const innerBorder = new THREE.Mesh(new THREE.BoxGeometry(w + 0.02, h + 0.02, frameDepth + 0.01), mats.innerBorder);
     innerBorder.position.z = 0.005;
     slotGroup.add(innerBorder);
 
-    const matteGeo = new THREE.PlaneGeometry(w + 0.04, h + 0.04);
-    const matteMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0, roughness: 0.95 });
-    const matte = new THREE.Mesh(matteGeo, matteMat);
+    const matte = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.04, h + 0.04), mats.matte);
     matte.position.z = frameDepth / 2 + 0.001;
     slotGroup.add(matte);
 
@@ -693,7 +711,6 @@ class GalleryBuilder {
     const canvasMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0, roughness: 0.8 });
     const canvas = new THREE.Mesh(canvasGeometry, canvasMaterial);
     canvas.position.z = frameDepth / 2 + 0.002;
-    canvas.receiveShadow = true;
     canvas.userData = { type: 'artwork_canvas' };
     slotGroup.add(canvas);
 
@@ -759,7 +776,6 @@ class GalleryBuilder {
     const archMaterial = new THREE.MeshStandardMaterial({ color: 0xd4c5a9, metalness: 0.2, roughness: 0.6 });
     const arch = new THREE.Mesh(archGeometry, archMaterial);
     arch.position.z = -0.15;
-    arch.castShadow = true;
     doorGroup.add(arch);
 
     const openingShape = new THREE.Shape();
@@ -841,7 +857,6 @@ class GalleryBuilder {
     const floorMaterial = new THREE.MeshStandardMaterial({ color: corridorConfig.floor.color, metalness: 0.1, roughness: 0.8 });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
     corridorGroup.add(floor);
 
     const wallMaterial = new THREE.MeshStandardMaterial({ color: corridorConfig.walls.color, metalness: 0.05, roughness: 0.9 });
@@ -1077,8 +1092,7 @@ class VirtualGallery {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputEncoding = THREE.sRGBEncoding;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.enabled = false;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
   }
 
@@ -1094,9 +1108,9 @@ class VirtualGallery {
   }
 
   addGlobalLighting() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.5);
     this.scene.add(ambientLight);
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
+    const hemisphereLight = new THREE.HemisphereLight(0xfff8f0, 0x080820, 0.4);
     hemisphereLight.position.set(0, 20, 0);
     this.scene.add(hemisphereLight);
   }
@@ -1225,12 +1239,17 @@ class VirtualGallery {
       }
     });
     
+    this._lastMinimapCamPos = new THREE.Vector3();
     this.renderMinimap();
     this.minimapInterval = setInterval(() => {
       if (document.getElementById('gallery-minimap')?.style.display !== 'none') {
-        this.renderMinimap();
+        const dist = this.camera.position.distanceTo(this._lastMinimapCamPos);
+        if (dist > 0.1) {
+          this._lastMinimapCamPos.copy(this.camera.position);
+          this.renderMinimap();
+        }
       }
-    }, 500);
+    }, 1000);
   }
 
   renderMinimap() {
