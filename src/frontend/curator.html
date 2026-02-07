@@ -28,6 +28,36 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } }
+
+        #sidebar { transition: width 0.25s ease, min-width 0.25s ease; overflow: hidden; }
+        #sidebar.collapsed { width: 68px !important; min-width: 68px; }
+        #sidebar.collapsed .sidebar-label,
+        #sidebar.collapsed .sidebar-user-info,
+        #sidebar.collapsed .sidebar-logo-text { display: none; }
+        #sidebar.collapsed .sidebar-link { justify-content: center; padding-left: 0; padding-right: 0; border-left-width: 0; }
+        #sidebar.collapsed .sidebar-link i { margin: 0; }
+        #sidebar.collapsed nav { padding-left: 8px; padding-right: 8px; }
+        #sidebar.collapsed .sidebar-header { justify-content: center; padding: 16px 8px; }
+        #sidebar.collapsed .sidebar-header a { justify-content: center; }
+        #sidebar.collapsed .sidebar-footer { padding: 8px; }
+        #sidebar.collapsed .sidebar-footer > div:first-child { justify-content: center; }
+        #sidebar.collapsed .sidebar-footer .sidebar-user-info,
+        #sidebar.collapsed .sidebar-footer #logoutBtn span { display: none; }
+        #sidebar.collapsed .sidebar-footer #logoutBtn { justify-content: center; }
+        #sidebar.collapsed #pendingBadge { position: absolute; top: 2px; right: 2px; margin: 0; font-size: 9px; padding: 1px 4px; }
+        #sidebar.collapsed .sidebar-link { position: relative; }
+
+        .main-content { transition: margin-left 0.25s ease; }
+        #sidebar.collapsed ~ .main-content { margin-left: 68px !important; }
+
+        #sidebarToggle { transition: transform 0.25s ease; }
+        #sidebar.collapsed #sidebarToggle { transform: rotate(180deg); }
+
+        .rooms-panel { transition: width 0.25s ease, min-width 0.25s ease, opacity 0.2s ease, padding 0.25s ease; }
+        .rooms-panel.collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; opacity: 0; pointer-events: none; height: 0; margin: 0; }
+        @media (min-width: 1024px) { .rooms-panel.collapsed { height: auto; } }
+        .rooms-panel-toggle { transition: transform 0.25s ease; }
+        .rooms-panel-toggle.rotated { transform: rotate(180deg); }
     </style>
 </head>
 <body class="font-sans bg-gray-50 min-h-screen">
@@ -46,12 +76,12 @@
 
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-50 transition-transform md:translate-x-0">
-            <div class="p-6 border-b border-gray-100">
+            <div class="sidebar-header p-6 border-b border-gray-100">
                 <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shrink-0">
                         <i data-lucide="palette" class="w-5 h-5 text-white"></i>
                     </div>
-                    <div>
+                    <div class="sidebar-logo-text">
                         <h1 class="font-display font-bold text-gray-900">Virtual Gallery</h1>
                         <span class="text-xs text-purple-600">Панель куратора</span>
                     </div>
@@ -59,48 +89,52 @@
             </div>
 
             <nav class="flex-1 p-4 space-y-1">
-                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                    <span class="font-medium">Главная</span>
+                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard" title="Главная">
+                    <i data-lucide="home" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label font-medium">Главная</span>
                 </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder">
-                    <i data-lucide="building-2" class="w-5 h-5"></i>
-                    <span class="font-medium">Галерея</span>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="gallery-builder" title="Галерея">
+                    <i data-lucide="building-2" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label font-medium">Галерея</span>
                 </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="collections">
-                    <i data-lucide="folder" class="w-5 h-5"></i>
-                    <span class="font-medium">Коллекции</span>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="collections" title="Коллекции">
+                    <i data-lucide="folder" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label font-medium">Коллекции</span>
                 </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="digitized">
-                    <i data-lucide="database" class="w-5 h-5"></i>
-                    <span class="font-medium">Наполнение</span>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="digitized" title="Наполнение">
+                    <i data-lucide="database" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label font-medium">Наполнение</span>
                     <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
                 </button>
-                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="ai-curation">
-                    <i data-lucide="sparkles" class="w-5 h-5"></i>
-                    <span class="font-medium">AI-курирование</span>
+                <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="ai-curation" title="AI-курирование">
+                    <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label font-medium">AI-курирование</span>
                 </button>
             </nav>
 
-            <div class="p-4 border-t border-gray-100">
+            <div class="sidebar-footer p-4 border-t border-gray-100">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
                         <i data-lucide="user" class="w-5 h-5 text-purple-600"></i>
                     </div>
-                    <div>
+                    <div class="sidebar-user-info">
                         <p class="font-medium text-gray-900 text-sm">Куратор</p>
                         <p class="text-xs text-gray-500">curator@virtgal.ru</p>
                     </div>
                 </div>
                 <button id="logoutBtn" class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
                     <span>Выйти</span>
+                </button>
+                <button id="sidebarToggle" class="w-full flex items-center gap-2 px-4 py-2 mt-1 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors text-sm" title="Свернуть меню">
+                    <i data-lucide="panel-left-close" class="w-4 h-4 shrink-0"></i>
+                    <span class="sidebar-label">Свернуть</span>
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
+        <main class="main-content flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
             <!-- Dashboard -->
             <section id="dashboard" class="tab-content active">
                 <div class="mb-8">
@@ -545,15 +579,20 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="flex flex-col lg:flex-row gap-6">
                     <!-- Rooms List -->
-                    <div class="lg:col-span-1">
+                    <div id="roomsPanel" class="rooms-panel w-full lg:w-80 shrink-0">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900">Залы галереи</h3>
-                                <button id="addRoomBtn" class="p-2 bg-purple-100 hover:bg-purple-200 rounded-lg transition-colors">
-                                    <i data-lucide="plus" class="w-5 h-5 text-purple-600"></i>
-                                </button>
+                                <h3 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Залы галереи</h3>
+                                <div class="flex items-center gap-1">
+                                    <button id="addRoomBtn" class="p-2 bg-purple-100 hover:bg-purple-200 rounded-lg transition-colors" title="Добавить зал">
+                                        <i data-lucide="plus" class="w-5 h-5 text-purple-600"></i>
+                                    </button>
+                                    <button id="roomsPanelToggle" class="p-2 hover:bg-gray-100 rounded-lg transition-colors rooms-panel-toggle" title="Свернуть панель залов">
+                                        <i data-lucide="panel-left-close" class="w-5 h-5 text-gray-500"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id="roomsList" class="space-y-2">
                                 <div class="room-item p-3 bg-purple-50 border border-purple-200 rounded-xl cursor-pointer flex items-center justify-between" data-room="main_hall">
@@ -621,13 +660,18 @@
                     </div>
 
                     <!-- Room Editor -->
-                    <div class="lg:col-span-2">
+                    <div class="flex-1 min-w-0">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <i data-lucide="layout" class="w-5 h-5 text-purple-600"></i>
-                                    Схема размещения
-                                </h3>
+                                <div class="flex items-center gap-2">
+                                    <button id="roomsPanelExpand" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors hidden" title="Показать панель залов">
+                                        <i data-lucide="panel-left-open" class="w-5 h-5 text-gray-500"></i>
+                                    </button>
+                                    <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        <i data-lucide="layout" class="w-5 h-5 text-purple-600"></i>
+                                        Схема размещения
+                                    </h3>
+                                </div>
                                 <div class="flex gap-2">
                                     <button onclick="openRoomSettingsModal()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
                                         <i data-lucide="settings" class="w-4 h-4"></i>
@@ -1125,6 +1169,36 @@
         });
 
         overlay?.addEventListener('click', closeSidebar);
+
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sb.classList.contains('collapsed') ? '1' : '0');
+            lucide.createIcons();
+        });
+
+        if (localStorage.getItem('sidebarCollapsed') === '1') {
+            document.getElementById('sidebar')?.classList.add('collapsed');
+        }
+
+        document.getElementById('roomsPanelToggle')?.addEventListener('click', () => {
+            const panel = document.getElementById('roomsPanel');
+            panel.classList.add('collapsed');
+            document.getElementById('roomsPanelExpand')?.classList.remove('hidden');
+            localStorage.setItem('roomsPanelCollapsed', '1');
+        });
+
+        document.getElementById('roomsPanelExpand')?.addEventListener('click', () => {
+            const panel = document.getElementById('roomsPanel');
+            panel.classList.remove('collapsed');
+            document.getElementById('roomsPanelExpand')?.classList.add('hidden');
+            localStorage.setItem('roomsPanelCollapsed', '0');
+        });
+
+        if (localStorage.getItem('roomsPanelCollapsed') === '1') {
+            document.getElementById('roomsPanel')?.classList.add('collapsed');
+            document.getElementById('roomsPanelExpand')?.classList.remove('hidden');
+        }
 
         document.querySelectorAll('.sidebar-link').forEach(btn => {
             btn.addEventListener('click', () => {
