@@ -1,6 +1,26 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
+function galleryToast(message, type = 'info') {
+  let container = document.getElementById('gallery-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'gallery-toast-container';
+    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+    document.body.appendChild(container);
+  }
+  const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
+  const toast = document.createElement('div');
+  toast.style.cssText = `background:rgba(20,20,40,0.95);color:#fff;padding:14px 20px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;max-width:350px;border-left:3px solid ${colors[type] || colors.info};backdrop-filter:blur(10px);pointer-events:auto;opacity:0;transform:translateX(30px);transition:all 0.3s ease;`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(0)'; });
+  setTimeout(() => {
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(30px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
 let GALLERY_CONFIG = {
   building: {
     name: "Virtual Art Museum",
@@ -205,6 +225,122 @@ class TextureManager {
   }
 }
 
+class ProceduralTextures {
+  static createParquetTexture(baseColor = 0x4a3f35, size = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = (baseColor >> 16) & 255, g = (baseColor >> 8) & 255, b = baseColor & 255;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, size, size);
+    const plankW = size / 8, plankH = size / 2;
+    for (let row = 0; row < size / plankH + 1; row++) {
+      const offset = (row % 2) * (plankW / 2);
+      for (let col = -1; col < size / plankW + 1; col++) {
+        const x = col * plankW + offset;
+        const y = row * plankH;
+        const variation = (Math.random() - 0.5) * 30;
+        ctx.fillStyle = `rgb(${Math.min(255, Math.max(0, r + variation))},${Math.min(255, Math.max(0, g + variation))},${Math.min(255, Math.max(0, b + variation))})`;
+        ctx.fillRect(x + 1, y + 1, plankW - 2, plankH - 2);
+        ctx.strokeStyle = `rgba(0,0,0,0.15)`;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, plankW, plankH);
+        for (let k = 0; k < 3; k++) {
+          const ly = y + Math.random() * plankH;
+          ctx.strokeStyle = `rgba(${r * 0.7},${g * 0.7},${b * 0.7},0.1)`;
+          ctx.beginPath();
+          ctx.moveTo(x + 2, ly);
+          ctx.lineTo(x + plankW - 2, ly + (Math.random() - 0.5) * 4);
+          ctx.stroke();
+        }
+      }
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.encoding = THREE.sRGBEncoding;
+    return texture;
+  }
+
+  static createMarbleTexture(baseColor = 0xf0e8d8, size = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = (baseColor >> 16) & 255, g = (baseColor >> 8) & 255, b = baseColor & 255;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, size, size);
+    for (let i = 0; i < 20; i++) {
+      const sx = Math.random() * size, sy = Math.random() * size;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      for (let j = 0; j < 8; j++) {
+        const cx1 = sx + (Math.random() - 0.5) * size * 0.5;
+        const cy1 = sy + (Math.random() - 0.5) * size * 0.5;
+        const cx2 = sx + (Math.random() - 0.5) * size;
+        const cy2 = sy + (Math.random() - 0.5) * size;
+        ctx.bezierCurveTo(cx1, cy1, cx2, cy2, sx + (Math.random() - 0.5) * size, sy + (Math.random() - 0.5) * size);
+      }
+      ctx.strokeStyle = `rgba(${r * 0.6},${g * 0.6},${b * 0.6},${0.04 + Math.random() * 0.06})`;
+      ctx.lineWidth = 1 + Math.random() * 2;
+      ctx.stroke();
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.encoding = THREE.sRGBEncoding;
+    return texture;
+  }
+
+  static createWallTexture(baseColor = 0xd4c5b9, size = 256) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = (baseColor >> 16) & 255, g = (baseColor >> 8) & 255, b = baseColor & 255;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, size, size);
+    const imageData = ctx.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const noise = (Math.random() - 0.5) * 8;
+      data[i] = Math.min(255, Math.max(0, data[i] + noise));
+      data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise));
+      data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise));
+    }
+    ctx.putImageData(imageData, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.encoding = THREE.sRGBEncoding;
+    return texture;
+  }
+
+  static createConcreteTexture(baseColor = 0x2a2a2a, size = 256) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = (baseColor >> 16) & 255, g = (baseColor >> 8) & 255, b = baseColor & 255;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, size, size);
+    const imageData = ctx.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const noise = (Math.random() - 0.5) * 15;
+      data[i] = Math.min(255, Math.max(0, data[i] + noise));
+      data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise));
+      data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise));
+    }
+    ctx.putImageData(imageData, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }
+}
+
 class ArtworkLODManager {
   constructor(textureManager, camera) {
     this.textureManager = textureManager;
@@ -229,8 +365,8 @@ class ArtworkLODManager {
   }
 
   applyPlaceholder(mesh) {
-    const placeholder = this.textureManager.createPlaceholderTexture(0x888888);
-    if (mesh.material && mesh.material.map !== undefined) {
+    if (mesh.material && !mesh.material.map) {
+      const placeholder = this.textureManager.createPlaceholderTexture(0x888888);
       mesh.material.map = placeholder;
       mesh.material.needsUpdate = true;
     }
@@ -319,10 +455,30 @@ class GalleryBuilder {
     return roomGroup;
   }
 
+  getFloorTexture(config) {
+    const theme = config.theme || 'classic';
+    const color = config.floor.color;
+    if (theme === 'classical' || theme === 'impressionism') {
+      return ProceduralTextures.createParquetTexture(color);
+    } else if (theme === 'modern' || theme === 'contemporary' || theme === 'dark') {
+      return ProceduralTextures.createConcreteTexture(color);
+    } else {
+      return ProceduralTextures.createMarbleTexture(color);
+    }
+  }
+
   createFloor(group, config) {
     const { width, depth } = config.dimensions;
     const geometry = new THREE.PlaneGeometry(width, depth);
-    const material = new THREE.MeshStandardMaterial({ color: config.floor.color, metalness: 0.1, roughness: 0.8, side: THREE.DoubleSide });
+    const floorTexture = this.getFloorTexture(config);
+    floorTexture.repeat.set(width / 4, depth / 4);
+    const material = new THREE.MeshStandardMaterial({
+      map: floorTexture,
+      color: config.floor.color,
+      metalness: 0.1,
+      roughness: 0.7,
+      side: THREE.DoubleSide
+    });
     const floor = new THREE.Mesh(geometry, material);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
@@ -331,26 +487,80 @@ class GalleryBuilder {
 
   createWalls(group, config) {
     const { width, height, depth } = config.dimensions;
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: config.walls.color, metalness: 0.05, roughness: 0.9, side: THREE.DoubleSide });
+    const wallTexture = ProceduralTextures.createWallTexture(config.walls.color);
+    wallTexture.repeat.set(2, 2);
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      map: wallTexture,
+      color: config.walls.color,
+      metalness: 0.02,
+      roughness: 0.92,
+      side: THREE.DoubleSide
+    });
 
     const backWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial.clone());
     backWall.position.set(0, height / 2, -depth / 2);
+    backWall.receiveShadow = true;
     group.add(backWall);
 
     const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(width, height), wallMaterial.clone());
     frontWall.position.set(0, height / 2, depth / 2);
     frontWall.rotation.y = Math.PI;
+    frontWall.receiveShadow = true;
     group.add(frontWall);
 
     const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial.clone());
     leftWall.position.set(-width / 2, height / 2, 0);
     leftWall.rotation.y = Math.PI / 2;
+    leftWall.receiveShadow = true;
     group.add(leftWall);
 
     const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(depth, height), wallMaterial.clone());
     rightWall.position.set(width / 2, height / 2, 0);
     rightWall.rotation.y = -Math.PI / 2;
+    rightWall.receiveShadow = true;
     group.add(rightWall);
+
+    this.addBaseboards(group, config);
+    this.addCrownMolding(group, config);
+  }
+
+  addBaseboards(group, config) {
+    const { width, height, depth } = config.dimensions;
+    const bH = 0.15, bD = 0.04;
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.6 });
+
+    const positions = [
+      { geo: [width, bH, bD], pos: [0, bH / 2, -depth / 2 + bD / 2], rot: [0, 0, 0] },
+      { geo: [width, bH, bD], pos: [0, bH / 2, depth / 2 - bD / 2], rot: [0, 0, 0] },
+      { geo: [bD, bH, depth], pos: [-width / 2 + bD / 2, bH / 2, 0], rot: [0, 0, 0] },
+      { geo: [bD, bH, depth], pos: [width / 2 - bD / 2, bH / 2, 0], rot: [0, 0, 0] }
+    ];
+
+    positions.forEach(({ geo, pos }) => {
+      const baseboard = new THREE.Mesh(new THREE.BoxGeometry(...geo), baseMat.clone());
+      baseboard.position.set(...pos);
+      baseboard.receiveShadow = true;
+      group.add(baseboard);
+    });
+  }
+
+  addCrownMolding(group, config) {
+    const { width, height, depth } = config.dimensions;
+    const mH = 0.08, mD = 0.06;
+    const moldMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0.1, roughness: 0.5 });
+
+    const positions = [
+      { geo: [width, mH, mD], pos: [0, height - mH / 2, -depth / 2 + mD / 2] },
+      { geo: [width, mH, mD], pos: [0, height - mH / 2, depth / 2 - mD / 2] },
+      { geo: [mD, mH, depth], pos: [-width / 2 + mD / 2, height - mH / 2, 0] },
+      { geo: [mD, mH, depth], pos: [width / 2 - mD / 2, height - mH / 2, 0] }
+    ];
+
+    positions.forEach(({ geo, pos }) => {
+      const molding = new THREE.Mesh(new THREE.BoxGeometry(...geo), moldMat.clone());
+      molding.position.set(...pos);
+      group.add(molding);
+    });
   }
 
   createCeiling(group, config) {
@@ -364,12 +574,42 @@ class GalleryBuilder {
   }
 
   addRoomLighting(group, config) {
-    const ambient = new THREE.AmbientLight(0xffffff, config.lighting.ambient);
+    const { width, height, depth } = config.dimensions;
+    const ambientIntensity = config.lighting.ambient * 0.6;
+    const ambient = new THREE.AmbientLight(0xfff5e6, ambientIntensity);
     group.add(ambient);
+
+    const hemiLight = new THREE.HemisphereLight(0xfff8f0, 0x080820, 0.3);
+    hemiLight.position.set(0, height, 0);
+    group.add(hemiLight);
+
+    const ceilingLightCount = Math.max(2, Math.floor(Math.min(width, depth) / 8));
+    for (let i = 0; i < ceilingLightCount; i++) {
+      for (let j = 0; j < ceilingLightCount; j++) {
+        const lx = ((i + 0.5) / ceilingLightCount - 0.5) * (width * 0.7);
+        const lz = ((j + 0.5) / ceilingLightCount - 0.5) * (depth * 0.7);
+
+        const pointLight = new THREE.PointLight(0xfff0e0, 0.15, height * 3);
+        pointLight.position.set(lx, height - 0.3, lz);
+        group.add(pointLight);
+
+        const fixtureGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.08, 16);
+        const fixtureMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+        const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+        fixture.position.set(lx, height - 0.04, lz);
+        group.add(fixture);
+
+        const bulbGeo = new THREE.SphereGeometry(0.06, 8, 8);
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff8e8 });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.set(lx, height - 0.12, lz);
+        group.add(bulb);
+      }
+    }
 
     if (config.lighting.spotlights) {
       config.lighting.spotlights.forEach(spotConfig => {
-        const spotlight = new THREE.SpotLight(0xffffff, spotConfig.intensity);
+        const spotlight = new THREE.SpotLight(0xfff5e6, spotConfig.intensity);
         spotlight.position.set(spotConfig.position.x, spotConfig.position.y, spotConfig.position.z);
         spotlight.castShadow = true;
         spotlight.angle = Math.PI / 6;
@@ -379,36 +619,102 @@ class GalleryBuilder {
     }
   }
 
+  addArtworkSpotlight(group, slotConfig, roomHeight) {
+    const warmWhite = 0xfff0d4;
+    const spotlight = new THREE.SpotLight(warmWhite, 0.8);
+    spotlight.position.set(
+      slotConfig.position.x,
+      roomHeight - 0.2,
+      slotConfig.position.z
+    );
+
+    const targetObj = new THREE.Object3D();
+    targetObj.position.set(slotConfig.position.x, slotConfig.position.y, slotConfig.position.z);
+    group.add(targetObj);
+    spotlight.target = targetObj;
+
+    spotlight.angle = Math.PI / 8;
+    spotlight.penumbra = 0.5;
+    spotlight.decay = 1.5;
+    spotlight.distance = roomHeight * 2;
+    spotlight.castShadow = true;
+    spotlight.shadow.mapSize.width = 512;
+    spotlight.shadow.mapSize.height = 512;
+    spotlight.shadow.bias = -0.001;
+    group.add(spotlight);
+
+    const trackGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.3, 8);
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 });
+    const trackHead = new THREE.Mesh(trackGeo, trackMat);
+    trackHead.position.set(slotConfig.position.x, roomHeight - 0.15, slotConfig.position.z);
+    trackHead.rotation.x = Math.PI / 6;
+    group.add(trackHead);
+  }
+
   createArtworkSlots(group, config) {
     if (!config.artworkSlots) return;
     config.artworkSlots.forEach(slot => {
       const slotMesh = this.createArtworkSlot(slot, config.id);
       group.add(slotMesh);
       this.artworkSlots.set(`${config.id}_${slot.id}`, slotMesh);
+      this.addArtworkSpotlight(group, slot, config.dimensions.height);
     });
   }
 
   createArtworkSlot(slotConfig, roomId) {
     const { w, h } = slotConfig.size;
-    const frameDepth = 0.08;
-    const frameWidth = 0.06;
+    const frameDepth = 0.1;
+    const frameWidth = 0.07;
 
     const slotGroup = new THREE.Group();
     slotGroup.name = `slot_${slotConfig.id}`;
     slotGroup.userData = { type: 'artwork_slot', slotId: slotConfig.id, roomId: roomId, wall: slotConfig.wall, isEmpty: true, artworkId: null };
 
-    const frameGeometry = new THREE.BoxGeometry(w + frameWidth * 2, h + frameWidth * 2, frameDepth);
-    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x3d2817, metalness: 0.3, roughness: 0.7 });
-    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-    frame.castShadow = true;
-    slotGroup.add(frame);
+    const outerFrameGeo = new THREE.BoxGeometry(w + frameWidth * 2, h + frameWidth * 2, frameDepth);
+    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x3d2817, metalness: 0.4, roughness: 0.5 });
+    const outerFrame = new THREE.Mesh(outerFrameGeo, frameMaterial);
+    outerFrame.castShadow = true;
+    outerFrame.receiveShadow = true;
+    slotGroup.add(outerFrame);
+
+    const innerBorderGeo = new THREE.BoxGeometry(w + 0.02, h + 0.02, frameDepth + 0.01);
+    const innerBorderMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6, roughness: 0.3 });
+    const innerBorder = new THREE.Mesh(innerBorderGeo, innerBorderMat);
+    innerBorder.position.z = 0.005;
+    slotGroup.add(innerBorder);
+
+    const matteGeo = new THREE.PlaneGeometry(w + 0.04, h + 0.04);
+    const matteMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, metalness: 0, roughness: 0.95 });
+    const matte = new THREE.Mesh(matteGeo, matteMat);
+    matte.position.z = frameDepth / 2 + 0.001;
+    slotGroup.add(matte);
 
     const canvasGeometry = new THREE.PlaneGeometry(w, h);
-    const canvasMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0, roughness: 0.9 });
+    const canvasMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0, roughness: 0.8 });
     const canvas = new THREE.Mesh(canvasGeometry, canvasMaterial);
-    canvas.position.z = frameDepth / 2 + 0.001;
+    canvas.position.z = frameDepth / 2 + 0.002;
+    canvas.receiveShadow = true;
     canvas.userData = { type: 'artwork_canvas' };
     slotGroup.add(canvas);
+
+    const labelCanvas = document.createElement('canvas');
+    labelCanvas.width = 256;
+    labelCanvas.height = 32;
+    const ctx = labelCanvas.getContext('2d');
+    ctx.fillStyle = '#d4af37';
+    ctx.fillRect(0, 0, 256, 32);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(slotConfig.id.replace('slot_', '# '), 128, 16);
+    const labelTexture = new THREE.CanvasTexture(labelCanvas);
+    const labelGeo = new THREE.PlaneGeometry(w * 0.4, 0.12);
+    const labelMat = new THREE.MeshBasicMaterial({ map: labelTexture, transparent: true });
+    const label = new THREE.Mesh(labelGeo, labelMat);
+    label.position.set(0, -(h / 2) - frameWidth - 0.15, frameDepth / 2);
+    label.userData = { type: 'artwork_label' };
+    slotGroup.add(label);
 
     slotGroup.position.set(slotConfig.position.x, slotConfig.position.y, slotConfig.position.z);
 
@@ -434,18 +740,44 @@ class GalleryBuilder {
     
     const doorWidth = 3;
     const doorHeight = 3.5;
-    
-    const frameGeometry = new THREE.BoxGeometry(doorWidth + 0.4, doorHeight + 0.2, 0.3);
-    const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.4, roughness: 0.6 });
-    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-    frame.position.y = doorHeight / 2;
-    doorGroup.add(frame);
+    const archRadius = doorWidth / 2;
+    const straightHeight = doorHeight - archRadius;
 
-    const openingGeometry = new THREE.BoxGeometry(doorWidth, doorHeight, 0.5);
-    const openingMaterial = new THREE.MeshBasicMaterial({ color: 0x050505, transparent: true, opacity: 0.9 });
-    const opening = new THREE.Mesh(openingGeometry, openingMaterial);
-    opening.position.y = doorHeight / 2;
+    const archShape = new THREE.Shape();
+    archShape.moveTo(-doorWidth / 2 - 0.2, 0);
+    archShape.lineTo(-doorWidth / 2 - 0.2, straightHeight + archRadius + 0.2);
+    archShape.lineTo(doorWidth / 2 + 0.2, straightHeight + archRadius + 0.2);
+    archShape.lineTo(doorWidth / 2 + 0.2, 0);
+    archShape.lineTo(doorWidth / 2, 0);
+    archShape.lineTo(doorWidth / 2, straightHeight);
+    archShape.absarc(0, straightHeight, archRadius, 0, Math.PI, false);
+    archShape.lineTo(-doorWidth / 2, 0);
+    archShape.lineTo(-doorWidth / 2 - 0.2, 0);
+
+    const extrudeSettings = { depth: 0.3, bevelEnabled: false };
+    const archGeometry = new THREE.ExtrudeGeometry(archShape, extrudeSettings);
+    const archMaterial = new THREE.MeshStandardMaterial({ color: 0xd4c5a9, metalness: 0.2, roughness: 0.6 });
+    const arch = new THREE.Mesh(archGeometry, archMaterial);
+    arch.position.z = -0.15;
+    arch.castShadow = true;
+    doorGroup.add(arch);
+
+    const openingShape = new THREE.Shape();
+    openingShape.moveTo(-doorWidth / 2, 0);
+    openingShape.lineTo(-doorWidth / 2, straightHeight);
+    openingShape.absarc(0, straightHeight, archRadius, Math.PI, 0, true);
+    openingShape.lineTo(doorWidth / 2, 0);
+    openingShape.lineTo(-doorWidth / 2, 0);
+
+    const openingGeo = new THREE.ShapeGeometry(openingShape);
+    const openingMat = new THREE.MeshBasicMaterial({ color: 0x0a0a1a, transparent: true, opacity: 0.85 });
+    const opening = new THREE.Mesh(openingGeo, openingMat);
+    opening.position.z = 0.16;
     doorGroup.add(opening);
+
+    const portalLight = new THREE.PointLight(0xfff5e6, 0.3, 8);
+    portalLight.position.set(0, doorHeight / 2, 0.5);
+    doorGroup.add(portalLight);
 
     const triggerGeometry = new THREE.BoxGeometry(doorWidth + 2, doorHeight, 2);
     const triggerMaterial = new THREE.MeshBasicMaterial({ visible: false });
@@ -455,23 +787,42 @@ class GalleryBuilder {
     doorGroup.add(trigger);
 
     const labelCanvas = document.createElement('canvas');
-    labelCanvas.width = 256;
-    labelCanvas.height = 64;
+    labelCanvas.width = 512;
+    labelCanvas.height = 80;
     const ctx = labelCanvas.getContext('2d');
+    ctx.fillStyle = 'rgba(26, 26, 46, 0.85)';
+    const lw = 450, lh = 60, lx = (512 - lw) / 2, ly = (80 - lh) / 2;
+    ctx.beginPath();
+    ctx.roundRect(lx, ly, lw, lh, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(lx, ly, lw, lh, 8);
+    ctx.stroke();
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold 26px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const targetRoom = this.config.rooms.find(r => r.id === doorConfig.to);
-    ctx.fillText(targetRoom ? targetRoom.name : doorConfig.to, 128, 32);
+    ctx.fillText(targetRoom ? targetRoom.name : doorConfig.to, 256, 36);
+    ctx.fillStyle = 'rgba(212, 175, 55, 0.8)';
+    ctx.font = '16px Arial';
+    ctx.fillText('→ перейти', 256, 58);
 
     const labelTexture = new THREE.CanvasTexture(labelCanvas);
-    const labelGeometry = new THREE.PlaneGeometry(2, 0.5);
+    const labelGeometry = new THREE.PlaneGeometry(2.5, 0.5);
     const labelMaterial = new THREE.MeshBasicMaterial({ map: labelTexture, transparent: true });
     const label = new THREE.Mesh(labelGeometry, labelMaterial);
-    label.position.y = doorHeight + 0.3;
+    label.position.y = straightHeight + archRadius + 0.5;
     label.position.z = 0.2;
     doorGroup.add(label);
+
+    const keystoneGeo = new THREE.BoxGeometry(0.3, 0.4, 0.35);
+    const keystoneMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.5, roughness: 0.4 });
+    const keystone = new THREE.Mesh(keystoneGeo, keystoneMat);
+    keystone.position.set(0, straightHeight + archRadius, 0);
+    doorGroup.add(keystone);
 
     doorGroup.position.set(doorConfig.position.x, doorConfig.position.y, doorConfig.position.z);
     doorGroup.rotation.y = doorConfig.rotation;
@@ -658,35 +1009,55 @@ class VirtualGallery {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
     this.hoveredObject = null;
+    this.hoveredDoor = null;
     
     this.init();
   }
 
   async init() {
+    this.updateLoadingProgress(5, 'Загрузка конфигурации...');
     await this.loadConfigFromAPI();
     
+    this.updateLoadingProgress(15, 'Настройка сцены...');
     this.setupScene();
     this.setupCamera();
     this.setupRenderer();
     this.setupControls();
     this.addGlobalLighting();
 
+    this.updateLoadingProgress(30, 'Создание текстур...');
     this.textureManager = new TextureManager(100);
     this.galleryBuilder = new GalleryBuilder(this.scene, this.textureManager);
+    
+    this.updateLoadingProgress(40, 'Строим залы...');
     await this.galleryBuilder.buildEntireGallery();
 
+    this.updateLoadingProgress(70, 'Настройка навигации...');
     this.roomNavigator = new RoomNavigator(this.camera, this.galleryBuilder, this.onRoomChange.bind(this));
     this.roomNavigator.initialize();
     
     this.artworkLODManager = new ArtworkLODManager(this.textureManager, this.camera);
 
+    this.updateLoadingProgress(85, 'Загружаем картины...');
     await this.loadArtworksForRoom('main_hall');
     this.setupEventListeners();
     this.createRoomInfoUI();
     
+    this.updateLoadingProgress(100, 'Готово!');
     this.isInitialized = true;
+    
+    await new Promise(r => setTimeout(r, 400));
     this.hideLoadingScreen();
     this.animate();
+  }
+
+  updateLoadingProgress(percent, statusText) {
+    const progressBar = document.getElementById('loading-progress-bar');
+    const progressText = document.getElementById('loading-progress-text');
+    const progressPercent = document.getElementById('loading-progress-percent');
+    if (progressBar) progressBar.style.width = percent + '%';
+    if (progressText) progressText.textContent = statusText;
+    if (progressPercent) progressPercent.textContent = percent + '%';
   }
 
   setupScene() {
@@ -749,23 +1120,58 @@ class VirtualGallery {
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     this.raycaster.setFromCamera(this.mouse, this.camera);
-    const slots = this.galleryBuilder.getArtworkSlotsForRoom(this.currentRoom);
-    const intersects = this.raycaster.intersectObjects(slots, true);
 
     if (this.hoveredObject) {
       this.hoveredObject.scale.set(1, 1, 1);
       document.body.style.cursor = 'default';
+      this.hoveredObject = null;
+    }
+    if (this.hoveredDoor) {
+      this.hoveredDoor.traverse(child => {
+        if (child.material && child.material.emissive) {
+          child.material.emissive.setHex(0x000000);
+          child.material.needsUpdate = true;
+        }
+      });
+      document.body.style.cursor = 'default';
+      this.hoveredDoor = null;
     }
 
-    if (intersects.length > 0) {
-      let parent = intersects[0].object;
+    const slots = this.galleryBuilder.getArtworkSlotsForRoom(this.currentRoom);
+    const artworkIntersects = this.raycaster.intersectObjects(slots, true);
+
+    if (artworkIntersects.length > 0) {
+      let parent = artworkIntersects[0].object;
       while (parent.parent && !parent.userData.type?.includes('slot')) parent = parent.parent;
       
       if (parent.userData.type === 'artwork_slot' && !parent.userData.isEmpty) {
         this.hoveredObject = parent;
         parent.scale.set(1.02, 1.02, 1.02);
         document.body.style.cursor = 'pointer';
+        return;
       }
+    }
+
+    const allDoors = this.galleryBuilder.getAllDoors();
+    const doorTriggers = [];
+    allDoors.forEach(door => {
+      door.traverse(obj => {
+        if (obj.userData?.type === 'door_trigger') doorTriggers.push(obj);
+      });
+    });
+    const doorIntersects = this.raycaster.intersectObjects(doorTriggers);
+    if (doorIntersects.length > 0) {
+      const doorTrigger = doorIntersects[0].object;
+      let doorGroup = doorTrigger.parent;
+      this.hoveredDoor = doorGroup;
+      doorGroup.traverse(child => {
+        if (child.material && child.material.emissive && child.userData?.type !== 'door_trigger') {
+          child.material.emissive.setHex(0x222244);
+          child.material.emissiveIntensity = 0.3;
+          child.material.needsUpdate = true;
+        }
+      });
+      document.body.style.cursor = 'pointer';
     }
   }
 
@@ -776,11 +1182,122 @@ class VirtualGallery {
   }
 
   onKeyDown(event) {
-    const rooms = ['main_hall', 'impressionism', 'modern_art', 'renaissance', 'contemporary'];
-    const keyNum = parseInt(event.key);
-    if (keyNum >= 1 && keyNum <= rooms.length) {
-      this.roomNavigator.navigateToRoom(rooms[keyNum - 1]);
+    if (event.key === 'm' || event.key === 'M' || event.key === 'ь' || event.key === 'Ь') {
+      this.toggleMinimap();
+      return;
     }
+    const roomIds = GALLERY_CONFIG.rooms.map(r => r.id);
+    const keyNum = parseInt(event.key);
+    if (keyNum >= 1 && keyNum <= roomIds.length) {
+      this.roomNavigator.navigateToRoom(roomIds[keyNum - 1]);
+    }
+  }
+
+  toggleMinimap() {
+    let minimap = document.getElementById('gallery-minimap');
+    if (minimap) {
+      minimap.style.display = minimap.style.display === 'none' ? 'block' : 'none';
+      if (minimap.style.display === 'block') this.renderMinimap();
+      return;
+    }
+    minimap = document.createElement('canvas');
+    minimap.id = 'gallery-minimap';
+    minimap.width = 280;
+    minimap.height = 280;
+    minimap.style.cssText = 'position:fixed;top:80px;right:20px;width:280px;height:280px;background:rgba(10,10,30,0.9);border:1px solid rgba(99,102,241,0.4);border-radius:12px;z-index:150;cursor:pointer;';
+    document.body.appendChild(minimap);
+    
+    minimap.addEventListener('click', (e) => {
+      const rect = minimap.getBoundingClientRect();
+      const cx = (e.clientX - rect.left) / rect.width;
+      const cy = (e.clientY - rect.top) / rect.height;
+      const mapRange = 120;
+      const worldX = (cx - 0.5) * mapRange * 2;
+      const worldZ = (cy - 0.5) * mapRange * 2;
+      
+      let closest = null, closestDist = Infinity;
+      GALLERY_CONFIG.rooms.forEach(room => {
+        const dist = Math.sqrt(Math.pow(room.position.x - worldX, 2) + Math.pow(room.position.z - worldZ, 2));
+        if (dist < closestDist) { closestDist = dist; closest = room; }
+      });
+      if (closest && closestDist < 30) {
+        this.roomNavigator.navigateToRoom(closest.id);
+      }
+    });
+    
+    this.renderMinimap();
+    this.minimapInterval = setInterval(() => {
+      if (document.getElementById('gallery-minimap')?.style.display !== 'none') {
+        this.renderMinimap();
+      }
+    }, 500);
+  }
+
+  renderMinimap() {
+    const canvas = document.getElementById('gallery-minimap');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const mapRange = 120;
+    
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(10, 10, 30, 0.95)';
+    ctx.fillRect(0, 0, w, h);
+
+    const toMapX = (x) => (x / mapRange + 0.5) * w;
+    const toMapY = (z) => (z / mapRange + 0.5) * h;
+
+    GALLERY_CONFIG.corridors.forEach(corridor => {
+      const fromRoom = GALLERY_CONFIG.rooms.find(r => r.id === corridor.from);
+      const toRoom = GALLERY_CONFIG.rooms.find(r => r.id === corridor.to);
+      if (fromRoom && toRoom) {
+        ctx.strokeStyle = 'rgba(100, 100, 140, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(toMapX(fromRoom.position.x), toMapY(fromRoom.position.z));
+        ctx.lineTo(toMapX(toRoom.position.x), toMapY(toRoom.position.z));
+        ctx.stroke();
+      }
+    });
+
+    GALLERY_CONFIG.rooms.forEach(room => {
+      const rx = toMapX(room.position.x);
+      const ry = toMapY(room.position.z);
+      const rw = (room.dimensions.width / mapRange) * w * 0.5;
+      const rh = (room.dimensions.depth / mapRange) * h * 0.5;
+      
+      const isCurrentRoom = room.id === this.currentRoom;
+      ctx.fillStyle = isCurrentRoom ? 'rgba(99, 102, 241, 0.4)' : 'rgba(60, 60, 90, 0.4)';
+      ctx.strokeStyle = isCurrentRoom ? '#6366f1' : 'rgba(100, 100, 150, 0.5)';
+      ctx.lineWidth = isCurrentRoom ? 2 : 1;
+      
+      ctx.beginPath();
+      ctx.roundRect(rx - rw / 2, ry - rh / 2, rw, rh, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isCurrentRoom ? '#ffffff' : 'rgba(255,255,255,0.6)';
+      ctx.font = isCurrentRoom ? 'bold 10px Inter, Arial' : '9px Inter, Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const shortName = room.name.length > 12 ? room.name.substring(0, 10) + '…' : room.name;
+      ctx.fillText(shortName, rx, ry);
+    });
+
+    const camX = toMapX(this.camera.position.x);
+    const camY = toMapY(this.camera.position.z);
+    ctx.fillStyle = '#f43f5e';
+    ctx.beginPath();
+    ctx.arc(camX, camY, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '9px Inter, Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText('M — скрыть', w - 8, h - 8);
   }
 
   async onRoomChange(roomId, roomConfig) {
@@ -830,6 +1347,11 @@ class VirtualGallery {
       mesh.material.map = texture;
       mesh.material.color.set(0xffffff);
       mesh.material.needsUpdate = true;
+
+      if (this.artworkLODManager && artwork.thumbnail_url) {
+        this.artworkLODManager.registerArtwork(mesh, artwork);
+        this.artworkLODManager.artworkMeshes.get(mesh.uuid).currentLOD = 'medium';
+      }
     } catch (error) {
       this.applyLabelTexture(mesh, artwork);
     }
@@ -1031,14 +1553,11 @@ class VirtualGallery {
     });
 
     modal.querySelector('#btn-auction').addEventListener('click', () => {
-      alert('Функция "Аукцион" позволяет выставить работу на торги. Для участия требуется регистрация.');
+      galleryToast('Функция «Аукцион» позволяет выставить работу на торги. Для участия требуется регистрация.', 'info');
     });
 
     modal.querySelector('#btn-question').addEventListener('click', () => {
-      const question = prompt('Введите ваш вопрос модератору о данной работе:');
-      if (question) {
-        alert('Ваш вопрос отправлен модератору. Ответ придёт на вашу почту.');
-      }
+      galleryToast('Раздел вопросов модератору скоро будет доступен.', 'info');
     });
   }
 

@@ -163,9 +163,15 @@
             <h2 style="font-size: 24px; margin-bottom: 10px; font-weight: 600; font-family: 'Playfair Display', serif;">
                 Virtual Art Gallery
             </h2>
-            <p style="font-size: 14px; color: rgba(255,255,255,0.7);">
-                Загрузка 3D галереи...
-            </p>
+            <div style="width: 280px; margin: 20px auto 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span id="loading-progress-text" style="font-size: 13px; color: rgba(255,255,255,0.7);">Инициализация...</span>
+                    <span id="loading-progress-percent" style="font-size: 13px; color: rgba(255,255,255,0.5);">0%</span>
+                </div>
+                <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                    <div id="loading-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #a78bfa); border-radius: 2px; transition: width 0.4s ease;"></div>
+                </div>
+            </div>
         </div>
         <style>
             @keyframes spin {
@@ -184,13 +190,7 @@
         На главную
     </a>
 
-    <div class="room-select" id="room-select">
-        <button class="room-btn active" data-room="main_hall">Холл</button>
-        <button class="room-btn" data-room="impressionism">Импрессионизм</button>
-        <button class="room-btn" data-room="modern_art">Модерн</button>
-        <button class="room-btn" data-room="renaissance">Ренессанс</button>
-        <button class="room-btn" data-room="contemporary">XXI век</button>
-    </div>
+    <div class="room-select" id="room-select"></div>
 
     <div class="controls-hint">
         <span><kbd>ЛКМ + Drag</kbd> Вращение</span>
@@ -213,17 +213,41 @@
     <script type="module" src="/js/gallery/main.js"></script>
 
     <script>
-        document.querySelectorAll('.room-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const roomId = btn.dataset.room;
-                if (window.virtualGallery && window.virtualGallery.roomNavigator) {
-                    window.virtualGallery.roomNavigator.navigateToRoom(roomId);
-                    
-                    document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+        async function buildRoomButtons() {
+            let rooms = [];
+            try {
+                const res = await fetch('/api/gallery/config');
+                if (res.ok) {
+                    const config = await res.json();
+                    if (config.rooms) rooms = config.rooms;
                 }
+            } catch(e) {}
+            if (rooms.length === 0) {
+                rooms = [
+                    { id: 'main_hall', name: 'Холл' },
+                    { id: 'impressionism', name: 'Импрессионизм' },
+                    { id: 'modern_art', name: 'Модерн' },
+                    { id: 'renaissance', name: 'Ренессанс' },
+                    { id: 'contemporary', name: 'XXI век' }
+                ];
+            }
+            const container = document.getElementById('room-select');
+            rooms.forEach((room, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'room-btn' + (i === 0 ? ' active' : '');
+                btn.dataset.room = room.id;
+                btn.textContent = room.name.length > 15 ? room.name.substring(0, 13) + '…' : room.name;
+                btn.addEventListener('click', () => {
+                    if (window.virtualGallery && window.virtualGallery.roomNavigator) {
+                        window.virtualGallery.roomNavigator.navigateToRoom(room.id);
+                        container.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
+                });
+                container.appendChild(btn);
             });
-        });
+        }
+        buildRoomButtons();
 
         window.addEventListener('roomChanged', (event) => {
             const roomId = event.detail.roomId;
