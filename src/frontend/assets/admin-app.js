@@ -1,0 +1,555 @@
+        lucide.createIcons();
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        const menuBtn = document.getElementById('mobileMenuBtn');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        }
+
+        menuBtn?.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Tab navigation
+        document.querySelectorAll('.sidebar-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+                lucide.createIcons();
+                closeSidebar();
+            });
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // Knowledge Base Management
+        const AI_SERVICE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : `${window.location.protocol}//${window.location.host.replace(/:\d+$/, '')}:8000`;
+        
+        async function loadKnowledgeStats() {
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/sources/stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update source counts
+                    const sources = data.sources || {};
+                    document.getElementById('metCount').textContent = `${sources.met || 0} записей`;
+                    document.getElementById('rijksCount').textContent = `${sources.rijksmuseum || sources.rijks || 0} записей`;
+                    document.getElementById('harvardCount').textContent = `${sources.harvard || 0} записей`;
+                    document.getElementById('wikiartCount').textContent = `${sources.wikiart || 0} записей`;
+                    document.getElementById('externalCount').textContent = data.total_indexed || 0;
+                }
+                
+                // Try to get RAG stats
+                const ragResponse = await fetch(`${AI_SERVICE_URL}/api/v1/rag/stats`);
+                if (ragResponse.ok) {
+                    const ragData = await ragResponse.json();
+                    document.getElementById('artworksCount').textContent = ragData.artworks_count || 0;
+                    document.getElementById('pdfChunksCount').textContent = ragData.pdf_chunks_count || 0;
+                    document.getElementById('totalVectors').textContent = ragData.total_vectors || 0;
+                }
+            } catch (error) {
+                console.log('Stats load error:', error);
+            }
+        }
+
+        document.getElementById('refreshStatsBtn')?.addEventListener('click', loadKnowledgeStats);
+
+        // Show/hide API key field based on source
+        document.getElementById('fetchSource')?.addEventListener('change', (e) => {
+            const apiKeyField = document.getElementById('apiKeyField');
+            if (e.target.value === 'rijks' || e.target.value === 'harvard') {
+                apiKeyField.classList.remove('hidden');
+            } else {
+                apiKeyField.classList.add('hidden');
+            }
+        });
+
+        // Fetch external form submission
+        document.getElementById('fetchExternalForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const source = document.getElementById('fetchSource').value;
+            const query = document.getElementById('fetchQuery').value || 'paintings';
+            const apiKey = document.getElementById('fetchApiKey').value;
+            const indexToQdrant = document.getElementById('indexToQdrant').checked;
+            
+            const progressEl = document.getElementById('fetchProgress');
+            const resultEl = document.getElementById('fetchResult');
+            const submitBtn = document.getElementById('startFetchBtn');
+            
+            progressEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+            submitBtn.disabled = true;
+            document.getElementById('fetchProgressText').textContent = `Загрузка из ${source}...`;
+            
+            try {
+                const requestBody = {
+                    query: query,
+                    index_to_qdrant: indexToQdrant
+                };
+                
+                if (apiKey) {
+                    requestBody.api_key = apiKey;
+                }
+                
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/fetch/${source}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultEl.className = 'mt-4 p-4 rounded-xl bg-green-50 text-green-800';
+                    resultEl.innerHTML = `
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            <span class="font-medium">Загрузка завершена</span>
+                        </div>
+                        <p class="text-sm">Загружено: ${data.fetched || 0} записей</p>
+                        ${data.indexed ? `<p class="text-sm">Индексировано: ${data.indexed}</p>` : ''}
+                    `;
+                    loadKnowledgeStats();
+                } else {
+                    resultEl.className = 'mt-4 p-4 rounded-xl bg-red-50 text-red-800';
+                    resultEl.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                            <span class="font-medium">Ошибка: ${data.detail || 'Неизвестная ошибка'}</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultEl.className = 'mt-4 p-4 rounded-xl bg-red-50 text-red-800';
+                resultEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <span class="font-medium">Ошибка подключения: ${error.message}</span>
+                    </div>
+                `;
+            } finally {
+                progressEl.classList.add('hidden');
+                resultEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+
+        // Quick fetch buttons
+        document.querySelectorAll('.fetch-source-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const source = btn.dataset.source;
+                document.getElementById('fetchSource').value = source;
+                document.getElementById('fetchSource').dispatchEvent(new Event('change'));
+                document.getElementById('fetchQuery').focus();
+            });
+        });
+
+        // Reindex buttons
+        document.getElementById('reindexArtworksBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все оцифрованные работы?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/artworks/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    toastSuccess('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                toastError('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        document.getElementById('reindexPdfsBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все PDF документы?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/pdfs/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    toastSuccess('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                toastError('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        document.getElementById('reindexExternalBtn')?.addEventListener('click', async () => {
+            if (!confirm('Переиндексировать все внешние источники?')) return;
+            
+            try {
+                const response = await fetch(`${AI_SERVICE_URL}/api/v1/external/reindex`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    toastSuccess('Переиндексация запущена');
+                    loadKnowledgeStats();
+                }
+            } catch (error) {
+                toastError('Ошибка переиндексации: ' + error.message);
+            }
+        });
+
+        // Load stats on knowledge tab open
+        document.querySelector('[data-tab="knowledge"]')?.addEventListener('click', loadKnowledgeStats);
+
+        // DevOps Infrastructure Monitoring
+        function updateStatusBadge(elementId, status, latency) {
+            const badge = document.getElementById(elementId);
+            if (!badge) return;
+            
+            badge.className = 'px-3 py-1 text-xs font-medium rounded-full ';
+            
+            switch(status) {
+                case 'ok':
+                case 'connected':
+                    badge.className += 'bg-green-100 text-green-700';
+                    badge.textContent = latency ? `OK (${latency}ms)` : 'Подключено';
+                    break;
+                case 'configured':
+                    badge.className += 'bg-blue-100 text-blue-700';
+                    badge.textContent = 'Настроено';
+                    break;
+                case 'not_configured':
+                    badge.className += 'bg-yellow-100 text-yellow-700';
+                    badge.textContent = 'Не настроено';
+                    break;
+                case 'disconnected':
+                case 'error':
+                    badge.className += 'bg-red-100 text-red-700';
+                    badge.textContent = 'Отключено';
+                    break;
+                default:
+                    badge.className += 'bg-gray-100 text-gray-600';
+                    badge.textContent = 'Неизвестно';
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const logsEl = document.getElementById('infraLogs');
+            if (!logsEl) return;
+            
+            const time = new Date().toLocaleTimeString();
+            const colors = {
+                'info': 'text-blue-400',
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warn': 'text-yellow-400'
+            };
+            
+            const logLine = document.createElement('p');
+            logLine.className = colors[type] || 'text-gray-300';
+            logLine.textContent = `[${time}] ${message}`;
+            logsEl.appendChild(logLine);
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        function clearLogs() {
+            const logsEl = document.getElementById('infraLogs');
+            if (logsEl) logsEl.innerHTML = '';
+        }
+
+        async function checkInfrastructure() {
+            clearLogs();
+            addLog('Начинаем проверку инфраструктуры...', 'info');
+
+            try {
+                addLog('Проверка Virtual Gallery API...', 'info');
+                const galleryResponse = await fetch('/api/health');
+                const galleryData = await galleryResponse.json();
+                updateStatusBadge('galleryStatusBadge', galleryData.status);
+                addLog(`Virtual Gallery: ${galleryData.status === 'ok' ? 'работает' : 'ошибка'}`, galleryData.status === 'ok' ? 'success' : 'error');
+
+                addLog('Проверка AI/ML сервиса...', 'info');
+                const aiResponse = await fetch('/api/ai/health');
+                const aiData = await aiResponse.json();
+                updateStatusBadge('aimlStatusBadge', aiData.status);
+                addLog(`AI/ML Service: ${aiData.status === 'connected' ? 'подключен' : 'отключен'}`, aiData.status === 'connected' ? 'success' : 'error');
+
+                addLog('Получение полного статуса инфраструктуры...', 'info');
+                const infraResponse = await fetch('/api/infra/status');
+                const infraData = await infraResponse.json();
+
+                if (infraData.services) {
+                    const s = infraData.services;
+                    
+                    updateStatusBadge('dbStatusBadge', s.database?.status, s.database?.latency);
+                    addLog(`PostgreSQL: ${s.database?.status === 'ok' ? 'подключен' : s.database?.error || 'отключен'}`, s.database?.status === 'ok' ? 'success' : 'error');
+                    
+                    updateStatusBadge('storageStatusBadge', s.storage?.status, s.storage?.latency);
+                    addLog(`S3 Storage: ${s.storage?.status === 'ok' ? 'подключен' : s.storage?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.storage?.status === 'ok' ? 'success' : s.storage?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('qdrantStatusBadge', s.qdrant?.status, s.qdrant?.latency);
+                    addLog(`Qdrant Cloud: ${s.qdrant?.status === 'ok' ? 'подключен' : s.qdrant?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.qdrant?.status === 'ok' ? 'success' : s.qdrant?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('redisStatusBadge', s.redis?.status, s.redis?.latency);
+                    addLog(`Redis: ${s.redis?.status === 'ok' ? 'подключен' : s.redis?.status === 'not_configured' ? 'не настроен' : 'отключен'}`, s.redis?.status === 'ok' ? 'success' : s.redis?.status === 'not_configured' ? 'warn' : 'error');
+                    
+                    updateStatusBadge('openrouterStatusBadge', s.openrouter?.status);
+                    addLog(`OpenRouter API: ${s.openrouter?.status === 'configured' ? 'настроен' : 'не настроен'}`, s.openrouter?.status === 'configured' ? 'success' : 'warn');
+                }
+
+                addLog('Проверка завершена', 'success');
+            } catch (error) {
+                addLog(`Ошибка проверки: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('refreshInfraBtn')?.addEventListener('click', checkInfrastructure);
+        document.getElementById('testAllBtn')?.addEventListener('click', checkInfrastructure);
+        document.querySelector('[data-tab="devops"]')?.addEventListener('click', () => {
+            setTimeout(checkInfrastructure, 100);
+        });
+
+        async function loadDisplaySettings() {
+            const container = document.getElementById('displaySettingsList');
+            try {
+                const response = await fetch('/api/display-settings');
+                const data = await response.json();
+                if (!data.settings || data.settings.length === 0) {
+                    container.innerHTML = '<div class="text-center py-6 text-gray-400">Нет настроек</div>';
+                    return;
+                }
+                const ratioOptions = ['1:1', '3:2', '4:3', '3:4', '16:9', '9:16', '2:3'];
+                const fitOptions = [
+                    { value: 'cover', label: 'Заполнение (cover)' },
+                    { value: 'contain', label: 'Вписать (contain)' },
+                    { value: 'fill', label: 'Растянуть (fill)' },
+                ];
+                container.innerHTML = data.settings.map(s => `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100" data-setting-key="${s.section_key}">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-gray-900">${s.section_label}</h3>
+                            <span class="text-xs text-gray-400">${s.section_key}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Пропорции</label>
+                                <select class="ds-ratio w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400">
+                                    ${ratioOptions.map(r => `<option value="${r}" ${r === s.aspect_ratio ? 'selected' : ''}>${r}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Режим отображения</label>
+                                <select class="ds-fit w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400">
+                                    ${fitOptions.map(f => `<option value="${f.value}" ${f.value === s.object_fit ? 'selected' : ''}>${f.label}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Макс. высота (px)</label>
+                                <div class="flex gap-2">
+                                    <input type="number" class="ds-height flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400" value="${s.max_height}" min="48" max="1200">
+                                    <button onclick="saveDisplaySetting('${s.section_key}')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-1">
+                                        <i data-lucide="save" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } catch (error) {
+                container.innerHTML = '<div class="text-center py-6 text-red-500">Ошибка загрузки настроек</div>';
+            }
+        }
+
+        async function saveDisplaySetting(key) {
+            const row = document.querySelector(`[data-setting-key="${key}"]`);
+            if (!row) return;
+            const aspect_ratio = row.querySelector('.ds-ratio').value;
+            const object_fit = row.querySelector('.ds-fit').value;
+            const max_height = row.querySelector('.ds-height').value;
+            try {
+                const response = await fetch(`/api/display-settings/${key}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aspect_ratio, object_fit, max_height: parseInt(max_height) })
+                });
+                if (!response.ok) throw new Error('Failed to save');
+                toastSuccess('Настройки отображения сохранены');
+            } catch (error) {
+                toastError('Ошибка сохранения: ' + error.message);
+            }
+        }
+
+        let currentArchiveFilter = '';
+
+        async function loadArchive(type = '') {
+            currentArchiveFilter = type;
+            const list = document.getElementById('archiveList');
+            list.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i data-lucide="loader-2" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                    <p>Загрузка архива...</p>
+                </div>
+            `;
+            lucide.createIcons();
+
+            try {
+                const url = type ? `/api/archive?type=${type}` : '/api/archive';
+                const [itemsRes, statsRes] = await Promise.all([
+                    fetch(url),
+                    fetch('/api/archive/stats')
+                ]);
+                const itemsData = await itemsRes.json();
+                const statsData = await statsRes.json();
+                const items = itemsData.items || [];
+                const stats = statsData.stats || { total: 0, by_type: [] };
+
+                document.getElementById('archiveTotalCount').textContent = stats.total;
+                const typeMap = {};
+                stats.by_type.forEach(t => typeMap[t.entity_type] = parseInt(t.count));
+                document.getElementById('archiveArtworksCount').textContent = typeMap.artwork || 0;
+                document.getElementById('archiveCollectionsCount').textContent = typeMap.collection || 0;
+                document.getElementById('archiveRoomsCount').textContent = typeMap.room || 0;
+
+                if (items.length === 0) {
+                    list.innerHTML = `
+                        <div class="text-center py-12 text-gray-400">
+                            <i data-lucide="archive" class="w-12 h-12 mx-auto mb-3"></i>
+                            <p class="text-lg font-medium">Архив пуст</p>
+                            <p class="text-sm mt-1">Удалённые элементы будут отображаться здесь</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+
+                list.innerHTML = items.map(item => {
+                    const data = item.entity_data;
+                    const typeLabels = { artwork: 'Экспонат', collection: 'Коллекция', room: 'Зал' };
+                    const typeColors = { artwork: 'blue', collection: 'purple', room: 'amber' };
+                    const typeIcons = { artwork: 'image', collection: 'folder', room: 'layout-grid' };
+                    const color = typeColors[item.entity_type] || 'gray';
+                    const icon = typeIcons[item.entity_type] || 'archive';
+                    const label = typeLabels[item.entity_type] || item.entity_type;
+
+                    let title = '', subtitle = '', imgUrl = '';
+                    if (item.entity_type === 'artwork') {
+                        title = data.title || 'Без названия';
+                        subtitle = data.artist_name || data.artist || 'Неизвестен';
+                        imgUrl = data.image_url || '';
+                    } else if (item.entity_type === 'collection') {
+                        title = data.name || 'Без названия';
+                        subtitle = data.description || '';
+                    } else if (item.entity_type === 'room') {
+                        title = data.name || 'Без названия';
+                        subtitle = `${data.width || '?'}x${data.depth || '?'}x${data.height || '?'}м, тема: ${data.theme || '?'}`;
+                    }
+
+                    const date = new Date(item.archived_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                    return `
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                            ${imgUrl ? `<img src="${imgUrl}" alt="" class="w-16 h-16 object-cover rounded-xl flex-shrink-0">` : 
+                              `<div class="w-16 h-16 bg-${color}-100 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="${icon}" class="w-7 h-7 text-${color}-600"></i></div>`}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 bg-${color}-100 text-${color}-700 text-xs font-medium rounded-full">${label}</span>
+                                    <span class="text-xs text-gray-400">${date}</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 truncate">${title}</h4>
+                                <p class="text-sm text-gray-500 truncate">${subtitle}</p>
+                                ${item.reason ? `<p class="text-xs text-gray-400 mt-1">Причина: ${item.reason}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                ${item.entity_type !== 'room' ? `
+                                <button onclick="restoreArchiveItem(${item.archive_id})" class="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1" title="Восстановить">
+                                    <i data-lucide="undo-2" class="w-4 h-4"></i>
+                                    Восстановить
+                                </button>` : ''}
+                                <button onclick="permanentlyDeleteArchiveItem(${item.archive_id})" class="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1" title="Удалить навсегда">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Load archive error:', error);
+                list.innerHTML = `<div class="text-center py-8 text-red-500"><p>Ошибка загрузки архива</p></div>`;
+            }
+        }
+
+        async function restoreArchiveItem(id) {
+            if (!confirm('Восстановить этот элемент из архива?')) return;
+            try {
+                const response = await fetch(`/api/archive/${id}/restore`, { method: 'POST' });
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to restore');
+                }
+                toastSuccess('Элемент успешно восстановлен');
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                toastError('Ошибка при восстановлении: ' + error.message);
+            }
+        }
+
+        async function permanentlyDeleteArchiveItem(id) {
+            if (!confirm('Удалить элемент из архива навсегда? Это действие необратимо!')) return;
+            try {
+                const response = await fetch(`/api/archive/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete');
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                toastError('Ошибка при удалении: ' + error.message);
+            }
+        }
+
+        document.getElementById('clearArchiveBtn')?.addEventListener('click', async () => {
+            const typeLabel = currentArchiveFilter ? { artwork: 'экспонаты', collection: 'коллекции', room: 'залы' }[currentArchiveFilter] || currentArchiveFilter : 'все элементы';
+            if (!confirm(`Вы уверены, что хотите удалить ${typeLabel} из архива навсегда?\n\nЭто действие необратимо!`)) return;
+            try {
+                const url = currentArchiveFilter ? `/api/archive?type=${currentArchiveFilter}` : '/api/archive';
+                const response = await fetch(url, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to clear');
+                const data = await response.json();
+                toastSuccess(`Удалено из архива: ${data.deleted} элементов`);
+                loadArchive(currentArchiveFilter);
+            } catch (error) {
+                toastError('Ошибка при очистке архива: ' + error.message);
+            }
+        });
+
+        document.querySelectorAll('.archive-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.archive-filter').forEach(b => {
+                    b.classList.remove('bg-indigo-100', 'text-indigo-700', 'active');
+                    b.classList.add('bg-gray-100', 'text-gray-600');
+                });
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                btn.classList.add('bg-indigo-100', 'text-indigo-700', 'active');
+                loadArchive(btn.dataset.type);
+            });
+        });
+
+        document.querySelector('[data-tab="settings"]')?.addEventListener('click', () => {
+            setTimeout(() => {
+                loadArchive(currentArchiveFilter);
+                loadDisplaySettings();
+            }, 100);
+        });

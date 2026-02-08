@@ -63,6 +63,11 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-08**: Рефакторинг admin.html и staff.html
+  - admin.html: извлечён инлайн-JS (555 строк) в `src/frontend/assets/admin-app.js`, HTML уменьшен с 1477 до 921 строк
+  - staff.html: извлечён инлайн-JS (566 строк) в `src/frontend/assets/staff-app.js`, HTML уменьшен с 946 до 379 строк
+  - Tailwind-конфиги оставлены инлайн, основная логика вынесена в отдельные файлы
+
 - **2026-02-07**: Ленивая загрузка залов и оптимизация ресурсов 3D-галереи
   - Ленивая загрузка залов: при старте строится только Главный холл + коридоры (~80 объектов вместо ~314)
   - Остальные залы загружаются по требованию при переходе через дверь
