@@ -175,62 +175,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Documents Section -->
-            <div id="documents">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                        <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
-                    </div>
-                    <h2 class="text-2xl font-display font-semibold text-gray-900">Обработка документов</h2>
-                </div>
-
-                <div class="glass-card rounded-2xl p-6 art-shadow border border-gray-100">
-                    <div id="pdf-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 transition-colors cursor-pointer mb-6">
-                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i data-lucide="file-plus" class="w-8 h-8 text-green-600"></i>
-                        </div>
-                        <p class="text-gray-600 mb-2">Перетащите PDF сюда</p>
-                        <p class="text-sm text-gray-500">или нажмите для выбора файла</p>
-                        <p class="text-xs text-gray-400 mt-2">PDF до 50MB</p>
-                        <input type="file" accept=".pdf" class="hidden" id="pdf-upload">
-                    </div>
-
-                    <div class="space-y-3 mb-6">
-                        <label class="block text-sm font-medium text-gray-700">Категория документа</label>
-                        <select id="pdf-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <option value="auto">Автоопределение (AI)</option>
-                            <option value="history">История искусства</option>
-                            <option value="technique">Техники и материалы</option>
-                            <option value="artist">Биографии художников</option>
-                            <option value="period">Периоды и стили</option>
-                        </select>
-                    </div>
-
-                    <button id="process-pdf-btn" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="file-check" class="w-5 h-5"></i>
-                        <span id="process-text">Обработать документ</span>
-                    </button>
-
-                    <!-- Recent Documents -->
-                    <div class="mt-6 pt-6 border-t border-gray-100">
-                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Недавние документы</h4>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                                <i data-lucide="file-text" class="w-4 h-4 text-green-600"></i>
-                                <span class="text-sm text-gray-700 flex-1 truncate">Импрессионизм_история.pdf</span>
-                                <span class="text-xs text-gray-400">2 дня назад</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                                <i data-lucide="file-text" class="w-4 h-4 text-green-600"></i>
-                                <span class="text-sm text-gray-700 flex-1 truncate">Техники_масляной_живописи.pdf</span>
-                                <span class="text-xs text-gray-400">5 дней назад</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="max-w-2xl mx-auto">
             <!-- AI Assistant Section -->
             <div id="assistant">
                 <div class="flex items-center gap-3 mb-6">
