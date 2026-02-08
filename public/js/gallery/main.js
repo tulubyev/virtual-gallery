@@ -473,10 +473,9 @@ class GalleryBuilder {
   }
 
   async buildEntireGallery() {
-    await this.buildRoom(this.config.rooms[0]);
-    for (const corridor of this.config.corridors) {
-      this.buildCorridor(corridor);
-    }
+    // Hyper-lazy loading: only build the main hall. 
+    // Corridors and other rooms will be built on demand when player interacts with doors.
+    await this.buildRoom(this.config.rooms.find(r => r.id === 'main_hall'));
     return this.getLoadedRooms();
   }
 
