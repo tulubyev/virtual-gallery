@@ -38,12 +38,12 @@ export const GALLERY_CONFIG = {
       walls: { color: 0xd4c5b9 },
       ceiling: { color: 0xffffff },
       artworkSlots: [
-        { id: "slot_1", wall: "left", position: { x: -9.9, y: 3, z: -5 }, size: { w: 2, h: 1.5 } },
+        { id: "slot_1", wall: "left", position: { x: -9.9, y: 3, z: -7 }, size: { w: 2, h: 1.5 } },
         { id: "slot_2", wall: "left", position: { x: -9.9, y: 3, z: 0 }, size: { w: 2.5, h: 2 } },
-        { id: "slot_3", wall: "left", position: { x: -9.9, y: 3, z: 5 }, size: { w: 2, h: 1.5 } },
-        { id: "slot_4", wall: "right", position: { x: 9.9, y: 3, z: -5 }, size: { w: 2, h: 1.5 } },
+        { id: "slot_3", wall: "left", position: { x: -9.9, y: 3, z: 7 }, size: { w: 2, h: 1.5 } },
+        { id: "slot_4", wall: "right", position: { x: 9.9, y: 3, z: -7 }, size: { w: 2, h: 1.5 } },
         { id: "slot_5", wall: "right", position: { x: 9.9, y: 3, z: 0 }, size: { w: 3, h: 2.5 } },
-        { id: "slot_6", wall: "right", position: { x: 9.9, y: 3, z: 5 }, size: { w: 2, h: 1.5 } }
+        { id: "slot_6", wall: "right", position: { x: 9.9, y: 3, z: 7 }, size: { w: 2, h: 1.5 } }
       ],
       doors: [{ to: "main_hall", position: { x: 0, y: 0, z: 12.4 }, rotation: Math.PI, isEntrance: true }],
       lighting: { ambient: 0.4, spotlights: [] }
@@ -59,10 +59,10 @@ export const GALLERY_CONFIG = {
       walls: { color: 0xffffff },
       ceiling: { color: 0x111111 },
       artworkSlots: [
-        { id: "slot_1", wall: "left", position: { x: -12.4, y: 3.5, z: -4 }, size: { w: 3, h: 3 } },
-        { id: "slot_2", wall: "left", position: { x: -12.4, y: 3.5, z: 4 }, size: { w: 2.5, h: 2.5 } },
-        { id: "slot_3", wall: "right", position: { x: 12.4, y: 3.5, z: -4 }, size: { w: 2.5, h: 2.5 } },
-        { id: "slot_4", wall: "right", position: { x: 12.4, y: 3.5, z: 4 }, size: { w: 3, h: 3 } },
+        { id: "slot_1", wall: "left", position: { x: -12.4, y: 3.5, z: -5 }, size: { w: 3, h: 3 } },
+        { id: "slot_2", wall: "left", position: { x: -12.4, y: 3.5, z: 5 }, size: { w: 2.5, h: 2.5 } },
+        { id: "slot_3", wall: "right", position: { x: 12.4, y: 3.5, z: -5 }, size: { w: 2.5, h: 2.5 } },
+        { id: "slot_4", wall: "right", position: { x: 12.4, y: 3.5, z: 5 }, size: { w: 3, h: 3 } },
         { id: "slot_5", wall: "back", position: { x: 0, y: 3.5, z: -9.9 }, size: { w: 4, h: 3 } }
       ],
       doors: [{ to: "main_hall", position: { x: -12.4, y: 0, z: 0 }, rotation: -Math.PI / 2, isEntrance: true }],
@@ -79,12 +79,12 @@ export const GALLERY_CONFIG = {
       walls: { color: 0x8b0000 },
       ceiling: { color: 0xf5f5dc },
       artworkSlots: [
-        { id: "slot_1", wall: "left", position: { x: -12.4, y: 4, z: -4 }, size: { w: 2.5, h: 3 } },
-        { id: "slot_2", wall: "left", position: { x: -12.4, y: 4, z: 4 }, size: { w: 2.5, h: 3 } },
-        { id: "slot_3", wall: "right", position: { x: 12.4, y: 4, z: -4 }, size: { w: 2.5, h: 3 } },
-        { id: "slot_4", wall: "right", position: { x: 12.4, y: 4, z: 4 }, size: { w: 2.5, h: 3 } },
+        { id: "slot_1", wall: "left", position: { x: -12.4, y: 4, z: -5 }, size: { w: 2.5, h: 3 } },
+        { id: "slot_2", wall: "left", position: { x: -12.4, y: 4, z: 5 }, size: { w: 2.5, h: 3 } },
+        { id: "slot_3", wall: "right", position: { x: 12.4, y: 4, z: -5 }, size: { w: 2.5, h: 3 } },
+        { id: "slot_4", wall: "right", position: { x: 12.4, y: 4, z: 5 }, size: { w: 2.5, h: 3 } },
         { id: "slot_5", wall: "back", position: { x: -5, y: 4, z: -9.9 }, size: { w: 2, h: 2.5 } },
-        { id: "slot_6", wall: "back", position: { x: 0, y: 4, z: -9.9 }, size: { w: 3, h: 4 } }
+        { id: "slot_6", wall: "back", position: { x: 5, y: 4, z: -9.9 }, size: { w: 3, h: 4 } }
       ],
       doors: [{ to: "main_hall", position: { x: 12.4, y: 0, z: 0 }, rotation: Math.PI / 2, isEntrance: true }],
       lighting: { ambient: 0.35, spotlights: [] }
@@ -100,11 +100,11 @@ export const GALLERY_CONFIG = {
       walls: { color: 0xe0e0e0 },
       ceiling: { color: 0x1a1a1a },
       artworkSlots: [
-        { id: "slot_1", wall: "left", position: { x: -9.9, y: 3, z: -6 }, size: { w: 2, h: 2 } },
+        { id: "slot_1", wall: "left", position: { x: -9.9, y: 3, z: -7 }, size: { w: 2, h: 2 } },
         { id: "slot_2", wall: "left", position: { x: -9.9, y: 3, z: 0 }, size: { w: 3, h: 2 } },
-        { id: "slot_3", wall: "left", position: { x: -9.9, y: 3, z: 6 }, size: { w: 2, h: 2 } },
-        { id: "slot_4", wall: "right", position: { x: 9.9, y: 3, z: -6 }, size: { w: 2, h: 2 } },
-        { id: "slot_5", wall: "right", position: { x: 9.9, y: 3, z: 0 }, size: { w: 3, h: 2 } }
+        { id: "slot_3", wall: "left", position: { x: -9.9, y: 3, z: 7 }, size: { w: 2, h: 2 } },
+        { id: "slot_4", wall: "right", position: { x: 9.9, y: 3, z: -7 }, size: { w: 2, h: 2 } },
+        { id: "slot_5", wall: "right", position: { x: 9.9, y: 3, z: 7 }, size: { w: 3, h: 2 } }
       ],
       doors: [{ to: "main_hall", position: { x: 0, y: 0, z: -12.4 }, rotation: 0, isEntrance: true }],
       lighting: { ambient: 0.5, spotlights: [] }

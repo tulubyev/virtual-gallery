@@ -685,25 +685,49 @@ class VirtualGallery {
     const slots = [];
     const { width, height, depth } = room.dimensions;
     const wallY = height * 0.5;
-    const slotW = Math.min(2.5, (width - 2) / Math.ceil(slotsCount / 2));
     const slotH = Math.min(2, height * 0.4);
-    
+
+    const cornerPadRatio = 0.15;
+    const minPad = 2.0;
+    const minGap = 1.0;
+
     const walls = [
-      { name: 'left', xFn: () => -width / 2 + 0.1, zFn: (t) => (t - 0.5) * (depth - 4), rotWall: 'left' },
-      { name: 'right', xFn: () => width / 2 - 0.1, zFn: (t) => (t - 0.5) * (depth - 4), rotWall: 'right' },
-      { name: 'back', xFn: (t) => (t - 0.5) * (width - 4), zFn: () => -depth / 2 + 0.1, rotWall: 'back' }
+      { name: 'left', wallLen: depth, fixedAxis: 'x', fixedVal: -width / 2 + 0.1, rotWall: 'left' },
+      { name: 'right', wallLen: depth, fixedAxis: 'x', fixedVal: width / 2 - 0.1, rotWall: 'right' },
+      { name: 'back', wallLen: width, fixedAxis: 'z', fixedVal: -depth / 2 + 0.1, rotWall: 'back' }
     ];
 
     let slotIndex = 0;
     for (let wallIdx = 0; wallIdx < walls.length && slotIndex < slotsCount; wallIdx++) {
       const wall = walls[wallIdx];
       const slotsOnWall = wallIdx < 2 ? Math.ceil(slotsCount / 3) : slotsCount - slotIndex;
-      
+      if (slotsOnWall <= 0) continue;
+
+      const pad = Math.max(minPad, wall.wallLen * cornerPadRatio);
+      const usable = Math.max(0, wall.wallLen - pad * 2);
+
+      const maxSlotW = usable > 0
+        ? Math.max(1, (usable - minGap * (slotsOnWall - 1)) / slotsOnWall)
+        : 1;
+      const slotW = Math.min(2.5, maxSlotW);
+
+      const totalSlotsWidth = slotW * slotsOnWall;
+      const totalGaps = usable - totalSlotsWidth;
+      const gap = slotsOnWall > 1 ? Math.max(minGap, totalGaps / (slotsOnWall - 1)) : 0;
+      const spanNeeded = totalSlotsWidth + gap * Math.max(0, slotsOnWall - 1);
+      const startOffset = -spanNeeded / 2 + slotW / 2;
+
       for (let i = 0; i < slotsOnWall && slotIndex < slotsCount; i++) {
-        const t = slotsOnWall === 1 ? 0.5 : i / (slotsOnWall - 1);
-        const x = typeof wall.xFn === 'function' ? wall.xFn(t) : wall.xFn;
-        const z = typeof wall.zFn === 'function' ? wall.zFn(t) : wall.zFn;
-        
+        let pos;
+        if (slotsOnWall === 1) {
+          pos = 0;
+        } else {
+          pos = startOffset + i * (slotW + gap);
+        }
+
+        const x = wall.fixedAxis === 'x' ? wall.fixedVal : pos;
+        const z = wall.fixedAxis === 'z' ? wall.fixedVal : pos;
+
         slots.push({
           id: `slot_${slotIndex + 1}`,
           wall: wall.rotWall,
@@ -713,7 +737,7 @@ class VirtualGallery {
         slotIndex++;
       }
     }
-    
+
     return slots;
   }
 }
