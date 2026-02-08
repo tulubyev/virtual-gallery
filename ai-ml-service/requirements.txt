@@ -1,7 +1,7 @@
 # AI/ML Core dependencies (Python)
 
 # Web Framework
-fastapi==0.109.0
+fastapi==0.115.8
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
@@ -23,8 +23,8 @@ cohere==4.45
 sentence-transformers==2.2.2
 torch==2.6.0
 torchvision==0.21.0
-transformers==4.36.0
-tokenizers==0.15.2
+transformers==4.48.0
+tokenizers==0.21.4
 
 # Computer Vision
 opencv-python==4.8.1.78
@@ -48,7 +48,7 @@ celery==5.3.4
 redis==5.0.1
 
 # HTTP Client
-aiohttp==3.9.4
+aiohttp==3.13.3
 
 # Utilities
 python-multipart==0.0.22
