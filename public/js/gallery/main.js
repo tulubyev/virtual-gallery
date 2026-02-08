@@ -55,7 +55,7 @@ let GALLERY_CONFIG = {
       type: "gallery",
       name: "Импрессионизм",
       theme: "impressionism",
-      position: { x: 0, y: 0, z: -45 },
+      position: { x: 0, y: 0, z: -32.5 },
       dimensions: { width: 20, height: 6, depth: 25 },
       floor: { color: 0x4a3f35 },
       walls: { color: 0xd4c5b9 },
@@ -76,7 +76,7 @@ let GALLERY_CONFIG = {
       type: "gallery",
       name: "Современное искусство",
       theme: "modern",
-      position: { x: 45, y: 0, z: 0 },
+      position: { x: 30, y: 0, z: 0 },
       dimensions: { width: 25, height: 7, depth: 20 },
       floor: { color: 0x222222 },
       walls: { color: 0xffffff },
@@ -96,7 +96,7 @@ let GALLERY_CONFIG = {
       type: "gallery",
       name: "Ренессанс",
       theme: "classical",
-      position: { x: -45, y: 0, z: 0 },
+      position: { x: -30, y: 0, z: 0 },
       dimensions: { width: 25, height: 8, depth: 20 },
       floor: { color: 0x5a4a3a },
       walls: { color: 0x8b0000 },
@@ -117,7 +117,7 @@ let GALLERY_CONFIG = {
       type: "gallery",
       name: "Современное искусство XXI века",
       theme: "contemporary",
-      position: { x: 0, y: 0, z: 45 },
+      position: { x: 0, y: 0, z: 32.5 },
       dimensions: { width: 20, height: 6, depth: 25 },
       floor: { color: 0x1a1a1a },
       walls: { color: 0xe0e0e0 },
@@ -135,10 +135,10 @@ let GALLERY_CONFIG = {
   ],
   
   corridors: [
-    { id: "corridor_to_impressionism", from: "main_hall", to: "impressionism", dimensions: { width: 4, height: 4, length: 15 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
-    { id: "corridor_to_modern", from: "main_hall", to: "modern_art", dimensions: { width: 4, height: 4, length: 15 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
-    { id: "corridor_to_renaissance", from: "main_hall", to: "renaissance", dimensions: { width: 4, height: 4, length: 15 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
-    { id: "corridor_to_contemporary", from: "main_hall", to: "contemporary", dimensions: { width: 4, height: 4, length: 15 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } }
+    { id: "corridor_to_impressionism", from: "main_hall", to: "impressionism", dimensions: { width: 4, height: 4, length: 5 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
+    { id: "corridor_to_modern", from: "main_hall", to: "modern_art", dimensions: { width: 4, height: 4, length: 5 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
+    { id: "corridor_to_renaissance", from: "main_hall", to: "renaissance", dimensions: { width: 4, height: 4, length: 5 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } },
+    { id: "corridor_to_contemporary", from: "main_hall", to: "contemporary", dimensions: { width: 4, height: 4, length: 5 }, floor: { color: 0x2a2a2a }, walls: { color: 0x3a3a3a }, lighting: { ambient: 0.3 } }
   ]
 };
 
