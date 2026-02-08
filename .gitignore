@@ -10,3 +10,14 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Python AI/ML service (runs separately)
+.pythonlibs/
+__pycache__/
+*.pyc
+
+# Caches
+.cache/
+
+# Attached assets (development only)
+attached_assets/
