@@ -134,44 +134,44 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <!-- Page Header -->
-        <div class="text-center mb-12">
+        <div class="text-center mb-10">
             <div class="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                <i data-lucide="library" class="w-4 h-4"></i>
-                RAG-система
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+                Энциклопедия искусства
             </div>
             <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">ArtWiki</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto text-lg">Обработка документов и AI-ассистент для исследования искусства</p>
+            <p class="text-gray-600 max-w-2xl mx-auto text-lg">Ваш персональный гид в мире искусства. Задайте вопрос AI-ассистенту и получите ответ на основе обширной базы знаний.</p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
-                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <i data-lucide="file-text" class="w-5 h-5 text-green-600"></i>
+        <!-- Topic Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card rounded-xl p-5 border border-gray-100 hover:border-purple-200 hover:shadow-md transition-all cursor-pointer group" onclick="document.getElementById('chat-input').value='Расскажи об основных направлениях в живописи'; document.getElementById('chat-input').focus();">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-purple-200 transition-colors">
+                    <i data-lucide="palette" class="w-5 h-5 text-purple-600"></i>
                 </div>
-                <p class="text-2xl font-bold text-gray-900">127</p>
-                <p class="text-sm text-gray-500">Документов</p>
+                <h3 class="font-semibold text-gray-900 text-sm mb-1">Виды искусства</h3>
+                <p class="text-xs text-gray-500">Живопись, скульптура, графика, декоративное искусство</p>
             </div>
-            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+            <div class="glass-card rounded-xl p-5 border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all cursor-pointer group" onclick="document.getElementById('chat-input').value='Какие техники живописи существуют?'; document.getElementById('chat-input').focus();">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-amber-200 transition-colors">
+                    <i data-lucide="brush" class="w-5 h-5 text-amber-600"></i>
                 </div>
-                <p class="text-2xl font-bold text-gray-900">2,450</p>
-                <p class="text-sm text-gray-500">Чанков</p>
+                <h3 class="font-semibold text-gray-900 text-sm mb-1">Техники</h3>
+                <p class="text-xs text-gray-500">Масло, акварель, темпера, фреска, гравюра</p>
             </div>
-            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
-                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <i data-lucide="image" class="w-5 h-5 text-amber-600"></i>
+            <div class="glass-card rounded-xl p-5 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all cursor-pointer group" onclick="document.getElementById('chat-input').value='Расскажи об основных эпохах в истории искусства'; document.getElementById('chat-input').focus();">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
+                    <i data-lucide="history" class="w-5 h-5 text-blue-600"></i>
                 </div>
-                <p class="text-2xl font-bold text-gray-900">892</p>
-                <p class="text-sm text-gray-500">Произведений</p>
+                <h3 class="font-semibold text-gray-900 text-sm mb-1">История</h3>
+                <p class="text-xs text-gray-500">От античности до современного искусства</p>
             </div>
-            <div class="glass-card rounded-xl p-4 text-center border border-gray-100">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <i data-lucide="globe" class="w-5 h-5 text-purple-600"></i>
+            <div class="glass-card rounded-xl p-5 border border-gray-100 hover:border-green-200 hover:shadow-md transition-all cursor-pointer group" onclick="document.getElementById('chat-input').value='Расскажи о великих художниках эпохи Возрождения'; document.getElementById('chat-input').focus();">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-green-200 transition-colors">
+                    <i data-lucide="user" class="w-5 h-5 text-green-600"></i>
                 </div>
-                <p class="text-2xl font-bold text-gray-900">4</p>
-                <p class="text-sm text-gray-500">Источника</p>
+                <h3 class="font-semibold text-gray-900 text-sm mb-1">Художники</h3>
+                <p class="text-xs text-gray-500">Биографии, стили и главные произведения мастеров</p>
             </div>
         </div>
 
