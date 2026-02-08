@@ -7,6 +7,7 @@
     <title>Кабинет участника аукциона - Virtual Gallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/assets/toast.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -60,6 +61,10 @@
             </div>
 
             <nav class="flex-1 p-4 space-y-1">
+                <a href="/auction" class="w-full flex items-center gap-3 px-4 py-3 text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg border-l-4 border-amber-500 transition-all mb-2">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    <span class="font-medium">Все аукционы</span>
+                </a>
                 <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
                     <i data-lucide="home" class="w-5 h-5"></i>
                     <span class="font-medium">Главная</span>
@@ -115,28 +120,28 @@
                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="wallet" class="w-6 h-6"></i>
                         </div>
-                        <p class="text-3xl font-bold">2,450,000 Rub</p>
+                        <p id="statBalance" class="text-3xl font-bold">2 450 000 ₽</p>
                         <p class="text-white/80 text-sm">Баланс</p>
                     </div>
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="hand" class="w-6 h-6 text-blue-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">7</p>
+                        <p id="statActiveBids" class="text-3xl font-bold text-gray-900">—</p>
                         <p class="text-gray-500 text-sm">Активные ставки</p>
                     </div>
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="trophy" class="w-6 h-6 text-green-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">12</p>
+                        <p id="statWonLots" class="text-3xl font-bold text-gray-900">—</p>
                         <p class="text-gray-500 text-sm">Выиграно лотов</p>
                     </div>
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
                             <i data-lucide="calendar" class="w-6 h-6 text-purple-600"></i>
                         </div>
-                        <p class="text-3xl font-bold text-gray-900">34</p>
+                        <p id="statTotalAuctions" class="text-3xl font-bold text-gray-900">—</p>
                         <p class="text-gray-500 text-sm">Участие в аукционах</p>
                     </div>
                 </div>
@@ -147,40 +152,10 @@
                         <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
                         Предстоящие аукционы
                     </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
-                            <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex-shrink-0"></div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h4 class="font-semibold text-gray-900">Современное искусство</h4>
-                                    <span class="live-badge bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 bg-white rounded-full"></span>
-                                        LIVE
-                                    </span>
-                                </div>
-                                <p class="text-sm text-gray-600">15 лотов</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm text-gray-500">Осталось</p>
-                                <p class="font-bold text-amber-600">2ч 34м</p>
-                            </div>
-                            <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-medium transition-colors">
-                                Участвовать
-                            </button>
-                        </div>
-                        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex-shrink-0"></div>
-                            <div class="flex-1">
-                                <h4 class="font-semibold text-gray-900">Импрессионисты</h4>
-                                <p class="text-sm text-gray-600">23 лота</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm text-gray-500">Начало</p>
-                                <p class="font-medium text-gray-900">Завтра, 14:00</p>
-                            </div>
-                            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors">
-                                Напомнить
-                            </button>
+                    <div id="upcomingAuctionsList" class="space-y-4">
+                        <div class="text-center py-8 text-gray-400">
+                            <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin mb-2"></i>
+                            <p class="text-sm">Загрузка...</p>
                         </div>
                     </div>
                 </div>
@@ -193,46 +168,10 @@
                     <p class="text-gray-600">Выберите аукцион для участия</p>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
-                    <div class="flex-1 relative">
-                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" placeholder="Поиск лотов..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <select class="px-4 py-2 border border-gray-200 rounded-xl">
-                        <option value="">Все категории</option>
-                        <option value="paintings">Живопись</option>
-                        <option value="sculptures">Скульптура</option>
-                        <option value="antiques">Антиквариат</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="relative">
-                            <div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300"></div>
-                            <span class="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                                LIVE
-                            </span>
-                        </div>
-                        <div class="p-5">
-                            <h4 class="font-display font-semibold text-lg text-gray-900 mb-1">Звездная ночь</h4>
-                            <p class="text-sm text-gray-500 mb-4">Винсент Ван Гог, 1889</p>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-xs text-gray-500">Текущая ставка</p>
-                                    <p class="text-xl font-bold text-amber-600">850,000 Rub</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-xs text-gray-500">Осталось</p>
-                                    <p class="font-medium text-gray-900">1ч 23м</p>
-                                </div>
-                            </div>
-                            <button class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
-                                <i data-lucide="gavel" class="w-4 h-4"></i>
-                                Сделать ставку
-                            </button>
-                        </div>
+                <div id="auctionsListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin mb-2"></i>
+                        <p class="text-sm">Загрузка аукционов...</p>
                     </div>
                 </div>
             </section>
@@ -244,48 +183,11 @@
                     <p class="text-gray-600">История ваших ставок</p>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Лот</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Текущая ставка</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Моя ставка</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-xl"></div>
-                                        <span class="font-medium text-gray-900">Звездная ночь</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-medium text-gray-900">850,000 Rub</td>
-                                <td class="px-6 py-4 text-gray-600">800,000 Rub</td>
-                                <td class="px-6 py-4"><span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Перебита</span></td>
-                                <td class="px-6 py-4">
-                                    <button class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium text-sm hover:bg-amber-200">Поднять</button>
-                                </td>
-                            </tr>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-200 to-indigo-300 rounded-xl"></div>
-                                        <span class="font-medium text-gray-900">Водяные лилии</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-medium text-gray-900">450,000 Rub</td>
-                                <td class="px-6 py-4 text-gray-600">450,000 Rub</td>
-                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Лидирует</span></td>
-                                <td class="px-6 py-4">
-                                    <button class="text-gray-400 px-3 py-1.5 rounded-lg text-sm cursor-default">Вы впереди</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="bidsContainer" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="text-center py-12 text-gray-400">
+                        <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin mb-2"></i>
+                        <p class="text-sm">Загрузка ставок...</p>
+                    </div>
                 </div>
             </section>
 
@@ -296,22 +198,12 @@
                     <p class="text-gray-600">Лоты, за которыми вы следите</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="h-40 bg-gradient-to-br from-rose-200 to-pink-300 relative">
-                            <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
-                            </button>
-                        </div>
-                        <div class="p-4">
-                            <h4 class="font-semibold text-gray-900">Девушка с жемчужной сережкой</h4>
-                            <p class="text-sm text-gray-500 mb-3">Вермеер, 1665</p>
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-amber-600">1,200,000 Rub</span>
-                                <span class="text-sm text-gray-500">2ч 15м</span>
-                            </div>
-                        </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="eye-off" class="w-8 h-8 text-gray-400"></i>
                     </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Список пуст</h3>
+                    <p class="text-gray-500 max-w-md mx-auto">Вы пока не добавили лоты в список наблюдения. Перейдите в раздел аукционов, чтобы добавить интересующие лоты.</p>
                 </div>
             </section>
 
@@ -322,51 +214,315 @@
                     <p class="text-gray-600">Ваши финансовые операции</p>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Тип</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Сумма</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Дата</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                            <i data-lucide="arrow-down" class="w-5 h-5 text-green-600"></i>
-                                        </div>
-                                        <span class="font-medium text-gray-900">Пополнение</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-medium text-green-600">+500,000 Rub</td>
-                                <td class="px-6 py-4 text-gray-600">25.01.2025</td>
-                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Выполнено</span></td>
-                            </tr>
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                                            <i data-lucide="gavel" class="w-5 h-5 text-amber-600"></i>
-                                        </div>
-                                        <span class="font-medium text-gray-900">Покупка лота</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-medium text-red-600">-350,000 Rub</td>
-                                <td class="px-6 py-4 text-gray-600">20.01.2025</td>
-                                <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Выполнено</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="transactionsContainer" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="text-center py-12 text-gray-400">
+                        <i data-lucide="loader-2" class="w-6 h-6 mx-auto animate-spin mb-2"></i>
+                        <p class="text-sm">Загрузка транзакций...</p>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
+        const CURRENT_USER_ID = 1;
+
+        function formatPrice(value) {
+            const num = parseFloat(value) || 0;
+            return num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+        }
+
+        function formatTimeRemaining(endDatetime) {
+            if (!endDatetime) return '—';
+            const diff = new Date(endDatetime) - new Date();
+            if (diff <= 0) return 'Завершён';
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            if (hours > 24) {
+                const days = Math.floor(hours / 24);
+                return days + 'д ' + (hours % 24) + 'ч';
+            }
+            return hours + 'ч ' + minutes + 'м';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function getArtworkThumb(item) {
+            return item.artwork_thumbnail_url || item.artwork_image_url || '';
+        }
+
+        function renderThumb(item, size) {
+            size = size || 'w-12 h-12';
+            const url = getArtworkThumb(item);
+            if (url) {
+                return '<img src="' + escapeHtml(url) + '" class="' + size + ' rounded-xl object-cover flex-shrink-0" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="' + size + ' bg-gradient-to-br from-amber-200 to-orange-300 rounded-xl flex-shrink-0 items-center justify-center" style="display:none"></div>';
+            }
+            return '<div class="' + size + ' bg-gradient-to-br from-amber-200 to-orange-300 rounded-xl flex-shrink-0"></div>';
+        }
+
+        async function fetchJSON(url) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (e) {
+                console.error('Fetch error:', url, e);
+                return null;
+            }
+        }
+
+        let participantData = null;
+
+        async function loadParticipantData() {
+            const data = await fetchJSON('/api/auctions/participant/' + CURRENT_USER_ID);
+            if (data) participantData = data;
+            return participantData;
+        }
+
+        async function loadDashboard() {
+            const data = await loadParticipantData();
+
+            if (data) {
+                const activeBidsCount = data.active_bids ? data.active_bids.length : 0;
+                const wonLotsCount = data.won_lots ? data.won_lots.length : 0;
+                const allBidsAuctions = new Set();
+                if (data.bid_history) {
+                    data.bid_history.forEach(b => { if (b.auction_id) allBidsAuctions.add(b.auction_id); });
+                }
+                document.getElementById('statActiveBids').textContent = activeBidsCount;
+                document.getElementById('statWonLots').textContent = wonLotsCount;
+                document.getElementById('statTotalAuctions').textContent = allBidsAuctions.size;
+
+                const badge = document.querySelector('.sidebar-link[data-tab="auctions"] span.ml-auto');
+                if (badge) badge.textContent = activeBidsCount || '';
+            }
+
+            const [activeRes, scheduledRes] = await Promise.all([
+                fetchJSON('/api/auctions?status=active'),
+                fetchJSON('/api/auctions?status=scheduled')
+            ]);
+
+            const activeAuctions = (activeRes && activeRes.auctions) ? activeRes.auctions : [];
+            const scheduledAuctions = (scheduledRes && scheduledRes.auctions) ? scheduledRes.auctions : [];
+            const allUpcoming = [...activeAuctions, ...scheduledAuctions];
+
+            const container = document.getElementById('upcomingAuctionsList');
+            if (allUpcoming.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="calendar-off" class="w-6 h-6"></i></div><p class="text-sm">Нет предстоящих аукционов</p></div>';
+            } else {
+                container.innerHTML = allUpcoming.map(a => {
+                    const isActive = a.status === 'active';
+                    const bgClass = isActive ? 'bg-amber-50 border border-amber-100' : 'bg-gray-50';
+                    const timeLabel = isActive ? 'Осталось' : 'Начало';
+                    const timeValue = isActive ? formatTimeRemaining(a.end_datetime) : (a.start_datetime ? new Date(a.start_datetime).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—');
+                    const badge = isActive
+                        ? '<span class="live-badge bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full"></span>LIVE</span>'
+                        : '<span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">Скоро</span>';
+                    const btn = isActive
+                        ? '<a href="/auction" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-medium transition-colors whitespace-nowrap">Участвовать</a>'
+                        : '<a href="/auction" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors whitespace-nowrap">Подробнее</a>';
+                    return '<div class="flex items-center gap-4 p-4 ' + bgClass + ' rounded-xl">' +
+                        '<div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex-shrink-0"></div>' +
+                        '<div class="flex-1 min-w-0">' +
+                        '<div class="flex items-center gap-2 mb-1"><h4 class="font-semibold text-gray-900 truncate">' + escapeHtml(a.name) + '</h4>' + badge + '</div>' +
+                        '<p class="text-sm text-gray-600">' + (a.lot_count || 0) + ' лотов</p>' +
+                        '</div>' +
+                        '<div class="text-right flex-shrink-0"><p class="text-sm text-gray-500">' + timeLabel + '</p><p class="font-bold text-amber-600">' + escapeHtml(timeValue) + '</p></div>' +
+                        btn +
+                        '</div>';
+                }).join('');
+            }
+            lucide.createIcons();
+        }
+
+        async function loadAuctions() {
+            const data = await fetchJSON('/api/auctions');
+            const container = document.getElementById('auctionsListContainer');
+            if (!data || !data.auctions || data.auctions.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12"><div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4"><i data-lucide="inbox" class="w-8 h-8 text-gray-400"></i></div><h3 class="text-lg font-semibold text-gray-700 mb-2">Нет доступных аукционов</h3><p class="text-gray-500">Аукционы пока не созданы</p></div>';
+                lucide.createIcons();
+                return;
+            }
+
+            const auctionCards = [];
+            for (const auction of data.auctions) {
+                const lotsRes = await fetchJSON('/api/auctions/' + auction.auction_id + '/lots');
+                const lots = (lotsRes && lotsRes.lots) ? lotsRes.lots : [];
+                if (lots.length === 0) {
+                    const isActive = auction.status === 'active';
+                    const statusBadge = isActive
+                        ? '<span class="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>LIVE</span>'
+                        : (auction.status === 'scheduled' ? '<span class="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Скоро</span>' : '<span class="absolute top-3 right-3 bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Завершён</span>');
+                    auctionCards.push(
+                        '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">' +
+                        '<div class="relative"><div class="h-48 bg-gradient-to-br from-amber-200 to-orange-300 flex items-center justify-center"><i data-lucide="gavel" class="w-12 h-12 text-white/60"></i></div>' + statusBadge + '</div>' +
+                        '<div class="p-5"><h4 class="font-display font-semibold text-lg text-gray-900 mb-1">' + escapeHtml(auction.name) + '</h4>' +
+                        '<p class="text-sm text-gray-500 mb-4">' + (auction.lot_count || 0) + ' лотов · ' + (auction.total_bids || 0) + ' ставок</p>' +
+                        '<div class="flex items-center justify-between mb-4"><div><p class="text-xs text-gray-500">Статус</p><p class="font-medium text-gray-900">' + (isActive ? 'Идёт' : auction.status === 'scheduled' ? 'Запланирован' : 'Завершён') + '</p></div>' +
+                        '<div class="text-right"><p class="text-xs text-gray-500">Время</p><p class="font-medium text-gray-900">' + formatTimeRemaining(auction.end_datetime) + '</p></div></div>' +
+                        '<a href="/auction" class="block w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-medium transition-colors text-center">Перейти</a></div></div>'
+                    );
+                } else {
+                    lots.forEach(lot => {
+                        const isActive = auction.status === 'active';
+                        const statusBadge = isActive
+                            ? '<span class="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>LIVE</span>'
+                            : (auction.status === 'scheduled' ? '<span class="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Скоро</span>' : '<span class="absolute top-3 right-3 bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Завершён</span>');
+                        const imgUrl = lot.artwork_thumbnail_url || lot.artwork_image_url;
+                        const imgHtml = imgUrl
+                            ? '<img src="' + escapeHtml(imgUrl) + '" class="h-48 w-full object-cover" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+                              '<div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300 items-center justify-center" style="display:none"></div>'
+                            : '<div class="h-48 bg-gradient-to-br from-yellow-200 to-orange-300"></div>';
+                        auctionCards.push(
+                            '<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">' +
+                            '<div class="relative">' + imgHtml + statusBadge + '</div>' +
+                            '<div class="p-5">' +
+                            '<h4 class="font-display font-semibold text-lg text-gray-900 mb-1">' + escapeHtml(lot.artwork_title || auction.name) + '</h4>' +
+                            '<p class="text-sm text-gray-500 mb-4">' + escapeHtml(lot.artwork_artist || '') + '</p>' +
+                            '<div class="flex items-center justify-between mb-4">' +
+                            '<div><p class="text-xs text-gray-500">Текущая ставка</p><p class="text-xl font-bold text-amber-600">' + formatPrice(lot.current_bid || lot.starting_price) + '</p></div>' +
+                            '<div class="text-right"><p class="text-xs text-gray-500">Осталось</p><p class="font-medium text-gray-900">' + formatTimeRemaining(auction.end_datetime) + '</p></div></div>' +
+                            '<button onclick="openBidForm(' + lot.lot_id + ', \'' + escapeHtml(lot.artwork_title || auction.name) + '\', ' + (lot.current_bid || lot.starting_price || 0) + ')" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">' +
+                            '<i data-lucide="gavel" class="w-4 h-4"></i>Сделать ставку</button></div></div>'
+                        );
+                    });
+                }
+            }
+            container.innerHTML = auctionCards.join('');
+            lucide.createIcons();
+        }
+
+        async function loadBids() {
+            const data = participantData || await loadParticipantData();
+            const container = document.getElementById('bidsContainer');
+            if (!data || !data.active_bids || data.active_bids.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4"><i data-lucide="hand" class="w-8 h-8 text-gray-400"></i></div><h3 class="text-lg font-semibold text-gray-700 mb-2">Нет активных ставок</h3><p class="text-gray-500">Вы ещё не делали ставок на активных аукционах</p></div>';
+                lucide.createIcons();
+                return;
+            }
+            let rows = data.active_bids.map(bid => {
+                const isWinning = bid.is_winning || (parseFloat(bid.amount) >= parseFloat(bid.current_bid));
+                const statusBadge = isWinning
+                    ? '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Лидирует</span>'
+                    : '<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Перебита</span>';
+                const actionBtn = isWinning
+                    ? '<button class="text-gray-400 px-3 py-1.5 rounded-lg text-sm cursor-default">Вы впереди</button>'
+                    : '<button onclick="openBidForm(' + bid.lot_id + ', \'' + escapeHtml(bid.artwork_title || 'Лот') + '\', ' + (bid.current_bid || 0) + ')" class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium text-sm hover:bg-amber-200">Поднять</button>';
+                return '<tr class="border-b border-gray-50 hover:bg-gray-50">' +
+                    '<td class="px-6 py-4"><div class="flex items-center gap-3">' + renderThumb(bid) + '<span class="font-medium text-gray-900">' + escapeHtml(bid.artwork_title || 'Лот #' + bid.lot_id) + '</span></div></td>' +
+                    '<td class="px-6 py-4 font-medium text-gray-900">' + formatPrice(bid.current_bid) + '</td>' +
+                    '<td class="px-6 py-4 text-gray-600">' + formatPrice(bid.amount) + '</td>' +
+                    '<td class="px-6 py-4">' + statusBadge + '</td>' +
+                    '<td class="px-6 py-4">' + actionBtn + '</td></tr>';
+            }).join('');
+
+            container.innerHTML = '<table class="w-full"><thead class="bg-gray-50 border-b border-gray-100"><tr>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Лот</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Текущая ставка</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Моя ставка</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>' +
+                '</tr></thead><tbody>' + rows + '</tbody></table>';
+            lucide.createIcons();
+        }
+
+        async function loadTransactions() {
+            const data = participantData || await loadParticipantData();
+            const container = document.getElementById('transactionsContainer');
+            if (!data || !data.bid_history || data.bid_history.length === 0) {
+                container.innerHTML = '<div class="text-center py-12"><div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4"><i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i></div><h3 class="text-lg font-semibold text-gray-700 mb-2">Нет транзакций</h3><p class="text-gray-500">История ваших ставок пуста</p></div>';
+                lucide.createIcons();
+                return;
+            }
+            let rows = data.bid_history.map(tx => {
+                const isWon = tx.is_winning;
+                const icon = isWon ? 'trophy' : 'gavel';
+                const iconBg = isWon ? 'bg-green-100' : 'bg-amber-100';
+                const iconColor = isWon ? 'text-green-600' : 'text-amber-600';
+                const label = isWon ? 'Выигранный лот' : 'Ставка';
+                const amountColor = isWon ? 'text-green-600' : 'text-amber-600';
+                const status = isWon
+                    ? '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">Выиграно</span>'
+                    : (tx.auction_status === 'active' ? '<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Активна</span>' : '<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">Завершена</span>');
+                return '<tr class="border-b border-gray-50 hover:bg-gray-50">' +
+                    '<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-10 h-10 ' + iconBg + ' rounded-full flex items-center justify-center"><i data-lucide="' + icon + '" class="w-5 h-5 ' + iconColor + '"></i></div>' +
+                    '<div><span class="font-medium text-gray-900">' + escapeHtml(label) + '</span><p class="text-xs text-gray-500">' + escapeHtml(tx.artwork_title || tx.auction_name || '') + '</p></div></div></td>' +
+                    '<td class="px-6 py-4 font-medium ' + amountColor + '">' + formatPrice(tx.amount) + '</td>' +
+                    '<td class="px-6 py-4 text-gray-600">' + formatDate(tx.timestamp) + '</td>' +
+                    '<td class="px-6 py-4">' + status + '</td></tr>';
+            }).join('');
+
+            container.innerHTML = '<table class="w-full"><thead class="bg-gray-50 border-b border-gray-100"><tr>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Тип</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Сумма</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Дата</th>' +
+                '<th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>' +
+                '</tr></thead><tbody>' + rows + '</tbody></table>';
+            lucide.createIcons();
+        }
+
+        function openBidForm(lotId, lotTitle, currentBid) {
+            const minBid = Math.ceil((parseFloat(currentBid) || 0) * 1.05);
+            const modal = document.createElement('div');
+            modal.id = 'bidModal';
+            modal.className = 'fixed inset-0 z-[100] flex items-center justify-center';
+            modal.innerHTML = '<div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeBidModal()"></div>' +
+                '<div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 relative z-10 p-6">' +
+                '<button onclick="closeBidModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>' +
+                '<h3 class="text-xl font-display font-bold text-gray-900 mb-2">Сделать ставку</h3>' +
+                '<p class="text-gray-500 mb-4">' + escapeHtml(lotTitle) + '</p>' +
+                '<div class="mb-4"><p class="text-sm text-gray-500 mb-1">Текущая ставка</p><p class="text-2xl font-bold text-amber-600">' + formatPrice(currentBid) + '</p></div>' +
+                '<div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">Ваша ставка (мин. ' + formatPrice(minBid) + ')</label>' +
+                '<input type="number" id="bidAmountInput" min="' + minBid + '" value="' + minBid + '" step="1000" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-lg"></div>' +
+                '<button onclick="submitBid(' + lotId + ')" class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold transition-colors">Подтвердить ставку</button></div>';
+            document.body.appendChild(modal);
+            lucide.createIcons();
+        }
+
+        function closeBidModal() {
+            const modal = document.getElementById('bidModal');
+            if (modal) modal.remove();
+        }
+
+        async function submitBid(lotId) {
+            const input = document.getElementById('bidAmountInput');
+            const amount = parseFloat(input.value);
+            if (!amount || amount <= 0) {
+                if (typeof toastError === 'function') toastError('Введите корректную сумму');
+                return;
+            }
+            try {
+                const res = await fetch('/api/auctions/bids', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lot_id: lotId, user_id: CURRENT_USER_ID, amount: amount })
+                });
+                const data = await res.json();
+                if (data.success || data.bid) {
+                    if (typeof toastSuccess === 'function') toastSuccess('Ставка успешно размещена!');
+                    closeBidModal();
+                    participantData = null;
+                    loadDashboard();
+                    loadBids();
+                    loadTransactions();
+                } else {
+                    if (typeof toastError === 'function') toastError(data.error || 'Ошибка при размещении ставки');
+                }
+            } catch (e) {
+                if (typeof toastError === 'function') toastError('Ошибка сети');
+            }
+        }
+
         lucide.createIcons();
 
         const sidebar = document.getElementById('sidebar');
@@ -385,6 +541,8 @@
 
         overlay?.addEventListener('click', closeSidebar);
 
+        const tabLoaded = { dashboard: false, auctions: false, bids: false, transactions: false };
+
         document.querySelectorAll('.sidebar-link').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
@@ -397,12 +555,21 @@
                 document.getElementById(tab).classList.add('active');
                 lucide.createIcons();
                 closeSidebar();
+
+                if (!tabLoaded[tab]) {
+                    tabLoaded[tab] = true;
+                    if (tab === 'auctions') loadAuctions();
+                    if (tab === 'bids') loadBids();
+                    if (tab === 'transactions') loadTransactions();
+                }
             });
         });
 
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             window.location.href = '/';
         });
+
+        loadDashboard().then(() => { tabLoaded.dashboard = true; });
     </script>
 </body>
 </html>

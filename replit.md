@@ -63,6 +63,17 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-08**: Система аукционов — главная страница и API
+  - Создан `src/routes/auctions.js` — полный REST API для аукционов (10 эндпоинтов)
+  - Эндпоинты: список аукционов с фильтрами, детали с лотами, статистика, история, участник, ставки
+  - Таблицы `auctions`, `auction_lots`, `bids` создаются автоматически (ensureTables)
+  - Валидация ставок: проверка суммы > текущей, активности аукциона, доступности лота
+  - Создана публичная страница `src/frontend/auction.html` — главная аукциона
+  - Разделы: герой, статистика, фильтры (все/активные/запланированные/завершённые), карточки лотов, модалка ставки, история, ссылка на кабинет участника
+  - Обновлён `auction-participant.html` — подключён к реальным API, добавлена ссылка «Все аукционы»
+  - Навигация обновлена: «Аукцион» → /auction (главная), /auction-participant.html (кабинет)
+  - Файлы: `src/routes/auctions.js`, `src/frontend/auction.html`, `src/frontend/auction-participant.html`
+
 - **2026-02-08**: Рефакторинг admin.html и staff.html
   - admin.html: извлечён инлайн-JS (555 строк) в `src/frontend/assets/admin-app.js`, HTML уменьшен с 1477 до 921 строк
   - staff.html: извлечён инлайн-JS (566 строк) в `src/frontend/assets/staff-app.js`, HTML уменьшен с 946 до 379 строк
