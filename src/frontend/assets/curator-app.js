@@ -1407,6 +1407,7 @@
             if (roomLightingInput) roomLightingInput.value = room.lighting || 70;
 
             renderRoomLayout();
+            renderRoomConnections();
         }
 
         document.querySelectorAll('.room-item').forEach(item => {
@@ -1923,24 +1924,76 @@
             toastSuccess(`«${artwork.title || 'Экспонат'}» размещён в слоте #${currentSlotIndex + 1}`);
         }
 
-        document.getElementById('addConnectionBtn')?.addEventListener('click', () => {
+        function renderRoomConnections() {
+            const container = document.getElementById('roomConnectionsList');
+            if (!container) return;
             const currentRoom = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
-            const availableRooms = galleryConfig.rooms.filter(r => r.id !== galleryConfig.currentRoom && !currentRoom.connections.includes(r.id));
-            
-            if (availableRooms.length === 0) {
-                toastWarning('Нет доступных залов для создания связи');
-                return;
+            if (!currentRoom) return;
+            if (!currentRoom.connections) currentRoom.connections = [];
+
+            const walls = ['Левая стена', 'Правая стена', 'Задняя стена', 'Передняя стена'];
+            let html = currentRoom.connections.map((connId, idx) => {
+                const connRoom = galleryConfig.rooms.find(r => r.id === connId);
+                const connName = connRoom ? connRoom.name : connId;
+                const wallLabel = walls[idx] || `Проход ${idx + 1}`;
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="door-open" class="w-5 h-5 text-gray-600"></i>
+                            <span class="font-medium text-gray-700">${connName}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-500">${wallLabel}</span>
+                            <button class="remove-connection-btn p-1.5 hover:bg-gray-200 rounded-lg" data-conn="${connId}" title="Удалить связь">
+                                <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            if (currentRoom.connections.length === 0) {
+                html += `<p class="text-sm text-gray-400 text-center py-3">Нет связей с другими залами</p>`;
             }
-            
-            const roomName = prompt('Выберите зал для связи:\n' + availableRooms.map((r, i) => `${i + 1}. ${r.name}`).join('\n'));
-            const index = parseInt(roomName) - 1;
-            
-            if (index >= 0 && index < availableRooms.length) {
-                currentRoom.connections.push(availableRooms[index].id);
-                availableRooms[index].connections.push(galleryConfig.currentRoom);
-                toastSuccess(`Связь с залом "${availableRooms[index].name}" создана`);
-            }
-        });
+
+            html += `
+                <button id="addConnectionBtn" class="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Добавить переход
+                </button>`;
+
+            container.innerHTML = html;
+            lucide.createIcons();
+
+            container.querySelectorAll('.remove-connection-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const connId = btn.dataset.conn;
+                    currentRoom.connections = currentRoom.connections.filter(c => c !== connId);
+                    const otherRoom = galleryConfig.rooms.find(r => r.id === connId);
+                    if (otherRoom && otherRoom.connections) {
+                        otherRoom.connections = otherRoom.connections.filter(c => c !== galleryConfig.currentRoom);
+                    }
+                    renderRoomConnections();
+                    toastSuccess('Связь удалена');
+                });
+            });
+
+            document.getElementById('addConnectionBtn')?.addEventListener('click', () => {
+                const availableRooms = galleryConfig.rooms.filter(r => r.id !== galleryConfig.currentRoom && !currentRoom.connections.includes(r.id));
+                if (availableRooms.length === 0) {
+                    toastWarning('Нет доступных залов для создания связи');
+                    return;
+                }
+                const roomName = prompt('Выберите зал для связи:\n' + availableRooms.map((r, i) => `${i + 1}. ${r.name}`).join('\n'));
+                const index = parseInt(roomName) - 1;
+                if (index >= 0 && index < availableRooms.length) {
+                    currentRoom.connections.push(availableRooms[index].id);
+                    if (!availableRooms[index].connections) availableRooms[index].connections = [];
+                    availableRooms[index].connections.push(galleryConfig.currentRoom);
+                    renderRoomConnections();
+                    toastSuccess(`Связь с залом "${availableRooms[index].name}" создана`);
+                }
+            });
+        }
 
         // Collections filter functionality
         document.querySelectorAll('.collection-filter').forEach(btn => {
