@@ -31,7 +31,7 @@ app.use('/api/stats', require('./src/routes/stats'));
 app.use('/api/auctions', require('./src/routes/auctions'));
 
 // Frontend
-const pages = ['admin', 'curator', 'auction', 'gallery-3d', 'artwiki', 'staff', 'user'];
+const pages = ['admin', 'curator', 'auction', 'gallery-3d', 'artwiki', 'rag', 'staff', 'user'];
 pages.forEach(p => app.get(`/${p}`, (req, res) => res.sendFile(path.join(__dirname, `src/frontend/${p}.html`))));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src/frontend/index.html')));
 
