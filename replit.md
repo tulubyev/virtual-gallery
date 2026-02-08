@@ -63,6 +63,14 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-08**: Security dependency updates (AI/ML Service)
+  - Updated `aiohttp` from 3.9.4 to 3.13.3
+  - Updated `fastapi` from 0.109.0 to 0.115.8
+  - Updated `transformers` from 4.36.0 to 4.48.0
+  - Updated `tokenizers` from 0.15.2 to 0.21.4
+  - Fixed aiohttp breaking change: replaced integer `timeout` params with `ClientTimeout(total=N)` in `external_sources_service.py`
+  - Files: `ai-ml-service/requirements.txt`, `ai-ml-service/src/models/services/external_sources_service.py`
+
 - **2026-02-08**: Система аукционов — главная страница и API
   - Создан `src/routes/auctions.js` — полный REST API для аукционов (10 эндпоинтов)
   - Эндпоинты: список аукционов с фильтрами, детали с лотами, статистика, история, участник, ставки
