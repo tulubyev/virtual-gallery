@@ -133,77 +133,6 @@
 
         <!-- Main Content -->
         <main class="main-content flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
-            <!-- Dashboard -->
-            <section id="dashboard" class="tab-content active">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Панель куратора</h1>
-                    <p class="text-gray-600">Управление выставками и коллекциями</p>
-                </div>
-
-                <!-- Stats -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('collections')">
-                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="folder" class="w-6 h-6 text-purple-600"></i>
-                        </div>
-                        <p id="statCollections" class="text-3xl font-bold text-gray-900">-</p>
-                        <p class="text-gray-500 text-sm">Активных коллекций</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('gallery')">
-                        <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="layout-grid" class="w-6 h-6 text-pink-600"></i>
-                        </div>
-                        <p id="statRooms" class="text-3xl font-bold text-gray-900">-</p>
-                        <p class="text-gray-500 text-sm">Залов галереи</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="switchToTab('digitized')">
-                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="image" class="w-6 h-6 text-indigo-600"></i>
-                        </div>
-                        <p id="statArtworks" class="text-3xl font-bold text-gray-900">-</p>
-                        <p class="text-gray-500 text-sm">Произведений в базе</p>
-                    </div>
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
-                            <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
-                        </div>
-                        <p id="statPending" class="text-3xl font-bold text-gray-900">-</p>
-                        <p class="text-gray-500 text-sm">Ожидают модерации</p>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Быстрые действия</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button id="quickNewCollection" class="flex flex-col items-center gap-3 p-6 bg-purple-50 hover:bg-purple-100 rounded-2xl transition-colors">
-                            <div class="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center">
-                                <i data-lucide="folder-plus" class="w-7 h-7 text-white"></i>
-                            </div>
-                            <span class="font-medium text-gray-900">Создать коллекцию</span>
-                        </button>
-                        <button id="quickGalleryBuilder" class="flex flex-col items-center gap-3 p-6 bg-pink-50 hover:bg-pink-100 rounded-2xl transition-colors">
-                            <div class="w-14 h-14 bg-pink-600 rounded-2xl flex items-center justify-center">
-                                <i data-lucide="layout-template" class="w-7 h-7 text-white"></i>
-                            </div>
-                            <span class="font-medium text-gray-900">Редактор галереи</span>
-                        </button>
-                        <button id="quickAICuration" class="flex flex-col items-center gap-3 p-6 bg-indigo-50 hover:bg-indigo-100 rounded-2xl transition-colors">
-                            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center">
-                                <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
-                            </div>
-                            <span class="font-medium text-gray-900">AI-курирование</span>
-                        </button>
-                        <button id="quickModeration" class="flex flex-col items-center gap-3 p-6 bg-amber-50 hover:bg-amber-100 rounded-2xl transition-colors">
-                            <div class="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center">
-                                <i data-lucide="check-circle" class="w-7 h-7 text-white"></i>
-                            </div>
-                            <span class="font-medium text-gray-900">Модерация</span>
-                        </button>
-                    </div>
-                </div>
-            </section>
-
             <!-- Collections -->
             <section id="collections" class="tab-content">
                 <div class="mb-6 flex items-center justify-between">
@@ -559,7 +488,7 @@
             </div>
 
             <!-- Gallery Builder -->
-            <section id="gallery-builder" class="tab-content">
+            <section id="gallery-builder" class="tab-content active">
                 <div class="mb-8 flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Галерея</h1>

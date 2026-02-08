@@ -1,17 +1,9 @@
         lucide.createIcons();
 
-        // Load Dashboard Stats
-        async function loadDashboardStats() {
+        async function loadPendingBadge() {
             try {
                 const response = await fetch('/api/stats/dashboard');
                 const stats = await response.json();
-                
-                document.getElementById('statCollections').textContent = stats.collections || 0;
-                document.getElementById('statRooms').textContent = stats.rooms || 0;
-                document.getElementById('statArtworks').textContent = stats.artworks || 0;
-                document.getElementById('statPending').textContent = stats.pending || 0;
-                
-                // Update pending badge
                 const pendingBadge = document.getElementById('pendingBadge');
                 if (pendingBadge && stats.pending > 0) {
                     pendingBadge.textContent = stats.pending;
@@ -22,41 +14,12 @@
             }
         }
 
-        // Switch to tab helper
         function switchToTab(tabName) {
             const tabBtn = document.querySelector(`[data-tab="${tabName}"]`);
             if (tabBtn) tabBtn.click();
         }
 
-        // Quick action handlers
-        document.getElementById('quickNewCollection')?.addEventListener('click', () => {
-            switchToTab('collections');
-            setTimeout(() => {
-                document.getElementById('newCollectionModal')?.classList.remove('hidden');
-            }, 200);
-        });
-
-        document.getElementById('quickGalleryBuilder')?.addEventListener('click', () => {
-            switchToTab('gallery');
-        });
-
-        document.getElementById('quickAICuration')?.addEventListener('click', () => {
-            switchToTab('ai-curation');
-        });
-
-        document.getElementById('quickModeration')?.addEventListener('click', () => {
-            switchToTab('digitized');
-            setTimeout(() => {
-                const filter = document.getElementById('digitizedStatusFilter');
-                if (filter) {
-                    filter.value = 'pending';
-                    filter.dispatchEvent(new Event('change'));
-                }
-            }, 200);
-        });
-
-        // Load stats on page load
-        loadDashboardStats();
+        loadPendingBadge();
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('mobileOverlay');
@@ -1350,7 +1313,7 @@
                 
                 if (!response.ok) throw new Error('Failed to update');
                 loadCollections();
-                loadDashboardStats();
+                loadPendingBadge();
             } catch (error) {
                 console.error('Toggle collection error:', error);
                 toastError('Ошибка при изменении статуса коллекции');
@@ -1369,7 +1332,7 @@
                 if (!response.ok) throw new Error('Failed to delete');
                 toastSuccess('Коллекция перемещена в архив');
                 loadCollections();
-                loadDashboardStats();
+                loadPendingBadge();
             } catch (error) {
                 console.error('Delete collection error:', error);
                 toastError('Ошибка при удалении коллекции');
