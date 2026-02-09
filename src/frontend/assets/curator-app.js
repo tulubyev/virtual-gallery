@@ -1907,7 +1907,7 @@
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
             const assignedIds = new Set();
             if (room?.artworkAssignments) {
-                Object.values(room.artworkAssignments).forEach(a => { if (a?.id) assignedIds.add(a.id); });
+                Object.values(room.artworkAssignments).forEach(a => { if (a?.id) assignedIds.add(String(a.id)); });
             }
 
             let filtered = slotArtworksCache;
@@ -1931,10 +1931,10 @@
             }
 
             list.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">` + filtered.map(artwork => {
-                const isAssigned = assignedIds.has(artwork.id);
+                const isAssigned = assignedIds.has(String(artwork.id));
                 return `
                     <div class="slot-artwork-option rounded-xl overflow-hidden border ${isAssigned ? 'border-green-300 bg-green-50/50' : 'border-gray-200 hover:border-purple-300'} transition-colors cursor-pointer ${isAssigned ? 'opacity-60' : ''}" 
-                         data-artwork-id="${artwork.id}" onclick="${isAssigned ? '' : `selectArtworkForSlot(${artwork.id})`}">
+                         data-artwork-id="${artwork.id}" onclick="${isAssigned ? '' : `selectArtworkForSlot('${String(artwork.id).replace(/'/g, "\\'")}')` }">
                         <div class="bg-gray-100 relative" style="aspect-ratio: 3/4">
                             ${artwork.image_url ? 
                                 `<img src="${artwork.thumbnail_url || artwork.image_url}" alt="${artwork.title || ''}" class="w-full h-full object-cover" loading="lazy">` :
@@ -1958,7 +1958,7 @@
         function selectArtworkForSlot(artworkId) {
             if (currentSlotIndex === null) return;
 
-            const artwork = slotArtworksCache.find(a => a.id === artworkId);
+            const artwork = slotArtworksCache.find(a => String(a.id) === String(artworkId));
             if (!artwork) return;
 
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
