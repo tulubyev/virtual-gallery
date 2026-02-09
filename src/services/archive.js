@@ -1,11 +1,11 @@
 const pool = require('../config/database');
 
 class ArchiveService {
-  async archiveEntity(entityType, entityId, entityData, archivedBy = 'curator', reason = null) {
+  async archiveEntity(entityType, entityId, entityData, archivedBy = 'curator', reason = null, sourceLocation = null) {
     const result = await pool.query(
-      `INSERT INTO archive (entity_type, entity_id, entity_data, archived_by, reason)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [entityType, entityId, JSON.stringify(entityData), archivedBy, reason]
+      `INSERT INTO archive (entity_type, entity_id, entity_data, archived_by, reason, source_location)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [entityType, entityId, JSON.stringify(entityData), archivedBy, reason, sourceLocation ? JSON.stringify(sourceLocation) : null]
     );
     return result.rows[0];
   }
@@ -45,6 +45,7 @@ class ArchiveService {
 
     const item = archived.rows[0];
     const data = item.entity_data;
+    const sourceLocation = item.source_location || null;
 
     if (item.entity_type === 'artwork') {
       const artworkId = data.artwork_id || data.id;
@@ -69,12 +70,42 @@ class ArchiveService {
         [colId, data.name, data.slug, data.description, data.epoch, data.country, data.cover_gradient, true]
       );
     } else if (item.entity_type === 'room') {
+      const restored = await this._restoreRoom(data);
+      if (!restored.success) {
+        return { restored: false, error: restored.error };
+      }
       await pool.query('DELETE FROM archive WHERE archive_id = $1', [archiveId]);
-      return { restored: true, entity_type: 'room', data: data };
+      return { restored: true, entity_type: 'room', data: data, source_location: sourceLocation };
     }
 
     await pool.query('DELETE FROM archive WHERE archive_id = $1', [archiveId]);
-    return { restored: true, entity_type: item.entity_type, data };
+    return { restored: true, entity_type: item.entity_type, data, source_location: sourceLocation };
+  }
+
+  async _restoreRoom(roomData) {
+    try {
+      const { getActiveConfig, saveConfig } = require('../services/gallery-config');
+      const dbConfig = await getActiveConfig();
+      if (!dbConfig || !dbConfig.config) {
+        return { success: false, error: 'Конфигурация галереи не найдена' };
+      }
+
+      const config = dbConfig.config;
+      const rooms = config.rooms || [];
+
+      const existingRoom = rooms.find(r => r.id === roomData.id);
+      if (existingRoom) {
+        return { success: false, error: `Зал с ID "${roomData.id}" уже существует в конфигурации галереи` };
+      }
+
+      rooms.push(roomData);
+      config.rooms = rooms;
+
+      await saveConfig(config, null);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: 'Ошибка при восстановлении зала: ' + e.message };
+    }
   }
 
   async deleteFromArchive(archiveId) {

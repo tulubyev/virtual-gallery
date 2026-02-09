@@ -44,9 +44,14 @@ router.delete('/:id', async (req, res) => {
 
 router.post('/room', async (req, res) => {
   try {
-    const { room, archived_by, reason } = req.body;
+    const { room, archived_by, reason, source_location } = req.body;
     if (!room) return res.status(400).json({ error: 'Room data required' });
-    const result = await archiveService.archiveEntity('room', 0, room, archived_by || 'curator', reason || null);
+    const srcLoc = source_location || {
+      section: 'gallery_builder',
+      label: 'Конструктор галереи',
+      detail: room.name || null
+    };
+    const result = await archiveService.archiveEntity('room', 0, room, archived_by || 'curator', reason || null, srcLoc);
     res.json({ success: true, archived: result });
   } catch (error) {
     res.status(500).json({ error: error.message });

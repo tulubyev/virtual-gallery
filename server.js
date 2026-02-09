@@ -36,6 +36,14 @@ const pages = ['admin', 'curator', 'auction', 'gallery-3d', 'artwiki', 'rag', 's
 pages.forEach(p => app.get(`/${p}`, (req, res) => res.sendFile(path.join(__dirname, `src/frontend/${p}.html`))));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src/frontend/index.html')));
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running at http://0.0.0.0:${PORT}`);
-});
+async function startup() {
+  try {
+    await pool.query('ALTER TABLE archive ADD COLUMN IF NOT EXISTS source_location JSONB DEFAULT NULL');
+  } catch (e) {
+  }
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
+  });
+}
+
+startup();

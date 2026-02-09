@@ -116,7 +116,13 @@ router.delete('/:id', async (req, res) => {
     const collection = await pool.query('SELECT * FROM collections WHERE collection_id = $1', [req.params.id]);
     if (collection.rows.length === 0) return res.status(404).json({ error: 'Collection not found' });
 
-    await archiveService.archiveEntity('collection', req.params.id, collection.rows[0], req.body.archived_by || 'curator', req.body.reason || null);
+    const collectionData = collection.rows[0];
+    const sourceLocation = {
+      section: 'collections',
+      label: `Коллекции`,
+      detail: collectionData.name || null
+    };
+    await archiveService.archiveEntity('collection', req.params.id, collectionData, req.body.archived_by || 'curator', req.body.reason || null, sourceLocation);
     await pool.query('DELETE FROM collections WHERE collection_id = $1', [req.params.id]);
     res.json({ success: true, archived: true });
   } catch (error) {

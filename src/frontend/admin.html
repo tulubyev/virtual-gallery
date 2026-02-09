@@ -61,10 +61,8 @@
 
             <!-- Navigation -->
             <nav class="flex-1 p-4 space-y-1">
-                <button class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="dashboard">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                    <span class="font-medium">Панель управления</span>
-                </button>
+
+  
                 <button class="sidebar-link w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg border-l-4 border-transparent transition-all" data-tab="users">
                     <i data-lucide="users" class="w-5 h-5"></i>
                     <span class="font-medium">Пользователи</span>
@@ -111,105 +109,7 @@
 
         <!-- Main Content -->
         <main class="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8">
-            <!-- Dashboard -->
-            <section id="dashboard" class="tab-content active">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Панель управления</h1>
-                    <p class="text-gray-600">Обзор активности галереи</p>
-                </div>
 
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
-                                <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                +12%
-                            </span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="totalUsers">1,247</p>
-                        <p class="text-gray-500 text-sm">Всего пользователей</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="user-check" class="w-6 h-6 text-green-600"></i>
-                            </div>
-                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
-                                <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                +8%
-                            </span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="activeUsers">892</p>
-                        <p class="text-gray-500 text-sm">Активных пользователей</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="image" class="w-6 h-6 text-purple-600"></i>
-                            </div>
-                            <span class="text-green-600 text-sm font-medium flex items-center gap-1">
-                                <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                +24
-                            </span>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="totalArtworks">3,456</p>
-                        <p class="text-gray-500 text-sm">Всего экспонатов</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                                <i data-lucide="plus-circle" class="w-6 h-6 text-orange-600"></i>
-                            </div>
-                        </div>
-                        <p class="text-3xl font-bold text-gray-900" id="newToday">47</p>
-                        <p class="text-gray-500 text-sm">Новые за сегодня</p>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Последняя активность</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="user-plus" class="w-5 h-5 text-green-600"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-900">Новый пользователь зарегистрирован</p>
-                                <p class="text-sm text-gray-500">user@virtgal.ru</p>
-                            </div>
-                            <span class="text-sm text-gray-400">2 мин назад</span>
-                        </div>
-                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
-                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="image-plus" class="w-5 h-5 text-purple-600"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-900">Добавлен новый экспонат</p>
-                                <p class="text-sm text-gray-500">"Звездная ночь" - Ван Гог</p>
-                            </div>
-                            <span class="text-sm text-gray-400">15 мин назад</span>
-                        </div>
-                        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
-                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="eye" class="w-5 h-5 text-blue-600"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-medium text-gray-900">Новый VR-тур создан</p>
-                                <p class="text-sm text-gray-500">Импрессионисты XIX века</p>
-                            </div>
-                            <span class="text-sm text-gray-400">1 час назад</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <!-- Users -->
             <section id="users" class="tab-content">

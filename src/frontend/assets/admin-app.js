@@ -912,6 +912,7 @@
 
                 list.innerHTML = items.map(item => {
                     const data = item.entity_data;
+                    const srcLoc = item.source_location || null;
                     const typeLabels = { artwork: 'Экспонат', collection: 'Коллекция', room: 'Зал' };
                     const typeColors = { artwork: 'blue', collection: 'purple', room: 'amber' };
                     const typeIcons = { artwork: 'image', collection: 'folder', room: 'layout-grid' };
@@ -934,6 +935,13 @@
 
                     const date = new Date(item.archived_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+                    let sourceInfo = '';
+                    if (srcLoc && (srcLoc.label || srcLoc.section)) {
+                        const srcLabel = srcLoc.label || srcLoc.section || '';
+                        const srcDetail = srcLoc.detail || '';
+                        sourceInfo = `<p class="text-xs text-indigo-500 mt-1 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Откуда: ${srcLabel}${srcDetail ? ' — ' + srcDetail : ''}</p>`;
+                    }
+
                     return `
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
                             ${imgUrl ? `<img src="${imgUrl}" alt="" class="w-16 h-16 object-cover rounded-xl flex-shrink-0">` : 
@@ -946,13 +954,13 @@
                                 <h4 class="font-semibold text-gray-900 truncate">${title}</h4>
                                 <p class="text-sm text-gray-500 truncate">${subtitle}</p>
                                 ${item.reason ? `<p class="text-xs text-gray-400 mt-1">Причина: ${item.reason}</p>` : ''}
+                                ${sourceInfo}
                             </div>
                             <div class="flex gap-2 flex-shrink-0">
-                                ${item.entity_type !== 'room' ? `
                                 <button onclick="restoreArchiveItem(${item.archive_id})" class="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors flex items-center gap-1" title="Восстановить">
                                     <i data-lucide="undo-2" class="w-4 h-4"></i>
                                     Восстановить
-                                </button>` : ''}
+                                </button>
                                 <button onclick="permanentlyDeleteArchiveItem(${item.archive_id})" class="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1" title="Удалить навсегда">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
@@ -971,11 +979,19 @@
             if (!confirm('Восстановить этот элемент из архива?')) return;
             try {
                 const response = await fetch(`/api/archive/${id}/restore`, { method: 'POST' });
+                const result = await response.json();
                 if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || 'Failed to restore');
+                    throw new Error(result.error || 'Failed to restore');
                 }
-                toastSuccess('Элемент успешно восстановлен');
+                if (result.entity_type === 'room') {
+                    const srcLoc = result.source_location;
+                    const locationHint = srcLoc && srcLoc.detail ? ` (${srcLoc.detail})` : '';
+                    toastSuccess(`Зал восстановлен${locationHint} и добавлен в конфигурацию галереи`);
+                } else {
+                    const srcLoc = result.source_location;
+                    const locationHint = srcLoc && srcLoc.label ? ` в раздел «${srcLoc.label}»` : '';
+                    toastSuccess(`Элемент успешно восстановлен${locationHint}`);
+                }
                 loadArchive(currentArchiveFilter);
             } catch (error) {
                 toastError('Ошибка при восстановлении: ' + error.message);
@@ -1023,6 +1039,5 @@
         document.querySelector('[data-tab="settings"]')?.addEventListener('click', () => {
             setTimeout(() => {
                 loadArchive(currentArchiveFilter);
-                loadDisplaySettings();
             }, 100);
         });

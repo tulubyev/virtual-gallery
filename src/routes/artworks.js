@@ -281,7 +281,13 @@ router.delete('/:id', async (req, res) => {
     const artwork = await pool.query('SELECT * FROM artworks WHERE artwork_id = $1', [req.params.id]);
     if (artwork.rows.length === 0) return res.status(404).json({ error: 'Artwork not found' });
 
-    await archiveService.archiveEntity('artwork', req.params.id, artwork.rows[0], req.body.archived_by || 'curator', req.body.reason || null);
+    const artworkData = artwork.rows[0];
+    const sourceLocation = {
+      section: 'artworks',
+      label: `Экспонаты`,
+      detail: artworkData.collection ? `Коллекция: ${artworkData.collection}` : null
+    };
+    await archiveService.archiveEntity('artwork', req.params.id, artworkData, req.body.archived_by || 'curator', req.body.reason || null, sourceLocation);
     await pool.query('DELETE FROM artworks WHERE artwork_id = $1', [req.params.id]);
     res.json({ success: true, archived: true });
   } catch (error) {

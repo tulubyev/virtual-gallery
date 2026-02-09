@@ -1571,7 +1571,16 @@
                 await fetch('/api/archive/room', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ room, archived_by: 'curator', reason: 'Удалён куратором' })
+                    body: JSON.stringify({
+                        room,
+                        archived_by: 'curator',
+                        reason: 'Удалён куратором',
+                        source_location: {
+                            section: 'gallery_builder',
+                            label: 'Конструктор галереи',
+                            detail: `Зал "${room.name || room.id}", позиция #${index + 1}`
+                        }
+                    })
                 });
             } catch (e) {}
             
