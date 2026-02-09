@@ -2,12 +2,12 @@
 
         async function loadStats() {
             try {
-                const response = await fetch('/api/artworks/stats');
+                const response = await fetch('/api/stats/dashboard');
                 const data = await response.json();
-                document.getElementById('stat-today').textContent = data.today || 0;
+                document.getElementById('stat-today').textContent = data.new_today || 0;
                 document.getElementById('stat-pending').textContent = data.pending || 0;
                 document.getElementById('stat-approved').textContent = data.approved || 0;
-                document.getElementById('stat-total').textContent = data.total || 0;
+                document.getElementById('stat-total').textContent = data.artworks || 0;
             } catch (error) {
                 console.error('Failed to load stats:', error);
             }
