@@ -2039,15 +2039,46 @@
                     toastWarning('Нет доступных залов для создания связи');
                     return;
                 }
-                const roomName = prompt('Выберите зал для связи:\n' + availableRooms.map((r, i) => `${i + 1}. ${r.name}`).join('\n'));
-                const index = parseInt(roomName) - 1;
-                if (index >= 0 && index < availableRooms.length) {
-                    currentRoom.connections.push(availableRooms[index].id);
-                    if (!availableRooms[index].connections) availableRooms[index].connections = [];
-                    availableRooms[index].connections.push(galleryConfig.currentRoom);
-                    renderRoomConnections();
-                    toastSuccess(`Связь с залом "${availableRooms[index].name}" создана`);
-                }
+
+                const existing = document.getElementById('connectionPickerDropdown');
+                if (existing) { existing.remove(); return; }
+
+                const dropdown = document.createElement('div');
+                dropdown.id = 'connectionPickerDropdown';
+                dropdown.className = 'mt-3 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden';
+                dropdown.innerHTML = `
+                    <div class="p-3 border-b border-gray-100 flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Выберите зал</span>
+                        <button id="closeConnectionPicker" class="p-1 hover:bg-gray-100 rounded-lg">
+                            <i data-lucide="x" class="w-4 h-4 text-gray-400"></i>
+                        </button>
+                    </div>
+                    <div class="max-h-48 overflow-y-auto">
+                        ${availableRooms.map(r => `
+                            <button class="connection-pick-btn w-full text-left px-4 py-3 hover:bg-purple-50 flex items-center gap-3 transition-colors" data-room-id="${r.id}">
+                                <i data-lucide="door-open" class="w-4 h-4 text-purple-500"></i>
+                                <span class="text-sm font-medium text-gray-700">${r.name}</span>
+                            </button>
+                        `).join('')}
+                    </div>`;
+                container.appendChild(dropdown);
+                lucide.createIcons();
+
+                dropdown.querySelector('#closeConnectionPicker').addEventListener('click', () => dropdown.remove());
+
+                dropdown.querySelectorAll('.connection-pick-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetId = btn.dataset.roomId;
+                        const targetRoom = galleryConfig.rooms.find(r => r.id === targetId);
+                        if (targetRoom) {
+                            currentRoom.connections.push(targetId);
+                            if (!targetRoom.connections) targetRoom.connections = [];
+                            targetRoom.connections.push(galleryConfig.currentRoom);
+                            renderRoomConnections();
+                            toastSuccess(`Связь с залом "${targetRoom.name}" создана`);
+                        }
+                    });
+                });
             });
         }
 
