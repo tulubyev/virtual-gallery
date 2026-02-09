@@ -36,6 +36,33 @@
             window.location.href = '/';
         });
 
+        // ===== Dashboard Stats =====
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch('/api/stats/dashboard');
+                if (!res.ok) throw new Error('Failed to fetch stats');
+                const data = await res.json();
+                
+                document.getElementById('totalUsers').textContent = data.users.toLocaleString();
+                document.getElementById('activeUsers').textContent = data.active_users.toLocaleString();
+                document.getElementById('totalArtworks').textContent = data.artworks.toLocaleString();
+                document.getElementById('newToday').textContent = data.new_today.toLocaleString();
+                
+                // Update small badges or secondary info if needed
+                const artworksBadge = document.getElementById('usersTotalBadge');
+                if (artworksBadge) artworksBadge.textContent = data.artworks;
+                
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Initialize dashboard
+        loadDashboardStats();
+
+        // Refresh stats on tab switch
+        document.querySelector('[data-tab="dashboard"]')?.addEventListener('click', loadDashboardStats);
+
         // ===== Artworks (Exhibits) Management =====
         let artworksCurrentOffset = 0;
         const artworksPageSize = 20;

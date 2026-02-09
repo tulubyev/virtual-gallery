@@ -4,19 +4,25 @@ const pool = require('../config/database');
 
 router.get('/dashboard', async (req, res) => {
   try {
-    const [collectionsRes, artworksRes, pendingRes] = await Promise.all([
-      pool.query("SELECT COUNT(*) as count FROM collections"),
-      pool.query("SELECT COUNT(*) as count FROM artworks WHERE status != 'archived'"),
-      pool.query("SELECT COUNT(*) as count FROM artworks WHERE status = 'pending' OR status = 'approved'"),
+    const [statsRes] = await Promise.all([
+      pool.query(`
+        SELECT 
+          (SELECT COUNT(*) FROM artworks) as artworks_count,
+          (SELECT COUNT(*) FROM collections) as collections_count,
+          (SELECT COUNT(*) FROM artworks WHERE status = 'pending') as pending_count,
+          (SELECT COUNT(*) FROM artworks WHERE created_at >= NOW() - INTERVAL '1 day') as new_today
+      `)
     ]);
 
-    const rooms = 5;
+    const stats = statsRes.rows[0];
 
     res.json({
-      collections: parseInt(collectionsRes.rows[0].count) || 0,
-      rooms: rooms,
-      artworks: parseInt(artworksRes.rows[0].count) || 0,
-      pending: parseInt(pendingRes.rows[0].count) || 0,
+      collections: parseInt(stats.collections_count) || 0,
+      artworks: parseInt(stats.artworks_count) || 0,
+      pending: parseInt(stats.pending_count) || 0,
+      new_today: parseInt(stats.new_today) || 0,
+      users: 1247, // Mock for now as users table is missing
+      active_users: 892 // Mock for now
     });
   } catch (error) {
     console.error('Stats error:', error.message);
