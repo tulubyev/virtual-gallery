@@ -277,6 +277,211 @@
             setTimeout(() => { loadArtworkFilters(); loadArtworks(); }, 50);
         });
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        // ===== Users Management =====
+        let usersCurrentOffset = 0;
+        const usersPageSize = 20;
+        let usersSearchTimeout = null;
+
+        const roleLabels = {
+            admin: 'Администратор',
+            curator: 'Куратор',
+            staff: 'Сотрудник',
+            guide: 'Экскурсовод',
+            user: 'Пользователь'
+        };
+
+        const roleColors = {
+            admin: { bg: 'bg-red-100', text: 'text-red-700' },
+            curator: { bg: 'bg-purple-100', text: 'text-purple-700' },
+            staff: { bg: 'bg-amber-100', text: 'text-amber-700' },
+            guide: { bg: 'bg-teal-100', text: 'text-teal-700' },
+            user: { bg: 'bg-blue-100', text: 'text-blue-700' }
+        };
+
+        function getRoleBadge(role) {
+            const label = roleLabels[role] || role || '—';
+            const c = roleColors[role] || { bg: 'bg-gray-100', text: 'text-gray-600' };
+            return `<span class="${c.bg} ${c.text} px-2.5 py-1 rounded-full text-xs font-medium">${label}</span>`;
+        }
+
+        function getUserInitials(name) {
+            if (!name) return '??';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        const avatarColors = ['indigo', 'green', 'amber', 'purple', 'teal', 'rose', 'sky', 'orange'];
+        function getAvatarColor(id) {
+            return avatarColors[(id || 0) % avatarColors.length];
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400"><i data-lucide="loader-2" class="w-6 h-6 mx-auto mb-2 animate-spin"></i>Загрузка...</td></tr>';
+            lucide.createIcons();
+
+            const params = new URLSearchParams();
+            const search = document.getElementById('userSearch')?.value;
+            const role = document.getElementById('roleFilter')?.value;
+
+            if (search) params.set('search', search);
+            if (role) params.set('role', role);
+            params.set('limit', usersPageSize);
+            params.set('offset', usersCurrentOffset);
+
+            try {
+                const res = await fetch(`/api/admin/users?${params.toString()}`);
+                if (!res.ok) throw new Error('Ошибка загрузки');
+                const data = await res.json();
+                const users = data.users || [];
+                const total = data.total || 0;
+
+                document.getElementById('usersTotalBadge').textContent = `${total} чел.`;
+
+                const from = total === 0 ? 0 : usersCurrentOffset + 1;
+                const to = Math.min(usersCurrentOffset + usersPageSize, total);
+                document.getElementById('usersShowing').textContent = `${from}–${to} из ${total}`;
+
+                const prevBtn = document.getElementById('usersPrevBtn');
+                const nextBtn = document.getElementById('usersNextBtn');
+                prevBtn.disabled = usersCurrentOffset === 0;
+                nextBtn.disabled = usersCurrentOffset + usersPageSize >= total;
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400"><i data-lucide="users" class="w-8 h-8 mx-auto mb-2"></i><p>Пользователи не найдены</p></td></tr>';
+                    lucide.createIcons();
+                    return;
+                }
+
+                tbody.innerHTML = users.map(u => {
+                    const safeName = escapeHtml(u.username);
+                    const safeEmail = escapeHtml(u.email);
+                    const initials = getUserInitials(u.username);
+                    const color = getAvatarColor(u.user_id);
+                    const dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—';
+
+                    return `<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td class="px-4 py-3 text-sm text-gray-400">${u.user_id}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 bg-${color}-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="text-sm font-medium text-${color}-600">${initials}</span>
+                                </div>
+                                <span class="font-medium text-gray-900">${safeName || '—'}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">${safeEmail || '—'}</td>
+                        <td class="px-4 py-3">${getRoleBadge(u.role)}</td>
+                        <td class="px-4 py-3 text-sm text-gray-500">${dateStr}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-1">
+                                <button onclick="openUserEdit(${u.user_id}, '${safeName.replace(/'/g, "\\'")}', '${safeEmail.replace(/'/g, "\\'")}', '${u.role || 'user'}')" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors" title="Редактировать">
+                                    <i data-lucide="edit" class="w-4 h-4 text-gray-600"></i>
+                                </button>
+                                <button onclick="deleteUser(${u.user_id}, '${safeName.replace(/'/g, "\\'")}')" class="p-1.5 hover:bg-red-50 rounded-lg transition-colors" title="Удалить">
+                                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+
+                lucide.createIcons();
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-red-500"><i data-lucide="alert-circle" class="w-6 h-6 mx-auto mb-2"></i><p>Ошибка загрузки: ${error.message}</p></td></tr>`;
+                lucide.createIcons();
+            }
+        }
+
+        window.openUserEdit = function(id, username, email, role) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRole').value = role;
+            const modal = document.getElementById('userEditModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        };
+
+        window.closeUserModal = function() {
+            const modal = document.getElementById('userEditModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.saveUser = async function(event) {
+            event.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const username = document.getElementById('editUsername').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const role = document.getElementById('editRole').value;
+
+            if (!username || !email) {
+                toastError('Имя и email обязательны');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, role })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    toastSuccess('Профиль обновлён');
+                    closeUserModal();
+                    loadUsers();
+                } else {
+                    toastError(data.error || 'Ошибка обновления');
+                }
+            } catch (e) {
+                toastError('Ошибка: ' + e.message);
+            }
+        };
+
+        window.deleteUser = async function(id, name) {
+            if (!confirm(`Удалить пользователя "${name}"? Это действие необратимо.`)) return;
+            try {
+                const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    toastSuccess('Пользователь удалён');
+                    loadUsers();
+                } else {
+                    const data = await res.json();
+                    toastError(data.error || 'Ошибка удаления');
+                }
+            } catch (e) {
+                toastError('Ошибка: ' + e.message);
+            }
+        };
+
+        window.usersPageChange = function(dir) {
+            usersCurrentOffset = Math.max(0, usersCurrentOffset + dir * usersPageSize);
+            loadUsers();
+        };
+
+        document.getElementById('userSearch')?.addEventListener('input', () => {
+            clearTimeout(usersSearchTimeout);
+            usersSearchTimeout = setTimeout(() => { usersCurrentOffset = 0; loadUsers(); }, 400);
+        });
+
+        document.getElementById('roleFilter')?.addEventListener('change', () => {
+            usersCurrentOffset = 0;
+            loadUsers();
+        });
+
+        document.querySelector('[data-tab="users"]')?.addEventListener('click', () => {
+            setTimeout(() => loadUsers(), 50);
+        });
+
         // Knowledge Base Management
         const AI_SERVICE_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:8000' 

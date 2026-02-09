@@ -24,6 +24,7 @@ app.use('/api/gallery', require('./src/routes/gallery'));
 app.use('/api/artworks', require('./src/routes/artworks'));
 app.use('/api/collections', require('./src/routes/collections'));
 app.use('/api/admin', require('./src/routes/admin'));
+app.use('/api/admin/users', require('./src/routes/users'));
 app.use('/api/watermark', require('./src/routes/watermark'));
 app.use('/api/archive', require('./src/routes/archive'));
 app.use('/api/display-settings', require('./src/routes/display-settings'));
