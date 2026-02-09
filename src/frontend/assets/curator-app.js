@@ -760,7 +760,7 @@
             document.getElementById('roomSettingsModal').classList.add('hidden');
         }
 
-        document.getElementById('saveRoomSettings')?.addEventListener('click', () => {
+        document.getElementById('saveRoomSettings')?.addEventListener('click', async () => {
             const activeRoomId = galleryConfig.currentRoom;
             if (!activeRoomId || !galleryConfig) return;
 
@@ -774,15 +774,25 @@
                 room.wallColor = document.getElementById('wallColor').value;
                 room.lighting = parseInt(document.getElementById('roomLighting').value);
                 
-                const roomItem = document.querySelector(`.room-item[data-room="${activeRoomId}"]`);
-                if (roomItem) {
-                    const nameEl = roomItem.querySelector('p.font-medium');
-                    if (nameEl) nameEl.textContent = room.name;
-                }
-                
-                toastSuccess('Настройки зала применены локально. Не забудьте сохранить конфигурацию галереи.');
                 closeRoomSettingsModal();
+                renderRoomsList();
                 renderRoomLayout();
+
+                try {
+                    const response = await fetch('/api/gallery/config', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(galleryConfig)
+                    });
+                    if (response.ok) {
+                        toastSuccess('Настройки зала сохранены');
+                    } else {
+                        toastError('Ошибка сохранения настроек зала');
+                    }
+                } catch (error) {
+                    console.error('Save room settings error:', error);
+                    toastError('Ошибка сохранения');
+                }
             }
         });
 
@@ -1372,6 +1382,8 @@
             setTimeout(() => loadGalleryConfig(), 100);
         });
 
+        loadGalleryConfig();
+
         function selectRoom(roomId) {
             galleryConfig.currentRoom = roomId;
             const room = galleryConfig.rooms.find(r => r.id === roomId);
@@ -1744,14 +1756,17 @@
                                 <p class="text-xs text-center mt-2 text-gray-700 truncate font-medium">${assignment.title || 'Без названия'}</p>
                                 <p class="text-[10px] text-center text-gray-400 truncate">${assignment.artist || ''}</p>
                             </div>
-                            <button onclick="event.stopPropagation(); removeSlotArtwork(${i})" class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Убрать экспонат">
-                                <i data-lucide="x" class="w-3 h-3"></i>
+                            <button onclick="event.stopPropagation(); removeSlotArtwork(${i})" class="absolute top-1 right-1 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm z-10" title="Убрать экспонат">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                             <span class="absolute bottom-1 left-1 text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">#${i + 1}</span>
                         </div>`;
                 } else {
                     html += `
-                        <div class="artwork-slot aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="${i}">
+                        <div class="artwork-slot relative aspect-[3/4] bg-white border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all" data-slot="${i}">
+                            <button onclick="event.stopPropagation(); deleteSlot(${i})" class="absolute top-1 right-1 p-1.5 bg-gray-200 hover:bg-red-500 text-gray-500 hover:text-white rounded-lg transition-colors z-10" title="Удалить слот #${i + 1}">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
                             <i data-lucide="plus" class="w-8 h-8 text-gray-400"></i>
                             <p class="text-xs text-gray-400 mt-2">Слот #${i + 1}</p>
                             <p class="text-[10px] text-gray-300 mt-0.5">Нажмите для выбора</p>
@@ -1786,6 +1801,38 @@
             delete room.artworkAssignments[slotIndex];
             renderRoomLayout();
             toastSuccess(`«${removed?.title || 'Экспонат'}» убран из слота #${slotIndex + 1}`);
+        }
+
+        function deleteSlot(slotIndex) {
+            const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
+            if (!room) return;
+
+            const slotsCount = parseInt(room.slots) || 0;
+            if (slotsCount <= 1) {
+                toastWarning('Нельзя удалить последний слот');
+                return;
+            }
+
+            if (room.artworkAssignments && room.artworkAssignments[slotIndex]) {
+                if (!confirm(`Слот #${slotIndex + 1} содержит экспонат. Удалить слот?`)) return;
+            }
+
+            if (room.artworkAssignments) {
+                const newAssignments = {};
+                for (let i = 0; i < slotsCount; i++) {
+                    if (i === slotIndex) continue;
+                    const newIdx = i < slotIndex ? i : i - 1;
+                    if (room.artworkAssignments[i]) {
+                        newAssignments[newIdx] = room.artworkAssignments[i];
+                    }
+                }
+                room.artworkAssignments = newAssignments;
+            }
+
+            room.slots = slotsCount - 1;
+            renderRoomsList();
+            renderRoomLayout();
+            toastSuccess(`Слот #${slotIndex + 1} удалён`);
         }
 
         function openSlotSelector(slotIndex) {
