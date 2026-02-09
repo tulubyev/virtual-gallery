@@ -52,7 +52,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, thumbnail_url, tags, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active')
        RETURNING *`,
-      [title || 'Untitled', artist || 'Unknown', year ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, thumbnailUrl || imageUrl, tags ? tags.split(',') : null]
+      [title || 'Untitled', artist || 'Unknown', year && !isNaN(parseInt(year)) ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, thumbnailUrl || imageUrl, tags ? tags.split(',') : null]
     );
 
     const artwork = result.rows[0];
