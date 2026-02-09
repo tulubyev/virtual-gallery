@@ -309,10 +309,10 @@
 
             <!-- Artworks -->
             <section id="artworks" class="tab-content">
-                <div class="mb-8 flex items-center justify-between">
+                <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Экспонаты</h1>
-                        <p class="text-gray-600">Управление коллекцией галереи</p>
+                        <h1 class="text-3xl font-display font-bold text-gray-900 mb-1">Экспонаты</h1>
+                        <p class="text-gray-600">Управление коллекцией галереи <span id="artworksTotalBadge" class="ml-2 text-sm bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium"></span></p>
                     </div>
                     <button id="addArtworkBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 transition-colors">
                         <i data-lucide="plus" class="w-4 h-4"></i>
@@ -320,40 +320,64 @@
                     </button>
                 </div>
 
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+                    <div class="flex flex-col lg:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="artworkSearch" placeholder="Поиск по названию или автору..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <select id="artworkStatusFilter" class="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">Все статусы</option>
+                        </select>
+                        <select id="artworkStyleFilter" class="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">Все стили</option>
+                        </select>
+                        <select id="artworkCountryFilter" class="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">Все страны</option>
+                        </select>
+                        <select id="artworkEpochFilter" class="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">Все эпохи</option>
+                        </select>
+                        <select id="artworkCollectionFilter" class="px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">Все коллекции</option>
+                        </select>
+                        <button id="artworkResetFilters" class="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors text-sm flex items-center gap-1">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Сброс
+                        </button>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Экспонат</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Автор</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Год</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Статус</th>
-                                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-600">Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody id="artworksTableBody">
-                            <tr class="border-b border-gray-50 hover:bg-gray-50">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-xl"></div>
-                                        <span class="font-medium text-gray-900">Звездная ночь</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-gray-600">Винсент Ван Гог</td>
-                                <td class="px-6 py-4 text-gray-600">1889</td>
-                                <td class="px-6 py-4">
-                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">Опубликован</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex gap-2">
-                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="eye" class="w-4 h-4 text-gray-600"></i></button>
-                                        <button class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="edit" class="w-4 h-4 text-gray-600"></i></button>
-                                        <button class="p-2 hover:bg-red-50 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4 text-red-600"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Экспонат</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Автор</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Стиль / Эпоха</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Коллекция</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Хранилище</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Статус</th>
+                                    <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="artworksTableBody">
+                                <tr><td colspan="7" class="px-6 py-12 text-center text-gray-400"><i data-lucide="loader-2" class="w-6 h-6 mx-auto mb-2 animate-spin"></i>Загрузка...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="artworksPagination" class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
+                        <span id="artworksPaginationInfo" class="text-sm text-gray-500"></span>
+                        <div class="flex gap-2">
+                            <button id="artworksPrevBtn" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <button id="artworksNextBtn" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 

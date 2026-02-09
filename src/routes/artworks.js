@@ -51,7 +51,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     const result = await pool.query(
       `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, thumbnail_url, tags, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active')
-       RETURNING artwork_id as id, title, artist_name as artist, image_url, thumbnail_url, status`,
+       RETURNING *`,
       [title || 'Untitled', artist || 'Unknown', year ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, thumbnailUrl || imageUrl, tags ? tags.split(',') : null]
     );
 
@@ -77,16 +77,89 @@ router.get('/random', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const { status, style, country, epoch, search, limit = 50, offset = 0 } = req.query;
-    let query = 'SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE 1=1';
+    const { status, style, country, epoch, collection, search, limit = 50, offset = 0 } = req.query;
+    let query = 'SELECT * FROM artworks WHERE 1=1';
+    let countQuery = 'SELECT COUNT(*)::int as total FROM artworks WHERE 1=1';
     const params = [];
+    const countParams = [];
     let idx = 1;
-    if (status) { query += ` AND status = $${idx++}`; params.push(status); }
-    if (search) { query += ` AND (LOWER(title) LIKE $${idx} OR LOWER(artist_name) LIKE $${idx})`; params.push(`%${search.toLowerCase()}%`); idx++; }
+    let cidx = 1;
+
+    if (status) {
+      query += ` AND status = $${idx++}`;
+      countQuery += ` AND status = $${cidx++}`;
+      params.push(status);
+      countParams.push(status);
+    }
+    if (style) {
+      query += ` AND style = $${idx++}`;
+      countQuery += ` AND style = $${cidx++}`;
+      params.push(style);
+      countParams.push(style);
+    }
+    if (country) {
+      query += ` AND country = $${idx++}`;
+      countQuery += ` AND country = $${cidx++}`;
+      params.push(country);
+      countParams.push(country);
+    }
+    if (epoch) {
+      query += ` AND epoch = $${idx++}`;
+      countQuery += ` AND epoch = $${cidx++}`;
+      params.push(epoch);
+      countParams.push(epoch);
+    }
+    if (collection) {
+      query += ` AND collection = $${idx++}`;
+      countQuery += ` AND collection = $${cidx++}`;
+      params.push(collection);
+      countParams.push(collection);
+    }
+    if (search) {
+      query += ` AND (LOWER(title) LIKE $${idx} OR LOWER(artist_name) LIKE $${idx})`;
+      countQuery += ` AND (LOWER(title) LIKE $${cidx} OR LOWER(artist_name) LIKE $${cidx})`;
+      params.push(`%${search.toLowerCase()}%`);
+      countParams.push(`%${search.toLowerCase()}%`);
+      idx++;
+      cidx++;
+    }
+
     query += ` ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx}`;
     params.push(parseInt(limit), parseInt(offset));
-    const result = await pool.query(query, params);
-    res.json({ success: true, artworks: result.rows });
+
+    const [result, countResult] = await Promise.all([
+      pool.query(query, params),
+      pool.query(countQuery, countParams)
+    ]);
+
+    res.json({
+      success: true,
+      artworks: result.rows,
+      total: countResult.rows[0].total,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/filters', async (req, res) => {
+  try {
+    const [styles, countries, epochs, collections, statuses] = await Promise.all([
+      pool.query("SELECT DISTINCT style FROM artworks WHERE style IS NOT NULL AND style != '' ORDER BY style"),
+      pool.query("SELECT DISTINCT country FROM artworks WHERE country IS NOT NULL AND country != '' ORDER BY country"),
+      pool.query("SELECT DISTINCT epoch FROM artworks WHERE epoch IS NOT NULL AND epoch != '' ORDER BY epoch"),
+      pool.query("SELECT DISTINCT a.collection, COALESCE(c.name, a.collection) as collection_name FROM artworks a LEFT JOIN collections c ON c.slug = a.collection WHERE a.collection IS NOT NULL AND a.collection != '' ORDER BY collection_name"),
+      pool.query("SELECT status, COUNT(*)::int as count FROM artworks GROUP BY status ORDER BY status")
+    ]);
+    res.json({
+      styles: styles.rows.map(r => r.style),
+      countries: countries.rows.map(r => r.country),
+      epochs: epochs.rows.map(r => r.epoch),
+      collections: collections.rows.map(r => ({ slug: r.collection, name: r.collection_name })),
+      statuses: statuses.rows
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
