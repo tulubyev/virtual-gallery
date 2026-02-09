@@ -778,21 +778,8 @@
                 renderRoomsList();
                 renderRoomLayout();
 
-                try {
-                    const response = await fetch('/api/gallery/config', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(galleryConfig)
-                    });
-                    if (response.ok) {
-                        toastSuccess('Настройки зала сохранены');
-                    } else {
-                        toastError('Ошибка сохранения настроек зала');
-                    }
-                } catch (error) {
-                    console.error('Save room settings error:', error);
-                    toastError('Ошибка сохранения');
-                }
+                clearTimeout(_saveTimer);
+                await saveGalleryConfigAction();
             }
         });
 
@@ -1448,7 +1435,10 @@
 
         function updateCurrentRoom(key, value) {
             const room = galleryConfig.rooms.find(r => r.id === galleryConfig.currentRoom);
-            if (room) room[key] = value;
+            if (room) {
+                room[key] = value;
+                autoSaveConfig();
+            }
         }
 
         document.getElementById('addRoomBtn')?.addEventListener('click', () => {
@@ -1468,6 +1458,7 @@
             galleryConfig.rooms.push(newRoom);
             renderRoomsList();
             selectRoom(newId);
+            autoSaveConfig();
         });
 
         function renderRoomsList() {
@@ -1553,6 +1544,7 @@
             galleryConfig.rooms[newIndex] = temp;
             
             renderRoomsList();
+            autoSaveConfig();
         }
         
         async function deleteRoom(roomId) {
@@ -1587,7 +1579,9 @@
             galleryConfig.rooms.splice(index, 1);
             
             galleryConfig.rooms.forEach(room => {
-                room.connections = room.connections.filter(c => c !== roomId);
+                if (room.connections) {
+                    room.connections = room.connections.filter(c => c !== roomId);
+                }
             });
             
             if (galleryConfig.currentRoom === roomId) {
@@ -1596,9 +1590,10 @@
             }
             
             renderRoomsList();
+            autoSaveConfig();
         }
 
-        async function saveGalleryConfigAction() {
+        async function saveGalleryConfigAction(silent = false) {
             try {
                 const response = await fetch('/api/gallery/config', {
                     method: 'POST',
@@ -1606,14 +1601,20 @@
                     body: JSON.stringify(galleryConfig)
                 });
                 if (response.ok) {
-                    toastSuccess('Конфигурация галереи сохранена!');
+                    if (!silent) toastSuccess('Конфигурация галереи сохранена!');
                 } else {
                     toastError('Ошибка сохранения конфигурации');
                 }
             } catch (error) {
                 console.error('Save config error:', error);
-                toastError('Ошибка сохранения');
+                if (!silent) toastError('Ошибка сохранения');
             }
+        }
+
+        let _saveTimer = null;
+        function autoSaveConfig() {
+            clearTimeout(_saveTimer);
+            _saveTimer = setTimeout(() => saveGalleryConfigAction(true), 800);
         }
 
         document.getElementById('saveGalleryConfig')?.addEventListener('click', saveGalleryConfigAction);
@@ -1654,6 +1655,7 @@
                 room.slots = (parseInt(room.slots) || 0) + 1;
                 renderRoomsList();
                 renderRoomLayout();
+                autoSaveConfig();
             }
         });
 
@@ -1671,6 +1673,7 @@
             room.slots = lastIndex;
             renderRoomsList();
             renderRoomLayout();
+            autoSaveConfig();
             toastSuccess(`Слот #${slotsCount} удалён`);
         });
 
@@ -1809,6 +1812,7 @@
             const removed = room.artworkAssignments[slotIndex];
             delete room.artworkAssignments[slotIndex];
             renderRoomLayout();
+            autoSaveConfig();
             toastSuccess(`«${removed?.title || 'Экспонат'}» убран из слота #${slotIndex + 1}`);
         }
 
@@ -1841,6 +1845,7 @@
             room.slots = slotsCount - 1;
             renderRoomsList();
             renderRoomLayout();
+            autoSaveConfig();
             toastSuccess(`Слот #${slotIndex + 1} удалён`);
         }
 
@@ -1977,6 +1982,7 @@
 
             closeSlotSelector();
             renderRoomLayout();
+            autoSaveConfig();
             toastSuccess(`«${artwork.title || 'Экспонат'}» размещён в слоте #${currentSlotIndex + 1}`);
         }
 
@@ -2029,6 +2035,7 @@
                         otherRoom.connections = otherRoom.connections.filter(c => c !== galleryConfig.currentRoom);
                     }
                     renderRoomConnections();
+                    autoSaveConfig();
                     toastSuccess('Связь удалена');
                 });
             });
@@ -2075,6 +2082,7 @@
                             if (!targetRoom.connections) targetRoom.connections = [];
                             targetRoom.connections.push(galleryConfig.currentRoom);
                             renderRoomConnections();
+                            autoSaveConfig();
                             toastSuccess(`Связь с залом "${targetRoom.name}" создана`);
                         }
                     });
