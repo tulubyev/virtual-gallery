@@ -77,6 +77,35 @@ router.get('/infra/status', async (req, res) => {
     results.services.storage = { status: 'disconnected', error: error.message };
   }
 
+  const qdrantUrl = process.env.QDRANT_URL;
+  const qdrantApiKey = process.env.QDRANT_API_KEY;
+  if (qdrantUrl) {
+    const startQdrant = Date.now();
+    try {
+      const headers = {};
+      if (qdrantApiKey) headers['api-key'] = qdrantApiKey;
+      const qdrantResponse = await fetch(`${qdrantUrl.replace(/\/$/, '')}/collections`, {
+        headers,
+        signal: createTimeout(5000)
+      });
+      results.services.qdrant = {
+        status: qdrantResponse.ok ? 'ok' : 'error',
+        latency: Date.now() - startQdrant
+      };
+    } catch (error) {
+      results.services.qdrant = { status: 'disconnected', error: error.message };
+    }
+  } else {
+    results.services.qdrant = { status: 'not_configured' };
+  }
+
+  const redisUrl = process.env.REDIS_URL || process.env.REDIS_HOST;
+  if (redisUrl) {
+    results.services.redis = { status: 'not_configured', note: 'Redis client not initialized in this service' };
+  } else {
+    results.services.redis = { status: 'not_configured' };
+  }
+
   res.json(results);
 });
 
