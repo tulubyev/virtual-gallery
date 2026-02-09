@@ -96,19 +96,22 @@
                 const data = await response.json();
                 
                 if (data.success && data.artworks.length > 0) {
-                    uploadHistory.innerHTML = data.artworks.map(artwork => `
-                        <div class="artwork-item flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-img-section="staff_list" data-id="${artwork.id}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artwork.artist || 'Неизвестный'}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-epoch="${artwork.epoch || ''}" data-description="${artwork.description || ''}">
+                    uploadHistory.innerHTML = data.artworks.map(artwork => {
+                        const artId = artwork.id || artwork.artwork_id;
+                        const artArtist = artwork.artist || artwork.artist_name || 'Неизвестный';
+                        return `
+                        <div class="artwork-item flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-img-section="staff_list" data-id="${artId}" data-image="${artwork.image_url}" data-title="${artwork.title}" data-artist="${artArtist}" data-year="${artwork.year_created || ''}" data-style="${artwork.style || ''}" data-country="${artwork.country || ''}" data-epoch="${artwork.epoch || ''}" data-description="${artwork.description || ''}">
                             <img src="${artwork.thumbnail_url || artwork.image_url}" class="w-12 h-12 object-cover rounded" alt="${artwork.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22>?</text></svg>'">
                             <div class="flex-1 min-w-0">
                                 <p class="font-medium text-gray-900 truncate">${artwork.title}</p>
-                                <p class="text-sm text-gray-500">${artwork.artist || 'Неизвестный'} ${artwork.year_created ? '• ' + artwork.year_created : ''}</p>
+                                <p class="text-sm text-gray-500">${artArtist} ${artwork.year_created ? '• ' + artwork.year_created : ''}</p>
                             </div>
                             <span class="px-2 py-1 text-xs rounded-full ${artwork.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${artwork.status}</span>
-                            <button class="edit-artwork-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-id="${artwork.id}" title="Редактировать">
+                            <button class="edit-artwork-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-id="${artId}" title="Редактировать">
                                 <i data-lucide="pencil" class="w-4 h-4"></i>
                             </button>
-                        </div>
-                    `).join('');
+                        </div>`;
+                    }).join('');
                     lucide.createIcons();
                     
                     document.querySelectorAll('.artwork-item').forEach(item => {

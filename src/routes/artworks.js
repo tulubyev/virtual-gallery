@@ -51,7 +51,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     const result = await pool.query(
       `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, thumbnail_url, tags, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'active')
-       RETURNING *`,
+       RETURNING *, artwork_id as id, artist_name as artist`,
       [title || 'Untitled', artist || 'Unknown', year && !isNaN(parseInt(year)) ? parseInt(year) : null, medium, dimensions, style, country, epoch, description, imageUrl, thumbnailUrl || imageUrl, tags ? tags.split(',') : null]
     );
 
@@ -78,7 +78,7 @@ router.get('/random', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { status, style, country, epoch, collection, search, limit = 50, offset = 0 } = req.query;
-    let query = 'SELECT * FROM artworks WHERE 1=1';
+    let query = 'SELECT *, artwork_id as id, artist_name as artist FROM artworks WHERE 1=1';
     let countQuery = 'SELECT COUNT(*)::int as total FROM artworks WHERE 1=1';
     const params = [];
     const countParams = [];
@@ -232,6 +232,11 @@ router.patch('/:id/status', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
+    const artworkId = req.params.id;
+    if (!artworkId || artworkId === 'undefined' || artworkId === 'null') {
+      return res.status(400).json({ error: 'Invalid artwork ID' });
+    }
+
     const { title, artist, style, period, technique, curator_notes, year, country, description, collection } = req.body;
 
     const setClauses = ['updated_at = NOW()'];
@@ -259,7 +264,7 @@ router.patch('/:id', async (req, res) => {
       return res.status(400).json({ error: 'No fields to update' });
     }
 
-    params.push(req.params.id);
+    params.push(artworkId);
     const result = await pool.query(
       `UPDATE artworks SET ${setClauses.join(', ')} WHERE artwork_id = $${idx} RETURNING *, artwork_id as id, artist_name as artist`,
       params
