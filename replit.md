@@ -63,6 +63,15 @@ The system uses JWT tokens for API authentication and implements role-based acce
 
 ## Recent Changes
 
+- **2026-02-09**: Расширенный раздел «Экспонаты» в админ-панели
+  - Реальные данные из БД вместо статического списка
+  - Поиск по названию/автору + 6 фильтров: статус, стиль, страна, эпоха, коллекция
+  - Пагинация с отображением «X–Y из Total»
+  - Определение типа хранения: S3 (Beget Cloud), локальное, внешний URL
+  - Отображение имён файлов из URL
+  - Новый эндпоинт `/api/artworks/filters` — уникальные значения для выпадающих списков
+  - Файлы: `src/routes/artworks.js`, `src/frontend/admin.html`, `src/frontend/assets/admin-app.js`
+
 - **2026-02-08**: Security dependency updates (AI/ML Service)
   - Updated `aiohttp` from 3.9.4 to 3.13.3
   - Updated `fastapi` from 0.109.0 to 0.115.8
