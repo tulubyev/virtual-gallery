@@ -5,30 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>О нас — Virtual Gallery Services</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'display': ['Playfair Display', 'serif'],
-                        'sans': ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'accent': {
-                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
-                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
-                            800: '#5b21b6', 900: '#4c1d95',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/assets/css/tailwind-output.css">
     <style>
         .hero-gradient { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a78bfa 100%); }
     </style>
@@ -40,7 +21,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                         <i data-lucide="palette" class="w-5 h-5 text-white"></i>
                     </div>
                     <h1 class="text-lg font-display font-bold text-gray-900">Virtual Gallery Services</h1>
@@ -50,9 +31,9 @@
                     <a href="/auction" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Аукцион</a>
                     <a href="/artwiki.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">ArtWiki</a>
                     <a href="/rag.html" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">RAG</a>
-                    <a href="/about.html" class="text-accent-600 font-medium">О нас</a>
+                    <a href="/about.html" class="text-violet-600 font-medium">О нас</a>
                 </nav>
-                <a href="/" class="bg-accent-600 hover:bg-accent-700 text-white px-5 py-2 rounded-xl font-medium transition-colors">На главную</a>
+                <a href="/" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-xl font-medium transition-colors">На главную</a>
             </div>
         </div>
     </header>
@@ -113,8 +94,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
-                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="image" class="w-6 h-6 text-accent-600"></i>
+                    <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="image" class="w-6 h-6 text-violet-600"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Оцифровка произведений</h3>
@@ -122,8 +103,8 @@
                     </div>
                 </div>
                 <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
-                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="layout" class="w-6 h-6 text-accent-600"></i>
+                    <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="layout" class="w-6 h-6 text-violet-600"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Создание виртуальных залов</h3>
@@ -131,8 +112,8 @@
                     </div>
                 </div>
                 <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
-                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="users" class="w-6 h-6 text-accent-600"></i>
+                    <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="users" class="w-6 h-6 text-violet-600"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Курирование и модерация</h3>
@@ -140,8 +121,8 @@
                     </div>
                 </div>
                 <div class="flex gap-5 p-6 bg-gray-50 rounded-2xl">
-                    <div class="w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i data-lucide="shield-check" class="w-6 h-6 text-accent-600"></i>
+                    <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-violet-600"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Защита авторских прав</h3>
@@ -155,13 +136,13 @@
     <!-- CTA -->
     <section class="py-16 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-gradient-to-br from-accent-600 to-purple-700 rounded-3xl p-10 lg:p-16 text-center text-white">
+            <div class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-3xl p-10 lg:p-16 text-center text-white">
                 <h2 class="text-3xl lg:text-4xl font-display font-bold mb-4">Хотите разместить свои работы?</h2>
                 <p class="text-lg text-purple-100 max-w-2xl mx-auto mb-8">
                     Мы поможем оцифровать ваши произведения, создать виртуальную галерею и открыть доступ к ним для зрителей со всего мира.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="/gallery-3d" class="bg-white text-accent-700 hover:bg-purple-50 px-8 py-3 rounded-xl font-semibold transition-colors">
+                    <a href="/gallery-3d" class="bg-white text-violet-700 hover:bg-purple-50 px-8 py-3 rounded-xl font-semibold transition-colors">
                         Посмотреть галерею
                     </a>
                     <a href="mailto:info@virtgal.ru" class="border-2 border-white/30 hover:bg-white/10 text-white px-8 py-3 rounded-xl font-semibold transition-colors">
@@ -178,7 +159,7 @@
             <div class="flex justify-between items-start">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-accent-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                             <i data-lucide="palette" class="w-5 h-5 text-white"></i>
                         </div>
                         <span class="text-xl font-display font-bold text-white truncate">Virtual Gallery Services</span>

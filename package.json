@@ -16,7 +16,9 @@
     "init-s3": "node scripts/initS3Bucket.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "build:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --minify",
+    "watch:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --watch"
   },
   "keywords": [
     "virtual-reality",
