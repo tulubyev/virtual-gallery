@@ -11,7 +11,7 @@ packages = ["cargo", "freetype", "imagemagick", "lcms2", "libiconv", "libimagequ
 
 [deployment]
 run = ["node", "server.js"]
-deploymentTarget = "autoscale"
+deploymentTarget = "vm"
 ignorePorts = false
 build = ["npm", "run", "build"]
 
