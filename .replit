@@ -46,10 +46,18 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5904
+externalPort = 3000
+
 [userenv]
 
 [userenv.production]
-DB_STRING = "postgres://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/virtual_gallery_db"
 S3_ENDPOINT = "https://s3.ru1.storage.beget.cloud"
 S3_BUCKET = "0a011f8d633a-gifted-saul"
 S3_REGION = "ru-msk"
+DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_gallery_db"
+
+[userenv.development]
+DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_gallery_db"
+DB_HOST = "62.217.178.173"
