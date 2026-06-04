@@ -6,6 +6,11 @@ export default defineConfig({
   plugins: [react()],
   root: 'src/frontend',
   base: '/',
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
+    'process.env': JSON.stringify({}),
+    'process.browser': JSON.stringify(true),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src/frontend'),
