@@ -29,6 +29,23 @@ const ArtWikiPage = lazy(() => import('./pages/ArtWikiPage'));
 const RAGPage = lazy(() => import('./pages/RAGPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
+// Prefetch high-traffic route chunks after the page is interactive so
+// subsequent navigations hit the browser cache instead of waiting on a fetch.
+const prefetchHighTrafficRoutes = () => {
+  const prefetch = () => {
+    import('./pages/ArtworksPage');
+    import('./pages/VirtualGalleryPage');
+    import('./pages/GalleriesListPage');
+    import('./pages/LoginPage');
+  };
+
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(prefetch, { timeout: 3000 });
+  } else {
+    setTimeout(prefetch, 200);
+  }
+};
+
 // Компоненты
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -56,6 +73,7 @@ const App: React.FC = () => {
     if (token) {
       // fetchUserData(token);
     }
+    prefetchHighTrafficRoutes();
     return () => { newSocket.close(); };
   }, []);
 
