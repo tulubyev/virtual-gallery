@@ -38,8 +38,8 @@ const App: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    // Инициализация сокета
-    const newSocket = io('http://localhost:5000');
+    // Инициализация сокета — используем относительный URL чтобы работало через прокси
+    const newSocket = io(window.location.origin, { path: '/socket.io' });
     setSocket(newSocket);
 
     // Проверка аутентификации при загрузке

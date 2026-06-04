@@ -25,9 +25,15 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      input: path.resolve(__dirname, 'react-app.html'),
       output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks: {
           vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
         }
       }
     }
