@@ -46,7 +46,6 @@ export default defineConfig({
           'vendor-three': ['three'],
           'vendor-motion': ['framer-motion'],
           'vendor-socket': ['socket.io-client'],
-          'vendor-icons': ['lucide-react'],
           'vendor-http': ['axios'],
         },
       }
