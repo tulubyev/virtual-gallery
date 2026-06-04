@@ -12,16 +12,16 @@ async function checkUserRole() {
   });
 
   try {
-    console.log('Проверка роли пользователя admin@virtgal.ru...');
+    console.log('Проверка роли пользователя admin@example.com...');
     const client = await pool.connect();
 
-    const result = await client.query('SELECT user_id, username, email, role FROM users WHERE email = $1', ['admin@virtgal.ru']);
+    const result = await client.query('SELECT user_id, username, email, role FROM users WHERE email = $1', ['admin@example.com']);
     
     if (result.rows.length > 0) {
       const user = result.rows[0];
       console.log('Найден пользователь:', user);
     } else {
-      console.log('Пользователь admin@virtgal.ru не найден в базе данных');
+      console.log('Пользователь admin@example.com не найден в базе данных');
     }
 
     client.release();

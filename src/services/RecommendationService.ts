@@ -1,74 +1,91 @@
+// src/services/RecommendationService.ts
 import { Pool } from 'pg';
-import { IRecommendationEngine } from '../types/ai';
+import { BaseService } from './BaseService';
+import { IRecommendationEngine, Artwork, InteractionType } from '../types/index';
 import { ILogger, ICacheable } from '../types/interfaces';
 
-export class RecommendationService implements IRecommendationEngine {
+export class RecommendationService extends BaseService implements IRecommendationEngine {
   private pool: Pool;
-  private logger: ILogger;
-  private cache: ICacheable;
 
-  constructor(pool: Pool, logger: ILogger, cache: ICacheable) {
+  constructor(
+    pool: Pool,
+    logger: ILogger,
+    cache?: ICacheable
+  ) {
+    super(logger, cache);
     this.pool = pool;
-    this.logger = logger;
-    this.cache = cache;
   }
+  async getRecommendations(userId: string, count: number = 5): Promise<Artwork[]> {
+    const cacheKey = `recommendations:${userId}:${count}`;
 
-  async getRecommendations(userId: string, limit: number = 10): Promise<any[]> {
-    const cacheKey = `recommendations:${userId}:${limit}`;
-    const cached = await this.cache.get<any[]>(cacheKey);
-    if (cached) return cached;
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would use AI/ML models to generate recommendations
+      // based on user preferences, history, and artwork characteristics
 
-    try {
-      const result = await this.pool.query(
-        `SELECT a.* FROM artworks a
-         LEFT JOIN user_interactions ui ON a.id = ui.artwork_id AND ui.user_id = $1
-         WHERE ui.id IS NULL
-         ORDER BY RANDOM()
-         LIMIT $2`,
-        [userId, limit]
-      );
-      
-      const recommendations = result.rows;
-      await this.cache.set(cacheKey, recommendations, 1800);
-      return recommendations;
-    } catch (error) {
-      this.logger.error('Error getting recommendations', error as Error);
-      throw error;
-    }
-  }
-
-  async getSimilarArtworks(artworkId: string, limit: number = 5): Promise<any[]> {
-    const cacheKey = `similar:${artworkId}:${limit}`;
-    const cached = await this.cache.get<any[]>(cacheKey);
-    if (cached) return cached;
-
-    try {
-      const artworkResult = await this.pool.query(
-        'SELECT artist, style, medium FROM artworks WHERE id = $1',
-        [artworkId]
-      );
-      
-      if (artworkResult.rows.length === 0) {
-        return [];
+      // For demonstration purposes, we'll return random artworks
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(
+          `SELECT * FROM artworks
+           ORDER BY RANDOM()
+           LIMIT $1`,
+          [count]
+        );
+        return result.rows;
+      } finally {
+        client.release();
       }
+    }, 1800); // 30 minutes
+  }
 
-      const artwork = artworkResult.rows[0];
-      
-      const result = await this.pool.query(
-        `SELECT * FROM artworks 
-         WHERE id != $1 
-         AND (artist = $2 OR style = $3 OR medium = $4)
-         ORDER BY RANDOM()
-         LIMIT $5`,
-        [artworkId, artwork.artist, artwork.style, artwork.medium, limit]
-      );
-      
-      const similar = result.rows;
-      await this.cache.set(cacheKey, similar, 3600);
-      return similar;
-    } catch (error) {
-      this.logger.error('Error getting similar artworks', error as Error);
-      throw error;
+  async getSimilarArtworks(artworkId: string, count: number = 5): Promise<Artwork[]> {
+    const cacheKey = `similar:${artworkId}:${count}`;
+
+    return this.withCache(cacheKey, async () => {
+      // In a real implementation, this would use AI/ML models to find similar artworks
+      // based on visual features, style, tags, etc.
+
+      // For demonstration, we'll return random artworks
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(
+          `SELECT * FROM artworks
+           WHERE artwork_id != $1
+           ORDER BY RANDOM()
+           LIMIT $2`,
+          [artworkId, count]
+        );
+        return result.rows;
+      } finally {
+        client.release();
+      }
+    }, 1800); // 30 minutes
+  }
+
+  async updateModel(userId: string, artworkId: string, interaction: InteractionType): Promise<void> {
+    // In a real implementation, this would update the recommendation model
+    // with new interaction data to improve future recommendations
+    this.logger.info('Updating recommendation model', { userId, artworkId, interaction });
+
+    // Invalidate user's recommendations cache
+    if (this.cache) {
+      await this.cache.delete(`recommendations:${userId}:*`);
     }
+  }
+
+  async retrainModel(): Promise<void> {
+    // In a real implementation, this would retrain the recommendation model
+    // with all available data
+    this.logger.info('Retraining recommendation model');
+  }
+
+  async initialize(): Promise<void> {
+    await super.initialize();
+    this.logger.info('RecommendationService initialized');
+  }
+
+  async dispose(): Promise<void> {
+    this.logger.info('RecommendationService disposed');
+    await super.dispose();
   }
 }

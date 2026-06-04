@@ -72,150 +72,27 @@ class AiController {
     }
   }
 
-  // Анализировать изображение экспоната через AI/ML сервис
+  // Анализировать изображение экспоната
   async analyzeImage(req: Request, res: Response): Promise<void> {
     try {
-      const { imageUrl, artworkId } = req.body;
+      const { artworkId } = req.params;
+      const imageUrl = req.body.imageUrl;
 
       if (!imageUrl) {
         res.status(400).json({ error: 'URL изображения обязателен' });
         return;
       }
 
-      // Вызов внешнего AI/ML сервиса
-      const aiServiceUrl = process.env.AI_CORE_URL || 'http://localhost:8001';
-
-      const response = await fetch(`${aiServiceUrl}/api/v1/images/analyze`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image_url: imageUrl,
-          artwork_id: artworkId,
-          user_id: (req as any).userId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`AI service error: ${response.status}`);
+      // Initialize the artwork analyzer if not already done
+      if (!this.artworkAnalyzer.isTrained) {
+        await this.artworkAnalyzer.initialize();
       }
 
-      const result = await response.json();
-      res.json(result);
+      // Use the new analyzeArtwork method
+      const analysis = await this.artworkAnalyzer.analyzeArtwork(imageUrl);
 
+      res.json(analysis);
     } catch (error: any) {
-      this.logger.error('Image analysis failed', error);
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  // Обработать PDF документ
-  async processPdf(req: Request, res: Response): Promise<void> {
-    try {
-      const { pdfUrl, documentId } = req.body;
-
-      if (!pdfUrl || !documentId) {
-        res.status(400).json({ error: 'URL PDF и documentId обязательны' });
-        return;
-      }
-
-      const aiServiceUrl = process.env.AI_CORE_URL || 'http://localhost:8001';
-
-      const response = await fetch(`${aiServiceUrl}/api/v1/pdfs/process`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pdf_url: pdfUrl,
-          document_id: documentId,
-          user_id: (req as any).userId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`AI service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      res.json(result);
-
-    } catch (error: any) {
-      this.logger.error('PDF processing failed', error);
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  // Обработать RAG запрос
-  async ragQuery(req: Request, res: Response): Promise<void> {
-    try {
-      const { query, contextLimit, filters } = req.body;
-
-      if (!query) {
-        res.status(400).json({ error: 'Query обязателен' });
-        return;
-      }
-
-      const aiServiceUrl = process.env.AI_CORE_URL || 'http://localhost:8001';
-
-      const response = await fetch(`${aiServiceUrl}/api/v1/rag/query`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: query,
-          context_limit: contextLimit || 5,
-          context: {
-            user_id: (req as any).userId,
-            filters: filters || {}
-          }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`AI service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      res.json(result);
-
-    } catch (error: any) {
-      this.logger.error('RAG query failed', error);
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  // Получить статус анализа
-  async getAnalysisStatus(req: Request, res: Response): Promise<void> {
-    try {
-      const { taskId } = req.params;
-      const { type } = req.query; // 'image' or 'pdf'
-
-      if (!taskId) {
-        res.status(400).json({ error: 'taskId обязателен' });
-        return;
-      }
-
-      const aiServiceUrl = process.env.AI_CORE_URL || 'http://localhost:8001';
-      const endpoint = type === 'pdf' ? 'pdfs' : 'images';
-
-      const response = await fetch(`${aiServiceUrl}/api/v1/${endpoint}/analysis/${taskId}`);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          res.status(404).json({ error: 'Task not found' });
-          return;
-        }
-        throw new Error(`AI service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      res.json(result);
-
-    } catch (error: any) {
-      this.logger.error('Get analysis status failed', error);
       res.status(500).json({ error: error.message });
     }
   }

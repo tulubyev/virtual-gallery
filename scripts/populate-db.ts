@@ -25,31 +25,31 @@ async function populateDatabase() {
     const testUsers = [
       {
         username: 'admin_user',
-        email: 'admin@virtgal.ru',
+        email: 'admin@example.com',
         password_hash: hashedPassword,
         preferences: JSON.stringify({ role: 'admin', first_name: 'Админ', last_name: 'Главный' })
       },
       {
         username: 'curator_user',
-        email: 'curator@virtgal.ru',
+        email: 'curator@example.com',
         password_hash: hashedPassword,
         preferences: JSON.stringify({ role: 'curator', first_name: 'Куратор', last_name: 'Искусства' })
       },
       {
         username: 'staff_user',
-        email: 'staff@virtgal.ru',
+        email: 'staff@example.com',
         password_hash: hashedPassword,
         preferences: JSON.stringify({ role: 'staff', first_name: 'Сотрудник', last_name: 'Галереи' })
       },
       {
         username: 'tour_guide_user',
-        email: 'tourguide@virtgal.ru',
+        email: 'tourguide@example.com',
         password_hash: hashedPassword,
         preferences: JSON.stringify({ role: 'tour_guide', first_name: 'Гид', last_name: 'Экскурсовод' })
       },
       {
         username: 'auction_participant_user',
-        email: 'auction@virtgal.ru',
+        email: 'auction@example.com',
         password_hash: hashedPassword,
         preferences: JSON.stringify({ role: 'auction_participant', first_name: 'Участник', last_name: 'Аукциона' })
       }
@@ -150,11 +150,11 @@ async function populateDatabase() {
     
     console.log('\nТестовые данные успешно добавлены!');
     console.log('\nТестовые учетные записи:');
-    console.log('Администратор: admin@virtgal.ru / password123');
-    console.log('Куратор: curator@virtgal.ru / password123');
-    console.log('Сотрудник: staff@virtgal.ru / password123');
-    console.log('Гид: tourguide@virtgal.ru / password123');
-    console.log('Участник аукциона: auction@virtgal.ru / password123');
+    console.log('Администратор: admin@example.com / password123');
+    console.log('Куратор: curator@example.com / password123');
+    console.log('Сотрудник: staff@example.com / password123');
+    console.log('Гид: tourguide@example.com / password123');
+    console.log('Участник аукциона: auction@example.com / password123');
   } catch (err) {
     console.error('Ошибка при заполнении базы данных:', err);
   } finally {
