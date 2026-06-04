@@ -1,110 +1,52 @@
 import React from 'react';
-import { Github, Globe, Mail, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Palette, Twitter, Instagram, Youtube } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-background border-t">
-      <div className="container py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-gray-900 text-white py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+
+          {/* Logo */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Globe className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">Виртуальная галерея</span>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Palette className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">Virtual Gallery Services</span>
             </div>
-            <p className="text-muted-foreground text-sm">
-              Современная платформа для просмотра и управления коллекциями произведений искусства в виртуальной среде.
-            </p>
+            <nav className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+              {[
+                { label: 'Галерея', to: '/galleries' },
+                { label: 'Аукцион', to: '/auction' },
+                { label: 'ArtWiki', to: '/artwiki' },
+                { label: 'RAG', to: '/rag' },
+                { label: 'О нас', to: '/about' },
+              ].map(l => (
+                <Link key={l.to} to={l.to} className="text-gray-400 hover:text-white text-sm transition-colors">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Навигация</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Главная
-                </Link>
-              </li>
-              <li>
-                <Link to="/galleries" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Галереи
-                </Link>
-              </li>
-              <li>
-                <Link to="/artworks" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Экспонаты
-                </Link>
-              </li>
-              <li>
-                <Link to="/tours" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Виртуальные туры
-                </Link>
-              </li>
-            </ul>
+          {/* Right side */}
+          <div className="flex flex-col items-start sm:items-end gap-3">
+            <div className="flex items-center gap-3">
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                <Twitter className="h-5 w-5 text-gray-400" />
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                <Instagram className="h-5 w-5 text-gray-400" />
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                <Youtube className="h-5 w-5 text-gray-400" />
+              </a>
+            </div>
+            <p className="text-gray-500 text-sm">© 2026 Virtual Art Gallery.</p>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Поддержка</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/help" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Помощь
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Частые вопросы
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Контакты
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-                  Конфиденциальность
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Контакты</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Mail className="h-4 w-4" />
-                <span>info@virtualgallery.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Phone className="h-4 w-4" />
-                <span>+7 (XXX) XXX-XX-XX</span>
-              </li>
-              <li className="flex items-center gap-2 text-muted-foreground text-sm">
-                <MapPin className="h-4 w-4" />
-                <span>Москва, ул. Искусств, 15</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                  <Github className="h-5 w-5" />
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Виртуальная галерея искусств. Все права защищены.
-          </p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link to="/terms" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-              Условия использования
-            </Link>
-            <Link to="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-              Политика конфиденциальности
-            </Link>
-          </div>
         </div>
       </div>
     </footer>
