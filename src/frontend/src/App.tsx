@@ -73,7 +73,7 @@ const App: React.FC = () => {
       <div className="flex flex-col min-h-screen bg-background">
         <Header currentUser={currentUser} onLogout={logout} />
         <div className="flex flex-1">
-          <main className="flex-1 p-4 md:p-6">
+          <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/artworks" element={<ArtworksPage />} />
