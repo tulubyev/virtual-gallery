@@ -536,31 +536,34 @@
         const processPdfBtn = document.getElementById('process-pdf-btn');
         const processText = document.getElementById('process-text');
 
-        pdfDropZone.addEventListener('click', () => pdfUpload.click());
-        pdfDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            pdfDropZone.classList.add('border-green-400', 'bg-green-50');
-        });
-        pdfDropZone.addEventListener('dragleave', () => {
-            pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
-        });
-        pdfDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && files[0].type === 'application/pdf') {
-                handlePdfSelect(files[0]);
-            }
-        });
+        if (pdfDropZone && pdfUpload) {
+            pdfDropZone.addEventListener('click', () => pdfUpload.click());
+            pdfDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                pdfDropZone.classList.add('border-green-400', 'bg-green-50');
+            });
+            pdfDropZone.addEventListener('dragleave', () => {
+                pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
+            });
+            pdfDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pdfDropZone.classList.remove('border-green-400', 'bg-green-50');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    handlePdfSelect(files[0]);
+                }
+            });
 
-        pdfUpload.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handlePdfSelect(e.target.files[0]);
-            }
-        });
+            pdfUpload.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handlePdfSelect(e.target.files[0]);
+                }
+            });
+        }
 
         function handlePdfSelect(file) {
             selectedPdfFile = file;
+            if (!pdfDropZone) return;
             pdfDropZone.innerHTML = `
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="file-check" class="w-8 h-8 text-green-600"></i>
@@ -574,7 +577,8 @@
 
         function clearPdfSelection() {
             selectedPdfFile = null;
-            pdfUpload.value = '';
+            if (pdfUpload) pdfUpload.value = '';
+            if (!pdfDropZone) return;
             pdfDropZone.innerHTML = `
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="file-plus" class="w-8 h-8 text-green-600"></i>
@@ -586,46 +590,48 @@
             lucide.createIcons();
         }
 
-        processPdfBtn.addEventListener('click', async () => {
-            if (!selectedPdfFile) {
-                toastWarning('Пожалуйста, выберите PDF файл');
-                return;
-            }
-
-            const category = document.getElementById('pdf-category').value;
-            processText.textContent = 'Обработка...';
-            processPdfBtn.disabled = true;
-
-            try {
-                const documentId = 'doc_' + Date.now();
-                const pdfUrl = URL.createObjectURL(selectedPdfFile);
-
-                const response = await fetch('/api/ai/process-pdf', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        pdfUrl: pdfUrl,
-                        documentId: documentId,
-                        category: category
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    toastSuccess('Документ успешно отправлен на обработку! ID: ' + documentId);
-                    clearPdfSelection();
-                } else {
-                    const hint = data.hint ? '\n\nПодсказка: ' + data.hint : '';
-                    toastError('Ошибка: ' + (data.error || 'Неизвестная ошибка') + hint);
+        if (processPdfBtn) {
+            processPdfBtn.addEventListener('click', async () => {
+                if (!selectedPdfFile) {
+                    toastWarning('Пожалуйста, выберите PDF файл');
+                    return;
                 }
-            } catch (error) {
-                toastWarning('AI/ML сервис недоступен. В демо-режиме документы не обрабатываются.');
-            } finally {
-                processText.textContent = 'Обработать документ';
-                processPdfBtn.disabled = false;
-            }
-        });
+
+                const category = document.getElementById('pdf-category') ? document.getElementById('pdf-category').value : 'general';
+                if (processText) processText.textContent = 'Обработка...';
+                processPdfBtn.disabled = true;
+
+                try {
+                    const documentId = 'doc_' + Date.now();
+                    const pdfUrl = URL.createObjectURL(selectedPdfFile);
+
+                    const response = await fetch('/api/ai/process-pdf', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            pdfUrl: pdfUrl,
+                            documentId: documentId,
+                            category: category
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        toastSuccess('Документ успешно отправлен на обработку! ID: ' + documentId);
+                        clearPdfSelection();
+                    } else {
+                        const hint = data.hint ? '\n\nПодсказка: ' + data.hint : '';
+                        toastError('Ошибка: ' + (data.error || 'Неизвестная ошибка') + hint);
+                    }
+                } catch (error) {
+                    toastWarning('AI/ML сервис недоступен. В демо-режиме документы не обрабатываются.');
+                } finally {
+                    if (processText) processText.textContent = 'Обработать документ';
+                    processPdfBtn.disabled = false;
+                }
+            });
+        }
 
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
