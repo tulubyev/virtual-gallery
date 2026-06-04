@@ -1,20 +1,13 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   GalleryVerticalEnd,
-  Users,
-  Eye,
-  Heart,
   Star,
-  Calendar,
-  Award,
-  TrendingUp,
-  MessageCircle,
   DollarSign,
-  Clock,
   Timer,
-  Gavel
+  Users,
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Tag } from "@/components/ui/tag";
@@ -100,7 +93,7 @@ const ArtAuctionCard: React.FC<ArtAuctionCardProps> = ({
           <div>
             <h3 className="font-semibold text-lg">{title}</h3>
             <div className="flex items-center gap-2 mt-1">
-              <User className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Автор: {artist}</span>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{description}</p>

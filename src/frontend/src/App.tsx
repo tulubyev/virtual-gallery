@@ -1,7 +1,7 @@
 // src/frontend/src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 // Страницы
 import HomePage from './pages/HomePage';
@@ -38,12 +38,10 @@ import { User } from './types';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     // Инициализация сокета — используем относительный URL чтобы работало через прокси
     const newSocket = io(window.location.origin, { path: '/socket.io' });
-    setSocket(newSocket);
 
     // Проверка аутентификации при загрузке
     const token = localStorage.getItem('authToken');

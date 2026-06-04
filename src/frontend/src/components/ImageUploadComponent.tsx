@@ -88,21 +88,6 @@ const RemoveButton = styled.button`
   justify-content: center;
 `;
 
-const ProgressBar = styled.div`
-  width: 100%;
-  height: 8px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 1rem;
-`;
-
-const ProgressFill = styled.div<{ percentage: number }>`
-  height: 100%;
-  width: ${({ percentage }) => `${percentage}%`};
-  background-color: #6200ee;
-  transition: width 0.3s ease;
-`;
 
 interface ImageUploadComponentProps {
   onUploadComplete: (upload: any) => void;

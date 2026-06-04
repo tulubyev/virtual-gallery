@@ -57,22 +57,34 @@ const RoomDisplay: React.FC<{ room: Room }> = ({ room }) => {
           {/* Здесь будут карточки экспонатов, размещенные в этом зале */}
           <ArtworkCard 
             artwork={{
+              id: '1',
               artwork_id: 1,
               title: "Пример экспоната",
+              artist: "Известный художник",
               artist_name: "Известный художник",
+              year: 2024,
               description: "Описание экспоната в этом зале",
-              tags: [room.theme],
+              imageUrl: '',
+              tags: room.theme ? [room.theme] : [],
+              likes: 0, views: 0, rating: 0, galleryId: '', roomId: '',
+              coordinates: { x: 0, y: 0, z: 0 },
               created_at: new Date(),
               updated_at: new Date()
             }}
           />
           <ArtworkCard 
             artwork={{
+              id: '2',
               artwork_id: 2,
               title: "Еще один экспонат",
+              artist: "Другой художник",
               artist_name: "Другой художник",
+              year: 2024,
               description: "Еще один экспонат в этом зале",
-              tags: [room.theme],
+              imageUrl: '',
+              tags: room.theme ? [room.theme] : [],
+              likes: 0, views: 0, rating: 0, galleryId: '', roomId: '',
+              coordinates: { x: 0, y: 0, z: 0 },
               created_at: new Date(),
               updated_at: new Date()
             }}

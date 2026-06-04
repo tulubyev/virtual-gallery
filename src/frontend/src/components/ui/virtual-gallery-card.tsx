@@ -1,18 +1,11 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  GalleryVerticalEnd,
   Users,
   Eye,
-  Heart,
   Star,
-  Calendar,
-  MapPin,
-  Award,
-  TrendingUp,
-  MessageCircle,
-  Cube,
+  Box,
   Headphones
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -68,7 +61,7 @@ const VirtualGalleryCard: React.FC<VirtualGalleryCardProps> = ({
           />
         ) : (
           <div className="w-full aspect-video bg-muted flex items-center justify-center">
-            <Cube className="h-16 w-16 text-primary/20" />
+            <Box className="h-16 w-16 text-primary/20" />
           </div>
         )}
       </div>

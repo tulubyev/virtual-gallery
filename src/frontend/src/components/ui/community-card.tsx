@@ -1,16 +1,9 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Users,
-  MessageCircle,
-  GalleryVerticalEnd,
-  Heart,
-  Eye,
   Star,
-  Calendar,
-  Award,
-  TrendingUp
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Tag } from "@/components/ui/tag";
@@ -119,7 +112,7 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
       
       <CardFooter className="flex flex-col gap-2 pt-0">
         <Button className="w-full" onClick={onJoin}>
-          <User className="h-4 w-4 mr-2" />
+          <Users className="h-4 w-4 mr-2" />
           Присоединиться
         </Button>
         <Button variant="outline" className="w-full" onClick={onView}>

@@ -4,17 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
-  Eye, 
   Heart, 
-  Calendar, 
   GalleryVerticalEnd, 
   Image, 
   Star,
   Activity,
   BarChart3,
-  MessageSquare,
   AlertTriangle,
-  CheckCircle,
   Clock,
   TrendingUp
 } from 'lucide-react';

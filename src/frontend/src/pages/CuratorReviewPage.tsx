@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageProcessingService } from '../services';
 import ArtworkAnalysisResult from '../components/ArtworkAnalysisResult';
-import { ArtworkSubmission, Artwork } from '../types';
+import { ArtworkSubmission } from '../types';
 
 const PageContainer = styled.div`
   max-width: 1200px;
@@ -140,8 +140,8 @@ const CuratorReviewPage: React.FC = () => {
 
     try {
       // В реальной реализации здесь будет отправка данных на сервер
-      await imageProcessingService.approveSubmission(selectedSubmission.submission_id, {
-        ...selectedSubmission.artwork_upload.artwork_data,
+      await imageProcessingService.approveSubmission(selectedSubmission.submission_id!, {
+        ...selectedSubmission.artwork_upload?.artwork_data,
         status: 'published',
         reviewed_by: 1, // В реальной реализации это будет ID текущего пользователя
         reviewed_at: new Date()
@@ -169,12 +169,12 @@ const CuratorReviewPage: React.FC = () => {
 
     try {
       // В реальной реализации здесь будет отправка данных на сервер
-      await imageProcessingService.rejectSubmission(selectedSubmission.submission_id, reviewNotes);
+      await imageProcessingService.rejectSubmission(selectedSubmission.submission_id!, reviewNotes);
 
       // Обновляем статус в локальном состоянии
       setSubmissions(prev => prev.map(sub => 
         sub.submission_id === selectedSubmission.submission_id 
-          ? { ...sub, status: 'rejected', reviewer_notes: reviewNotes } 
+          ? { ...sub, status: 'rejected' as const, reviewer_notes: reviewNotes } 
           : sub
       ));
       
@@ -193,7 +193,7 @@ const CuratorReviewPage: React.FC = () => {
 
     try {
       // В реальной реализации здесь будет отправка данных на сервер
-      await imageProcessingService.rejectSubmission(selectedSubmission.submission_id, reviewNotes);
+      await imageProcessingService.rejectSubmission(selectedSubmission.submission_id!, reviewNotes);
 
       // Обновляем статус в локальном состоянии
       setSubmissions(prev => prev.map(sub => 
@@ -234,11 +234,11 @@ const CuratorReviewPage: React.FC = () => {
           <tbody>
             {submissions.map(submission => (
               <tr key={submission.submission_id}>
-                <td>{submission.artwork_upload.original_name}</td>
+                <td>{submission.artwork_upload?.original_name ?? ''}</td>
                 <td>{submission.submitted_by}</td>
-                <td>{new Date(submission.submitted_at).toLocaleDateString()}</td>
+                <td>{new Date(submission.submitted_at ?? submission.created_at ?? '').toLocaleDateString()}</td>
                 <td>
-                  <StatusBadge status={submission.status}>
+                  <StatusBadge status={submission.status ?? ''}>
                     {submission.status === 'pending' && 'На проверке'}
                     {submission.status === 'approved' && 'Одобрено'}
                     {submission.status === 'rejected' && 'Отклонено'}
@@ -262,12 +262,12 @@ const CuratorReviewPage: React.FC = () => {
       {selectedSubmission && (
         <Section>
           <SectionTitle>
-            Просмотр карточки: {selectedSubmission.artwork_upload.original_name}
+            Просмотр карточки: {selectedSubmission.artwork_upload?.original_name ?? ''}
           </SectionTitle>
           
           <ArtworkAnalysisResult 
-            analysis={selectedSubmission.artwork_upload.analysis_result!} 
-            artwork={selectedSubmission.artwork_upload.artwork_data || {}} 
+            analysis={selectedSubmission.artwork_upload?.analysis_result ?? {}} 
+            artwork={selectedSubmission.artwork_upload?.artwork_data ?? {}} 
             onArtworkChange={() => {}} // Заглушка, так как куратор не редактирует данные напрямую
           />
           

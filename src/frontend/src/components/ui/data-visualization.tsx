@@ -28,7 +28,7 @@ ChartJS.register(
 );
 
 interface DataVisualizationProps {
-  type: "line" | "bar" | "pie";
+  type: "line" | "bar" | "pie" | "doughnut";
   data: any;
   options?: any;
   className?: string;
@@ -62,6 +62,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({
       case "bar":
         return <Bar data={data} options={combinedOptions} />;
       case "pie":
+      case "doughnut":
         return <Pie data={data} options={combinedOptions} />;
       default:
         return <Line data={data} options={combinedOptions} />;

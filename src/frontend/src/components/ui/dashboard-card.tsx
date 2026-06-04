@@ -1,18 +1,8 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp,
   TrendingDown,
-  Users,
-  GalleryVerticalEnd,
-  Heart,
-  Eye,
-  DollarSign,
-  Calendar,
-  Activity,
-  BarChart3,
-  Target
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 

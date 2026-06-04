@@ -2,21 +2,12 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Building2,
-  GalleryVerticalEnd,
   Users,
-  Eye,
-  Heart,
   Star,
   Calendar,
-  Award,
   MapPin,
   Ruler,
-  Palette,
   HardHat,
-  Square,
-  Volume2,
-  Lightbulb
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { ProgressBar } from "@/components/ui/progress-bar";

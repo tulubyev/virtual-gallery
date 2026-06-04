@@ -1,23 +1,13 @@
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
-  Users,
   MessageCircle,
   Heart,
-  Share2,
-  Eye,
   GalleryVerticalEnd,
-  Star,
-  Calendar,
-  Award,
   TrendingUp,
   Activity,
-  BarChart3,
-  PieChart,
-  UserPlus,
-  Repeat2
+  TrendingDown
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -36,6 +26,9 @@ interface ArtSocialNetworkVisualizerProps {
       totalLikes: number;
       totalShares: number;
       totalComments: number;
+      avgPerUser: number;
+      likesPerPost: number;
+      commentsPerPost: number;
     };
     communityGrowth: {
       labels: string[];
@@ -229,7 +222,10 @@ const ArtSocialNetworkVisualizer: React.FC<ArtSocialNetworkVisualizerProps> = ({
             <div className="space-y-4">
               {socialData.topCreators.map((creator, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 hover:bg-muted rounded-lg">
-                  <Avatar src={creator.avatar} size="md" />
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={creator.avatar} alt={creator.name} />
+                    <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{creator.name}</h4>
                     <div className="flex gap-4 text-xs text-muted-foreground mt-1">
@@ -238,7 +234,7 @@ const ArtSocialNetworkVisualizer: React.FC<ArtSocialNetworkVisualizerProps> = ({
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{creator.engagementRate}%</p>
+                    <p className="text-sm font-medium">{creator.engagement}%</p>
                     <p className="text-xs text-muted-foreground">вовлеченность</p>
                   </div>
                 </div>

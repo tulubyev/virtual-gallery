@@ -1,36 +1,40 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
-  Archive,
-  GalleryVerticalEnd,
-  Users,
-  Eye,
-  Heart,
-  Star,
   Calendar,
   Award,
-  MapPin,
-  FileText,
   Image,
-  Video,
-  Music,
   Filter,
   Search,
-  Download,
-  Upload
+  TrendingUp,
+  Target,
+  User
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { Tag } from "@/components/ui/tag";
 import { cn } from "@/lib/utils";
 
 interface ArtArchiveVisualizerProps {
   archiveData: {
+    totalArtworks: number;
+    dateRange: {
+      start: number;
+      end: number;
+    };
+    collectionCount: number;
+    curatorCount: number;
+    preservationStatus: string;
     collections: Array<{
       name: string;
       description: string;
       artworkCount: number;
-      dateRange: {
+      digitizedCount: number;
+      totalCount: number;
+      period: string;
+      dateRange?: {
         start: number;
         end: number;
       };
@@ -44,7 +48,19 @@ interface ArtArchiveVisualizerProps {
       inProgress: number;
       awaitingDigitization: number;
     };
+    digitizationMetrics: {
+      digitized: number;
+      completionRate: number;
+    };
     mediaTypes: {
+      labels: string[];
+      datasets: {
+        label: string;
+        data: number[];
+        backgroundColor: string[];
+      }[];
+    };
+    mediaDistribution: {
       labels: string[];
       datasets: {
         label: string;
@@ -84,6 +100,7 @@ const ArtArchiveVisualizer: React.FC<ArtArchiveVisualizerProps> = ({
   className
 }) => {
   const digitizationRate = (archiveData.digitizationProgress.digitized / archiveData.digitizationProgress.totalArtworks) * 100;
+  const preservationMetrics = archiveData.preservationMetrics;
   
   return (
     <div className={cn("space-y-6", className)}>
@@ -133,7 +150,7 @@ const ArtArchiveVisualizer: React.FC<ArtArchiveVisualizerProps> = ({
             <CardTitle className="text-sm font-medium">Типы медиа</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{archiveData.mediaTypes.length}</div>
+            <div className="text-2xl font-bold">{archiveData.mediaTypes.labels.length}</div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Image className="h-4 w-4 mr-1" />
               <span>Разнообразие форматов</span>

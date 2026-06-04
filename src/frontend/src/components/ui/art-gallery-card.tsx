@@ -1,17 +1,12 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   GalleryVerticalEnd,
-  Users,
+  Clock,
   Eye,
-  Heart,
   Star,
-  Calendar,
   MapPin,
-  Award,
-  TrendingUp,
-  MessageCircle
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Tag } from "@/components/ui/tag";
@@ -98,7 +93,7 @@ const ArtGalleryCard: React.FC<ArtGalleryCardProps> = ({
           
           <div className="grid grid-cols-3 gap-2 text-center py-3">
             <div className="border rounded-lg p-2">
-              <p className="text-lg font-semibold">{artworkCount}</p>
+              <p className="text-lg font-semibold">{artworksCount}</p>
               <p className="text-xs text-muted-foreground">Экспонатов</p>
             </div>
             <div className="border rounded-lg p-2">

@@ -1,3 +1,4 @@
+import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -7,6 +8,7 @@ interface TabProps {
   isActive: boolean;
   onClick: () => void;
   disabled?: boolean;
+  children?: React.ReactNode;
 }
 
 interface TabsProps {
@@ -17,7 +19,6 @@ interface TabsProps {
 }
 
 const Tab: React.FC<TabProps> = ({ 
-  id, 
   label, 
   isActive, 
   onClick, 

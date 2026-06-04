@@ -81,29 +81,10 @@ const Button = styled.button`
   }
 `;
 
-const ArtworksGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-`;
-
-const ArtworkItem = styled.div<{ selected: boolean }>`
-  border: 2px solid ${({ selected }) => selected ? '#6200ee' : '#ddd'};
-  border-radius: 8px;
-  padding: 1rem;
-  cursor: pointer;
-  background-color: ${({ selected }) => selected ? '#f0e6ff' : 'white'};
-
-  &:hover {
-    border-color: #6200ee;
-  }
-`;
-
 const RoomManagementPage: React.FC = () => {
   const { galleryId } = useParams<{ galleryId: string }>();
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [allArtworks, setAllArtworks] = useState<Artwork[]>([]);
+  const [, setAllArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   
   // State для формы создания/редактирования зала
@@ -111,7 +92,7 @@ const RoomManagementPage: React.FC = () => {
   const [roomDescription, setRoomDescription] = useState('');
   const [roomTheme, setRoomTheme] = useState('');
   const [roomRegion, setRoomRegion] = useState('');
-  const [selectedArtworks, setSelectedArtworks] = useState<number[]>([]);
+  const [, setSelectedArtworks] = useState<number[]>([]);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
 
   useEffect(() => {
@@ -183,7 +164,7 @@ const RoomManagementPage: React.FC = () => {
         region: roomRegion,
       };
       
-      const updatedRoom = await galleryService.updateRoom(editingRoom.room_id, updatedRoomData);
+      const updatedRoom = await galleryService.updateRoom(editingRoom.room_id!, updatedRoomData);
       
       // Обновляем список залов
       setRooms(rooms.map(r => r.room_id === updatedRoom.room_id ? updatedRoom : r));
@@ -212,7 +193,7 @@ const RoomManagementPage: React.FC = () => {
     setEditingRoom(room);
     setRoomName(room.name);
     setRoomDescription(room.description || '');
-    setRoomTheme(room.theme);
+    setRoomTheme(room.theme ?? '');
     setRoomRegion(room.region || '');
     // Здесь можно добавить логику для установки выбранных экспонатов
   };
@@ -226,13 +207,6 @@ const RoomManagementPage: React.FC = () => {
     setEditingRoom(null);
   };
 
-  const toggleArtworkSelection = (artworkId: number) => {
-    setSelectedArtworks(prev => 
-      prev.includes(artworkId) 
-        ? prev.filter(id => id !== artworkId) 
-        : [...prev, artworkId]
-    );
-  };
 
   if (loading) {
     return <PageContainer>Загрузка данных...</PageContainer>;
@@ -339,7 +313,7 @@ const RoomManagementPage: React.FC = () => {
                   <Button onClick={() => handleEditRoom(room)}>Редактировать</Button>
                   <Button 
                     style={{ marginLeft: '0.5rem', backgroundColor: '#f44336' }}
-                    onClick={() => handleDeleteRoom(room.room_id)}
+                    onClick={() => handleDeleteRoom(room.room_id ?? 0)}
                   >
                     Удалить
                   </Button>

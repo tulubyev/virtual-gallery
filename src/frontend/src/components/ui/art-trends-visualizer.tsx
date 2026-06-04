@@ -4,18 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp,
   TrendingDown,
-  GalleryVerticalEnd,
-  Users,
-  Eye,
-  Heart,
-  Star,
-  Calendar,
   Award,
-  MessageCircle,
   Flame,
-  Activity,
-  BarChart3,
-  LineChart
+  Brush
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { cn } from "@/lib/utils";
@@ -53,6 +44,10 @@ interface ArtTrendsVisualizerProps {
       trending: boolean;
       specialty: string;
       recentExhibitions: number;
+    }>;
+    trendingTags: Array<{
+      name: string;
+      usageCount: number;
     }>;
     marketPredictions: Array<{
       trend: string;
@@ -203,7 +198,7 @@ const ArtTrendsVisualizer: React.FC<ArtTrendsVisualizerProps> = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {trendsData.predictions.map((prediction, index) => (
+              {trendsData.marketPredictions.map((prediction, index) => (
                 <div key={index} className="border-b pb-3 last:border-0 last:pb-0">
                   <div className="flex justify-between items-start">
                     <h4 className="font-medium">{prediction.trend}</h4>

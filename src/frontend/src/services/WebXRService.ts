@@ -1,5 +1,5 @@
 // src/frontend/src/services/WebXRService.ts
-import { Vector3, Euler } from 'three';
+import { Vector3, Euler, Quaternion } from 'three';
 
 interface WebXRSessionOptions {
   requiredFeatures?: string[];
@@ -124,7 +124,7 @@ class WebXRService {
   }
 
   // Handle input sources change (controllers, hands, etc.)
-  private onInputSourcesChange(event: XRInputSourceEvent): void {
+  private onInputSourcesChange(event: XRInputSourcesChangeEvent | XRInputSourceEvent): void {
     console.log('XR Input Sources Changed:', event);
     
     // Log the current input sources
@@ -203,22 +203,18 @@ class WebXRService {
     // Convert to Three.js coordinate system
     return {
       position: new Vector3(position.x, position.y, position.z),
-      rotation: new Euler().setFromQuaternion({
-        x: orientation.x,
-        y: orientation.y,
-        z: orientation.z,
-        w: orientation.w
-      })
+      rotation: new Euler().setFromQuaternion(new Quaternion(orientation.x, orientation.y, orientation.z, orientation.w))
     };
   }
 
   // Get hand joint positions if hand tracking is available
   getHandJointPositions(inputSource: XRInputSource, referenceSpace: XRReferenceSpace): Map<string, Vector3> | null {
-    if (inputSource.hand && this.state.frame) {
+    const frame = this.state.frame;
+    if (inputSource.hand && frame) {
       const jointPositions = new Map<string, Vector3>();
       
       for (const joint of inputSource.hand.keys()) {
-        const jointPose = this.state.frame.getJointPose(inputSource.hand.get(joint)!, referenceSpace);
+        const jointPose = frame.getJointPose?.(inputSource.hand.get(joint)!, referenceSpace);
         if (jointPose) {
           const pos = jointPose.transform.position;
           jointPositions.set(joint, new Vector3(pos.x, pos.y, pos.z));

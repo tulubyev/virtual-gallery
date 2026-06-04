@@ -1,19 +1,12 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { 
   GalleryVerticalEnd,
-  Users,
   Eye,
   Heart,
   Star,
-  Calendar,
-  Award,
   TrendingUp,
-  MessageCircle,
-  Activity,
-  BarChart3,
-  PieChart
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { cn } from "@/lib/utils";
@@ -54,6 +47,8 @@ interface ArtStatsVisualizerProps {
       weeklyActive: number;
       monthlyActive: number;
       avgSessionDuration: number; // in minutes
+      likesRatio: number;
+      commentsRatio: number;
     };
   };
   className?: string;
@@ -63,6 +58,7 @@ const ArtStatsVisualizer: React.FC<ArtStatsVisualizerProps> = ({
   statsData,
   className
 }) => {
+  const engagementMetrics = statsData.visitorEngagement;
   return (
     <div className={cn("space-y-6", className)}>
       {/* Main statistics */}
@@ -142,7 +138,7 @@ const ArtStatsVisualizer: React.FC<ArtStatsVisualizerProps> = ({
           <CardContent>
             <DataVisualization
               type="line"
-              data={analyticsData.monthlyTrends}
+              data={statsData.monthlyStats}
               options={{
                 responsive: true,
                 plugins: {
@@ -172,7 +168,7 @@ const ArtStatsVisualizer: React.FC<ArtStatsVisualizerProps> = ({
           <CardContent>
             <DataVisualization
               type="doughnut"
-              data={analyticsData.categoryDistribution}
+              data={statsData.categoryDistribution}
               options={{
                 responsive: true,
                 plugins: {
@@ -198,7 +194,7 @@ const ArtStatsVisualizer: React.FC<ArtStatsVisualizerProps> = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {analyticsData.topArtworks.map((artwork, index) => (
+              {statsData.trendingArtworks.map((artwork, index) => (
                 <div key={index} className="flex items-center gap-4 p-3 hover:bg-muted rounded-lg">
                   <div className="bg-muted rounded-lg p-2">
                     <GalleryVerticalEnd className="h-6 w-6 text-primary" />

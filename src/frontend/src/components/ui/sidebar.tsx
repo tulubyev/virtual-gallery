@@ -1,9 +1,13 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
+
+const Tooltip = TooltipPrimitive.Root
+const TooltipTrigger = TooltipPrimitive.Trigger
+const TooltipContent = TooltipPrimitive.Content
 
 const sidebarVariants = cva(
   "group peer border-r bg-muted/50 data-[state=collapsed]:w-12 data-[state=expanded]:w-64",

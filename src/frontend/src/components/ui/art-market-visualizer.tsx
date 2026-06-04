@@ -1,18 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   TrendingUp,
   TrendingDown,
-  DollarSign,
-  Users,
-  GalleryVerticalEnd,
-  Calendar,
   Award,
   Activity,
-  BarChart3,
-  PieChart
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { cn } from "@/lib/utils";

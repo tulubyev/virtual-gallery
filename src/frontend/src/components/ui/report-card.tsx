@@ -2,16 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  BarChart3,
   TrendingUp,
   TrendingDown,
-  Users,
   GalleryVerticalEnd,
-  Eye,
-  Calendar,
   Download,
   Filter,
-  Activity
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 

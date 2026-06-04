@@ -1,16 +1,12 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  User,
   Mail,
   Calendar,
   Award,
   Star,
-  CheckCircle,
-  Eye,
-  Heart,
-  GalleryVerticalEnd
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar-enhanced";
 import { ProgressBar } from "@/components/ui/progress-bar";

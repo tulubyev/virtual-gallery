@@ -114,7 +114,7 @@ const ArtworkManagement: React.FC<ArtworkManagementProps> = ({
       setFilteredArtworks(
         artworks.filter(artwork => 
           artwork.title.toLowerCase().includes(term) || 
-          artwork.artist_name.toLowerCase().includes(term) ||
+          (artwork.artist_name?.toLowerCase().includes(term) ?? false) ||
           (artwork.style && artwork.style.toLowerCase().includes(term)) ||
           (artwork.tags.some(tag => tag.toLowerCase().includes(term)))
         )
@@ -176,7 +176,7 @@ const ArtworkManagement: React.FC<ArtworkManagementProps> = ({
                     <ActionButton className="edit" onClick={() => onEdit(artwork)}>
                       Edit
                     </ActionButton>
-                    <ActionButton className="delete" onClick={() => onDelete(artwork.artwork_id)}>
+                    <ActionButton className="delete" onClick={() => onDelete(artwork.artwork_id!)}>
                       Delete
                     </ActionButton>
                   </>

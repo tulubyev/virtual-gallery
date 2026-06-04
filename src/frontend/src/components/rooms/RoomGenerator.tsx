@@ -1,5 +1,4 @@
 import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomTemplate, MaterialPreset, Decoration, LightingPreset } from '../../../models/Room';
 
@@ -92,16 +91,16 @@ export const RoomGenerator: React.FC<RoomGeneratorProps> = ({
           geometry = new THREE.BoxGeometry(1, 1, 1);
       }
 
-      const material = materials[decoration.material] || new THREE.MeshStandardMaterial({ color: '#8B4513' });
+      const material = materials[decoration.material!] || new THREE.MeshStandardMaterial({ color: '#8B4513' });
 
       return (
         <mesh
           key={`decoration-${index}`}
           geometry={geometry}
           material={material}
-          position={decoration.position as [number, number, number]}
-          rotation={decoration.rotation as [number, number, number]}
-          scale={decoration.scale as [number, number, number]}
+          position={decoration.position as unknown as [number, number, number]}
+          rotation={decoration.rotation as unknown as [number, number, number]}
+          scale={decoration.scale as unknown as [number, number, number]}
         />
       );
     });
@@ -123,7 +122,7 @@ export const RoomGenerator: React.FC<RoomGeneratorProps> = ({
         key="directional"
         color={lightingPreset.directional.color}
         intensity={lightingPreset.directional.intensity}
-        position={lightingPreset.directional.position as [number, number, number]}
+        position={lightingPreset.directional.position as unknown as [number, number, number]}
         castShadow
       />
     );
@@ -135,7 +134,7 @@ export const RoomGenerator: React.FC<RoomGeneratorProps> = ({
             key={`point-${index}`}
             color={pointLight.color}
             intensity={pointLight.intensity}
-            position={pointLight.position as [number, number, number]}
+            position={pointLight.position as unknown as [number, number, number]}
             distance={pointLight.distance}
           />
         );

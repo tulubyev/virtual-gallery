@@ -78,9 +78,9 @@ const ArtworkAnalysisResult: React.FC<{
       
       <div>
         <h4>Предполагаемый стиль: <strong>{analysis.style}</strong></h4>
-        <p>Доверительная оценка: {Math.round(analysis.confidence * 100)}%</p>
+        <p>Доверительная оценка: {Math.round((analysis.confidence ?? 0) * 100)}%</p>
         <ConfidenceBar>
-          <ConfidenceFill percentage={analysis.confidence * 100} />
+          <ConfidenceFill percentage={(analysis.confidence ?? 0) * 100} />
         </ConfidenceBar>
       </div>
       
@@ -90,7 +90,7 @@ const ArtworkAnalysisResult: React.FC<{
       
       <TagsContainer>
         <h4>Обнаруженные теги:</h4>
-        {analysis.tags.map((tag, index) => (
+        {(analysis.tags ?? []).map((tag, index) => (
           <Tag key={index}>{tag}</Tag>
         ))}
       </TagsContainer>
@@ -98,7 +98,7 @@ const ArtworkAnalysisResult: React.FC<{
       <div>
         <h4>Доминирующие цвета:</h4>
         <div>
-          {analysis.dominant_colors.map((color, index) => (
+          {(analysis.dominant_colors ?? []).map((color, index) => (
             <ColorSwatch key={index} color={color} title={color} />
           ))}
         </div>
@@ -106,7 +106,7 @@ const ArtworkAnalysisResult: React.FC<{
       
       <div>
         <h4>Обнаруженные объекты:</h4>
-        {analysis.detected_objects.map((obj, index) => (
+        {(analysis.detected_objects ?? []).map((obj, index) => (
           <ObjectDetectionItem key={index}>
             <div>
               <strong>{obj.name}</strong> (доверие: {Math.round(obj.confidence * 100)}%)
@@ -121,10 +121,10 @@ const ArtworkAnalysisResult: React.FC<{
       
       <div>
         <h4>Качество изображения:</h4>
-        <p>Яркость: {analysis.image_quality.brightness.toFixed(2)}</p>
-        <p>Контрастность: {analysis.image_quality.contrast.toFixed(2)}</p>
-        <p>Резкость: {analysis.image_quality.sharpness.toFixed(2)}</p>
-        <p>Разрешение: {analysis.image_quality.resolution.width}x{analysis.image_quality.resolution.height}</p>
+        <p>Яркость: {(analysis.image_quality?.brightness ?? 0).toFixed(2)}</p>
+        <p>Контрастность: {(analysis.image_quality?.contrast ?? 0).toFixed(2)}</p>
+        <p>Резкость: {(analysis.image_quality?.sharpness ?? 0).toFixed(2)}</p>
+        <p>Разрешение: {analysis.image_quality?.resolution?.width ?? 0}x{analysis.image_quality?.resolution?.height ?? 0}</p>
       </div>
       
       <SectionTitle>Редактирование карточки экспоната</SectionTitle>

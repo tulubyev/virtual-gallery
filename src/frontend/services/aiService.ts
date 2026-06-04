@@ -22,6 +22,12 @@ export interface AnalysisStatusResponse {
       completion_tokens: number;
       total_tokens: number;
     };
+    processing_stats?: {
+      total_pages?: number;
+      chunks_created?: number;
+      duration?: number;
+      [key: string]: unknown;
+    };
   };
   error?: string;
   created_at?: string;

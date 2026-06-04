@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Search,
-  Filter,
   Grid3X3,
   List,
   Heart,
@@ -33,7 +32,7 @@ interface Artwork {
 }
 
 const ArtworksPage: React.FC = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([
+  const [artworks] = useState<Artwork[]>([
     {
       id: '1',
       title: 'Абстрактная композиция №1',

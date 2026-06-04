@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import styled from 'styled-components';
 import webXRService from '../services/WebXRService';
 import { Artwork } from '../types';
@@ -326,7 +325,7 @@ const VRScene: React.FC<{
       galleryObjectsRef.current.push(artworkSurface);
 
       // Add interaction event
-      frame.addEventListener('click', () => {
+      (frame as unknown as EventTarget).addEventListener('click', () => {
         onArtworkSelect(artwork);
       });
     });

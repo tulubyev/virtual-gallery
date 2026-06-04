@@ -1,7 +1,6 @@
 // src/frontend/src/components/DashboardOverview.tsx
 import React from 'react';
 import styled from 'styled-components';
-import { Artwork, User } from '../types';
 
 const OverviewContainer = styled.div`
   display: grid;

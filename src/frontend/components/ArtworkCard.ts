@@ -44,7 +44,7 @@ export class ArtworkCard {
         const tagsContainer = document.getElementById('artwork-tags') as HTMLElement;
         tagsContainer.innerHTML = '';
         if (artworkData.tags && Array.isArray(artworkData.tags)) {
-            artworkData.tags.forEach(tag => {
+            artworkData.tags.forEach((tag: string) => {
                 const tagSpan = document.createElement('span');
                 tagSpan.className = 'tag';
                 tagSpan.textContent = tag;

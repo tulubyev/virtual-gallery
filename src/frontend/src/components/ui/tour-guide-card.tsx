@@ -1,16 +1,12 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  User,
   Mail,
   Map,
   Calendar,
   Star,
-  Award,
-  Users,
-  Clock,
-  MessageCircle,
   Play
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar-enhanced";

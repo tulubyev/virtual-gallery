@@ -1,17 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { 
   TrendingUp,
   TrendingDown,
-  Users,
-  GalleryVerticalEnd,
-  Heart,
-  Eye,
-  DollarSign,
-  Calendar,
-  Activity,
-  BarChart3,
-  Target
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 

@@ -2,8 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 
@@ -194,10 +192,11 @@ const VirtualGallery3D: React.FC<VirtualGallery3DProps> = ({ artworks, onArtwork
             (obj as THREE.Mesh).geometry.dispose();
           }
           if ((obj as THREE.Mesh).material) {
-            if (Array.isArray((obj as THREE.Mesh).material)) {
-              (obj as THREE.Mesh).material.forEach(material => material.dispose());
+            const mat = (obj as THREE.Mesh).material;
+            if (Array.isArray(mat)) {
+              (mat as THREE.Material[]).forEach(m => m.dispose());
             } else {
-              (obj as THREE.Mesh).material.dispose();
+              (mat as THREE.Material).dispose();
             }
           }
         });
@@ -425,7 +424,7 @@ const VirtualGallery3D: React.FC<VirtualGallery3DProps> = ({ artworks, onArtwork
       artworkGroup.add(artworkSurface);
 
       // Сохраняем ссылку на объект для обработки кликов
-      galleryObjectsRef.current[artwork.artwork_id] = artworkSurface;
+      galleryObjectsRef.current[artwork.artwork_id ?? 0] = artworkSurface;
     });
   };
 

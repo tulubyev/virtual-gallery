@@ -15,9 +15,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
 
-    /* Linting — relaxed to allow the build to succeed */
-    "strict": false,
-    "noUnusedLocals": false,
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
 
@@ -27,6 +27,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "components", "assets"],
+  "include": ["src", "components"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

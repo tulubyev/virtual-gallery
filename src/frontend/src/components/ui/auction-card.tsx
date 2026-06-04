@@ -1,12 +1,10 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   DollarSign, 
-  Clock, 
-  Users, 
   GalleryVerticalEnd,
-  Calendar,
   Timer
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";

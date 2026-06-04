@@ -1,5 +1,6 @@
 import * as React from "react"
-import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react"
+import useEmblaCarousel from "embla-carousel-react"
+type UseEmblaCarouselType = ReturnType<typeof useEmblaCarousel>
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -56,9 +57,9 @@ const Carousel = React.forwardRef<
   ) => {
     const [carouselRef, api] = useEmblaCarousel(
       {
-        ...opts,
+        ...(opts ?? {}),
         axis: orientation === "horizontal" ? "x" : "y",
-      },
+      } as Parameters<typeof useEmblaCarousel>[0],
       plugins
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
@@ -123,7 +124,7 @@ const Carousel = React.forwardRef<
           api,
           opts,
           orientation:
-            orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
+            orientation || (((opts as Record<string, unknown>)?.axis) === 'y' ? "vertical" : "horizontal"),
           scrollPrev,
           scrollNext,
           canScrollPrev,

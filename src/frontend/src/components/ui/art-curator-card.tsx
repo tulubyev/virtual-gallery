@@ -1,18 +1,13 @@
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   User,
   Award,
-  GalleryVerticalEnd,
-  Users,
-  Eye,
-  Heart,
   Star,
-  Calendar,
   MessageCircle,
-  Target,
-  TrendingUp
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Tag } from "@/components/ui/tag";
@@ -76,7 +71,10 @@ const ArtCuratorCard: React.FC<ArtCuratorCardProps> = ({
       
       <CardHeader className="items-center pb-3">
         <div className="relative">
-          <Avatar src={avatar} size="xl" />
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={avatar} alt={name} />
+            <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+          </Avatar>
           <div className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
             <Award className="h-3 w-3 text-primary-foreground" />
           </div>

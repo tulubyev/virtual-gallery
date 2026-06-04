@@ -12,18 +12,6 @@ const NavigatorContainer = styled.div`
   overflow: hidden;
 `;
 
-const RoomLabel = styled.div<{ position: { x: number; y: number; z: number } }>`
-  position: absolute;
-  top: ${({ position }) => position.y}px;
-  left: ${({ position }) => position.x}px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  font-size: 0.8rem;
-`;
 
 interface Room {
   id: number;
@@ -109,15 +97,7 @@ const Gallery3DNavigator: React.FC<Gallery3DNavigatorProps> = ({ rooms, onRoomSe
       roomObjects.push(roomObject);
     });
 
-    // Добавляем подписи к залам
-    const labels: JSX.Element[] = rooms.map(room => (
-      <RoomLabel 
-        key={room.id} 
-        position={{ x: room.position.x * 10 + 250, y: -room.position.z * 10 + 250, z: room.position.y * 10 }} 
-      >
-        {room.name}
-      </RoomLabel>
-    ));
+    // Добавляем подписи к залам (currently unused labels definition removed)
 
     // Добавляем управление
     const controls = new OrbitControls(camera, renderer.domElement);

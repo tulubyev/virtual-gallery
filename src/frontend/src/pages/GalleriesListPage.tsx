@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Search,
-  Filter,
   MapPin,
   Clock,
   Users,
@@ -33,7 +32,7 @@ interface Gallery {
 }
 
 const GalleriesListPage: React.FC = () => {
-  const [galleries, setGalleries] = useState<Gallery[]>([
+  const [galleries] = useState<Gallery[]>([
     {
       id: '1',
       name: 'Галерея современного искусства',

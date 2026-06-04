@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Home, GalleryVerticalEnd, Users, Heart, Eye, Calendar, Award, BarChart3, Target, DollarSign, MessageCircle, CheckCircle, Clock, Camera, Package, ShoppingCart, MapPin, TrendingUp, Play, Volume2, Shield, Battery, Wifi, Cpu, Video, Share2, Repeat2, UserPlus, Building2, Ruler, Scissors, Palette, Brush, History, Lightbulb, Cube, User, Settings } from "lucide-react";
+import { Menu, Home, GalleryVerticalEnd, Users, Heart, Eye, Calendar, Award, BarChart3, Target, DollarSign, MessageCircle, CheckCircle, MapPin, History, Box, User, Settings } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
 interface SidebarItem {
@@ -96,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-64 lg:w-72 xl:w-80 flex-col border-r bg-gradient-to-b from-background to-muted/50 p-4 space-y-4">
         <div className="flex items-center gap-2 p-2 mb-4">
-          <Cube className="h-8 w-8 text-primary" />
+          <Box className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Виртуальная Галерея
           </h1>
@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <SheetContent side="left" className="w-[240px] sm:w-[300px] p-0">
           <div className="flex flex-col h-full">
             <div className="flex items-center gap-2 p-4 border-b">
-              <Cube className="h-8 w-8 text-primary" />
+              <Box className="h-8 w-8 text-primary" />
               <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 Виртуальная Галерея
               </h1>

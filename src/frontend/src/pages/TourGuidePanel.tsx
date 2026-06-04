@@ -5,14 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Map,
   Users,
-  Calendar,
   Clock,
   Star,
   GalleryVerticalEnd,
   MessageSquare,
   Play,
-  Pause,
-  RotateCcw,
   Flag,
   TrendingUp,
   BarChart3,
@@ -86,13 +83,6 @@ const TourGuidePanel: React.FC = () => {
     { title: 'Средний рейтинг', value: '4.7', change: '+0.2' },
   ];
 
-  // Mock data for recent tours
-  const recentTours = [
-    { id: 1, title: 'Введение в современное искусство', date: '2023-11-19', participants: 12, rating: 4.7 },
-    { id: 2, title: 'История импрессионизма', date: '2023-11-18', participants: 8, rating: 4.9 },
-    { id: 3, title: 'Цифровые инсталляции', date: '2023-11-17', participants: 15, rating: 4.5 },
-    { id: 4, title: 'Классическая живопись', date: '2023-11-16', participants: 10, rating: 4.8 },
-  ];
 
   // Mock data for visitors
   const visitors: Visitor[] = [

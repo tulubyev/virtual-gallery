@@ -6,19 +6,13 @@ import {
   BookOpen,
   Users,
   GraduationCap,
-  Award,
   Star,
-  Calendar,
   GalleryVerticalEnd,
-  MessageCircle,
   Target,
   TrendingUp,
-  Play,
-  Eye,
-  Heart
+  Clock
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
-import { ProgressBar } from "@/components/ui/progress-bar";
 import { cn } from "@/lib/utils";
 
 interface ArtEducationVisualizerProps {
@@ -136,7 +130,7 @@ const ArtEducationVisualizer: React.FC<ArtEducationVisualizerProps> = ({
           <CardContent>
             <DataVisualization
               type="line"
-              data={learningData.studentProgress}
+              data={educationData.studentProgress}
               options={{
                 responsive: true,
                 plugins: {
@@ -166,7 +160,7 @@ const ArtEducationVisualizer: React.FC<ArtEducationVisualizerProps> = ({
           <CardContent>
             <DataVisualization
               type="bar"
-              data={learningData.coursePopularity}
+              data={educationData.coursePopularity}
               options={{
                 responsive: true,
                 plugins: {

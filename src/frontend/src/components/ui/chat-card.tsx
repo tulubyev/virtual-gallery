@@ -1,16 +1,13 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  MessageCircle,
-  User,
-  Clock,
   Check,
   CheckCheck,
   MoreVertical,
   Phone,
   Video,
-  Paperclip
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar-enhanced";
 

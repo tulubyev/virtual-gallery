@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   Palette,
   Compass,
-  Users,
   Star,
   Camera,
   BookOpen,

@@ -68,7 +68,7 @@ const RoomPage: React.FC = () => {
           const allArtworks = await artworkService.getAllArtworks();
           // Фильтруем экспонаты по тегам зала (упрощенная логика)
           const filteredArtworks = allArtworks.filter(artwork => 
-            artwork.tags.some(tag => roomData.tags.includes(tag))
+            artwork.tags.some(tag => (roomData.tags ?? []).includes(tag))
           );
           setArtworks(filteredArtworks);
         }

@@ -1,32 +1,15 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Cpu,
   Database,
   Globe,
   Zap,
   Brain,
-  Camera,
-  Video,
   Palette,
-  GalleryVerticalEnd,
   Users,
   Eye,
-  Heart,
-  Star,
-  Calendar,
-  Award,
   Activity,
-  BarChart3,
-  PieChart,
-  TrendingUp,
-  TrendingDown,
-  Shield,
-  Lock,
-  Wifi,
-  Battery
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { ProgressBar } from "@/components/ui/progress-bar";
@@ -91,6 +74,8 @@ const ArtTechVisualizer: React.FC<ArtTechVisualizerProps> = ({
   techData,
   className
 }) => {
+  const securityMetrics = techData.securityMetrics;
+  const vrMetrics = techData.vrArMetrics;
   return (
     <div className={cn("space-y-6", className)}>
       {/* System metrics */}
@@ -234,8 +219,8 @@ const ArtTechVisualizer: React.FC<ArtTechVisualizerProps> = ({
                     <div>
                       <p className="text-xs text-muted-foreground">Удовлетворенность</p>
                       <div className="flex items-center gap-2">
-                        <ProgressBar value={tech.satisfaction} variant="success" className="h-2" />
-                        <span className="text-sm font-medium">{tech.satisfaction}%</span>
+                        <ProgressBar value={tech.userSatisfaction} variant="success" className="h-2" />
+                        <span className="text-sm font-medium">{tech.userSatisfaction}%</span>
                       </div>
                     </div>
                     <div>

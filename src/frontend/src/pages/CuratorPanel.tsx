@@ -6,15 +6,14 @@ import {
   Image, 
   Star, 
   Eye, 
-  Heart, 
-  Calendar, 
   GalleryVerticalEnd, 
   Plus, 
   Filter,
   Search,
   MessageSquare,
   CheckCircle,
-  XCircle
+  XCircle,
+  TrendingUp
 } from 'lucide-react';
 
 interface ArtworkReview {

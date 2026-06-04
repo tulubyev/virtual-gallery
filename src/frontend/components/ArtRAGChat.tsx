@@ -164,7 +164,7 @@ export const ArtRAGChat: React.FC<ArtRAGChatProps> = ({ className }) => {
                               <ExternalLink className="h-3 w-3" />
                               <span className="truncate">{source.content_preview}</span>
                               <Badge variant="outline" className="text-xs">
-                                {Math.round(source.score * 100)}%
+                                {Math.round((source.score ?? 0) * 100)}%
                               </Badge>
                             </div>
                           ))}

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,17 +6,8 @@ import {
   Map,
   Users,
   Clock,
-  GalleryVerticalEnd,
   Star,
-  Heart,
-  Eye,
-  Calendar,
-  Award,
-  TrendingUp,
-  MessageCircle,
-  Play,
-  Pause,
-  RotateCcw
+  Play
 } from "lucide-react";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Tag } from "@/components/ui/tag";
@@ -97,7 +89,7 @@ const TourCard: React.FC<TourCardProps> = ({
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2 text-center">
             <div className="border rounded-lg p-2">
-              <p className="text-lg font-semibold">{participantCount}</p>
+              <p className="text-lg font-semibold">{participants}</p>
               <p className="text-xs text-muted-foreground">Участников</p>
             </div>
             <div className="border rounded-lg p-2">

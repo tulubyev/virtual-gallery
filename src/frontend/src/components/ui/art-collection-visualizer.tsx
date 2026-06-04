@@ -3,17 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  GalleryVerticalEnd,
-  Users,
   Eye,
-  Heart,
   Star,
-  Calendar,
-  Award,
-  TrendingUp,
-  MessageCircle,
-  Folder,
-  Layers
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { cn } from "@/lib/utils";
@@ -53,6 +44,7 @@ interface ArtCollectionVisualizerProps {
       shares: number;
       comments: number;
       saves: number;
+      likes: number;
     };
   };
   className?: string;

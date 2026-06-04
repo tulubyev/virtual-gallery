@@ -2,20 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
-  GalleryVerticalEnd,
-  Users,
-  Eye,
-  Heart,
-  Star,
-  Calendar,
   Award,
-  TrendingUp,
-  MessageCircle,
-  MapPin,
-  Clock,
-  History,
-  Palette,
-  Brush
 } from "lucide-react";
 import { DataVisualization } from "@/components/ui/data-visualization";
 import { cn } from "@/lib/utils";

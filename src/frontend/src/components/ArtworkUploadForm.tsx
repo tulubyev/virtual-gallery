@@ -2,7 +2,6 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageProcessingService } from '../services/imageProcessingService';
-import { ArtworkUpload } from '../types';
 
 const UploadContainer = styled.div`
   max-width: 600px;
@@ -65,18 +64,6 @@ const UploadButton = styled.button`
   }
 `;
 
-const PreviewContainer = styled.div`
-  margin-top: 1.5rem;
-`;
-
-const PreviewImage = styled.img`
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: 4px;
-  display: block;
-  margin: 0 auto;
-`;
-
 const ProgressBar = styled.div`
   height: 8px;
   background-color: #ecf0f1;
@@ -124,7 +111,7 @@ const ArtworkUploadForm: React.FC = () => {
   const [processedFiles, setProcessedFiles] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
-  const [userId, setUserId] = useState<number>(1); // В реальной системе это будет ID текущего пользователя
+  const [userId] = useState<number>(1); // В реальной системе это будет ID текущего пользователя
   const [uploadMethod, setUploadMethod] = useState<'drag' | 'archive' | 'url'>('drag');
   const [urlInput, setUrlInput] = useState('');
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -273,7 +260,7 @@ const ArtworkUploadForm: React.FC = () => {
           });
 
           // Загружаем изображение
-          const uploadResult = await imageProcessingService.uploadImage(file, userId);
+          await imageProcessingService.uploadImage(file, userId);
 
           // Эмуляция задержки
           await new Promise(resolve => setTimeout(resolve, 300));

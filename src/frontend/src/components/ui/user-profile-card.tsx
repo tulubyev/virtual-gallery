@@ -1,16 +1,13 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar-enhanced";
+import { Avatar } from "@/components/ui/avatar-enhanced";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Users, 
-  Eye, 
   Heart, 
   MessageCircle,
   Calendar,
   MapPin,
-  Award,
-  Star
 } from "lucide-react";
 
 interface UserProfileCardProps {

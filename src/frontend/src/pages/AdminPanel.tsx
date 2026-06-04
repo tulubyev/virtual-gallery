@@ -6,14 +6,12 @@ import {
   Users, 
   Eye, 
   Heart, 
-  Calendar, 
   TrendingUp, 
   GalleryVerticalEnd, 
   Image, 
   Star,
   Activity,
   BarChart3,
-  DollarSign
 } from 'lucide-react';
 
 interface StatCardProps {

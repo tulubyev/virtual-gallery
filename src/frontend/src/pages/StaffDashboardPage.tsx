@@ -93,24 +93,30 @@ const Table = styled.table`
   }
 `;
 
-const StatusBadge = styled.span<{ status: string }>`
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background-color: ${({ status }) => {
-    switch(status) {
-      case 'uploaded': return '#2196f3';
-      case 'analyzing': return '#ff9800';
-      case 'analyzed': return '#4caf50';
-      case 'review_pending': return '#9c27b0';
-      case 'published': return '#8bc34a';
-      case 'rejected': return '#f44336';
-      default: return '#9e9e9e';
-    }
-  }};
-  color: white;
-`;
+const statusColor = (status?: string): string => {
+  switch(status) {
+    case 'uploaded': return '#2196f3';
+    case 'analyzing': return '#ff9800';
+    case 'analyzed': return '#4caf50';
+    case 'review_pending': return '#9c27b0';
+    case 'published': return '#8bc34a';
+    case 'rejected': return '#f44336';
+    default: return '#9e9e9e';
+  }
+};
+
+function StatusBadge(props: { status?: string; children?: React.ReactNode }) {
+  return (
+    <span style={{
+      padding: '0.25rem 0.75rem',
+      borderRadius: '20px',
+      fontSize: '0.8rem',
+      fontWeight: 500,
+      backgroundColor: statusColor(props.status),
+      color: 'white',
+    }}>{props.children}</span>
+  );
+}
 
 const StaffDashboardPage: React.FC = () => {
   const [uploads, setUploads] = useState<ArtworkUpload[]>([]);
@@ -202,7 +208,7 @@ const StaffDashboardPage: React.FC = () => {
         setAnalysisResult(result);
         setArtworkData({
           ...upload.artwork_data,
-          title: upload.original_name.replace(/\.[^/.]+$/, ""), // Убираем расширение из имени файла
+          title: (upload.original_name ?? '').replace(/\.[^/.]+$/, ""), // Убираем расширение из имени файла
         });
       } catch (error) {
         console.error('Ошибка при загрузке результатов анализа:', error);
@@ -373,9 +379,9 @@ const StaffDashboardPage: React.FC = () => {
             {uploads.map(upload => (
               <tr key={upload.artwork_id}>
                 <td>{upload.original_name}</td>
-                <td>{new Date(upload.upload_date).toLocaleDateString()}</td>
+                <td>{upload.upload_date ? new Date(upload.upload_date).toLocaleDateString() : ''}</td>
                 <td>
-                  <StatusBadge status={upload.status}>
+                  <StatusBadge status={upload.status ?? ''}>
                     {upload.status === 'uploaded' && 'Загружено'}
                     {upload.status === 'analyzing' && 'Анализируется'}
                     {upload.status === 'analyzed' && 'Проанализировано'}
