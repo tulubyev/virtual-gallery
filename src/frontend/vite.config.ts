@@ -34,6 +34,9 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks: {
           'vendor-router': ['react-router-dom'],
+          'vendor-styled': ['styled-components'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
           'vendor-radix': [
             '@radix-ui/react-avatar',
             '@radix-ui/react-dialog',

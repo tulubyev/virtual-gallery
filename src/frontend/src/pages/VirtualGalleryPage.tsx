@@ -8,10 +8,37 @@ const VirtualGallery3D = React.lazy(() => import('../components/VirtualGallery3D
 
 const LoadingSpinner = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-size: 1.5rem;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: white;
+  gap: 1.5rem;
+
+  .spinner-ring {
+    width: 64px;
+    height: 64px;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: #818cf8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .spinner-label {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.05em;
+  }
+
+  .spinner-sub {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -102,7 +129,13 @@ const ArtworkDetailPage: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingSpinner>Загрузка виртуальной галереи...</LoadingSpinner>;
+    return (
+      <LoadingSpinner>
+        <div className="spinner-ring" />
+        <span className="spinner-label">Загрузка виртуальной галереи…</span>
+        <span className="spinner-sub">Инициализация 3D-пространства</span>
+      </LoadingSpinner>
+    );
   }
 
   if (error) {
@@ -111,7 +144,13 @@ const ArtworkDetailPage: React.FC = () => {
 
   return (
     <div>
-      <Suspense fallback={<LoadingSpinner>Загрузка виртуальной галереи...</LoadingSpinner>}>
+      <Suspense fallback={
+        <LoadingSpinner>
+          <div className="spinner-ring" />
+          <span className="spinner-label">Загрузка 3D-галереи…</span>
+          <span className="spinner-sub">Three.js / WebXR</span>
+        </LoadingSpinner>
+      }>
         <VirtualGallery3D 
           artworks={artworks} 
           onArtworkClick={handleArtworkClick}

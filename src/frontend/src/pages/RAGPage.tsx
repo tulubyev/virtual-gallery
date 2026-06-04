@@ -23,6 +23,7 @@ const RAGPage: React.FC = () => {
   const [category, setCategory] = useState('auto');
   const [isDragging, setIsDragging] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [recentDocs, setRecentDocs] = useState<RecentDoc[]>(INITIAL_RECENT);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,9 +33,15 @@ const RAGPage: React.FC = () => {
     setTimeout(() => setToast(null), 4000);
   }
 
+  const MAX_PDF_BYTES = 50 * 1024 * 1024; // 50 MB
+
   function handleFileSelect(file: File) {
     if (file.type !== 'application/pdf') {
       showToast('error', 'Пожалуйста, выберите PDF файл');
+      return;
+    }
+    if (file.size > MAX_PDF_BYTES) {
+      showToast('error', `Файл слишком большой (${(file.size / 1024 / 1024).toFixed(1)} МБ). Максимум — 50 МБ.`);
       return;
     }
     setSelectedFile(file);
@@ -67,6 +74,7 @@ const RAGPage: React.FC = () => {
       return;
     }
     setProcessing(true);
+    setUploadProgress(0);
     try {
       const documentId = 'doc_' + Date.now();
 
@@ -75,14 +83,25 @@ const RAGPage: React.FC = () => {
       formData.append('documentId', documentId);
       formData.append('category', category);
 
-      const res = await fetch('/api/ai/process-pdf', {
-        method: 'POST',
-        body: formData,
+      const data = await new Promise<Record<string, string>>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/ai/process-pdf');
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        };
+
+        xhr.onload = () => {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch { resolve({ __status: String(xhr.status) }); }
+        };
+        xhr.onerror = () => reject(new Error('network'));
+        xhr.send(formData);
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (!data.__status || Number(data.__status) < 400) {
         showToast('success', 'Документ успешно отправлен на обработку! ID: ' + documentId);
         setRecentDocs(prev => [{ name: selectedFile.name, daysAgo: 'Только что' }, ...prev.slice(0, 4)]);
         clearSelection();
@@ -94,6 +113,7 @@ const RAGPage: React.FC = () => {
       showToast('warning', 'AI/ML сервис недоступен. В демо-режиме документы не обрабатываются.');
     } finally {
       setProcessing(false);
+      setUploadProgress(0);
     }
   }
 
@@ -198,6 +218,28 @@ const RAGPage: React.FC = () => {
                 </select>
               </div>
 
+              {/* Upload progress bar */}
+              {processing && uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Загрузка файла…</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              {processing && uploadProgress === 100 && (
+                <div className="mb-4 text-xs text-gray-500 flex items-center gap-2">
+                  <span className="animate-spin inline-block">⏳</span>
+                  <span>Файл загружен. AI обрабатывает документ…</span>
+                </div>
+              )}
+
               {/* Process Button */}
               <button
                 onClick={processPdf}
@@ -205,7 +247,7 @@ const RAGPage: React.FC = () => {
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{processing ? '⏳' : '✅'}</span>
-                <span>{processing ? 'Обработка...' : 'Обработать документ'}</span>
+                <span>{processing ? (uploadProgress < 100 ? `Загрузка ${uploadProgress}%…` : 'Обработка AI…') : 'Обработать документ'}</span>
               </button>
 
               {/* Recent Documents */}

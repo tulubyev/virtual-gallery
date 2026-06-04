@@ -40,11 +40,13 @@ const roleNav: Record<string, { title: string; path: string }[]> = {
     { title: 'Галерея', path: '/galleries' },
     { title: 'Туры', path: '/tours' },
     { title: 'ArtWiki', path: '/artwiki' },
+    { title: 'RAG', path: '/rag' },
   ],
   auction_participant: [
     { title: 'Галерея', path: '/galleries' },
     { title: 'Аукцион', path: '/auction' },
     { title: 'ArtWiki', path: '/artwiki' },
+    { title: 'RAG', path: '/rag' },
   ],
 };
 
