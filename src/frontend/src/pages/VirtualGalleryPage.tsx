@@ -74,7 +74,8 @@ const ArtworkDetailPage: React.FC = () => {
     const fetchArtworks = async () => {
       try {
         const response = await axios.get('/api/artworks');
-        setArtworks(response.data);
+        const data = response.data;
+        setArtworks(Array.isArray(data) ? data : (data.artworks || []));
       } catch (err) {
         console.error('Ошибка при загрузке экспонатов:', err);
         setError('Не удалось загрузить экспонаты');
