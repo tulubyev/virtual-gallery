@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, MapPin, Cpu, Clock,
   File, Layers, Brain, Database, ShieldCheck, Coins, Globe,
   Search, Box, Headphones, Timer, Wallet, Send, User as UserIcon,
-  ArrowRight, Sparkles, PlayCircle,
+  Sparkles, PlayCircle,
 } from 'lucide-react';
 
 interface Slide {
@@ -455,34 +455,6 @@ const HomePage: React.FC = () => {
             </div>
 
           </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          5. QUICK SECTION LINKS
-      ══════════════════════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">Разделы платформы</h2>
-          <p className="text-gray-500 text-sm">Выберите нужный раздел для работы</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { title: 'Галерея', desc: 'Виртуальные залы', path: '/galleries', bg: 'bg-indigo-50 hover:bg-indigo-100', text: 'text-indigo-700', icon: Glasses },
-            { title: 'Аукцион', desc: 'Торги за произведения', path: '/auction', bg: 'bg-orange-50 hover:bg-orange-100', text: 'text-orange-700', icon: Gavel },
-            { title: 'ArtWiki', desc: 'Энциклопедия + AI', path: '/artwiki', bg: 'bg-purple-50 hover:bg-purple-100', text: 'text-purple-700', icon: Library },
-            { title: 'О нас', desc: 'Возможности платформы', path: '/about', bg: 'bg-gray-100 hover:bg-gray-200', text: 'text-gray-700', icon: ArrowRight },
-          ].map(item => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`block ${item.bg} rounded-xl p-5 transition-all hover:-translate-y-0.5`}
-            >
-              <item.icon className={`h-6 w-6 ${item.text} mb-3`} />
-              <div className={`font-semibold text-sm ${item.text}`}>{item.title}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{item.desc}</div>
-            </Link>
-          ))}
         </div>
       </section>
 
