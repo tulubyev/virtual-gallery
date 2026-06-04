@@ -35,14 +35,19 @@ export default defineConfig({
         manualChunks: {
           'vendor-router': ['react-router-dom'],
           'vendor-radix': [
+            '@radix-ui/react-avatar',
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-menubar',
+            '@radix-ui/react-navigation-menu',
             '@radix-ui/react-select',
             '@radix-ui/react-slot',
           ],
           'vendor-three': ['three'],
+          'vendor-motion': ['framer-motion'],
           'vendor-socket': ['socket.io-client'],
           'vendor-icons': ['lucide-react'],
+          'vendor-http': ['axios'],
         },
       }
     }

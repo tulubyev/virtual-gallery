@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-Cxgh2Cme.js";import{r as n}from"./vendor-router-sYWTefjn.js";import{q as o}from"./styled-components.browser.esm-CbTRkjly.js";import"./api-D_bF43qS.js";import{i as c}from"./imageProcessingService-CxL0cPvm.js";import{A as v}from"./ArtworkAnalysisResult-CTTPqqYg.js";import"./index-BjtuyMK1.js";const m=o.div`
+import{j as e}from"./vendor-radix-Cxgh2Cme.js";import{r as n}from"./vendor-router-sYWTefjn.js";import{q as o}from"./styled-components.browser.esm-CbTRkjly.js";import"./api-D9n5ghVV.js";import{i as c}from"./imageProcessingService-DtlwHRLY.js";import{A as v}from"./ArtworkAnalysisResult-CTTPqqYg.js";import"./vendor-http-BjtuyMK1.js";const m=o.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;

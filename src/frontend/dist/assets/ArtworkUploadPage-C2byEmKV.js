@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-Cxgh2Cme.js";import{q as i}from"./styled-components.browser.esm-CbTRkjly.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-CxL0cPvm.js";import"./api-D_bF43qS.js";import"./index-BjtuyMK1.js";const K=i.div`
+import{j as e}from"./vendor-radix-Cxgh2Cme.js";import{q as i}from"./styled-components.browser.esm-CbTRkjly.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-DtlwHRLY.js";import"./api-D9n5ghVV.js";import"./vendor-http-BjtuyMK1.js";const K=i.div`
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
