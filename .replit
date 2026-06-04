@@ -61,3 +61,7 @@ DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_
 [userenv.development]
 DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_gallery_db"
 DB_HOST = "62.217.178.173"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000
