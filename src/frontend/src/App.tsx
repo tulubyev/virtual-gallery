@@ -27,6 +27,7 @@ import ToursPage from './pages/ToursPage';
 import CollectionsPage from './pages/CollectionsPage';
 import ArtWikiPage from './pages/ArtWikiPage';
 import RAGPage from './pages/RAGPage';
+import AboutPage from './pages/AboutPage';
 
 // Компоненты
 import Header from './components/Header';
@@ -118,6 +119,7 @@ const App: React.FC = () => {
               <Route path="/collections" element={<CollectionsPage />} />
               <Route path="/artwiki" element={<ArtWikiPage />} />
               <Route path="/rag" element={<RAGPage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route
                 path="/admin"
                 element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}

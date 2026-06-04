@@ -42,7 +42,8 @@ htmlPages.forEach(p => app.get(`/html/${p}`, (req, res) => res.sendFile(path.joi
 app.get('/html', (req, res) => res.sendFile(path.join(__dirname, 'src/frontend/index.html')));
 
 // Pages not yet in React SPA — temporarily serve HTML until React versions are ready
-const htmlFallbackPages = ['artwiki', 'rag', 'auction', 'gallery-3d', 'auction-participant'];
+// artwiki and rag are now handled by React Router
+const htmlFallbackPages = ['auction', 'gallery-3d', 'auction-participant'];
 htmlFallbackPages.forEach(p => app.get(`/${p}`, (req, res) => res.sendFile(path.join(__dirname, `src/frontend/${p}.html`))));
 
 // React SPA catch-all — serves index.html for all unmatched routes (React Router handles them)

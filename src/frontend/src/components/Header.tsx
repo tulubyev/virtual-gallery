@@ -1,27 +1,6 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import {
-  Bell,
-  CircleUser,
-  Home,
-  GalleryVerticalEnd,
-  Users,
-  Settings,
-  LogOut,
-  Menu,
-  Palette,
-  LayoutDashboard,
-  Image,
-  Map,
-  Ticket,
-  Star
-} from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { Palette, LayoutDashboard, LogOut, Menu, X, ChevronDown } from 'lucide-react';
 import { User } from '@/types';
 
 interface HeaderProps {
@@ -29,191 +8,176 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
+const publicNav = [
+  { title: 'Галерея', path: '/galleries' },
+  { title: 'Аукцион', path: '/auction' },
+  { title: 'ArtWiki', path: '/artwiki' },
+  { title: 'RAG', path: '/rag' },
+  { title: 'О нас', path: '/about' },
+];
+
+const roleNav: Record<string, { title: string; path: string }[]> = {
+  admin: [
+    { title: 'Галерея', path: '/galleries' },
+    { title: 'Аукцион', path: '/auction' },
+    { title: 'ArtWiki', path: '/artwiki' },
+    { title: 'RAG', path: '/rag' },
+  ],
+  curator: [
+    { title: 'Галерея', path: '/galleries' },
+    { title: 'Аукцион', path: '/auction' },
+    { title: 'ArtWiki', path: '/artwiki' },
+    { title: 'RAG', path: '/rag' },
+  ],
+  staff: [
+    { title: 'Главная', path: '/' },
+    { title: 'Галерея', path: '/galleries' },
+    { title: 'ArtWiki', path: '/artwiki' },
+    { title: 'RAG', path: '/rag' },
+  ],
+  tour_guide: [
+    { title: 'Галерея', path: '/galleries' },
+    { title: 'Туры', path: '/tours' },
+    { title: 'ArtWiki', path: '/artwiki' },
+  ],
+  auction_participant: [
+    { title: 'Галерея', path: '/galleries' },
+    { title: 'Аукцион', path: '/auction' },
+    { title: 'ArtWiki', path: '/artwiki' },
+  ],
+};
+
+const dashboardLink: Record<string, string> = {
+  admin: '/admin',
+  curator: '/curator',
+  staff: '/staff',
+  tour_guide: '/tour-guide',
+  auction_participant: '/auction-participant',
+};
+
 const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
 
-  const handleLogout = () => {
-    onLogout();
-    setIsMenuOpen(false);
-  };
-
-  // Определяем активный маршрут для подсветки
   const isActive = (path: string) => location.pathname === path;
 
-  // Определяем доступные ссылки в зависимости от роли пользователя
-  const getNavigationLinks = () => {
-    if (!currentUser) {
-      return [
-        { title: 'Главная', path: '/', icon: Home },
-        { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-        { title: 'Экспонаты', path: '/artworks', icon: Image },
-      ];
-    }
-
-    switch (currentUser.role) {
-      case 'admin':
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Пользователи', path: '/admin/users', icon: Users },
-          { title: 'Админ-панель', path: '/admin', icon: Settings },
-          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
-        ];
-      case 'curator':
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Куратор', path: '/curator', icon: Star },
-          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
-          { title: 'Рецензии', path: '/curator-review', icon: Settings },
-        ];
-      case 'staff':
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Сотрудник', path: '/staff', icon: Users },
-          { title: 'Загрузка', path: '/artwork-upload', icon: Image },
-          { title: 'Дашборд', path: '/staff-dashboard', icon: LayoutDashboard },
-        ];
-      case 'tour_guide':
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Организатор туров', path: '/tour-guide', icon: Map },
-          { title: 'Туры', path: '/tours', icon: Map },
-        ];
-      case 'auction_participant':
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Участник аукциона', path: '/auction-participant', icon: Ticket },
-        ];
-      default:
-        return [
-          { title: 'Главная', path: '/', icon: Home },
-          { title: 'Галереи', path: '/galleries', icon: GalleryVerticalEnd },
-          { title: 'Экспонаты', path: '/artworks', icon: Image },
-          { title: 'Коллекции', path: '/collections', icon: Palette },
-        ];
-    }
-  };
-
-  const navLinks = getNavigationLinks();
+  const navLinks = currentUser
+    ? roleNav[currentUser.role] ?? publicNav
+    : publicNav;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container flex h-16 items-center">
-        <div className="flex items-center gap-4">
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0 md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Переключить меню</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64">
-              <div className="flex items-center gap-2 py-4">
-                <GalleryVerticalEnd className="h-6 w-6" />
-                <span className="text-xl font-bold">Виртуальная галерея</span>
-              </div>
-              
-              <nav className="flex flex-col gap-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive(link.path)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-accent hover:text-accent-foreground'
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <link.icon className="h-4 w-4" />
-                    {link.title}
-                  </Link>
-                ))}
-                
-                {currentUser && (
-                  <>
-                    <div className="my-2 h-px bg-border" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Выйти
-                    </button>
-                  </>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
-          
-          <Link to="/" className="flex items-center gap-2">
-            <GalleryVerticalEnd className="h-6 w-6" />
-            <span className="text-xl font-bold hidden sm:block">Виртуальная галерея</span>
-          </Link>
-        </div>
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
 
-        <nav className="mx-6 hidden md:flex items-center gap-2">
-          {navLinks.slice(0, 5).map((link) => (
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className="bg-indigo-100 p-1.5 rounded-lg">
+              <Palette className="h-5 w-5 text-indigo-600" />
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-sm font-bold text-gray-900 leading-none">Virtual Gallery</div>
+              <div className="text-xs text-gray-500 leading-none mt-0.5">AI Powered</div>
+            </div>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navLinks.map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  isActive(link.path)
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                {link.title}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                {dashboardLink[currentUser.role] && (
+                  <Link
+                    to={dashboardLink[currentUser.role]}
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Дашборд
+                  </Link>
+                )}
+                <span className="hidden lg:block text-xs text-gray-500 max-w-[120px] truncate">
+                  {currentUser.username}
+                </span>
+                <button
+                  onClick={onLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline">Выйти</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  Войти
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-3 py-1.5 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                >
+                  Регистрация
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden p-1.5 rounded-md text-gray-600 hover:bg-gray-100"
+              onClick={() => setMobileOpen(o => !o)}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile nav */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
+          {navLinks.map(link => (
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              onClick={() => setMobileOpen(false)}
+              className={`block px-3 py-2 rounded-md text-sm font-medium ${
                 isActive(link.path)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-accent hover:text-accent-foreground'
+                  ? 'text-indigo-600 bg-indigo-50'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <link.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{link.title}</span>
+              {link.title}
             </Link>
           ))}
-        </nav>
-
-        <div className="flex flex-1 items-center justify-end gap-4">
-          {currentUser ? (
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-sm font-medium">
-                Привет, {currentUser.username}
-              </span>
-              <Button onClick={handleLogout} variant="outline" size="sm">
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Выйти</span>
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="outline" size="sm">Войти</Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm">Регистрация</Button>
-              </Link>
-            </div>
+          {currentUser && dashboardLink[currentUser.role] && (
+            <Link
+              to={dashboardLink[currentUser.role]}
+              onClick={() => setMobileOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-medium text-indigo-600 bg-indigo-50"
+            >
+              Дашборд
+            </Link>
           )}
-          
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs text-white">
-              3
-            </span>
-          </Button>
-          
-          <Button variant="secondary" size="icon" className="rounded-full">
-            <CircleUser className="h-5 w-5" />
-            <span className="sr-only">Профиль</span>
-          </Button>
         </div>
-      </div>
+      )}
     </header>
   );
 };

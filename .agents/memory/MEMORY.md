@@ -1,0 +1,1 @@
+- [Nav & routing structure](nav-routing.md) — HTML pages stay at /html/* as reference; React SPA handles all routes via catch-all; select HTML fallbacks for pages not yet in React.
