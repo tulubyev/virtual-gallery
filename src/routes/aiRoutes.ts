@@ -1,6 +1,19 @@
 // src/routes/aiRoutes.ts
 import { Router } from 'express';
+import multer from 'multer';
 import { AiController } from '../controllers/AiController';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Только PDF файлы разрешены'));
+    }
+  },
+});
 
 export function createAiRoutes(controller: AiController) {
   const router = Router();
@@ -26,8 +39,8 @@ export function createAiRoutes(controller: AiController) {
   // ArtWiki AI chat
   router.post('/chat', (req, res) => controller.chat(req, res));
 
-  // RAG PDF processing
-  router.post('/process-pdf', (req, res) => controller.processPdf(req, res));
+  // RAG PDF processing (multipart/form-data)
+  router.post('/process-pdf', upload.single('pdf'), (req, res) => controller.processPdf(req, res));
 
   return router;
 }

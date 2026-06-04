@@ -239,18 +239,29 @@ class AiController {
   // Process PDF for RAG
   async processPdf(req: Request, res: Response): Promise<void> {
     try {
-      const { pdfUrl, documentId, category } = req.body;
-      if (!pdfUrl || !documentId) {
-        res.status(400).json({ error: 'pdfUrl и documentId обязательны' });
+      const file = (req as any).file as Express.Multer.File | undefined;
+      const { documentId, category } = req.body;
+
+      if (!file) {
+        res.status(400).json({ error: 'PDF файл обязателен' });
+        return;
+      }
+      if (!documentId) {
+        res.status(400).json({ error: 'documentId обязателен' });
         return;
       }
 
       const aiServiceUrl = process.env.AI_ML_SERVICE_URL || 'http://localhost:8000';
       try {
+        const formData = new FormData();
+        const arrayBuffer = file.buffer.buffer.slice(file.buffer.byteOffset, file.buffer.byteOffset + file.buffer.byteLength) as ArrayBuffer;
+        formData.append('pdf', new Blob([arrayBuffer], { type: 'application/pdf' }), file.originalname);
+        formData.append('documentId', documentId);
+        if (category) formData.append('category', category);
+
         const aiRes = await fetch(`${aiServiceUrl}/process-pdf`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pdfUrl, documentId, category }),
+          body: formData,
           signal: AbortSignal.timeout(30000),
         });
         const data: any = await aiRes.json();

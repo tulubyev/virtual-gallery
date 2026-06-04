@@ -69,12 +69,15 @@ const RAGPage: React.FC = () => {
     setProcessing(true);
     try {
       const documentId = 'doc_' + Date.now();
-      const pdfUrl = URL.createObjectURL(selectedFile);
+
+      const formData = new FormData();
+      formData.append('pdf', selectedFile);
+      formData.append('documentId', documentId);
+      formData.append('category', category);
 
       const res = await fetch('/api/ai/process-pdf', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pdfUrl, documentId, category }),
+        body: formData,
       });
 
       const data = await res.json();
