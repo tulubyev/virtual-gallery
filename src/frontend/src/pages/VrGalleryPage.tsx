@@ -1,8 +1,9 @@
 // src/frontend/src/pages/VrGalleryPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import axios from 'axios';
-import VRScene from '../components/VRGalleryComponent';
 import { Artwork } from '../types';
+
+const VRScene = React.lazy(() => import('../components/VRGalleryComponent'));
 
 const VrGalleryPage: React.FC = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -44,11 +45,13 @@ const VrGalleryPage: React.FC = () => {
   }
 
   return (
-    <VRScene
-      artworks={artworks}
-      onArtworkSelect={handleArtworkSelect}
-      onExitVR={handleExitVR}
-    />
+    <Suspense fallback={<div>Loading VR Gallery...</div>}>
+      <VRScene
+        artworks={artworks}
+        onArtworkSelect={handleArtworkSelect}
+        onExitVR={handleExitVR}
+      />
+    </Suspense>
   );
 };
 

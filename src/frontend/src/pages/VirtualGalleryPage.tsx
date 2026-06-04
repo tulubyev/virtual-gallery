@@ -1,9 +1,10 @@
 // src/frontend/src/pages/VirtualGalleryPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import VirtualGallery3D from '../components/VirtualGallery3D';
 import { Artwork } from '../types';
+
+const VirtualGallery3D = React.lazy(() => import('../components/VirtualGallery3D'));
 
 const LoadingSpinner = styled.div`
   display: flex;
@@ -110,11 +111,13 @@ const ArtworkDetailPage: React.FC = () => {
 
   return (
     <div>
-      <VirtualGallery3D 
-        artworks={artworks} 
-        onArtworkClick={handleArtworkClick}
-        onExitVR={handleExitVR}
-      />
+      <Suspense fallback={<LoadingSpinner>Загрузка виртуальной галереи...</LoadingSpinner>}>
+        <VirtualGallery3D 
+          artworks={artworks} 
+          onArtworkClick={handleArtworkClick}
+          onExitVR={handleExitVR}
+        />
+      </Suspense>
 
       {selectedArtwork && (
         <ArtworkDetailModal onClick={handleCloseModal}>

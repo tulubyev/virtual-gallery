@@ -43,7 +43,6 @@ export default defineConfig({
             '@radix-ui/react-select',
             '@radix-ui/react-slot',
           ],
-          'vendor-three': ['three'],
           'vendor-motion': ['framer-motion'],
           'vendor-socket': ['socket.io-client'],
           'vendor-http': ['axios'],
