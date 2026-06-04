@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { MapPin, Clock, Users, Star, Eye, GalleryVerticalEnd, Search } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -153,6 +154,78 @@ const TOPIC_CARDS = [
 
 const QUICK_QUESTIONS = ['Что такое импрессионизм?', 'Техники Ван Гога'];
 
+interface Gallery {
+  id: string;
+  name: string;
+  description: string;
+  location: string;
+  openingHours: string;
+  visitorCount: number;
+  tags: string[];
+  featured: boolean;
+  rating: number;
+  artworksCount: number;
+  color: string;
+  icon: string;
+}
+
+const GALLERIES: Gallery[] = [
+  {
+    id: '1', icon: '🎨', color: 'purple',
+    name: 'Галерея современного искусства',
+    description: 'Коллекция современных произведений от ведущих художников 21 века.',
+    location: 'Центральный район, ул. Искусств, 15',
+    openingHours: 'Ежедневно 10:00–20:00',
+    visitorCount: 12500, tags: ['современное', 'экспериментальное', 'цифровое'], featured: true,
+    rating: 4.8, artworksCount: 1240,
+  },
+  {
+    id: '2', icon: '🏛', color: 'indigo',
+    name: 'Классическая галерея',
+    description: 'Шедевры живописи и скульптуры от мастеров прошлых эпох.',
+    location: 'Исторический квартал, пр. Культуры, 42',
+    openingHours: 'Пн–Пт 9:00–18:00, Сб–Вс 10:00–17:00',
+    visitorCount: 8700, tags: ['классическое', 'живопись', 'скульптура'], featured: true,
+    rating: 4.7, artworksCount: 850,
+  },
+  {
+    id: '3', icon: '💻', color: 'sky',
+    name: 'Галерея цифрового искусства',
+    description: 'Инновационные работы, созданные с использованием цифровых технологий.',
+    location: 'Технопарк, здание 5, эт. 3',
+    openingHours: 'Круглосуточно',
+    visitorCount: 5400, tags: ['цифровое', 'интерактивное', 'VR'], featured: false,
+    rating: 4.6, artworksCount: 420,
+  },
+  {
+    id: '4', icon: '🧵', color: 'orange',
+    name: 'Галерея народного искусства',
+    description: 'Традиционные ремесла и народные промыслы со всего мира.',
+    location: 'Этноквартал, ул. Ремесел, 7',
+    openingHours: 'Пн–Вс 11:00–19:00',
+    visitorCount: 3200, tags: ['народное', 'ремесла', 'традиции'], featured: false,
+    rating: 4.5, artworksCount: 680,
+  },
+  {
+    id: '5', icon: '🌸', color: 'emerald',
+    name: 'Музей импрессионизма',
+    description: 'Коллекция работ импрессионистов 19-го века.',
+    location: 'Парк культуры, ул. Художников, 25',
+    openingHours: 'Вт–Вс 10:00–18:00',
+    visitorCount: 7200, tags: ['импрессионизм', '19 век', 'Франция'], featured: true,
+    rating: 4.9, artworksCount: 320,
+  },
+  {
+    id: '6', icon: '📡', color: 'blue',
+    name: 'Современные инсталляции',
+    description: 'Интерактивные и мультимедийные инсталляции современных художников.',
+    location: 'Арт-квартал, ул. Инноваций, 8',
+    openingHours: 'Пн–Сб 12:00–21:00',
+    visitorCount: 4100, tags: ['инсталляция', 'интерактив', 'цифровое'], featured: false,
+    rating: 4.4, artworksCount: 150,
+  },
+];
+
 const colorClasses: Record<string, { bg: string; text: string; border: string; hover: string }> = {
   purple: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'hover:border-purple-200', hover: 'group-hover:bg-purple-200' },
   amber:  { bg: 'bg-amber-100',  text: 'text-amber-600',  border: 'hover:border-amber-200',  hover: 'group-hover:bg-amber-200'  },
@@ -194,6 +267,15 @@ const ArtWikiPage: React.FC = () => {
   const [museumModal, setMuseumModal] = useState<{ url: string; name: string } | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [gallerySearch, setGallerySearch] = useState('');
+
+  const filteredGalleries = useMemo(() =>
+    GALLERIES.filter(g =>
+      g.name.toLowerCase().includes(gallerySearch.toLowerCase()) ||
+      g.description.toLowerCase().includes(gallerySearch.toLowerCase()) ||
+      g.tags.some(t => t.toLowerCase().includes(gallerySearch.toLowerCase()))
+    ),
+  [gallerySearch]);
 
   useEffect(() => {
     checkAiStatus();
@@ -436,6 +518,118 @@ const ArtWikiPage: React.FC = () => {
             })}
           </div>
         </div>
+
+        {/* ── Virtual Galleries ── */}
+        <div className="mt-14">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-3">
+              <span>🏛</span>
+              Виртуальные галереи
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Исследуйте коллекции</h2>
+            <p className="text-gray-600 max-w-xl mx-auto text-sm">
+              Immersive 3D-пространства с произведениями искусства со всего мира.
+              Нажмите на карточку, чтобы посетить галерею.
+            </p>
+          </div>
+
+          {/* Search */}
+          <div className="max-w-md mx-auto mb-8 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              value={gallerySearch}
+              onChange={e => setGallerySearch(e.target.value)}
+              placeholder="Поиск галерей по названию или тегу..."
+              className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent"
+            />
+          </div>
+
+          {/* Gallery cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredGalleries.map(gallery => {
+              const c = colorClasses[gallery.color] ?? colorClasses.purple;
+              return (
+                <div
+                  key={gallery.id}
+                  className={`bg-white/95 rounded-xl p-5 border border-gray-100 ${c.border} hover:shadow-lg transition-all group text-left relative`}
+                >
+                  {gallery.featured && (
+                    <span className="absolute top-3 right-3 bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                      Рекомендуем
+                    </span>
+                  )}
+
+                  {/* Header */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-11 h-11 ${c.bg} rounded-xl flex items-center justify-center ${c.hover} transition-colors flex-shrink-0`}>
+                      <span className="text-xl">{gallery.icon}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm leading-tight">{gallery.name}</h4>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <span className="text-xs text-gray-500">{gallery.rating.toFixed(1)}</span>
+                        <span className="text-gray-300 text-xs">·</span>
+                        <span className="text-xs text-gray-400">{gallery.artworksCount} экспонатов</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">{gallery.description}</p>
+
+                  {/* Meta */}
+                  <div className="space-y-1.5 mb-3">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{gallery.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Clock className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                      <span>{gallery.openingHours}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <Users className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                      <span>{gallery.visitorCount.toLocaleString()} посетителей</span>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {gallery.tags.map(tag => (
+                      <span key={tag} className={`text-xs px-2 py-0.5 rounded-full ${c.bg} ${c.text} font-medium`}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Button */}
+                  <button className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-medium transition-all ${c.bg} ${c.text} hover:opacity-80`}>
+                    <Eye className="h-4 w-4" />
+                    Посетить галерею
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredGalleries.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <GalleryVerticalEnd className="h-8 w-8 text-indigo-500" />
+              </div>
+              <p className="text-gray-500 text-sm">Галереи не найдены. Попробуйте другой запрос.</p>
+              <button
+                onClick={() => setGallerySearch('')}
+                className="mt-3 text-xs text-indigo-600 hover:text-indigo-700 underline"
+              >
+                Сбросить поиск
+              </button>
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* Museum Modal */}
