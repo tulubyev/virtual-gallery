@@ -1,33 +1,33 @@
 // src/frontend/src/App.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
-// Страницы
-import HomePage from './pages/HomePage';
-import AdminPanel from './pages/AdminPanel';
-import CuratorPanel from './pages/CuratorPanel';
-import StaffPanel from './pages/StaffPanel';
-import TourGuidePanel from './pages/TourGuidePanel';
-import AuctionParticipantPanel from './pages/AuctionParticipantPanel';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ArtworkDetailPage from './pages/ArtworkDetailPage';
-import VrGalleryPage from './pages/VrGalleryPage';
-import GalleryPage from './pages/GalleryPage';
-import RoomManagementPage from './pages/RoomManagementPage';
-import RoomPage from './pages/RoomPage';
-import StaffDashboardPage from './pages/StaffDashboardPage';
-import CuratorReviewPage from './pages/CuratorReviewPage';
-import ArtworkUploadPage from './pages/ArtworkUploadPage';
-import VirtualGalleryPage from './pages/VirtualGalleryPage';
-import ArtworksPage from './pages/ArtworksPage';
-import GalleriesListPage from './pages/GalleriesListPage';
-import ToursPage from './pages/ToursPage';
-import CollectionsPage from './pages/CollectionsPage';
-import ArtWikiPage from './pages/ArtWikiPage';
-import RAGPage from './pages/RAGPage';
-import AboutPage from './pages/AboutPage';
+// Страницы — динамический импорт для code splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const CuratorPanel = lazy(() => import('./pages/CuratorPanel'));
+const StaffPanel = lazy(() => import('./pages/StaffPanel'));
+const TourGuidePanel = lazy(() => import('./pages/TourGuidePanel'));
+const AuctionParticipantPanel = lazy(() => import('./pages/AuctionParticipantPanel'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ArtworkDetailPage = lazy(() => import('./pages/ArtworkDetailPage'));
+const VrGalleryPage = lazy(() => import('./pages/VrGalleryPage'));
+const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const RoomManagementPage = lazy(() => import('./pages/RoomManagementPage'));
+const RoomPage = lazy(() => import('./pages/RoomPage'));
+const StaffDashboardPage = lazy(() => import('./pages/StaffDashboardPage'));
+const CuratorReviewPage = lazy(() => import('./pages/CuratorReviewPage'));
+const ArtworkUploadPage = lazy(() => import('./pages/ArtworkUploadPage'));
+const VirtualGalleryPage = lazy(() => import('./pages/VirtualGalleryPage'));
+const ArtworksPage = lazy(() => import('./pages/ArtworksPage'));
+const GalleriesListPage = lazy(() => import('./pages/GalleriesListPage'));
+const ToursPage = lazy(() => import('./pages/ToursPage'));
+const CollectionsPage = lazy(() => import('./pages/CollectionsPage'));
+const ArtWikiPage = lazy(() => import('./pages/ArtWikiPage'));
+const RAGPage = lazy(() => import('./pages/RAGPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 // Компоненты
 import Header from './components/Header';
@@ -35,6 +35,12 @@ import Footer from './components/Footer';
 
 // Типы
 import { User } from './types';
+
+const PageLoader: React.FC = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="text-muted-foreground text-sm animate-pulse">Loading…</div>
+  </div>
+);
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -72,81 +78,83 @@ const App: React.FC = () => {
         <Header currentUser={currentUser} onLogout={logout} />
         <div className="flex flex-1">
           <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/artworks" element={<ArtworksPage />} />
-              <Route path="/artworks/:id" element={<ArtworkDetailPage />} />
-              <Route path="/vr-gallery" element={<VrGalleryPage />} />
-              <Route path="/galleries" element={<GalleriesListPage />} />
-              <Route path="/galleries/:id" element={<GalleryPage />} />
-              <Route path="/rooms/:id" element={<RoomPage />} />
-              <Route
-                path="/galleries/:galleryId/rooms/manage"
-                element={
-                  currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
-                  <RoomManagementPage /> :
-                  <Navigate to="/login" />
-                }
-              />
-              <Route
-                path="/staff-dashboard"
-                element={
-                  currentUser?.role === 'staff' || currentUser?.role === 'admin' ?
-                  <StaffDashboardPage /> :
-                  <Navigate to="/login" />
-                }
-              />
-              <Route
-                path="/curator-review"
-                element={
-                  currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
-                  <CuratorReviewPage /> :
-                  <Navigate to="/login" />
-                }
-              />
-              <Route
-                path="/artwork-upload"
-                element={
-                  currentUser?.role === 'admin' || currentUser?.role === 'curator' ?
-                  <ArtworkUploadPage /> :
-                  <Navigate to="/login" />
-                }
-              />
-              <Route path="/virtual-gallery" element={<VirtualGalleryPage />} />
-              <Route path="/tours" element={<ToursPage />} />
-              <Route path="/collections" element={<CollectionsPage />} />
-              <Route path="/artwiki" element={<ArtWikiPage />} />
-              <Route path="/rag" element={<RAGPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route
-                path="/admin"
-                element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/curator"
-                element={currentUser?.role === 'curator' ? <CuratorPanel /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/staff"
-                element={currentUser?.role === 'staff' ? <StaffPanel /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/tour-guide"
-                element={currentUser?.role === 'tour_guide' ? <TourGuidePanel /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/auction-participant"
-                element={currentUser?.role === 'auction_participant' ? <AuctionParticipantPanel /> : <Navigate to="/login" />}
-              />
-              <Route
-                path="/login"
-                element={!currentUser ? <LoginPage onLogin={login} /> : <Navigate to="/" />}
-              />
-              <Route
-                path="/register"
-                element={!currentUser ? <RegisterPage onRegister={login} /> : <Navigate to="/" />}
-              />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/artworks" element={<ArtworksPage />} />
+                <Route path="/artworks/:id" element={<ArtworkDetailPage />} />
+                <Route path="/vr-gallery" element={<VrGalleryPage />} />
+                <Route path="/galleries" element={<GalleriesListPage />} />
+                <Route path="/galleries/:id" element={<GalleryPage />} />
+                <Route path="/rooms/:id" element={<RoomPage />} />
+                <Route
+                  path="/galleries/:galleryId/rooms/manage"
+                  element={
+                    currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
+                    <RoomManagementPage /> :
+                    <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/staff-dashboard"
+                  element={
+                    currentUser?.role === 'staff' || currentUser?.role === 'admin' ?
+                    <StaffDashboardPage /> :
+                    <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/curator-review"
+                  element={
+                    currentUser?.role === 'curator' || currentUser?.role === 'admin' ?
+                    <CuratorReviewPage /> :
+                    <Navigate to="/login" />
+                  }
+                />
+                <Route
+                  path="/artwork-upload"
+                  element={
+                    currentUser?.role === 'admin' || currentUser?.role === 'curator' ?
+                    <ArtworkUploadPage /> :
+                    <Navigate to="/login" />
+                  }
+                />
+                <Route path="/virtual-gallery" element={<VirtualGalleryPage />} />
+                <Route path="/tours" element={<ToursPage />} />
+                <Route path="/collections" element={<CollectionsPage />} />
+                <Route path="/artwiki" element={<ArtWikiPage />} />
+                <Route path="/rag" element={<RAGPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route
+                  path="/admin"
+                  element={currentUser?.role === 'admin' ? <AdminPanel /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/curator"
+                  element={currentUser?.role === 'curator' ? <CuratorPanel /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/staff"
+                  element={currentUser?.role === 'staff' ? <StaffPanel /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/tour-guide"
+                  element={currentUser?.role === 'tour_guide' ? <TourGuidePanel /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/auction-participant"
+                  element={currentUser?.role === 'auction_participant' ? <AuctionParticipantPanel /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/login"
+                  element={!currentUser ? <LoginPage onLogin={login} /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/register"
+                  element={!currentUser ? <RegisterPage onRegister={login} /> : <Navigate to="/" />}
+                />
+              </Routes>
+            </Suspense>
           </main>
         </div>
         <Footer />
