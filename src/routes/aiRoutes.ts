@@ -23,5 +23,11 @@ export function createAiRoutes(controller: AiController) {
   // Predict engagement
   router.post('/predict-engagement', (req, res) => controller.predictEngagement(req, res));
 
+  // ArtWiki AI chat
+  router.post('/chat', (req, res) => controller.chat(req, res));
+
+  // RAG PDF processing
+  router.post('/process-pdf', (req, res) => controller.processPdf(req, res));
+
   return router;
 }

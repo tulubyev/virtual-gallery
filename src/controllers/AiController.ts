@@ -207,6 +207,65 @@ class AiController {
     }
   }
 
+  // AI Chat endpoint for ArtWiki
+  async chat(req: Request, res: Response): Promise<void> {
+    try {
+      const { message } = req.body;
+      if (!message) {
+        res.status(400).json({ error: 'Сообщение обязательно' });
+        return;
+      }
+
+      const aiServiceUrl = process.env.AI_ML_SERVICE_URL || 'http://localhost:8000';
+      try {
+        const aiRes = await fetch(`${aiServiceUrl}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+          signal: AbortSignal.timeout(15000),
+        });
+        const data: any = await aiRes.json();
+        res.json({ reply: data.reply ?? data.message ?? data.answer ?? 'Ответ получен.' });
+      } catch {
+        res.json({
+          reply: `Демо-режим: Вы спросили о "${message}". AI/ML сервис недоступен, но я могу помочь с базовыми вопросами об искусстве. Попробуйте спросить о конкретном художнике или стиле.`,
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Process PDF for RAG
+  async processPdf(req: Request, res: Response): Promise<void> {
+    try {
+      const { pdfUrl, documentId, category } = req.body;
+      if (!pdfUrl || !documentId) {
+        res.status(400).json({ error: 'pdfUrl и documentId обязательны' });
+        return;
+      }
+
+      const aiServiceUrl = process.env.AI_ML_SERVICE_URL || 'http://localhost:8000';
+      try {
+        const aiRes = await fetch(`${aiServiceUrl}/process-pdf`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pdfUrl, documentId, category }),
+          signal: AbortSignal.timeout(30000),
+        });
+        const data: any = await aiRes.json();
+        res.json(data);
+      } catch {
+        res.status(503).json({
+          error: 'AI/ML сервис недоступен',
+          hint: 'Запустите Python AI/ML сервис для обработки PDF документов',
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   // Generate artwork description
   async generateArtworkDescription(req: Request, res: Response): Promise<void> {
     try {
