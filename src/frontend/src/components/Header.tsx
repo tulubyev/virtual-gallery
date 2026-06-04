@@ -14,6 +14,7 @@ const publicNav = [
   { title: 'ArtWiki', path: '/artwiki' },
   { title: 'RAG', path: '/rag' },
   { title: 'О нас', path: '/about' },
+  { title: '🧪 Новые функции', path: '/new-features' },
 ];
 
 const roleNav: Record<string, { title: string; path: string }[]> = {

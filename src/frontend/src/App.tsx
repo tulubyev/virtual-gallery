@@ -28,6 +28,7 @@ const CollectionsPage = lazy(() => import('./pages/CollectionsPage'));
 const ArtWikiPage = lazy(() => import('./pages/ArtWikiPage'));
 const RAGPage = lazy(() => import('./pages/RAGPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const NewFeaturesPage = lazy(() => import('./pages/NewFeaturesPage'));
 
 // Prefetch high-traffic route chunks after the page is interactive so
 // subsequent navigations hit the browser cache instead of waiting on a fetch.
@@ -114,6 +115,7 @@ const App: React.FC = () => {
                 <Route path="/artwiki" element={<ArtWikiPage />} />
                 <Route path="/rag" element={<RAGPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/new-features" element={<NewFeaturesPage />} />
 
                 {/* Галерея — 3D виртуальный план (восстановлен) */}
                 <Route path="/galleries" element={<VirtualGalleryPage />} />
