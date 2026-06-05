@@ -1,7 +1,7 @@
 // src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { User } from '../types';
 
 interface RegisterPageProps {
@@ -20,7 +20,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post('/api/auth/register', {
         username,
         email,
         password,
@@ -97,9 +97,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
       </form>
       <p className="mt-4 text-center">
         Уже есть аккаунт?{' '}
-        <a href="/login" className="text-blue-500 hover:underline">
+        <Link to="/login" className="text-blue-500 hover:underline">
           Войдите
-        </a>
+        </Link>
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 // src/pages/LoginPage.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { User } from '../types';
 
 interface LoginPageProps {
@@ -18,7 +18,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('/api/auth/login', {
         email,
         password
       });
@@ -72,9 +72,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       </form>
       <p className="mt-4 text-center">
         Нет аккаунта?{' '}
-        <a href="/register" className="text-blue-500 hover:underline">
+        <Link to="/register" className="text-blue-500 hover:underline">
           Зарегистрируйтесь
-        </a>
+        </Link>
       </p>
     </div>
   );

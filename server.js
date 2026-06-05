@@ -11,6 +11,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // API Routes — no-cache so clients always get fresh data
+app.use('/api/auth', noCacheMiddleware, require('./src/routes/auth'));
 app.use('/api', noCacheMiddleware, require('./src/routes/health'));
 app.use('/api/ai', noCacheMiddleware, require('./src/routes/ai'));
 app.use('/api/gallery', noCacheMiddleware, require('./src/routes/gallery'));

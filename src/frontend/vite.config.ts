@@ -47,7 +47,6 @@ export default defineConfig({
             '@radix-ui/react-slot',
           ],
           'vendor-motion': ['framer-motion'],
-          'vendor-socket': ['socket.io-client'],
           'vendor-http': ['axios'],
         },
       }
