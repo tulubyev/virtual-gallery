@@ -2,7 +2,26 @@
 
 ## Getting Started
 
-New developers can get the project running with two setup commands.
+### First-time setup (one command)
+
+```bash
+npm run bootstrap
+```
+
+This single command does everything in order:
+1. Runs `npm run setup` — copies `.env.example` → `.env`, installs Node.js dependencies, checks environment variables, and initializes the database.
+2. Runs `npm run setup:ai` — copies `ai-ml-service/.env.example` → `ai-ml-service/.env` and installs Python dependencies.
+3. Runs `npm run dev:all` — launches the Node.js server, Vite, and the Python AI/ML service together.
+
+**Before running**, make sure you have your credentials ready. After the setup scripts finish (but before the dev servers start) you may be prompted to fill in `.env` and `ai-ml-service/.env` with real values.
+
+The app will be available at `http://localhost:3001`.
+
+---
+
+### Manual setup (step by step)
+
+If you prefer to run each step separately:
 
 **Step 1 — Node.js service:**
 
@@ -27,7 +46,7 @@ This will:
 2. Run `pip install -r ai-ml-service/requirements.txt` to install Python dependencies
 3. Print a checklist of required AI/ML environment variables
 
-**After setup**, open both `.env` and `ai-ml-service/.env` and replace any placeholder values with real credentials. Then start everything with one command:
+**After setup**, open both `.env` and `ai-ml-service/.env` and replace any placeholder values with real credentials. Then start everything with:
 
 ```bash
 npm run dev:all

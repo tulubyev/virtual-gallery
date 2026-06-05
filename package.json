@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "bootstrap": "npm run setup && npm run setup:ai && npm run dev:all",
     "setup": "bash scripts/setup.sh",
     "setup:ai": "bash scripts/setup_ai.sh",
     "//dev": "Flags: --kill-others-on-fail false keeps Express up if Vite crashes; nodemon auto-restarts Express on file changes; tsx lets server.js require TypeScript route files directly",
