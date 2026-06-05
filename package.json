@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "setup": "bash scripts/setup.sh",
     "//dev": "Flags: --kill-others-on-fail false keeps Express up if Vite crashes; nodemon auto-restarts Express on file changes",
     "dev": "concurrently --kill-others-on-fail false --names \"server,vite\" --prefix-colors \"blue,green\" \"PORT=3001 nodemon server.js\" \"cd src/frontend && npx vite --port 5000 --host\"",
     "dev:server": "node server.js",

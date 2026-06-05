@@ -1,5 +1,47 @@
 # Virtual Art Gallery
 
+## Getting Started
+
+New developers can get the project running with a single command:
+
+```bash
+npm run setup
+```
+
+This will:
+1. Copy `.env.example` → `.env` (if `.env` doesn't already exist)
+2. Run `npm install` to install all Node.js dependencies
+3. Check that all required environment variables are filled in
+4. Initialize the database (runs `npm run init-db`) — only if credentials are complete
+
+**After setup**, open `.env` and replace any placeholder values with real credentials (database, S3, JWT secret). Then start the app:
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:3001`.
+
+### Required environment variables
+
+| Variable | Description |
+|---|---|
+| `DB_HOST` | PostgreSQL host |
+| `DB_PORT` | PostgreSQL port (default `5432`) |
+| `DB_NAME` | Database name |
+| `DB_USER` | Database user |
+| `DB_PASSWORD` | Database password |
+| `DB_STRING` | Full connection string |
+| `JWT_SECRET` | Secret for signing JWT tokens (≥32 chars) |
+| `S3_ACCESS_KEY_ID` | S3-compatible storage access key |
+| `S3_SECRET_ACCESS_KEY` | S3-compatible storage secret key |
+| `S3_REGION` | Storage region |
+| `S3_BUCKET_NAME` | Storage bucket name |
+| `S3_ENDPOINT` | Storage endpoint URL |
+| `AI_CORE_URL` | URL of the Python AI/ML service (default `http://localhost:8001`) |
+
+---
+
 ## Overview
 
 The Virtual Art Gallery is a web application designed to revolutionize art appreciation and management. It provides a comprehensive 3D gallery environment with VR support, AI-powered curation, and IoT integration. The platform allows users to explore artworks, receive personalized recommendations, and interact within a rich digital art space. It supports multiple user roles (admin, curator, staff, tour guide, visitors) with robust role-based access control, aiming to enhance the accessibility and experience of art through technology.

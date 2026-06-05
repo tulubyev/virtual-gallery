@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# =============================================================
+# Virtual Art Gallery — one-command developer setup
+# Usage: bash scripts/setup.sh
+# =============================================================
+
+set -e
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+GREEN="\033[0;32m"
+YELLOW="\033[1;33m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+ok()   { echo -e "${GREEN}[OK]${RESET}  $*"; }
+warn() { echo -e "${YELLOW}[WARN]${RESET} $*"; }
+fail() { echo -e "${RED}[FAIL]${RESET} $*"; }
+
+echo ""
+echo "==========================================="
+echo "   Virtual Art Gallery — Developer Setup   "
+echo "==========================================="
+echo ""
+
+# ------------------------------------------------------------------
+# 1. Copy .env.example → .env (only when .env doesn't exist yet)
+# ------------------------------------------------------------------
+ENV_FILE="$ROOT_DIR/.env"
+ENV_EXAMPLE="$ROOT_DIR/.env.example"
+
+if [ -f "$ENV_FILE" ]; then
+  ok ".env already exists — skipping copy."
+else
+  if [ -f "$ENV_EXAMPLE" ]; then
+    cp "$ENV_EXAMPLE" "$ENV_FILE"
+    ok "Copied .env.example → .env"
+    warn "Open .env and fill in your real credentials before starting the app."
+  else
+    fail ".env.example not found. Cannot create .env automatically."
+    exit 1
+  fi
+fi
+
+# ------------------------------------------------------------------
+# 2. Install Node.js dependencies
+# ------------------------------------------------------------------
+echo ""
+echo "Installing Node.js dependencies..."
+cd "$ROOT_DIR"
+npm install --silent
+ok "npm install complete."
+
+# ------------------------------------------------------------------
+# 3. Required env-var checklist
+# ------------------------------------------------------------------
+echo ""
+echo "--- Environment variable checklist ---"
+
+MISSING=0
+check_var() {
+  local var_name="$1"
+  local value
+  # Source .env so we can inspect values
+  value=$(grep -E "^${var_name}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'")
+  if [ -z "$value" ] || echo "$value" | grep -qE "^(your-|change-me)"; then
+    warn "${var_name} — NOT set (placeholder detected)"
+    MISSING=$((MISSING + 1))
+  else
+    ok "${var_name}"
+  fi
+}
+
+check_var "DB_HOST"
+check_var "DB_PORT"
+check_var "DB_NAME"
+check_var "DB_USER"
+check_var "DB_PASSWORD"
+check_var "DB_STRING"
+check_var "JWT_SECRET"
+check_var "S3_ACCESS_KEY_ID"
+check_var "S3_SECRET_ACCESS_KEY"
+check_var "S3_REGION"
+check_var "S3_BUCKET_NAME"
+check_var "S3_ENDPOINT"
+
+echo ""
+if [ "$MISSING" -gt 0 ]; then
+  warn "$MISSING variable(s) still have placeholder values."
+  warn "Edit .env with your real credentials, then re-run this script"
+  warn "or run 'npm run init-db' directly once credentials are ready."
+  echo ""
+  echo "Skipping database initialization (credentials incomplete)."
+else
+  # ------------------------------------------------------------------
+  # 4. Initialize the database
+  # ------------------------------------------------------------------
+  echo "Initializing database..."
+  cd "$ROOT_DIR"
+  DB_INIT_OK=0
+  if npm run init-db 2>&1; then
+    ok "Database initialized successfully."
+    DB_INIT_OK=1
+  else
+    warn "Database initialization failed (see output above)."
+    warn "Once resolved, run: npm run init-db"
+  fi
+fi
+
+# ------------------------------------------------------------------
+# 5. Final summary
+# ------------------------------------------------------------------
+echo ""
+echo "==========================================="
+echo "   Setup summary"
+echo "==========================================="
+ok ".env present"
+if [ "$MISSING" -eq 0 ]; then
+  ok "All required env vars set"
+  if [ "${DB_INIT_OK:-0}" -eq 1 ]; then
+    ok "Database initialized"
+  else
+    warn "Database init failed — run 'npm run init-db' manually after fixing the error"
+  fi
+else
+  warn "$MISSING env var(s) need real values"
+  warn "Database init skipped — fill .env first, then run 'npm run init-db'"
+fi
+echo ""
+echo "Next steps:"
+echo "  1. Edit .env if any vars above show [WARN]"
+echo "  2. Run: npm run dev"
+echo "  3. Open the app at http://localhost:3001"
+echo ""
