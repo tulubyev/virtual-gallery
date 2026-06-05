@@ -27,18 +27,24 @@ This will:
 2. Run `pip install -r ai-ml-service/requirements.txt` to install Python dependencies
 3. Print a checklist of required AI/ML environment variables
 
-**After setup**, open both `.env` and `ai-ml-service/.env` and replace any placeholder values with real credentials. Then start the app:
+**After setup**, open both `.env` and `ai-ml-service/.env` and replace any placeholder values with real credentials. Then start everything with one command:
+
+```bash
+npm run dev:all
+```
+
+This launches the Node.js server, Vite, and the Python AI/ML service together with labeled output (`[server]`, `[vite]`, `[ai]`). The app will be available at `http://localhost:3001`.
+
+If you only want the Node.js app and Vite (no AI service):
 
 ```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:3001`.
-
-To start the AI/ML service separately:
+To start the AI/ML service on its own:
 
 ```bash
-cd ai-ml-service && python3 -m uvicorn src.main:app --host 0.0.0.0 --port 8001
+cd ai-ml-service && python3 -m uvicorn src.models.main:app --host 0.0.0.0 --port 8001
 ```
 
 ### Required environment variables
