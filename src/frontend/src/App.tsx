@@ -28,6 +28,7 @@ const ArtWikiPage = lazy(() => import('./pages/ArtWikiPage'));
 const RAGPage = lazy(() => import('./pages/RAGPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NewFeaturesPage = lazy(() => import('./pages/NewFeaturesPage'));
+const AuctionPage = lazy(() => import('./pages/AuctionPage'));
 
 // Prefetch high-traffic route chunks after the page is interactive so
 // subsequent navigations hit the browser cache instead of waiting on a fetch.
@@ -104,8 +105,27 @@ const App: React.FC = () => {
       <div className="flex flex-col min-h-screen bg-background">
         <Header currentUser={currentUser} onLogout={logout} />
         {DEBUG_SKIP_AUTH && (
-          <div className="bg-amber-50 border-b border-amber-200 px-4 py-1.5 text-center text-xs text-amber-700 font-medium">
-            🛠 Режим отладки: аутентификация отключена — все дашборды открыты без входа
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">
+            <p className="text-xs text-amber-700 font-medium mb-2">🛠 Режим отладки: аутентификация отключена — все дашборды открыты без входа</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { path: '/admin', label: '⚙️ Админ' },
+                { path: '/curator', label: '🎨 Куратор' },
+                { path: '/staff', label: '👷 Персонал' },
+                { path: '/tour-guide', label: '🗺 Гид' },
+                { path: '/auction-participant', label: '🔨 Участник аукциона' },
+                { path: '/staff-dashboard', label: '📊 Дашборд персонала' },
+                { path: '/curator-review', label: '🔍 Ревью куратора' },
+              ].map(({ path, label }) => (
+                <a
+                  key={path}
+                  href={path}
+                  className="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-medium px-3 py-1 rounded-full transition-colors"
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
           </div>
         )}
         <div className="flex flex-1">
@@ -131,6 +151,8 @@ const App: React.FC = () => {
                 <Route path="/galleries/:id" element={<GalleryPage />} />
                 <Route path="/rooms/:id" element={<RoomPage />} />
                 <Route path="/virtual-gallery" element={<VirtualGalleryPage />} />
+                <Route path="/gallery-3d" element={<VirtualGalleryPage />} />
+                <Route path="/auction" element={<AuctionPage />} />
 
                 {/* Дашборды — в режиме DEBUG открыты без логина */}
                 <Route
