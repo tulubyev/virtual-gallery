@@ -9,28 +9,40 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(noCacheMiddleware);
 
-// API Routes (must be first)
-app.use('/api', require('./src/routes/health'));
-app.use('/api/ai', require('./src/routes/ai'));
-app.use('/api/gallery', require('./src/routes/gallery'));
-app.use('/api/artworks', require('./src/routes/artworks'));
-app.use('/api/collections', require('./src/routes/collections'));
-app.use('/api/admin', require('./src/routes/admin'));
-app.use('/api/admin/users', require('./src/routes/users'));
-app.use('/api/watermark', require('./src/routes/watermark'));
-app.use('/api/archive', require('./src/routes/archive'));
-app.use('/api/display-settings', require('./src/routes/display-settings'));
-app.use('/api/stats', require('./src/routes/stats'));
-app.use('/api/auctions', require('./src/routes/auctions'));
+// API Routes — no-cache so clients always get fresh data
+app.use('/api', noCacheMiddleware, require('./src/routes/health'));
+app.use('/api/ai', noCacheMiddleware, require('./src/routes/ai'));
+app.use('/api/gallery', noCacheMiddleware, require('./src/routes/gallery'));
+app.use('/api/artworks', noCacheMiddleware, require('./src/routes/artworks'));
+app.use('/api/collections', noCacheMiddleware, require('./src/routes/collections'));
+app.use('/api/admin', noCacheMiddleware, require('./src/routes/admin'));
+app.use('/api/admin/users', noCacheMiddleware, require('./src/routes/users'));
+app.use('/api/watermark', noCacheMiddleware, require('./src/routes/watermark'));
+app.use('/api/archive', noCacheMiddleware, require('./src/routes/archive'));
+app.use('/api/display-settings', noCacheMiddleware, require('./src/routes/display-settings'));
+app.use('/api/stats', noCacheMiddleware, require('./src/routes/stats'));
+app.use('/api/auctions', noCacheMiddleware, require('./src/routes/auctions'));
 
 // Static assets
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// React SPA built assets (hashed filenames, served at /assets/...)
-app.use(express.static(path.join(__dirname, 'src/frontend/dist')));
+// React SPA hashed chunks — immutable cache (filename changes on every build)
+app.use('/assets', express.static(path.join(__dirname, 'src/frontend/dist/assets'), {
+  maxAge: '1y',
+  immutable: true,
+}));
+
+// React SPA root (index.html — no cache so new deploys are picked up instantly)
+app.use(express.static(path.join(__dirname, 'src/frontend/dist'), {
+  maxAge: 0,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('index.html')) {
+      res.set('Cache-Control', 'no-store');
+    }
+  },
+}));
 
 // Legacy HTML assets fallback (for /html/* routes)
 app.use('/assets', express.static(path.join(__dirname, 'src/frontend/assets')));

@@ -1,1 +1,3 @@
 - [Nav & routing structure](nav-routing.md) — HTML pages stay at /html/* as reference; React SPA handles all routes via catch-all; select HTML fallbacks for pages not yet in React.
+- [Cache & static serving](cache-static.md) — /assets/* immutable 1y cache; index.html no-store; noCacheMiddleware only on /api/* routes in server.js.
+- [Auth debug flag](auth-debug.md) — DEBUG_SKIP_AUTH=true in App.tsx line 59 bypasses all role guards; flip to false to restore real auth flow.

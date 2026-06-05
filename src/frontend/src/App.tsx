@@ -1,7 +1,6 @@
 // src/frontend/src/App.tsx
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
 
 // Страницы — динамический импорт для code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -50,6 +49,7 @@ const prefetchHighTrafficRoutes = () => {
 // Компоненты
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Типы
 import { User } from './types';
@@ -69,13 +69,11 @@ const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const newSocket = io(window.location.origin, { path: '/socket.io' });
     const token = localStorage.getItem('authToken');
     if (token) {
       // fetchUserData(token);
     }
     prefetchHighTrafficRoutes();
-    return () => { newSocket.close(); };
   }, []);
 
   const login = (userData: User) => setCurrentUser(userData);
@@ -103,6 +101,7 @@ const App: React.FC = () => {
         )}
         <div className="flex flex-1">
           <main className="flex-1">
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Публичные страницы */}
@@ -173,6 +172,7 @@ const App: React.FC = () => {
                 />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </main>
         </div>
         <Footer />
