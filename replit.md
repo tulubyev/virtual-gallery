@@ -2,7 +2,9 @@
 
 ## Getting Started
 
-New developers can get the project running with a single command:
+New developers can get the project running with two setup commands.
+
+**Step 1 — Node.js service:**
 
 ```bash
 npm run setup
@@ -14,13 +16,30 @@ This will:
 3. Check that all required environment variables are filled in
 4. Initialize the database (runs `npm run init-db`) — only if credentials are complete
 
-**After setup**, open `.env` and replace any placeholder values with real credentials (database, S3, JWT secret). Then start the app:
+**Step 2 — Python AI/ML service:**
+
+```bash
+npm run setup:ai
+```
+
+This will:
+1. Copy `ai-ml-service/.env.example` → `ai-ml-service/.env` (if missing)
+2. Run `pip install -r ai-ml-service/requirements.txt` to install Python dependencies
+3. Print a checklist of required AI/ML environment variables
+
+**After setup**, open both `.env` and `ai-ml-service/.env` and replace any placeholder values with real credentials. Then start the app:
 
 ```bash
 npm run dev
 ```
 
 The app will be available at `http://localhost:3001`.
+
+To start the AI/ML service separately:
+
+```bash
+cd ai-ml-service && python3 -m uvicorn src.main:app --host 0.0.0.0 --port 8001
+```
 
 ### Required environment variables
 
