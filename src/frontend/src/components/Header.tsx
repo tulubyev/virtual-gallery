@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Palette, LayoutDashboard, LogOut, Menu, X, ChevronDown, Shield, Users, Gavel, User as UserIcon } from 'lucide-react';
+import { Palette, LayoutDashboard, LogOut, Menu, X, ChevronDown, Shield, Users, Gavel, User as UserIcon, Sparkles } from 'lucide-react';
 import { User } from '@/types';
 
 interface HeaderProps {
@@ -8,45 +8,51 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-const publicNav = [
+interface NavItem {
+  title: string;
+  path: string;
+  ai?: boolean;
+}
+
+const publicNav: NavItem[] = [
   { title: 'Галерея', path: '/galleries' },
   { title: 'Аукцион', path: '/auction' },
-  { title: 'ArtWiki', path: '/artwiki' },
-  { title: 'RAG', path: '/rag' },
+  { title: 'ArtWiki', path: '/artwiki', ai: true },
+  { title: 'RAG', path: '/rag', ai: true },
   { title: 'О нас', path: '/about' },
   { title: '🧪 Новые функции', path: '/new-features' },
 ];
 
-const roleNav: Record<string, { title: string; path: string }[]> = {
+const roleNav: Record<string, NavItem[]> = {
   admin: [
     { title: 'Галерея', path: '/galleries' },
     { title: 'Аукцион', path: '/auction' },
-    { title: 'ArtWiki', path: '/artwiki' },
-    { title: 'RAG', path: '/rag' },
+    { title: 'ArtWiki', path: '/artwiki', ai: true },
+    { title: 'RAG', path: '/rag', ai: true },
   ],
   curator: [
     { title: 'Галерея', path: '/galleries' },
     { title: 'Аукцион', path: '/auction' },
-    { title: 'ArtWiki', path: '/artwiki' },
-    { title: 'RAG', path: '/rag' },
+    { title: 'ArtWiki', path: '/artwiki', ai: true },
+    { title: 'RAG', path: '/rag', ai: true },
   ],
   staff: [
     { title: 'Главная', path: '/' },
     { title: 'Галерея', path: '/galleries' },
-    { title: 'ArtWiki', path: '/artwiki' },
-    { title: 'RAG', path: '/rag' },
+    { title: 'ArtWiki', path: '/artwiki', ai: true },
+    { title: 'RAG', path: '/rag', ai: true },
   ],
   tour_guide: [
     { title: 'Галерея', path: '/galleries' },
     { title: 'Туры', path: '/tours' },
-    { title: 'ArtWiki', path: '/artwiki' },
-    { title: 'RAG', path: '/rag' },
+    { title: 'ArtWiki', path: '/artwiki', ai: true },
+    { title: 'RAG', path: '/rag', ai: true },
   ],
   auction_participant: [
     { title: 'Галерея', path: '/galleries' },
     { title: 'Аукцион', path: '/auction' },
-    { title: 'ArtWiki', path: '/artwiki' },
-    { title: 'RAG', path: '/rag' },
+    { title: 'ArtWiki', path: '/artwiki', ai: true },
+    { title: 'RAG', path: '/rag', ai: true },
   ],
 };
 
@@ -90,13 +96,19 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   isActive(link.path)
                     ? 'text-indigo-600 bg-indigo-50'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 {link.title}
+                {link.ai && (
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    AI
+                  </span>
+                )}
               </Link>
             ))}
           </nav>
@@ -182,13 +194,19 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
               key={link.path}
               to={link.path}
               onClick={() => setMobileOpen(false)}
-              className={`block px-3 py-2 rounded-md text-sm font-medium ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium ${
                 isActive(link.path)
                   ? 'text-indigo-600 bg-indigo-50'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               {link.title}
+              {link.ai && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  AI
+                </span>
+              )}
             </Link>
           ))}
           {currentUser && dashboardLink[currentUser.role] && (
