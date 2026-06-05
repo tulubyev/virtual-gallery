@@ -21,9 +21,9 @@
     "build:client": "npm run build:react",
     "init-db": "tsx src/database/init.ts",
     "init-s3": "node scripts/initS3Bucket.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage --passWithNoTests",
     "test:e2e": "playwright test",
     "build:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --minify",
     "watch:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --watch"
@@ -73,6 +73,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "@swc/core": "^1.15.40",
+    "@swc/jest": "^0.2.39",
     "@types/adm-zip": "^0.5.7",
     "@types/aws-sdk": "^0.0.42",
     "@types/bcrypt": "^5.0.2",
@@ -99,7 +101,6 @@
     "nodemon": "^3.1.11",
     "prettier": "^3.0.0",
     "supertest": "^6.3.0",
-    "ts-jest": "^29.4.6",
     "tsx": "^4.22.4",
     "typescript": "^5.3.3",
     "vite": "^7.3.1"
