@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 interface RecentDoc {
   name: string;
@@ -26,7 +26,15 @@ const RAGPage: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [recentDocs, setRecentDocs] = useState<RecentDoc[]>(INITIAL_RECENT);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
+  const [aiUnavailable, setAiUnavailable] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/ai/health')
+      .then(r => r.json())
+      .then(data => { if (data.status !== 'connected') setAiUnavailable(true); })
+      .catch(() => setAiUnavailable(true));
+  }, []);
 
   function showToast(type: 'success' | 'error' | 'warning', text: string) {
     setToast({ type, text });
@@ -146,6 +154,20 @@ const RAGPage: React.FC = () => {
               Загрузка и индексация документов для базы знаний AI-ассистента
             </p>
           </div>
+
+          {/* AI unavailable notice */}
+          {aiUnavailable && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 mb-8 text-amber-800">
+              <span className="text-xl mt-0.5">⚠️</span>
+              <div>
+                <p className="font-semibold text-sm mb-1">AI/ML сервис недоступен</p>
+                <p className="text-xs leading-relaxed">
+                  Сервис обработки документов сейчас не работает. Загрузка и индексация PDF-файлов временно отключены.
+                  Пожалуйста, убедитесь, что AI/ML сервис запущен, или попробуйте позже.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Documents Section */}
           <div>
