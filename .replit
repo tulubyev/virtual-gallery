@@ -39,7 +39,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "tsx server.js"
+args = "npm run dev"
 waitForPort = 5000
 
 [[ports]]
