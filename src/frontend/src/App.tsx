@@ -68,18 +68,36 @@ const PageLoader: React.FC = () => (
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    const savedUser = localStorage.getItem('currentUser');
-    if (token && savedUser) {
-      try {
-        setCurrentUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('currentUser');
-      }
+    if (!token) {
+      setAuthChecked(true);
+      prefetchHighTrafficRoutes();
+      return;
     }
-    prefetchHighTrafficRoutes();
+
+    fetch('/api/auth/verify', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid && data.user) {
+          setCurrentUser(data.user);
+        } else {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('currentUser');
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+      })
+      .finally(() => {
+        setAuthChecked(true);
+        prefetchHighTrafficRoutes();
+      });
   }, []);
 
   const login = (userData: User) => {
@@ -99,6 +117,10 @@ const App: React.FC = () => {
       ? element
       : <Navigate to="/login" />;
   };
+
+  if (!authChecked) {
+    return <PageLoader />;
+  }
 
   return (
     <Router>
