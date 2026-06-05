@@ -22,6 +22,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
     "build:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --minify",
     "watch:tailwind": "tailwindcss -c src/frontend/tailwind.config.js -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --watch"
   },
@@ -69,6 +70,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/adm-zip": "^0.5.7",
     "@types/aws-sdk": "^0.0.42",
     "@types/bcrypt": "^5.0.2",

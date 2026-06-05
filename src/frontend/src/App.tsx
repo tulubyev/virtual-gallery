@@ -70,16 +70,25 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
-      // fetchUserData(token);
+    const savedUser = localStorage.getItem('currentUser');
+    if (token && savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem('currentUser');
+      }
     }
     prefetchHighTrafficRoutes();
   }, []);
 
-  const login = (userData: User) => setCurrentUser(userData);
+  const login = (userData: User) => {
+    setCurrentUser(userData);
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  };
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
   };
 
   // В режиме отладки пропускаем проверку роли, иначе проверяем
