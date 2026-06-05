@@ -10,7 +10,7 @@
     "//dev": "Flags: --kill-others-on-fail false keeps Express up if Vite crashes; nodemon auto-restarts Express on file changes",
     "dev": "concurrently --kill-others-on-fail false --names \"server,vite\" --prefix-colors \"blue,green\" \"PORT=3001 nodemon server.js\" \"cd src/frontend && npx vite --port 5000 --host\"",
     "dev:server": "node server.js",
-    "dev:ts": "nodemon --exec ts-node src/server.ts",
+    "dev:ts": "nodemon --exec tsx src/server.ts",
     "dev:client": "vite --config vite.config.ts",
     "dev:spa": "cd src/frontend && npm run dev",
     "build": "npx tailwindcss -i src/frontend/assets/css/tailwind-input.css -o src/frontend/assets/css/tailwind-output.css --minify && npx vite build --config vite.config.ts",
@@ -98,7 +98,6 @@
     "prettier": "^3.0.0",
     "supertest": "^6.3.0",
     "ts-jest": "^29.4.6",
-    "ts-node": "^1.7.1",
     "tsx": "^4.22.4",
     "typescript": "^5.3.3",
     "vite": "^7.3.1"
