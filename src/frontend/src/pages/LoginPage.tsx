@@ -23,18 +23,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         password
       });
 
-      const { token, ...userData } = response.data;
+      const { token, user_id, username, email: uemail, role } = response.data;
 
-      // Сохраняем токен в localStorage
       localStorage.setItem('authToken', token);
 
-      // Вызываем callback для обновления состояния пользователя
-      onLogin(userData);
+      const user: User = {
+        id: String(user_id),
+        username,
+        email: uemail,
+        role,
+      };
 
-      // Перенаправляем на главную страницу
+      onLogin(user);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Ошибка входа');
+      setError(err.response?.data?.error || 'Invalid email or password');
     }
   };
 

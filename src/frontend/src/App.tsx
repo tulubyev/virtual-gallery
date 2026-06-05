@@ -84,7 +84,13 @@ const App: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.valid && data.user) {
-          setCurrentUser(data.user);
+          const raw = data.user;
+          setCurrentUser({
+            id: String(raw.user_id),
+            username: raw.username,
+            email: raw.email,
+            role: raw.role,
+          });
         } else {
           localStorage.removeItem('authToken');
           localStorage.removeItem('currentUser');
