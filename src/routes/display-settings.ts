@@ -1,17 +1,18 @@
-const express = require('express');
-const router = express.Router();
-const pool = require('../config/database');
+import express, { Request, Response } from 'express';
+import pool from '../config/database';
 
-router.get('/', async (req, res) => {
+const router = express.Router();
+
+router.get('/', async (_req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT * FROM display_settings ORDER BY id');
     res.json({ success: true, settings: result.rows });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.patch('/:key', async (req, res) => {
+router.patch('/:key', async (req: Request, res: Response) => {
   try {
     const { key } = req.params;
     const { aspect_ratio, object_fit, max_height } = req.body;
@@ -21,9 +22,9 @@ router.patch('/:key', async (req, res) => {
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Setting not found' });
     res.json({ success: true, setting: result.rows[0] });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+export = router;

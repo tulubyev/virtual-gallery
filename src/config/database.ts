@@ -1,5 +1,7 @@
-require('dotenv').config();
-const { Pool } = require('pg');
+import dotenv from 'dotenv';
+import { Pool, QueryResult } from 'pg';
+
+dotenv.config();
 
 const dbConnectionString = process.env.DB_STRING || process.env.DATABASE_URL;
 const dbHost = (dbConnectionString || '').replace(/^.*@/, '').replace(/\/.*$/, '');
@@ -8,23 +10,20 @@ console.log('Database connection:', dbConnectionString ? `Using DB_STRING (${dbH
 const pool = new Pool({
   connectionString: dbConnectionString,
   ...(process.env.DB_STRING ? {} : { ssl: { rejectUnauthorized: false } }),
-  // Resilience settings
   connectionTimeoutMillis: 10000,
   idleTimeoutMillis: 30000,
   max: 10,
 });
 
-// Prevent idle client errors from crashing the server
-pool.on('error', (err) => {
+pool.on('error', (err: Error) => {
   console.error('[DB] Unexpected error on idle client:', err.message);
 });
 
-// Thin wrapper that retries once on connection failure
-const originalQuery = pool.query.bind(pool);
-pool.query = async function resilientQuery(...args) {
+const originalQuery = (pool.query as Function).bind(pool);
+(pool as any).query = async function resilientQuery(...args: any[]): Promise<QueryResult> {
   try {
     return await originalQuery(...args);
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === 'ECONNRESET' || err.code === 'ECONNREFUSED' || err.code === '57P01') {
       console.warn('[DB] Connection lost, retrying query once…');
       return await originalQuery(...args);
@@ -33,4 +32,4 @@ pool.query = async function resilientQuery(...args) {
   }
 };
 
-module.exports = pool;
+export = pool;
