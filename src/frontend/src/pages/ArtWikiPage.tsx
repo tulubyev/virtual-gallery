@@ -377,14 +377,14 @@ function now(): string {
   return new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
 }
 
+const WELCOME_MESSAGE: Message = {
+  role: 'assistant',
+  text: 'Здравствуйте! Я ваш AI-ассистент по искусству. Могу ответить на вопросы об истории искусства, техниках, художниках на основе загруженных документов.',
+  time: 'Только что',
+};
+
 const ArtWikiPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      text: 'Здравствуйте! Я ваш AI-ассистент по искусству. Могу ответить на вопросы об истории искусства, техниках, художниках на основе загруженных документов.',
-      time: 'Только что',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState<'checking' | 'online' | 'demo'>('checking');
@@ -456,6 +456,10 @@ const ArtWikiPage: React.FC = () => {
     }
   }
 
+  function clearChat() {
+    setMessages([{ ...WELCOME_MESSAGE, time: now() }]);
+  }
+
   function openMuseum(museum: Museum) {
     setIframeLoaded(false);
     setMuseumModal({ url: museum.url, name: museum.name });
@@ -520,18 +524,28 @@ const ArtWikiPage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-white">Art Assistant</h3>
                   <p className="text-white/70 text-xs">Эксперт по истории искусства</p>
                 </div>
-                <span className={`ml-auto px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 backdrop-blur-sm ${
-                  aiStatus === 'online' ? 'bg-white/20 text-white' :
-                  aiStatus === 'demo'   ? 'bg-amber-500/20 text-white' :
-                  'bg-white/20 text-white'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${
-                    aiStatus === 'online' ? 'bg-green-400' :
-                    aiStatus === 'demo'   ? 'bg-amber-400' :
-                    'bg-gray-400 animate-pulse'
-                  }`} />
-                  {aiStatus === 'online' ? 'Онлайн' : aiStatus === 'demo' ? 'Демо-режим' : 'Проверка...'}
-                </span>
+                <div className="ml-auto flex items-center gap-2">
+                  <button
+                    onClick={clearChat}
+                    disabled={loading || messages.length <= 1}
+                    title="Новый разговор"
+                    className="px-3 py-1 rounded-full text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <span>✕</span> Новый разговор
+                  </button>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 backdrop-blur-sm ${
+                    aiStatus === 'online' ? 'bg-white/20 text-white' :
+                    aiStatus === 'demo'   ? 'bg-amber-500/20 text-white' :
+                    'bg-white/20 text-white'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${
+                      aiStatus === 'online' ? 'bg-green-400' :
+                      aiStatus === 'demo'   ? 'bg-amber-400' :
+                      'bg-gray-400 animate-pulse'
+                    }`} />
+                    {aiStatus === 'online' ? 'Онлайн' : aiStatus === 'demo' ? 'Демо-режим' : 'Проверка...'}
+                  </span>
+                </div>
               </div>
             </div>
 
