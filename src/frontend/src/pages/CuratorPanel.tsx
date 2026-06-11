@@ -862,7 +862,7 @@ const CuratorPanel: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Ширина (м)</label>
                   <input
-                    type="number" min={10} max={50}
+                    type="number" min={3} max={50}
                     value={editingRoom.width}
                     onChange={e => setEditingRoom({ ...editingRoom, width: Number(e.target.value) })}
                     className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background"
@@ -871,7 +871,7 @@ const CuratorPanel: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Глубина (м)</label>
                   <input
-                    type="number" min={10} max={50}
+                    type="number" min={3} max={50}
                     value={editingRoom.depth}
                     onChange={e => setEditingRoom({ ...editingRoom, depth: Number(e.target.value) })}
                     className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background"
