@@ -52,6 +52,7 @@ const prefetchHighTrafficRoutes = () => {
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
+import { Toaster } from './components/ui/toaster';
 
 // Типы
 import { User } from './types';
@@ -243,6 +244,7 @@ const App: React.FC = () => {
         </div>
         <Footer />
       </div>
+      <Toaster />
     </Router>
   );
 };

@@ -1,6 +1,6 @@
 // src/frontend/src/pages/VirtualGalleryPage.tsx
 import React, { Suspense, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 
@@ -101,7 +101,7 @@ const ArtworkDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get('/api/artworks');
+        const response = await api.get('/artworks');
         const data = response.data;
         setArtworks(Array.isArray(data) ? data : (data.artworks || []));
       } catch (err) {

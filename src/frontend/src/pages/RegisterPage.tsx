@@ -1,6 +1,6 @@
 // src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { User } from '../types';
 
@@ -38,7 +38,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/register', {
+      const response = await api.post('/auth/register', {
         username: username.trim(),
         email: email.trim(),
         password,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { fetchWithAuth } from '../services/api';
 import { Link } from 'react-router-dom';
 import {
   ScanEye, FileText, Bot, Scan, Library, Glasses, Gavel,
@@ -113,7 +114,7 @@ const HomePage: React.FC = () => {
 
   // Load real artworks from API, keep fallback while loading
   useEffect(() => {
-    fetch('/api/artworks?limit=20')
+    fetchWithAuth('/api/artworks?limit=20')
       .then(r => r.json())
       .then(data => {
         const arr: any[] = Array.isArray(data) ? data : (data.artworks ?? []);
@@ -174,7 +175,7 @@ const HomePage: React.FC = () => {
     setMessages(prev => [...prev, { text: msg, isUser: true, time: nowTime() }]);
     setIsChatLoading(true);
     try {
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetchWithAuth('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg }),

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../services/api';
 import { User, Shield, Mail, Calendar, Key, Save, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { User as UserType } from '../types';
 
@@ -34,7 +35,7 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) return;
-    fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+    fetchWithAuth('/api/auth/me')
       .then(r => r.json())
       .then(data => {
         if (data.error) { setLoadError(data.error); return; }
@@ -49,11 +50,10 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
     e.preventDefault();
     setProfileMsg(null);
     setProfileSaving(true);
-    const token = localStorage.getItem('authToken');
     try {
-      const res  = await fetch('/api/auth/me', {
+      const res  = await fetchWithAuth('/api/auth/me', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username.trim(), email: email.trim() }),
       });
       const data = await res.json();
@@ -77,11 +77,10 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
     if (newPass !== confPass) { setPassMsg({ ok: false, text: 'Пароли не совпадают' }); return; }
     if (newPass.length < 6)   { setPassMsg({ ok: false, text: 'Минимум 6 символов' });   return; }
     setPassSaving(true);
-    const token = localStorage.getItem('authToken');
     try {
-      const res  = await fetch('/api/auth/me/password', {
+      const res  = await fetchWithAuth('/api/auth/me/password', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword: curPass, newPassword: newPass }),
       });
       const data = await res.json();

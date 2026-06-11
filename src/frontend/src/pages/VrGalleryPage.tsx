@@ -1,6 +1,6 @@
 // src/frontend/src/pages/VrGalleryPage.tsx
 import React, { Suspense, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Artwork } from '../types';
 
 const VRScene = React.lazy(() => import('../components/VRGalleryComponent'));
@@ -13,7 +13,7 @@ const VrGalleryPage: React.FC = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/artworks');
+        const response = await api.get('/artworks');
         setArtworks(response.data);
       } catch (err) {
         console.error('Error fetching artworks:', err);

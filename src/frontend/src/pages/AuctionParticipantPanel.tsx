@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../services/api';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft, Home, Gavel, Hand, Eye, Receipt,
@@ -63,9 +64,9 @@ const AuctionParticipantPanel: React.FC = () => {
     setDashboardLoading(true);
     try {
       const [participantRes, activeRes, scheduledRes] = await Promise.all([
-        fetch(`/api/auctions/participant/${userId}`).then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/auctions?status=active').then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/auctions?status=scheduled').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetchWithAuth(`/api/auctions/participant/${userId}`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetchWithAuth('/api/auctions?status=active').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetchWithAuth('/api/auctions?status=scheduled').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
 
       if (participantRes) {
@@ -90,7 +91,7 @@ const AuctionParticipantPanel: React.FC = () => {
   async function loadAuctions() {
     setAuctionsLoading(true);
     try {
-      const res = await fetch('/api/auctions');
+      const res = await fetchWithAuth('/api/auctions');
       const data = await res.json();
       setAuctionsList(data.auctions || []);
     } catch {
@@ -102,7 +103,7 @@ const AuctionParticipantPanel: React.FC = () => {
   async function loadBids() {
     setBidsLoading(true);
     try {
-      const res = await fetch(`/api/auctions/participant/${userId}`);
+      const res = await fetchWithAuth(`/api/auctions/participant/${userId}`);
       const data = await res.json();
       setBidHistory(data.bid_history || data.active_bids || []);
     } catch {
@@ -114,10 +115,7 @@ const AuctionParticipantPanel: React.FC = () => {
   async function loadTransactions() {
     setTransactionsLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch('/api/auctions/transactions', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await fetchWithAuth('/api/auctions/transactions');
       if (res.ok) {
         const data = await res.json();
         setTransactions(data.transactions || []);

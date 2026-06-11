@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { fetchWithAuth } from '../services/api';
 
 interface RecentDoc {
   name: string;
@@ -30,7 +31,7 @@ const RAGPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/ai/health')
+    fetchWithAuth('/api/ai/health')
       .then(r => r.json())
       .then(data => { if (data.status !== 'connected') setAiUnavailable(true); })
       .catch(() => setAiUnavailable(true));

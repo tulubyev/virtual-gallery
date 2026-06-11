@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchWithAuth } from '../services/api';
 import {
   Gavel, Image, Users, Hand, ChevronDown, ChevronUp,
   Loader2, Inbox, Crown, Trophy, UserCheck, LayoutDashboard,
@@ -94,7 +95,7 @@ const AuctionPage: React.FC = () => {
   const countdownRefs = useRef<Record<number, ReturnType<typeof setInterval>>>({});
 
   useEffect(() => {
-    fetch('/api/auctions/stats')
+    fetchWithAuth('/api/auctions/stats')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setStats(data); })
       .catch(() => {});
@@ -104,7 +105,7 @@ const AuctionPage: React.FC = () => {
     setLoading(true);
     try {
       const url = status ? `/api/auctions?status=${status}` : '/api/auctions';
-      const res = await fetch(url);
+      const res = await fetchWithAuth(url);
       const data = await res.json();
       const list: Auction[] = data.auctions || [];
       setAuctions(list);
@@ -148,7 +149,7 @@ const AuctionPage: React.FC = () => {
     if (auctionLots[auctionId]) return;
     setLotsLoading(prev => ({ ...prev, [auctionId]: true }));
     try {
-      const res = await fetch(`/api/auctions/${auctionId}`);
+      const res = await fetchWithAuth(`/api/auctions/${auctionId}`);
       const data = await res.json();
       setAuctionLots(prev => ({ ...prev, [auctionId]: data.auction?.lots || [] }));
     } catch {
@@ -165,10 +166,9 @@ const AuctionPage: React.FC = () => {
     if (isNaN(amount) || amount <= minBid) return;
     setBidLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`/api/auctions/lots/${bidModal.lot.lot_id}/bid`, {
+      const res = await fetchWithAuth(`/api/auctions/lots/${bidModal.lot.lot_id}/bid`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount }),
       });
       if (res.ok) {
@@ -178,7 +178,7 @@ const AuctionPage: React.FC = () => {
           setAuctionLots(prev => { const n = { ...prev }; delete n[bidModal.auctionId!]; return n; });
           const isExpanded = expandedAuctions[bidModal.auctionId];
           if (isExpanded) {
-            const r = await fetch(`/api/auctions/${bidModal.auctionId}`);
+            const r = await fetchWithAuth(`/api/auctions/${bidModal.auctionId}`);
             const d = await r.json();
             setAuctionLots(prev => ({ ...prev, [bidModal.auctionId!]: d.auction?.lots || [] }));
           }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { fetchWithAuth } from '../services/api';
 import { MapPin, Clock, Users, Star, Eye, GalleryVerticalEnd, Search } from 'lucide-react';
 
 interface Message {
@@ -410,7 +411,7 @@ const ArtWikiPage: React.FC = () => {
 
   async function checkAiStatus() {
     try {
-      const res = await fetch('/api/ai/health');
+      const res = await fetchWithAuth('/api/ai/health');
       const data = await res.json();
       setAiStatus(data.status === 'connected' ? 'online' : 'demo');
     } catch {
@@ -437,7 +438,7 @@ const ArtWikiPage: React.FC = () => {
       const history = messages
         .slice(-10)
         .map(m => ({ role: m.role, content: m.text }));
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetchWithAuth('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: question, history }),

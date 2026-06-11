@@ -1,4 +1,5 @@
 import { RoomType, RoomInstance, RoomAnalytics } from '../../models/Room';
+import { fetchWithAuth } from './api';
 
 class RoomAPIService {
   private baseURL = '/api/rooms';
@@ -8,7 +9,7 @@ class RoomAPIService {
       const params = new URLSearchParams();
       if (category) params.append('category', category);
 
-      const response = await fetch(`${this.baseURL}/types?${params}`);
+      const response = await fetchWithAuth(`${this.baseURL}/types?${params}`);
       const data = await response.json();
 
       if (!data.success) {
@@ -24,7 +25,7 @@ class RoomAPIService {
 
   async getRoomTypeById(typeId: number): Promise<RoomType> {
     try {
-      const response = await fetch(`${this.baseURL}/types/${typeId}`);
+      const response = await fetchWithAuth(`${this.baseURL}/types/${typeId}`);
       const data = await response.json();
 
       if (!data.success) {
@@ -53,12 +54,9 @@ class RoomAPIService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(this.baseURL, {
+      const response = await fetchWithAuth(this.baseURL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(roomData)
       });
 
@@ -77,7 +75,7 @@ class RoomAPIService {
 
   async getRoomInstancesByGallery(galleryId: number): Promise<RoomInstance[]> {
     try {
-      const response = await fetch(`${this.baseURL}/gallery/${galleryId}`);
+      const response = await fetchWithAuth(`${this.baseURL}/gallery/${galleryId}`);
       const data = await response.json();
 
       if (!data.success) {
@@ -93,7 +91,7 @@ class RoomAPIService {
 
   async getRoomInstanceById(instanceId: number): Promise<RoomInstance> {
     try {
-      const response = await fetch(`${this.baseURL}/${instanceId}`);
+      const response = await fetchWithAuth(`${this.baseURL}/${instanceId}`);
       const data = await response.json();
 
       if (!data.success) {
@@ -114,12 +112,9 @@ class RoomAPIService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${this.baseURL}/${instanceId}`, {
+      const response = await fetchWithAuth(`${this.baseURL}/${instanceId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
       });
 
@@ -143,11 +138,8 @@ class RoomAPIService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${this.baseURL}/${instanceId}`, {
+      const response = await fetchWithAuth(`${this.baseURL}/${instanceId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
       });
 
       const data = await response.json();
@@ -168,12 +160,9 @@ class RoomAPIService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${this.baseURL}/${instanceId}/visitors`, {
+      const response = await fetchWithAuth(`${this.baseURL}/${instanceId}/visitors`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ count })
       });
 
@@ -203,11 +192,7 @@ class RoomAPIService {
       if (startDate) params.append('startDate', startDate.toISOString());
       if (endDate) params.append('endDate', endDate.toISOString());
 
-      const response = await fetch(`${this.baseURL}/${instanceId}/analytics?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetchWithAuth(`${this.baseURL}/${instanceId}/analytics?${params}`);
 
       const data = await response.json();
 
@@ -232,12 +217,9 @@ class RoomAPIService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${this.baseURL}/validate`, {
+      const response = await fetchWithAuth(`${this.baseURL}/validate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ typeId, customizations })
       });
 
