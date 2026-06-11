@@ -69,12 +69,26 @@ const PageLoader: React.FC = () => (
 );
 
 const App: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  // Seed optimistic user state from localStorage so the UI is instant on reload
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const cached = localStorage.getItem('currentUser');
+      return cached ? (JSON.parse(cached) as User) : null;
+    } catch {
+      return null;
+    }
+  });
+  // If we already have a cached user we can show the UI immediately;
+  // otherwise wait for the verify round-trip before rendering.
+  const [authChecked, setAuthChecked] = useState<boolean>(
+    () => !!localStorage.getItem('currentUser')
+  );
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
+      localStorage.removeItem('currentUser');
+      setCurrentUser(null);
       setAuthChecked(true);
       prefetchHighTrafficRoutes();
       return;
@@ -87,20 +101,24 @@ const App: React.FC = () => {
       .then((data) => {
         if (data.valid && data.user) {
           const raw = data.user;
-          setCurrentUser({
+          const verified: User = {
             id: String(raw.user_id),
             username: raw.username,
             email: raw.email,
             role: raw.role,
-          });
+          };
+          setCurrentUser(verified);
+          localStorage.setItem('currentUser', JSON.stringify(verified));
         } else {
           localStorage.removeItem('authToken');
           localStorage.removeItem('currentUser');
+          setCurrentUser(null);
         }
       })
       .catch(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('currentUser');
+        setCurrentUser(null);
       })
       .finally(() => {
         setAuthChecked(true);
