@@ -3,13 +3,16 @@ import { Pool } from 'pg';
 import 'dotenv/config';
 
 async function updateSchema() {
-  const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-  });
+  const connectionString = process.env.DB_STRING || process.env.DATABASE_URL;
+  const pool = connectionString
+    ? new Pool({ connectionString })
+    : new Pool({
+        host: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT || '5432'),
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+      });
 
   try {
     console.log('Обновление структуры базы данных...');

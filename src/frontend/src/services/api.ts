@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 
 // Avoid firing the session-expired handler more than once per expiry event
 let sessionExpiredHandled = false;
