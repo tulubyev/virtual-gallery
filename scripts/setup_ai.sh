@@ -73,10 +73,9 @@ if [ -z "$PYTHON_CMD" ]; then
 fi
 
 # ------------------------------------------------------------------
-# 4. Install Python dependencies
+# 4. Install Python dependencies (skip when requirements.txt unchanged)
 # ------------------------------------------------------------------
 echo ""
-echo "Installing Python dependencies from ai-ml-service/requirements.txt..."
 
 REQUIREMENTS="$AI_DIR/requirements.txt"
 if [ ! -f "$REQUIREMENTS" ]; then
@@ -84,12 +83,34 @@ if [ ! -f "$REQUIREMENTS" ]; then
   exit 1
 fi
 
-if "$PYTHON_CMD" -m pip install -r "$REQUIREMENTS" --quiet; then
-  ok "pip install complete."
+PIP_STAMP="$AI_DIR/.pip-stamp"
+CURRENT_HASH=""
+STORED_HASH=""
+
+if command -v sha256sum &>/dev/null; then
+  CURRENT_HASH=$(sha256sum "$REQUIREMENTS" | awk '{print $1}')
+elif command -v shasum &>/dev/null; then
+  CURRENT_HASH=$(shasum -a 256 "$REQUIREMENTS" | awk '{print $1}')
+fi
+
+if [ -f "$PIP_STAMP" ]; then
+  STORED_HASH=$(cat "$PIP_STAMP")
+fi
+
+if [ -n "$CURRENT_HASH" ] && [ "$CURRENT_HASH" = "$STORED_HASH" ]; then
+  ok "Python dependencies are up to date — skipping pip install."
 else
-  warn "pip install encountered errors (see output above)."
-  warn "You may need to install system dependencies or use a virtual environment."
-  warn "Try: cd ai-ml-service && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
+  echo "Installing Python dependencies from ai-ml-service/requirements.txt..."
+  if "$PYTHON_CMD" -m pip install -r "$REQUIREMENTS" --quiet; then
+    ok "pip install complete."
+    if [ -n "$CURRENT_HASH" ]; then
+      echo "$CURRENT_HASH" > "$PIP_STAMP"
+    fi
+  else
+    warn "pip install encountered errors (see output above)."
+    warn "You may need to install system dependencies or use a virtual environment."
+    warn "Try: cd ai-ml-service && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
+  fi
 fi
 
 # ------------------------------------------------------------------

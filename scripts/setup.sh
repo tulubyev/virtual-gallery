@@ -43,13 +43,38 @@ else
 fi
 
 # ------------------------------------------------------------------
-# 2. Install Node.js dependencies
+# 2. Install Node.js dependencies (skip when node_modules is current)
 # ------------------------------------------------------------------
 echo ""
-echo "Installing Node.js dependencies..."
-cd "$ROOT_DIR"
-npm install --silent
-ok "npm install complete."
+NEEDS_INSTALL=1
+NODE_MODULES="$ROOT_DIR/node_modules"
+PACKAGE_JSON="$ROOT_DIR/package.json"
+PACKAGE_LOCK="$ROOT_DIR/package-lock.json"
+
+if [ -d "$NODE_MODULES" ]; then
+  MODULES_MTIME=$(stat -c %Y "$NODE_MODULES" 2>/dev/null || stat -f %m "$NODE_MODULES" 2>/dev/null || echo 0)
+  PKG_MTIME=$(stat -c %Y "$PACKAGE_JSON" 2>/dev/null || stat -f %m "$PACKAGE_JSON" 2>/dev/null || echo 1)
+  LOCK_MTIME=0
+  if [ -f "$PACKAGE_LOCK" ]; then
+    LOCK_MTIME=$(stat -c %Y "$PACKAGE_LOCK" 2>/dev/null || stat -f %m "$PACKAGE_LOCK" 2>/dev/null || echo 1)
+  fi
+  NEWEST_PKG=$PKG_MTIME
+  if [ "$LOCK_MTIME" -gt "$NEWEST_PKG" ]; then
+    NEWEST_PKG=$LOCK_MTIME
+  fi
+  if [ "$MODULES_MTIME" -ge "$NEWEST_PKG" ]; then
+    NEEDS_INSTALL=0
+  fi
+fi
+
+if [ "$NEEDS_INSTALL" -eq 1 ]; then
+  echo "Installing Node.js dependencies..."
+  cd "$ROOT_DIR"
+  npm install --silent
+  ok "npm install complete."
+else
+  ok "node_modules is up to date — skipping npm install."
+fi
 
 # ------------------------------------------------------------------
 # 3. Required env-var checklist
