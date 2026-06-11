@@ -49,6 +49,7 @@ export default defineConfig({
           'vendor-motion': ['framer-motion'],
           'vendor-http': ['axios'],
           'vendor-three': ['three'],
+          'vendor-r3f': ['@react-three/fiber', '@react-three/drei'],
         },
       }
     }

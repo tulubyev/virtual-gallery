@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as d}from"./vendor-styled-CbTRkjly.js";const c=d.div`
+import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as d}from"./vendor-styled-BDXqawyY.js";const c=d.div`
   background: white;
   padding: 1.5rem;
   border-radius: 8px;

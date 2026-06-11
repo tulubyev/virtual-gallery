@@ -4,7 +4,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 
-const VirtualGallery3D = React.lazy(() => import('../components/VirtualGallery3D'));
+const GalleryR3F = React.lazy(() => import('../components/GalleryR3F'));
 
 const LoadingSpinner = styled.div`
   display: flex;
@@ -151,8 +151,8 @@ const ArtworkDetailPage: React.FC = () => {
           <span className="spinner-sub">Three.js / WebXR</span>
         </LoadingSpinner>
       }>
-        <VirtualGallery3D 
-          artworks={artworks} 
+        <GalleryR3F
+          artworks={artworks}
           onArtworkClick={handleArtworkClick}
           onExitVR={handleExitVR}
         />

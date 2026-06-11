@@ -1,487 +1,490 @@
 // src/frontend/src/components/VirtualGallery3D.tsx
-import React, { useEffect, useRef, useState } from 'react';
+// Complete rewrite: real textures, wall placement, WASD movement, no shadow abuse
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import styled from 'styled-components';
 import { Artwork } from '../types';
 
-const GalleryContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  position: relative;
-`;
+// ─── Layout constants ────────────────────────────────────────────────────────
+const ROOM_W = 44, ROOM_D = 44, WALL_H = 9;
+const FRAME_W = 2.4, FRAME_H = 2.4, FRAME_DEPTH = 0.09;
+const ART_HANG_Y = 2.7;
+const WALK_SPEED = 0.10;
+const CLAMP = 19;
 
-const InfoPanel = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  z-index: 10;
-  max-width: 300px;
-`;
+interface WallSlot { x: number; y: number; z: number; rotY: number }
 
-const ControlsPanel = styled.div`
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 1rem;
-  border-radius: 8px;
-  z-index: 10;
-  display: flex;
-  gap: 1rem;
-`;
+function buildSlots(count: number): WallSlot[] {
+  const slots: WallSlot[] = [];
+  // Back wall: 2 rows × 8 per row
+  const backX = [-14, -10, -6, -2, 2, 6, 10, 14];
+  backX.forEach((x, i) => {
+    if (i < count) slots.push({ x, y: ART_HANG_Y,       z: -21.4, rotY: 0 });
+  });
+  backX.forEach((x, i) => {
+    if (8 + i < count) slots.push({ x, y: ART_HANG_Y + 3.5, z: -21.4, rotY: 0 });
+  });
+  // Left wall
+  [-14, -10, -6, -2, 2, 6, 10, 14].forEach((z, i) => {
+    if (16 + i < count) slots.push({ x: -21.4, y: ART_HANG_Y, z, rotY: Math.PI / 2 });
+  });
+  // Right wall
+  [-14, -10, -6, -2, 2, 6, 10, 14].forEach((z, i) => {
+    if (24 + i < count) slots.push({ x: 21.4, y: ART_HANG_Y, z, rotY: -Math.PI / 2 });
+  });
+  return slots.slice(0, count);
+}
 
-const ControlButton = styled.button`
-  padding: 0.5rem 1rem;
-  background: #6200ee;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+function makeLabelTexture(title: string, artist: string): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 96;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = 'rgba(20,20,20,0.85)';
+  ctx.fillRect(0, 0, 512, 96);
+  ctx.fillStyle = '#f0f0f0';
+  ctx.font = 'bold 26px Georgia, serif';
+  ctx.textAlign = 'center';
+  const t = title.length > 32 ? title.slice(0, 32) + '…' : title;
+  ctx.fillText(t, 256, 38);
+  ctx.fillStyle = '#aaa';
+  ctx.font = '20px Arial, sans-serif';
+  const a = (artist || '').length > 36 ? (artist || '').slice(0, 36) + '…' : (artist || 'Неизвестный художник');
+  ctx.fillText(a, 256, 72);
+  return new THREE.CanvasTexture(canvas);
+}
 
-  &:hover {
-    background: #3700b3;
-  }
-`;
+function makePlaceholder(title: string): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d')!;
+  const grad = ctx.createLinearGradient(0, 0, 512, 512);
+  grad.addColorStop(0, '#1e1e2e'); grad.addColorStop(1, '#2d2d3f');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = '#444'; ctx.lineWidth = 4;
+  ctx.strokeRect(20, 20, 472, 472);
+  ctx.fillStyle = '#888'; ctx.font = 'italic 22px Georgia, serif';
+  ctx.textAlign = 'center';
+  const words = (title || 'Artwork').split(' ');
+  let line = '', y = 240;
+  words.forEach(w => {
+    const test = line + w + ' ';
+    if (ctx.measureText(test).width > 440 && line.length) {
+      ctx.fillText(line.trim(), 256, y); line = w + ' '; y += 30;
+    } else line = test;
+  });
+  ctx.fillText(line.trim(), 256, y);
+  return new THREE.CanvasTexture(canvas);
+}
 
-interface VirtualGallery3DProps {
+// ─── Component ───────────────────────────────────────────────────────────────
+interface Props {
   artworks: Artwork[];
   onArtworkClick: (artwork: Artwork) => void;
   onExitVR: () => void;
 }
 
-const VirtualGallery3D: React.FC<VirtualGallery3DProps> = ({ artworks, onArtworkClick, onExitVR }) => {
+const VirtualGallery3D: React.FC<Props> = ({ artworks, onArtworkClick, onExitVR }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const controlsRef = useRef<OrbitControls | null>(null);
-  const frameIdRef = useRef<number | null>(null);
-  const galleryObjectsRef = useRef<{ [key: number]: THREE.Mesh }>({});
-  const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
-  const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
-  const [performanceStats, setPerformanceStats] = useState({ fps: 0, objects: 0 });
+  const rendererRef  = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef     = useRef<THREE.Scene | null>(null);
+  const cameraRef    = useRef<THREE.PerspectiveCamera | null>(null);
+  const controlsRef  = useRef<OrbitControls | null>(null);
+  const frameIdRef   = useRef<number | null>(null);
+  const keysRef      = useRef({ w: false, a: false, s: false, d: false });
+  const texCache     = useRef<Map<string, THREE.Texture>>(new Map());
+  const artGroupsRef = useRef<THREE.Group[]>([]);
+  const raycaster    = useRef(new THREE.Raycaster());
+  const mouse        = useRef(new THREE.Vector2());
+  const [fps, setFps] = useState(0);
+  const [hint, setHint] = useState(true);
 
-  // Texture cache to prevent reloading
-  const textureCacheRef = useRef<Map<string, THREE.Texture>>(new Map());
-
+  // ── Scene init (run once) ──────────────────────────────────────────────────
   useEffect(() => {
     if (!mountRef.current) return;
+    const el = mountRef.current;
 
-    // Инициализация Three.js
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111113);
-    scene.fog = new THREE.Fog(0x111113, 10, 30); // Добавляем туман для оптимизации
+    scene.background = new THREE.Color(0x0e0e14);
+    scene.fog = new THREE.FogExp2(0x0e0e14, 0.012);
     sceneRef.current = scene;
 
-    // Создание камеры
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.set(0, 1.6, 5);
+    const w = el.clientWidth, h = el.clientHeight;
+    const camera = new THREE.PerspectiveCamera(70, w / h, 0.1, 80);
+    camera.position.set(0, 1.6, 12);
     cameraRef.current = camera;
 
-    // Создание рендерера с оптимизациями
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true,
-      powerPreference: "high-performance", // Оптимизация производительности
-      alpha: true
+    const renderer = new THREE.WebGLRenderer({
+      antialias: window.devicePixelRatio < 2,
+      powerPreference: 'high-performance',
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Ограничиваем масштабирование для производительности
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.shadowMap.enabled = false; // Shadows OFF — huge perf win
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    renderer.xr.enabled = true; // Включаем WebXR
-    mountRef.current.appendChild(renderer.domElement);
+    renderer.toneMappingExposure = 1.1;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    el.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Добавление освещения
-    const lights = addLighting(scene);
-
-    // Создание окружения галереи
-    createGalleryEnvironment(scene);
-
-    // Добавление экспонатов
-    addArtworksToScene(scene, artworks);
-
-    // Добавление управления
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dampingFactor = 0.07;
+    controls.minDistance = 0.5;
+    controls.maxDistance = 35;
+    controls.maxPolarAngle = Math.PI * 0.82;
+    controls.minPolarAngle = Math.PI * 0.1;
+    controls.target.set(0, 1.6, -5);
     controlsRef.current = controls;
 
-    // Переменные для отслеживания производительности
-    let frameCount = 0;
-    let lastTime = performance.now();
+    buildRoom(scene);
+    buildLighting(scene);
 
-    // Обработка изменения размера окна
-    const handleResize = () => {
-      if (camera && renderer) {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-    };
+    // FPS counter
+    let fc = 0, last = performance.now();
 
-    window.addEventListener('resize', handleResize);
-
-    // Анимационный цикл с оптимизациями
     const animate = () => {
       frameIdRef.current = requestAnimationFrame(animate);
-
-      if (controls) {
-        controls.update(); // Только если используется управление
-      }
-
-      // Обновление статистики производительности
-      frameCount++;
-      const currentTime = performance.now();
-      if (currentTime >= lastTime + 1000) {
-        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        setPerformanceStats({
-          fps,
-          objects: scene.children.length
-        });
-        frameCount = 0;
-        lastTime = currentTime;
-      }
-
-      if (renderer && scene && camera) {
-        renderer.render(scene, camera);
+      handleWalk(camera, controls);
+      controls.update();
+      renderer.render(scene, camera);
+      fc++;
+      const now = performance.now();
+      if (now - last >= 1000) {
+        setFps(Math.round(fc * 1000 / (now - last)));
+        fc = 0; last = now;
       }
     };
-
     animate();
 
-    // Очистка при размонтировании
-    return () => {
-      window.removeEventListener('resize', handleResize);
-
-      if (frameIdRef.current) {
-        cancelAnimationFrame(frameIdRef.current);
-      }
-
-      // Очистка текстур
-      textureCacheRef.current.forEach(texture => texture.dispose());
-      textureCacheRef.current.clear();
-
-      if (mountRef.current && renderer?.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
-
-      // Удаляем слушатели событий
-      renderer?.domElement.removeEventListener('click', handleArtworkClick);
-
-      if (renderer) {
-        renderer.dispose();
-        
-        // Удаляем геометрии и материалы
-        scene.traverse((obj) => {
-          if ((obj as THREE.Mesh).geometry) {
-            (obj as THREE.Mesh).geometry.dispose();
-          }
-          if ((obj as THREE.Mesh).material) {
-            const mat = (obj as THREE.Mesh).material;
-            if (Array.isArray(mat)) {
-              (mat as THREE.Material[]).forEach(m => m.dispose());
-            } else {
-              (mat as THREE.Material).dispose();
-            }
-          }
-        });
-      }
-
-      // Удаляем источники света
-      lights.forEach(light => light.removeFromParent());
+    // Resize
+    const onResize = () => {
+      const W = el.clientWidth, H = el.clientHeight;
+      camera.aspect = W / H;
+      camera.updateProjectionMatrix();
+      renderer.setSize(W, H);
     };
-  }, [artworks]);
+    window.addEventListener('resize', onResize);
 
-  // Добавление освещения
-  const addLighting = (scene: THREE.Scene) => {
-    const lights: THREE.Light[] = [];
+    // Keyboard
+    const onDown = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'arrowup')    keysRef.current.w = true;
+      if (k === 'a' || k === 'arrowleft')  keysRef.current.a = true;
+      if (k === 's' || k === 'arrowdown')  keysRef.current.s = true;
+      if (k === 'd' || k === 'arrowright') keysRef.current.d = true;
+    };
+    const onUp = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'arrowup')    keysRef.current.w = false;
+      if (k === 'a' || k === 'arrowleft')  keysRef.current.a = false;
+      if (k === 's' || k === 'arrowdown')  keysRef.current.s = false;
+      if (k === 'd' || k === 'arrowright') keysRef.current.d = false;
+    };
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
 
-    // Основное освещение
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
-    lights.push(ambientLight);
+    // Click
+    renderer.domElement.addEventListener('click', handleClick);
 
-    // Направленный свет
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 10, 7);
-    directionalLight.castShadow = true;
-    
-    // Настройка теней
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -10;
-    directionalLight.shadow.camera.right = 10;
-    directionalLight.shadow.camera.top = 10;
-    directionalLight.shadow.camera.bottom = -10;
-    
-    scene.add(directionalLight);
-    lights.push(directionalLight);
-
-    // Точечные источники света для экспонатов (только для видимых экспонатов)
-    const visibleArtworks = artworks.slice(0, 20); // Ограничиваем количество источников света
-    visibleArtworks.forEach((artwork, index) => {
-      const spotlight = new THREE.SpotLight(0xffddaa, 0.6);
-      spotlight.position.set(
-        -6 + (index % 4) * 4,
-        4,
-        -8 + Math.floor(index / 4) * -4
-      );
-      spotlight.castShadow = true;
-      spotlight.angle = Math.PI / 6;
-      spotlight.penumbra = 0.2;
-      spotlight.decay = 2;
-      spotlight.distance = 20;
-      
-      // Настройка теней для спот-света
-      spotlight.shadow.mapSize.width = 512;
-      spotlight.shadow.mapSize.height = 512;
-      spotlight.shadow.camera.near = 0.5;
-      spotlight.shadow.camera.far = 20;
-      
-      scene.add(spotlight);
-      lights.push(spotlight);
-    });
-
-    return lights;
-  };
-
-  // Создание окружения галереи
-  const createGalleryEnvironment = (scene: THREE.Scene) => {
-    // Пол
-    const floorGeometry = new THREE.PlaneGeometry(40, 40);
-    const floorMaterial = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.8,
-      metalness: 0.2
-    });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    // Стены
-    const wallGeometry = new THREE.BoxGeometry(40, 8, 0.5);
-    const wallMaterial = new THREE.MeshStandardMaterial({
-      color: 0x444444,
-      roughness: 0.7,
-      metalness: 0.3
-    });
-
-    // Задняя стена
-    const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    backWall.position.z = -20;
-    backWall.position.y = 4;
-    backWall.castShadow = false;
-    backWall.receiveShadow = true;
-    scene.add(backWall);
-
-    // Левая стена
-    const leftWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    leftWall.position.x = -20;
-    leftWall.position.y = 4;
-    leftWall.rotation.y = Math.PI / 2;
-    leftWall.castShadow = false;
-    leftWall.receiveShadow = true;
-    scene.add(leftWall);
-
-    // Правая стена
-    const rightWall = new THREE.Mesh(wallGeometry, wallMaterial);
-    rightWall.position.x = 20;
-    rightWall.position.y = 4;
-    rightWall.rotation.y = Math.PI / 2;
-    rightWall.castShadow = false;
-    rightWall.receiveShadow = true;
-    scene.add(rightWall);
-
-    // Потолок
-    const ceilingGeometry = new THREE.PlaneGeometry(40, 40);
-    const ceilingMaterial = new THREE.MeshStandardMaterial({
-      color: 0x222222,
-      roughness: 0.9,
-      metalness: 0.1
-    });
-    const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
-    ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.y = 8;
-    ceiling.castShadow = false;
-    scene.add(ceiling);
-
-    // Добавление декоративных элементов
-    addDecorativeElements(scene);
-  };
-
-  // Добавление декоративных элементов
-  const addDecorativeElements = (scene: THREE.Scene) => {
-    // Колонны с использованием InstancedMesh для оптимизации
-    const pillarGeometry = new THREE.CylinderGeometry(0.5, 0.5, 8, 16);
-    const pillarMaterial = new THREE.MeshStandardMaterial({
-      color: 0x888888,
-      roughness: 0.6,
-      metalness: 0.2
-    });
-
-    // Создаем 4 колонны как один InstancedMesh
-    const pillars = new THREE.InstancedMesh(pillarGeometry, pillarMaterial, 4);
-    const matrix = new THREE.Matrix4();
-
-    for (let i = 0; i < 4; i++) {
-      matrix.setPosition(-15 + i * 10, 4, -18);
-      pillars.setMatrixAt(i, matrix);
-    }
-
-    pillars.instanceMatrix.needsUpdate = true;
-    pillars.castShadow = true;
-    pillars.receiveShadow = true;
-    scene.add(pillars);
-  };
-
-  // Добавление экспонатов в сцену
-  const addArtworksToScene = (scene: THREE.Scene, artworks: Artwork[]) => {
-    // Очищаем предыдущие объекты
-    Object.values(galleryObjectsRef.current).forEach(obj => {
-      if (obj.parent) obj.parent.remove(obj);
-    });
-    galleryObjectsRef.current = {};
-
-    // Располагаем экспонаты в галерее
-    artworks.forEach((artwork, index) => {
-      // Позиционируем экспонаты в сетке
-      const x = -6 + (index % 4) * 4;
-      const z = -8 + Math.floor(index / 4) * -4;
-      const y = 2; // Высота развешивания
-
-      // Создаем группу для экспоната
-      const artworkGroup = new THREE.Group();
-      artworkGroup.position.set(x, y, z);
-      scene.add(artworkGroup);
-
-      // Создаем рамку для экспоната
-      const frameGeometry = new THREE.BoxGeometry(2.5, 2.5, 0.1);
-      const frameMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B4513, // Коричневая рамка
-        metalness: 0.3,
-        roughness: 0.7
-      });
-      const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-      frame.userData = { type: 'artwork', artworkId: artwork.artwork_id, artwork };
-      artworkGroup.add(frame);
-
-      // Создаем поверхность экспоната (изображение)
-      const artworkGeometry = new THREE.PlaneGeometry(2.3, 2.3);
-      
-      // Загружаем или используем кэшированную текстуру
-      let texture: THREE.Texture | null = null;
-      if (artwork.image_url && textureCacheRef.current.has(artwork.image_url)) {
-        texture = textureCacheRef.current.get(artwork.image_url)!;
-      } else if (artwork.image_url) {
-        // В реальной реализации здесь будет загрузка текстуры изображения
-        // Для оптимизации мы бы использовали заранее подготовленные текстуры
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d')!;
-        ctx.fillStyle = '#aaaaaa';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '20px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(artwork.title || 'Artwork', canvas.width / 2, canvas.height / 2);
-        
-        const imageData = new THREE.CanvasTexture(canvas);
-        textureCacheRef.current.set(artwork.image_url, imageData);
-        texture = imageData;
-      }
-
-      const artworkMaterial = new THREE.MeshStandardMaterial({
-        map: texture || undefined,
-        color: texture ? 0xffffff : 0xaaaaaa,
-        emissive: texture ? 0x333333 : 0x222222,
-        roughness: 0.5,
-        metalness: 0.1,
-        side: THREE.DoubleSide
-      });
-      
-      const artworkSurface = new THREE.Mesh(artworkGeometry, artworkMaterial);
-      artworkSurface.position.z = 0.06; // Немного впереди рамки
-      artworkSurface.userData = { type: 'artwork', artworkId: artwork.artwork_id, artwork };
-      artworkGroup.add(artworkSurface);
-
-      // Сохраняем ссылку на объект для обработки кликов
-      galleryObjectsRef.current[artwork.artwork_id ?? 0] = artworkSurface;
-    });
-  };
-
-  // Обработка клика по экспонату
-  const handleArtworkClick = (event: MouseEvent) => {
-    if (!cameraRef.current || !rendererRef.current || !sceneRef.current) return;
-
-    const rect = rendererRef.current.domElement.getBoundingClientRect();
-
-    mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-    raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
-
-    // Собираем все объекты экспонатов для проверки пересечений
-    const allArtworkObjects = Object.values(galleryObjectsRef.current);
-    const intersects = raycasterRef.current.intersectObjects(allArtworkObjects);
-
-    if (intersects.length > 0) {
-      const clickedObject = intersects[0].object;
-      if (clickedObject.userData && clickedObject.userData.artwork) {
-        onArtworkClick(clickedObject.userData.artwork);
-      }
-    }
-  };
-
-  // Включаем обработчик кликов
-  useEffect(() => {
-    const rendererElement = rendererRef.current?.domElement;
-    if (rendererElement) {
-      rendererElement.addEventListener('click', handleArtworkClick);
-      return () => {
-        rendererElement.removeEventListener('click', handleArtworkClick);
-      };
-    }
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('keydown', onDown);
+      window.removeEventListener('keyup', onUp);
+      renderer.domElement.removeEventListener('click', handleClick);
+      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
+      texCache.current.forEach(t => t.dispose());
+      texCache.current.clear();
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+    };
   }, []);
 
-  return (
-    <GalleryContainer ref={mountRef}>
-      <InfoPanel>
-        <h3>Виртуальная галерея</h3>
-        <p>Используйте мышь для навигации по галерее</p>
-        <p>Всего экспонатов: {artworks.length}</p>
-        <p>FPS: {performanceStats.fps}</p>
-        <p>Объектов: {performanceStats.objects}</p>
-      </InfoPanel>
+  // ── Artworks update (run when artworks change) ─────────────────────────────
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
 
-      <ControlsPanel>
-        <ControlButton onClick={() => rendererRef.current?.xr.isPresenting ? rendererRef.current.xr.getSession()?.end() : null}>
-          {rendererRef.current?.xr.isPresenting ? 'Выйти из VR' : 'Войти в VR'}
-        </ControlButton>
-        <ControlButton onClick={onExitVR}>
-          Назад к галерее
-        </ControlButton>
-      </ControlsPanel>
-    </GalleryContainer>
+    // Clear previous artwork groups
+    artGroupsRef.current.forEach(g => {
+      g.traverse(obj => {
+        if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose();
+        const mat = (obj as THREE.Mesh).material;
+        if (mat) Array.isArray(mat) ? mat.forEach(m => m.dispose()) : (mat as THREE.Material).dispose();
+      });
+      scene.remove(g);
+    });
+    artGroupsRef.current = [];
+
+    if (!artworks.length) return;
+
+    const slots = buildSlots(artworks.length);
+    const loader = new THREE.TextureLoader();
+
+    artworks.forEach((artwork, i) => {
+      const slot = slots[i];
+      if (!slot) return;
+
+      const group = new THREE.Group();
+      group.position.set(slot.x, slot.y, slot.z);
+      group.rotation.y = slot.rotY;
+      scene.add(group);
+      artGroupsRef.current.push(group);
+
+      // Frame (instanced per artwork)
+      const frameGeo = new THREE.BoxGeometry(FRAME_W, FRAME_H, FRAME_DEPTH);
+      const frameMat = new THREE.MeshStandardMaterial({
+        color: 0x5a3a1a, roughness: 0.6, metalness: 0.35,
+      });
+      const frame = new THREE.Mesh(frameGeo, frameMat);
+      frame.userData = { artwork };
+      group.add(frame);
+
+      // Canvas placeholder
+      const placeholderTex = makePlaceholder(artwork.title || '');
+      const artGeo = new THREE.PlaneGeometry(FRAME_W - 0.18, FRAME_H - 0.18);
+      const artMat = new THREE.MeshStandardMaterial({
+        map: placeholderTex,
+        roughness: 0.9,
+        metalness: 0.0,
+      });
+      const artMesh = new THREE.Mesh(artGeo, artMat);
+      artMesh.position.z = FRAME_DEPTH / 2 + 0.005;
+      artMesh.userData = { artwork };
+      group.add(artMesh);
+
+      // Label below frame
+      const labelTex = makeLabelTexture(artwork.title || '', artwork.artist_name || '');
+      const labelGeo = new THREE.PlaneGeometry(FRAME_W, 0.45);
+      const labelMat = new THREE.MeshBasicMaterial({ map: labelTex, transparent: true });
+      const label = new THREE.Mesh(labelGeo, labelMat);
+      label.position.y = -FRAME_H / 2 - 0.28;
+      label.position.z = FRAME_DEPTH / 2 + 0.005;
+      group.add(label);
+
+      // Async: load real image
+      const imgUrl = artwork.image_url;
+      if (imgUrl) {
+        const cached = texCache.current.get(imgUrl);
+        if (cached) {
+          artMat.map = cached;
+          artMat.needsUpdate = true;
+          placeholderTex.dispose();
+        } else {
+          loader.load(
+            imgUrl,
+            tex => {
+              tex.colorSpace = THREE.SRGBColorSpace;
+              tex.generateMipmaps = true;
+              tex.minFilter = THREE.LinearMipmapLinearFilter;
+              texCache.current.set(imgUrl, tex);
+              // Adjust geometry to match image aspect ratio
+              const img = tex.image as HTMLImageElement;
+              const aspect = img.naturalWidth > 0 ? img.naturalWidth / img.naturalHeight : 1;
+              const aw = FRAME_W - 0.18;
+              const ah = aw / aspect;
+              artMesh.geometry.dispose();
+              artMesh.geometry = new THREE.PlaneGeometry(aw, Math.min(ah, FRAME_H - 0.18));
+              artMat.map = tex;
+              artMat.needsUpdate = true;
+              placeholderTex.dispose();
+            },
+            undefined,
+            () => { /* keep placeholder on error */ }
+          );
+        }
+      }
+    });
+  }, [artworks]);
+
+  // ── WASD walk helper ────────────────────────────────────────────────────────
+  const handleWalk = useCallback((
+    camera: THREE.PerspectiveCamera,
+    controls: OrbitControls
+  ) => {
+    const { w, a, s, d } = keysRef.current;
+    if (!w && !a && !s && !d) return;
+
+    const fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd);
+    fwd.y = 0; fwd.normalize();
+    const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0));
+
+    const delta = new THREE.Vector3();
+    if (w) delta.addScaledVector(fwd, WALK_SPEED);
+    if (s) delta.addScaledVector(fwd, -WALK_SPEED);
+    if (a) delta.addScaledVector(right, -WALK_SPEED);
+    if (d) delta.addScaledVector(right, WALK_SPEED);
+
+    camera.position.add(delta);
+    controls.target.add(delta);
+
+    // Clamp inside room
+    const cl = (v: number) => Math.max(-CLAMP, Math.min(CLAMP, v));
+    camera.position.x = cl(camera.position.x);
+    camera.position.z = cl(camera.position.z);
+    camera.position.y = 1.6;
+    controls.target.x = cl(controls.target.x);
+    controls.target.z = cl(controls.target.z);
+  }, []);
+
+  // ── Click handler ───────────────────────────────────────────────────────────
+  const handleClick = useCallback((e: MouseEvent) => {
+    if (!rendererRef.current || !cameraRef.current || !sceneRef.current) return;
+    const rect = rendererRef.current.domElement.getBoundingClientRect();
+    mouse.current.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    mouse.current.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+    raycaster.current.setFromCamera(mouse.current, cameraRef.current);
+    const hits = raycaster.current.intersectObjects(sceneRef.current.children, true);
+    for (const hit of hits) {
+      if (hit.object.userData?.artwork) {
+        onArtworkClick(hit.object.userData.artwork);
+        return;
+      }
+    }
+  }, [onArtworkClick]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100vh', background: '#0e0e14' }}>
+      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
+
+      {/* Controls hint */}
+      {hint && (
+        <div style={{
+          position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.75)', color: '#ccc', padding: '10px 20px',
+          borderRadius: 10, fontSize: 13, textAlign: 'center', pointerEvents: 'none',
+          backdropFilter: 'blur(6px)',
+        }}>
+          🖱 Мышь — осмотр · WASD / ← → ↑ ↓ — движение · Клик на картину — подробнее
+        </div>
+      )}
+
+      {/* HUD */}
+      <div style={{
+        position: 'absolute', top: 16, left: 16, background: 'rgba(0,0,0,0.6)',
+        color: '#eee', padding: '10px 16px', borderRadius: 10, fontSize: 13,
+        backdropFilter: 'blur(6px)', lineHeight: 1.6,
+      }}>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>Виртуальная галерея</div>
+        <div>Экспонатов: {artworks.length}</div>
+        <div style={{ color: fps < 30 ? '#f87171' : fps < 50 ? '#fbbf24' : '#4ade80' }}>
+          FPS: {fps}
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div style={{
+        position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 10,
+      }}>
+        {[
+          { label: '🔍 Войти в VR', action: () => {} },
+          { label: '← Назад', action: onExitVR },
+        ].map(btn => (
+          <button key={btn.label} onClick={() => { setHint(false); btn.action(); }} style={{
+            padding: '9px 20px', background: 'rgba(80,60,180,0.85)', color: '#fff',
+            border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, cursor: 'pointer',
+            fontSize: 14, fontWeight: 500, backdropFilter: 'blur(4px)',
+          }}>
+            {btn.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 };
+
+// ─── Room geometry builder ────────────────────────────────────────────────────
+function buildRoom(scene: THREE.Scene) {
+  const hw = ROOM_W / 2, hd = ROOM_D / 2;
+
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x1c1a16, roughness: 0.85, metalness: 0.08 });
+  const wallMat  = new THREE.MeshStandardMaterial({ color: 0x1e1c24, roughness: 0.90, metalness: 0.05 });
+  const ceilMat  = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 1.0,  metalness: 0.0  });
+
+  // Floor with subtle grid lines via canvas texture
+  const floorTex = (() => {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d')!;
+    ctx.fillStyle = '#1c1a16'; ctx.fillRect(0, 0, 512, 512);
+    ctx.strokeStyle = '#2a2820'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 512; i += 64) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(8, 8);
+    return t;
+  })();
+  floorMat.map = floorTex;
+
+  const addPlane = (w: number, h: number, mat: THREE.Material, x: number, y: number, z: number, rx: number, ry: number) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    m.position.set(x, y, z);
+    m.rotation.set(rx, ry, 0);
+    scene.add(m);
+  };
+
+  addPlane(ROOM_W, ROOM_D, floorMat, 0, 0,         0,    -Math.PI / 2, 0);             // floor
+  addPlane(ROOM_W, ROOM_D, ceilMat,  0, WALL_H,    0,     Math.PI / 2, 0);             // ceiling
+  addPlane(ROOM_W, WALL_H, wallMat,  0, WALL_H / 2, -hd,  0, 0);                      // back wall
+  addPlane(ROOM_W, WALL_H, wallMat,  0, WALL_H / 2,  hd,  0, Math.PI);                // front wall
+  addPlane(ROOM_D, WALL_H, wallMat, -hw, WALL_H / 2, 0,   0, Math.PI / 2);            // left wall
+  addPlane(ROOM_D, WALL_H, wallMat,  hw, WALL_H / 2, 0,   0, -Math.PI / 2);           // right wall
+
+  // Skirting / baseboard strip
+  const baseGeo = new THREE.BoxGeometry(ROOM_W, 0.12, 0.08);
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x2a2830, roughness: 0.7 });
+  const bk = new THREE.Mesh(baseGeo, baseMat); bk.position.set(0, 0.06, -hd + 0.04); scene.add(bk);
+  const bf = new THREE.Mesh(baseGeo, baseMat); bf.position.set(0, 0.06,  hd - 0.04); scene.add(bf);
+  const bs = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, ROOM_D), baseMat);
+  const bl = bs.clone(); bl.position.set(-hw + 0.04, 0.06, 0); scene.add(bl);
+  const br = bs.clone(); br.position.set( hw - 0.04, 0.06, 0); scene.add(br);
+
+  // Pillars along back wall (instanced)
+  const pilGeo = new THREE.CylinderGeometry(0.35, 0.4, WALL_H, 12);
+  const pilMat = new THREE.MeshStandardMaterial({ color: 0x28263a, roughness: 0.7, metalness: 0.2 });
+  const pillars = new THREE.InstancedMesh(pilGeo, pilMat, 6);
+  const mat4 = new THREE.Matrix4();
+  [-18, -11, -4, 4, 11, 18].forEach((x, i) => {
+    mat4.setPosition(x, WALL_H / 2, -hd + 1.5);
+    pillars.setMatrixAt(i, mat4);
+  });
+  pillars.instanceMatrix.needsUpdate = true;
+  scene.add(pillars);
+
+  // Track light fixtures on ceiling
+  const trackGeo = new THREE.BoxGeometry(0.18, 0.1, 0.18);
+  const trackMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.3 });
+  [-14, -8, -2, 4, 10, 16].forEach(x => {
+    const t = new THREE.Mesh(trackGeo, trackMat);
+    t.position.set(x, WALL_H - 0.06, -hd + 4);
+    scene.add(t);
+  });
+}
+
+// ─── Lighting builder ─────────────────────────────────────────────────────────
+function buildLighting(scene: THREE.Scene) {
+  // Warm ambient fill
+  scene.add(new THREE.AmbientLight(0xfff0e0, 0.55));
+
+  // Hemisphere sky/ground
+  const hemi = new THREE.HemisphereLight(0xfff5e6, 0x1a1a2e, 0.35);
+  scene.add(hemi);
+
+  // 6 museum track point lights — NO shadows
+  const hd = ROOM_D / 2;
+  [-14, -8, -2, 4, 10, 16].forEach(x => {
+    const pt = new THREE.PointLight(0xffd9a0, 1.8, 22, 1.8);
+    pt.position.set(x, WALL_H - 0.5, -hd + 4);
+    scene.add(pt);
+  });
+
+  // Soft fill from center ceiling
+  const fill = new THREE.PointLight(0xffeedd, 0.6, 40, 1.2);
+  fill.position.set(0, WALL_H - 1, 0);
+  scene.add(fill);
+}
 
 export default VirtualGallery3D;

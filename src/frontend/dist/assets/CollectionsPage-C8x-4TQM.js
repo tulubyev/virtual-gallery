@@ -1,4 +1,4 @@
-import{j as t}from"./vendor-radix-RVnWX0Yt.js";import{q as e}from"./vendor-styled-CbTRkjly.js";import"./vendor-router-sYWTefjn.js";const r=e.div`
+import{j as t}from"./vendor-radix-RVnWX0Yt.js";import{q as e}from"./vendor-styled-BDXqawyY.js";import"./vendor-router-sYWTefjn.js";const r=e.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;

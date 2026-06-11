@@ -1,4 +1,4 @@
-import { HTMLAttributes, forwardRef } from "react";
+import React, { HTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface TransitionProps extends HTMLAttributes<HTMLDivElement> {
@@ -35,14 +35,15 @@ const Transition = forwardRef<HTMLDivElement, TransitionProps>(
       `${enter} ${enterFrom} ${enterTo} ${className}` : 
       `${leave} ${leaveFrom} ${leaveTo} ${className}`;
 
+    const AnyComponent = Component as React.ElementType<React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }>;
     return (
-      <Component
-        ref={ref}
+      <AnyComponent
+        ref={ref as React.Ref<HTMLElement>}
         className={cn(transitionClass)}
         {...props}
       >
         {children}
-      </Component>
+      </AnyComponent>
     );
   }
 );

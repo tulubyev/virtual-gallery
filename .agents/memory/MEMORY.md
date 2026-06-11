@@ -1,3 +1,5 @@
 - [Nav & routing structure](nav-routing.md) — HTML pages stay at /html/* as reference; React SPA handles all routes via catch-all; select HTML fallbacks for pages not yet in React.
 - [Cache & static serving](cache-static.md) — /assets/* immutable 1y cache; index.html no-store; noCacheMiddleware only on /api/* routes in server.js.
 - [Auth debug flag](auth-debug.md) — DEBUG_SKIP_AUTH=true in App.tsx line 59 bypasses all role guards; flip to false to restore real auth flow.
+- [R3F version pinning](r3f-version-pinning.md) — three ^0.158, @react-three/fiber ^8.17, @react-three/drei ^9.122 are pinned together; upgrading three requires TypeScript 5.x first.
+- [3D gallery architecture](gallery-3d-arch.md) — Two components: VirtualGallery3D (plain Three.js, Task A fixes) and GalleryR3F (R3F, active); GalleryR3F is the live one via VirtualGalleryPage.
