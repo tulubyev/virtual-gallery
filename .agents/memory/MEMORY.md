@@ -3,3 +3,4 @@
 - [API base URL — Replit rule](replit-api-url.md) — axios/fetch baseURL must be relative (/api), never http://localhost:5000 — browser in Replit can't reach localhost directly.
 - [R3F version pinning](r3f-version-pinning.md) — three ^0.158, @react-three/fiber ^8.17, @react-three/drei ^9.122 are pinned together; upgrading three requires TypeScript 5.x first.
 - [3D gallery architecture](gallery-3d-arch.md) — Two components: VirtualGallery3D (plain Three.js, Task A fixes) and GalleryR3F (R3F, active); GalleryR3F is the live one via VirtualGalleryPage.
+- [Vite MPA vs SPA routing](vite-spa-routing.md) — Vite serves any .html file in src/frontend/ as its own MPA entry; use spa-html-redirect plugin in vite.config.ts to rewrite those routes to react-app.html.

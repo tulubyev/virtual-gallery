@@ -4,7 +4,23 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'spa-html-redirect',
+      configureServer(server) {
+        const spaRoutes = ['admin', 'curator', 'auction', 'gallery-3d', 'artwiki', 'rag',
+          'staff', 'user', 'auction-participant', 'about'];
+        server.middlewares.use((req, _res, next) => {
+          const clean = (req.url ?? '/').split('?')[0].replace(/\/$/, '');
+          if (spaRoutes.some(r => clean === `/${r}` || clean === `/${r}.html`)) {
+            req.url = '/react-app.html';
+          }
+          next();
+        });
+      },
+    },
+  ],
   publicDir: path.resolve(__dirname, '../../public'),
   resolve: {
     alias: {
@@ -25,7 +41,7 @@ export default defineConfig({
         target: 'http://localhost:3001',
         ws: true,
       }
-    }
+    },
   },
   build: {
     rollupOptions: {

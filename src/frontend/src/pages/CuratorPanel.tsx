@@ -26,6 +26,9 @@ import {
   GitBranch,
   ExternalLink,
   Loader2,
+  Upload,
+  Pencil,
+  LayoutList,
 } from 'lucide-react';
 
 interface ArtworkReview {
@@ -73,6 +76,23 @@ interface ArtworkOption {
   image_url?: string;
   thumbnail_url?: string;
   status?: string;
+}
+
+interface ArtworkRecord {
+  id: number;
+  title: string;
+  artist: string;
+  year_created?: number | null;
+  medium?: string;
+  dimensions?: string;
+  style?: string;
+  country?: string;
+  description?: string;
+  image_url?: string;
+  thumbnail_url?: string;
+  status: string;
+  collection?: string;
+  created_at?: string;
 }
 
 const THEME_COLORS: Record<string, string> = {
@@ -141,6 +161,26 @@ const CuratorPanel: React.FC = () => {
   const [artworkOptions, setArtworkOptions] = useState<ArtworkOption[]>([]);
   const [artworkSearch, setArtworkSearch] = useState('');
   const [artworksLoading, setArtworksLoading] = useState(false);
+
+  // ── Artwork management tab ──
+  const [artworksList, setArtworksList] = useState<ArtworkRecord[]>([]);
+  const [artworksListLoading, setArtworksListLoading] = useState(false);
+  const [artworkListSearch, setArtworkListSearch] = useState('');
+  const [artworkListStatus, setArtworkListStatus] = useState('');
+
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ title: '', artist: '', year: '', style: '', medium: '', country: '', description: '' });
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
+  const [editArtworkOpen, setEditArtworkOpen] = useState(false);
+  const [editingArtwork, setEditingArtwork] = useState<ArtworkRecord | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const activeRoom = galleryConfig?.rooms.find(r => r.id === activeRoomId) ?? null;
 
@@ -293,6 +333,169 @@ const CuratorPanel: React.FC = () => {
     updateRoomInConfig({ ...activeRoom, connections: updated });
   };
 
+  // ── Artwork management handlers ──
+  const fetchArtworksList = useCallback(async (search = '', status = '') => {
+    setArtworksListLoading(true);
+    try {
+      const params = new URLSearchParams({ limit: '200' });
+      if (search) params.set('search', search);
+      if (status) params.set('status', status);
+      const res = await fetch('/api/artworks?' + params.toString());
+      const data = await res.json();
+      const items: ArtworkRecord[] = (Array.isArray(data) ? data : data.artworks ?? []).map((a: any) => ({
+        id: a.artwork_id ?? a.id,
+        title: a.title,
+        artist: a.artist_name ?? a.artist ?? '',
+        year_created: a.year_created,
+        medium: a.medium,
+        dimensions: a.dimensions,
+        style: a.style,
+        country: a.country,
+        description: a.description,
+        image_url: a.image_url,
+        thumbnail_url: a.thumbnail_url,
+        status: a.status ?? 'draft',
+        collection: a.collection,
+        created_at: a.created_at,
+      }));
+      setArtworksList(items);
+    } catch {
+      setArtworksList([]);
+    } finally {
+      setArtworksListLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'artworks') fetchArtworksList(artworkListSearch, artworkListStatus);
+  }, [activeTab, fetchArtworksList]);
+
+  const openUploadModal = () => {
+    setUploadForm({ title: '', artist: '', year: '', style: '', medium: '', country: '', description: '' });
+    setUploadFile(null);
+    setUploadPreview(null);
+    setUploadError('');
+    setUploadModalOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setUploadFile(f);
+    if (f) setUploadPreview(URL.createObjectURL(f));
+    else setUploadPreview(null);
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!uploadFile) { setUploadError('Выберите изображение'); return; }
+    if (!uploadForm.title.trim()) { setUploadError('Укажите название'); return; }
+    if (!uploadForm.artist.trim()) { setUploadError('Укажите автора'); return; }
+    setUploading(true);
+    setUploadError('');
+    try {
+      const fd = new FormData();
+      fd.append('image', uploadFile);
+      fd.append('title', uploadForm.title);
+      fd.append('artist', uploadForm.artist);
+      if (uploadForm.year) fd.append('year', uploadForm.year);
+      if (uploadForm.style) fd.append('style', uploadForm.style);
+      if (uploadForm.medium) fd.append('medium', uploadForm.medium);
+      if (uploadForm.country) fd.append('country', uploadForm.country);
+      if (uploadForm.description) fd.append('description', uploadForm.description);
+      const token = localStorage.getItem('authToken');
+      const res = await fetch('/api/artworks/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? 'Ошибка загрузки');
+      }
+      setUploadModalOpen(false);
+      fetchArtworksList(artworkListSearch, artworkListStatus);
+    } catch (e: any) {
+      setUploadError(e.message ?? 'Ошибка загрузки');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const openEditArtwork = (a: ArtworkRecord) => {
+    setEditingArtwork({ ...a });
+    setEditArtworkOpen(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingArtwork) return;
+    setEditSaving(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/artworks/${editingArtwork.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          title: editingArtwork.title,
+          artist: editingArtwork.artist,
+          year: editingArtwork.year_created ?? '',
+          style: editingArtwork.style ?? '',
+          technique: editingArtwork.medium ?? '',
+          country: editingArtwork.country ?? '',
+          description: editingArtwork.description ?? '',
+          collection: editingArtwork.collection ?? '',
+        }),
+      });
+      if (!res.ok) throw new Error('Ошибка сохранения');
+      setEditArtworkOpen(false);
+      fetchArtworksList(artworkListSearch, artworkListStatus);
+    } catch {
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleStatusChange = async (id: number, newStatus: string) => {
+    const token = localStorage.getItem('authToken');
+    await fetch(`/api/artworks/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    setArtworksList(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
+  };
+
+  const handleDeleteArtwork = async () => {
+    if (deleteConfirmId === null) return;
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      await fetch(`/api/artworks/${deleteConfirmId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ archived_by: 'curator' }),
+      });
+      setArtworksList(prev => prev.filter(a => a.id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+    } catch {
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const STATUS_LABELS: Record<string, string> = {
+    published: 'Опубликован', draft: 'Черновик', approved: 'Одобрен',
+    pending: 'На рассмотрении', rejected: 'Отклонён', archived: 'Архив',
+  };
+  const STATUS_COLORS: Record<string, string> = {
+    published: 'bg-green-100 text-green-700', draft: 'bg-gray-100 text-gray-600',
+    approved: 'bg-blue-100 text-blue-700', pending: 'bg-yellow-100 text-yellow-700',
+    rejected: 'bg-red-100 text-red-700', archived: 'bg-gray-200 text-gray-500',
+  };
+
+  const filteredArtworksList = artworksList.filter(a => {
+    const q = artworkListSearch.toLowerCase();
+    return !q || a.title.toLowerCase().includes(q) || a.artist.toLowerCase().includes(q);
+  });
+
   const filteredArtworks = artworkOptions.filter(a => {
     const q = artworkSearch.toLowerCase();
     return (
@@ -347,8 +550,9 @@ const CuratorPanel: React.FC = () => {
       {/* Tabs */}
       <div className="flex flex-wrap gap-x-4 mb-6 border-b">
         <TabButton tab="gallery" label="Галерея" icon={<Building2 className="h-4 w-4" />} />
+        <TabButton tab="artworks" label="Экспонаты" icon={<LayoutList className="h-4 w-4" />} />
         <TabButton tab="dashboard" label="Дашборд" />
-        <TabButton tab="submissions" label="Материалы на рассмотрении" />
+        <TabButton tab="submissions" label="На рассмотрении" />
         <TabButton tab="collections" label="Коллекции" />
         <TabButton tab="analytics" label="Аналитика" />
         <div className="flex-1" />
@@ -609,6 +813,131 @@ const CuratorPanel: React.FC = () => {
         </div>
       )}
 
+      {/* ─── ARTWORKS TAB ─── */}
+      {activeTab === 'artworks' && (
+        <div className="space-y-4">
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Поиск по названию или автору…"
+                value={artworkListSearch}
+                onChange={e => {
+                  setArtworkListSearch(e.target.value);
+                  fetchArtworksList(e.target.value, artworkListStatus);
+                }}
+                className="w-full pl-9 pr-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm"
+              />
+            </div>
+            <select
+              value={artworkListStatus}
+              onChange={e => {
+                setArtworkListStatus(e.target.value);
+                fetchArtworksList(artworkListSearch, e.target.value);
+              }}
+              className="px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm"
+            >
+              <option value="">Все статусы</option>
+              <option value="published">Опубликованные</option>
+              <option value="draft">Черновики</option>
+              <option value="approved">Одобренные</option>
+              <option value="pending">На рассмотрении</option>
+              <option value="rejected">Отклонённые</option>
+            </select>
+            <Button onClick={openUploadModal} className="shrink-0">
+              <Upload className="h-4 w-4 mr-2" />Добавить экспонат
+            </Button>
+          </div>
+
+          {/* List */}
+          <Card>
+            <CardContent className="p-0">
+              {artworksListLoading ? (
+                <div className="flex items-center justify-center py-16 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin mr-2" />Загрузка…
+                </div>
+              ) : filteredArtworksList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                  <Image className="h-12 w-12 mb-3 opacity-20" />
+                  <p>Экспонаты не найдены</p>
+                  <Button className="mt-4" onClick={openUploadModal}><Upload className="h-4 w-4 mr-2" />Добавить первый</Button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b bg-muted/40">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-medium">Экспонат</th>
+                        <th className="text-left px-4 py-3 font-medium">Автор</th>
+                        <th className="text-left px-4 py-3 font-medium hidden md:table-cell">Год</th>
+                        <th className="text-left px-4 py-3 font-medium hidden lg:table-cell">Стиль</th>
+                        <th className="text-left px-4 py-3 font-medium">Статус</th>
+                        <th className="text-right px-4 py-3 font-medium">Действия</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredArtworksList.map(artwork => (
+                        <tr key={artwork.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted shrink-0">
+                                {artwork.thumbnail_url || artwork.image_url ? (
+                                  <img src={artwork.thumbnail_url ?? artwork.image_url} alt={artwork.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Image className="h-5 w-5 text-muted-foreground/40" />
+                                  </div>
+                                )}
+                              </div>
+                              <span className="font-medium line-clamp-1">{artwork.title}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{artwork.artist}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">{artwork.year_created ?? '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{artwork.style ?? '—'}</td>
+                          <td className="px-4 py-3">
+                            <select
+                              value={artwork.status}
+                              onChange={e => handleStatusChange(artwork.id, e.target.value)}
+                              className={`text-xs font-medium px-2 py-1 rounded-full border-0 outline-none cursor-pointer ${STATUS_COLORS[artwork.status] ?? 'bg-gray-100 text-gray-600'}`}
+                            >
+                              {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                                <option key={val} value={val}>{label}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => openEditArtwork(artwork)}
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                title="Редактировать"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirmId(artwork.id)}
+                                className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-600 transition-colors"
+                                title="Удалить"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          <p className="text-xs text-muted-foreground text-right">Всего: {filteredArtworksList.length}</p>
+        </div>
+      )}
+
       {/* ─── DASHBOARD TAB ─── */}
       {activeTab === 'dashboard' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -814,6 +1143,185 @@ const CuratorPanel: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* ─── MODAL: Upload Artwork ─── */}
+      {uploadModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="p-5 border-b flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                  <Upload className="h-5 w-5 text-violet-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Добавить экспонат</h3>
+              </div>
+              <button onClick={() => setUploadModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {/* Image drop zone */}
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Изображение *</label>
+                <label className="block cursor-pointer">
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                  {uploadPreview ? (
+                    <div className="relative rounded-xl overflow-hidden border aspect-video flex items-center justify-center bg-muted">
+                      <img src={uploadPreview} alt="preview" className="max-h-48 object-contain" />
+                      <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-2 py-0.5 rounded-full">Нажмите для замены</span>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-muted-foreground hover:border-violet-400 hover:text-violet-500 transition-colors">
+                      <Upload className="h-8 w-8 mb-2" />
+                      <span className="text-sm">Нажмите для выбора файла</span>
+                      <span className="text-xs mt-1">PNG, JPG, WEBP — до 20 МБ</span>
+                    </div>
+                  )}
+                </label>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Название *</label>
+                  <input value={uploadForm.title} onChange={e => setUploadForm({ ...uploadForm, title: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Название произведения" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Автор *</label>
+                  <input value={uploadForm.artist} onChange={e => setUploadForm({ ...uploadForm, artist: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Имя художника" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Год создания</label>
+                  <input type="number" value={uploadForm.year} onChange={e => setUploadForm({ ...uploadForm, year: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Например, 1889" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Стиль / жанр</label>
+                  <input value={uploadForm.style} onChange={e => setUploadForm({ ...uploadForm, style: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Импрессионизм, масло…" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Техника / материал</label>
+                  <input value={uploadForm.medium} onChange={e => setUploadForm({ ...uploadForm, medium: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Холст, масло" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Страна</label>
+                  <input value={uploadForm.country} onChange={e => setUploadForm({ ...uploadForm, country: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" placeholder="Франция, Россия…" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Описание</label>
+                <textarea value={uploadForm.description} onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })}
+                  rows={3} className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm resize-none" placeholder="Краткое описание произведения" />
+              </div>
+              {uploadError && <p className="text-sm text-red-500 bg-red-50 rounded-lg px-3 py-2">{uploadError}</p>}
+            </div>
+            <div className="p-5 border-t shrink-0 flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setUploadModalOpen(false)} disabled={uploading}>Отмена</Button>
+              <Button className="flex-1" onClick={handleUploadSubmit} disabled={uploading}>
+                {uploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Загрузка…</> : <><Upload className="h-4 w-4 mr-2" />Загрузить</>}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: Edit Artwork ─── */}
+      {editArtworkOpen && editingArtwork && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="p-5 border-b flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Pencil className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold">Редактировать экспонат</h3>
+              </div>
+              <button onClick={() => setEditArtworkOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {(editingArtwork.thumbnail_url || editingArtwork.image_url) && (
+                <div className="mb-4 rounded-xl overflow-hidden bg-muted flex items-center justify-center h-36">
+                  <img src={editingArtwork.thumbnail_url ?? editingArtwork.image_url} alt={editingArtwork.title} className="max-h-36 object-contain" />
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Название *</label>
+                  <input value={editingArtwork.title} onChange={e => setEditingArtwork({ ...editingArtwork, title: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Автор *</label>
+                  <input value={editingArtwork.artist} onChange={e => setEditingArtwork({ ...editingArtwork, artist: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Год создания</label>
+                  <input type="number" value={editingArtwork.year_created ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, year_created: e.target.value ? Number(e.target.value) : null })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Стиль / жанр</label>
+                  <input value={editingArtwork.style ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, style: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Техника / материал</label>
+                  <input value={editingArtwork.medium ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, medium: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Страна</label>
+                  <input value={editingArtwork.country ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, country: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1.5">Коллекция</label>
+                  <input value={editingArtwork.collection ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, collection: e.target.value })}
+                    className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1.5">Описание</label>
+                  <textarea value={editingArtwork.description ?? ''} onChange={e => setEditingArtwork({ ...editingArtwork, description: e.target.value })}
+                    rows={3} className="w-full px-3 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 bg-background text-sm resize-none" />
+                </div>
+              </div>
+            </div>
+            <div className="p-5 border-t shrink-0 flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setEditArtworkOpen(false)} disabled={editSaving}>Отмена</Button>
+              <Button className="flex-1" onClick={handleEditSave} disabled={editSaving}>
+                {editSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Сохранение…</> : <><Save className="h-4 w-4 mr-2" />Сохранить</>}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL: Delete Confirm ─── */}
+      {deleteConfirmId !== null && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold">Удалить экспонат?</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">Экспонат будет удалён. Это действие нельзя отменить.</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirmId(null)} disabled={deleting}>Отмена</Button>
+              <Button variant="destructive" className="flex-1" onClick={handleDeleteArtwork} disabled={deleting}>
+                {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Удаление…</> : 'Удалить'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ─── MODAL: Room Settings ─── */}
