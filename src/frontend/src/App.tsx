@@ -57,11 +57,6 @@ import { Toaster } from './components/ui/toaster';
 // Типы
 import { User } from './types';
 
-// ─── DEBUG FLAG ───────────────────────────────────────────────────────────────
-// Установи в false когда потребуется вернуть защиту дашбордов
-const DEBUG_SKIP_AUTH = true;
-// ─────────────────────────────────────────────────────────────────────────────
-
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="text-muted-foreground text-sm animate-pulse">Loading…</div>
@@ -136,13 +131,10 @@ const App: React.FC = () => {
     localStorage.removeItem('currentUser');
   };
 
-  // В режиме отладки пропускаем проверку роли, иначе проверяем
-  const guard = (roles: string[], element: React.ReactElement) => {
-    if (DEBUG_SKIP_AUTH) return element;
-    return currentUser && roles.includes(currentUser.role)
+  const guard = (roles: string[], element: React.ReactElement) =>
+    currentUser && roles.includes(currentUser.role)
       ? element
       : <Navigate to="/login" />;
-  };
 
   if (!authChecked) {
     return <PageLoader />;
@@ -152,30 +144,7 @@ const App: React.FC = () => {
     <Router>
       <div className="flex flex-col min-h-screen bg-background">
         <Header currentUser={currentUser} onLogout={logout} />
-        {DEBUG_SKIP_AUTH && (
-          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">
-            <p className="text-xs text-amber-700 font-medium mb-2">🛠 Режим отладки: аутентификация отключена — все дашборды открыты без входа</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {[
-                { path: '/admin', label: '⚙️ Админ' },
-                { path: '/curator', label: '🎨 Куратор' },
-                { path: '/staff', label: '👷 Персонал' },
-                { path: '/tour-guide', label: '🗺 Гид' },
-                { path: '/auction-participant', label: '🔨 Участник аукциона' },
-                { path: '/staff-dashboard', label: '📊 Дашборд персонала' },
-                { path: '/curator-review', label: '🔍 Ревью куратора' },
-              ].map(({ path, label }) => (
-                <a
-                  key={path}
-                  href={path}
-                  className="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-medium px-3 py-1 rounded-full transition-colors"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+
         <div className="flex flex-1">
           <main className="flex-1">
             <ErrorBoundary>
@@ -202,7 +171,7 @@ const App: React.FC = () => {
                 <Route path="/gallery-3d" element={<VirtualGalleryPage />} />
                 <Route path="/auction" element={<AuctionPage />} />
 
-                {/* Дашборды — в режиме DEBUG открыты без логина */}
+                {/* Дашборды — только для авторизованных пользователей */}
                 <Route
                   path="/admin"
                   element={guard(['admin'], <AdminPanel />)}
