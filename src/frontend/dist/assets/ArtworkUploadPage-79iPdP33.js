@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-CvNlKOSa.js";import"./api-Bxl0lHoF.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-BJE4ZOIW.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-Dw4Oy_FK.js";const K=i.div`
+import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-nR_8NdBP.js";import"./api-DevYagcW.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-DGnj2jeZ.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-Dw4Oy_FK.js";const K=i.div`
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
