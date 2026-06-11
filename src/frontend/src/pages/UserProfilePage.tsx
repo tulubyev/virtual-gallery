@@ -60,7 +60,7 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
       if (!res.ok) { setProfileMsg({ ok: false, text: data.error || 'Ошибка сохранения' }); return; }
       if (data.token) {
         localStorage.setItem('authToken', data.token);
-        onUpdate({ id: data.user_id, username: data.username, email: data.email, role: data.role });
+        onUpdate({ id: String(data.user_id), username: data.username, email: data.email, role: data.role });
       }
       setProfile(p => p ? { ...p, username: data.username, email: data.email } : p);
       setProfileMsg({ ok: true, text: 'Профиль обновлён' });
