@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Palette, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Palette, Twitter, Instagram, Youtube, Sparkles } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -20,12 +20,18 @@ const Footer: React.FC = () => {
               {[
                 { label: 'Галерея', to: '/galleries' },
                 { label: 'Аукцион', to: '/auction' },
-                { label: 'ArtWiki', to: '/artwiki' },
-                { label: 'RAG', to: '/rag' },
+                { label: 'ArtWiki', to: '/artwiki', ai: true },
+                { label: 'RAG', to: '/rag', ai: true },
                 { label: 'О нас', to: '/about' },
               ].map(l => (
-                <Link key={l.to} to={l.to} className="text-gray-400 hover:text-white text-sm transition-colors">
+                <Link key={l.to} to={l.to} className="inline-flex items-center gap-1 text-gray-400 hover:text-white text-sm transition-colors">
                   {l.label}
+                  {l.ai && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-900 text-violet-300 leading-none">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      AI
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
