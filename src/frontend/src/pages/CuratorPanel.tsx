@@ -239,10 +239,21 @@ const CuratorPanel: React.FC = () => {
     setArtworkSearch('');
     setArtworksLoading(true);
     try {
-      const res = await fetch('/api/artworks?status=approved&limit=100');
-      const data = await res.json();
-      const items: ArtworkOption[] = Array.isArray(data) ? data : (data.artworks ?? data.items ?? []);
-      setArtworkOptions(items);
+      const [approvedRes, publishedRes] = await Promise.all([
+        fetch('/api/artworks?status=approved&limit=100'),
+        fetch('/api/artworks?status=published&limit=100'),
+      ]);
+      const toArray = (d: unknown): ArtworkOption[] =>
+        Array.isArray(d) ? d : ((d as Record<string, unknown>)?.artworks ?? (d as Record<string, unknown>)?.items ?? []) as ArtworkOption[];
+      const approved: ArtworkOption[] = approvedRes.ok ? toArray(await approvedRes.json()) : [];
+      const published: ArtworkOption[] = publishedRes.ok ? toArray(await publishedRes.json()) : [];
+      const seen = new Set<string | number>();
+      const merged = [...approved, ...published].filter(a => {
+        if (seen.has(a.id)) return false;
+        seen.add(a.id);
+        return true;
+      });
+      setArtworkOptions(merged);
     } catch {
       setArtworkOptions([]);
     } finally {
