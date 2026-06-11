@@ -15,11 +15,11 @@ interface UserRow {
   password_hash?: string;
 }
 
-function makeToken(user: UserRow): string {
+function makeToken(user: UserRow, rememberMe = false): string {
   return jwt.sign(
     { userId: user.user_id, email: user.email, role: user.role, username: user.username },
     JWT_SECRET,
-    { expiresIn: '24h' }
+    { expiresIn: rememberMe ? '7d' : '24h' }
   );
 }
 
@@ -55,7 +55,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
@@ -74,7 +74,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = makeToken(user);
+    const token = makeToken(user, !!rememberMe);
     res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, token });
   } catch (err: any) {
     console.error('[auth/login]', err.message);

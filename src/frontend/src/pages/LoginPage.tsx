@@ -11,6 +11,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -20,7 +21,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     try {
       const response = await api.post('/auth/login', {
         email,
-        password
+        password,
+        rememberMe
       });
 
       const { token, user_id, username, email: uemail, role } = response.data;
@@ -65,6 +67,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            id="rememberMe"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          />
+          <label htmlFor="rememberMe" className="text-sm text-gray-600 cursor-pointer select-none">
+            Запомнить меня (на 7 дней)
+          </label>
         </div>
         <button
           type="submit"
