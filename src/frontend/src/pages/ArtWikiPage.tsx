@@ -359,10 +359,13 @@ const ArtWikiPage: React.FC = () => {
     }
 
     try {
+      const history = messages
+        .slice(-10)
+        .map(m => ({ role: m.role, content: m.text }));
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: question }),
+        body: JSON.stringify({ message: question, history }),
       });
       const data = await res.json();
       const reply = data.reply ?? data.message ?? data.answer ?? 'Ответ получен.';

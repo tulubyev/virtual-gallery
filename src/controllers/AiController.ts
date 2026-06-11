@@ -210,18 +210,20 @@ class AiController {
   // AI Chat endpoint for ArtWiki
   async chat(req: Request, res: Response): Promise<void> {
     try {
-      const { message } = req.body;
+      const { message, history } = req.body;
       if (!message) {
         res.status(400).json({ error: 'Сообщение обязательно' });
         return;
       }
+
+      const conversationHistory = Array.isArray(history) ? history.slice(-10) : [];
 
       const aiServiceUrl = process.env.AI_ML_SERVICE_URL || 'http://localhost:8000';
       try {
         const aiRes = await fetch(`${aiServiceUrl}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({ message, history: conversationHistory }),
           signal: AbortSignal.timeout(15000),
         });
         const data: any = await aiRes.json();
