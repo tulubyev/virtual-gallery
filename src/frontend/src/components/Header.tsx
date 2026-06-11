@@ -148,6 +148,19 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
                   {currentUser && (
                     <>
                       <div className="my-1 border-t border-gray-100" />
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
+
+                      >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-100 text-indigo-600">
+                          <UserIcon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">Профиль</div>
+                          <div className="text-xs text-gray-400">Настройки аккаунта</div>
+                        </div>
+                      </Link>
                       <button
                         onClick={onLogout}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors text-left"

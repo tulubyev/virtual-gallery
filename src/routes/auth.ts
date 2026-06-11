@@ -82,6 +82,96 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+function getToken(req: Request): string | null {
+  return (req.headers['authorization'] || '').replace('Bearer ', '') || null;
+}
+
+async function decodeUser(token: string): Promise<{ userId: number } | null> {
+  try {
+    return jwt.verify(token, JWT_SECRET) as { userId: number };
+  } catch {
+    return null;
+  }
+}
+
+router.get('/me', async (req: Request, res: Response) => {
+  try {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = await decodeUser(token);
+    if (!decoded) return res.status(401).json({ error: 'Invalid token' });
+
+    const result = await pool.query(
+      'SELECT user_id, username, email, role, created_at FROM users WHERE user_id = $1',
+      [decoded.userId]
+    );
+    const user = result.rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, created_at: user.created_at });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+router.put('/me', async (req: Request, res: Response) => {
+  try {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = await decodeUser(token);
+    if (!decoded) return res.status(401).json({ error: 'Invalid token' });
+
+    const { username, email } = req.body;
+    if (!username && !email) return res.status(400).json({ error: 'Nothing to update' });
+
+    if (email) {
+      const conflict = await pool.query('SELECT user_id FROM users WHERE email = $1 AND user_id != $2', [email, decoded.userId]);
+      if (conflict.rows.length > 0) return res.status(409).json({ error: 'Email already in use' });
+    }
+
+    const result = await pool.query(
+      `UPDATE users SET
+        username = COALESCE($1, username),
+        email    = COALESCE($2, email)
+       WHERE user_id = $3
+       RETURNING user_id, username, email, role`,
+      [username || null, email || null, decoded.userId]
+    );
+    const user: UserRow = result.rows[0];
+    const newToken = makeToken(user);
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, token: newToken });
+  } catch (err: any) {
+    console.error('[auth/me PUT]', err.message);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+router.put('/me/password', async (req: Request, res: Response) => {
+  try {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = await decodeUser(token);
+    if (!decoded) return res.status(401).json({ error: 'Invalid token' });
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters' });
+
+    const result = await pool.query('SELECT password_hash FROM users WHERE user_id = $1', [decoded.userId]);
+    const user = result.rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!match) return res.status(401).json({ error: 'Current password is incorrect' });
+
+    const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE user_id = $2', [newHash, decoded.userId]);
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error('[auth/me/password]', err.message);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
 router.get('/verify', async (req: Request, res: Response) => {
   try {
     const token = (req.headers['authorization'] || '').replace('Bearer ', '');

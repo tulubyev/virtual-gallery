@@ -48,6 +48,7 @@ export default defineConfig({
           ],
           'vendor-motion': ['framer-motion'],
           'vendor-http': ['axios'],
+          'vendor-three': ['three'],
         },
       }
     }

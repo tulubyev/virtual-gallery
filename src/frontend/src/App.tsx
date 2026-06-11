@@ -29,6 +29,7 @@ const RAGPage = lazy(() => import('./pages/RAGPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NewFeaturesPage = lazy(() => import('./pages/NewFeaturesPage'));
 const AuctionPage = lazy(() => import('./pages/AuctionPage'));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
 // Prefetch high-traffic route chunks after the page is interactive so
 // subsequent navigations hit the browser cache instead of waiting on a fetch.
@@ -218,6 +219,12 @@ const App: React.FC = () => {
                 <Route
                   path="/galleries/:galleryId/rooms/manage"
                   element={guard(['curator', 'admin'], <RoomManagementPage />)}
+                />
+
+                {/* Профиль пользователя */}
+                <Route
+                  path="/profile"
+                  element={currentUser ? <UserProfilePage currentUser={currentUser} onUpdate={login} /> : <Navigate to="/login" />}
                 />
 
                 {/* Вход / регистрация */}

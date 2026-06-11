@@ -1,5 +1,5 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/VirtualGallery3D-KDWJB16W.js","assets/vendor-radix-RVnWX0Yt.js","assets/vendor-router-sYWTefjn.js","assets/OrbitControls-BDLqfVUn.js","assets/vendor-styled-CbTRkjly.js"])))=>i.map(i=>d[i]);
-import{_ as f}from"./react-app-C6XBLXhp.js";import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{r as t,b}from"./vendor-router-sYWTefjn.js";import{a as k}from"./vendor-http-BjtuyMK1.js";import{q as n}from"./vendor-styled-CbTRkjly.js";import"./vendor-icons-LgpiQIoI.js";const w=b.lazy(()=>f(()=>import("./VirtualGallery3D-KDWJB16W.js"),__vite__mapDeps([0,1,2,3,4]))),d=n.div`
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/VirtualGallery3D-C1yjgkqa.js","assets/vendor-radix-RVnWX0Yt.js","assets/vendor-router-sYWTefjn.js","assets/vendor-three-DRTgikV6.js","assets/OrbitControls-DizVRK2G.js","assets/vendor-styled-CbTRkjly.js"])))=>i.map(i=>d[i]);
+import{_ as f}from"./react-app-D5gtij5N.js";import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{r as t,b}from"./vendor-router-sYWTefjn.js";import{a as k}from"./vendor-http-BjtuyMK1.js";import{q as n}from"./vendor-styled-CbTRkjly.js";import"./vendor-icons-DTpDhVIL.js";const w=b.lazy(()=>f(()=>import("./VirtualGallery3D-C1yjgkqa.js"),__vite__mapDeps([0,1,2,3,4,5]))),d=n.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
