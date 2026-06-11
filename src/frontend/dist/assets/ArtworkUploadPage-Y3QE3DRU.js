@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-DtlwHRLY.js";import"./api-D9n5ghVV.js";import"./vendor-http-BjtuyMK1.js";const K=i.div`
+import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-B6GDlWaI.js";import"./api-XUKH6Re4.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-Dy0sK4GB.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-Dw4Oy_FK.js";const K=i.div`
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
@@ -113,4 +113,4 @@ import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-style
   margin: 0;
 `,he=({title:r,children:m,activeNav:c,onNavClick:u,userRole:f})=>{const x=f==="admin"?["Overview","Users","Artworks","Collections","Exhibitions","Auctions","Reports","Settings"]:["Overview","Artworks","Collections","Exhibitions","Reports"];return e.jsxs(ne,{children:[e.jsxs(ie,{children:[e.jsx(pe,{children:r}),e.jsxs("div",{children:["Welcome, ",f.charAt(0).toUpperCase()+f.slice(1),"!"]})]}),e.jsxs(ae,{children:[e.jsx(le,{children:x.map(h=>e.jsx(de,{active:c===h.toLowerCase(),onClick:()=>u(h.toLowerCase()),children:h},h))}),e.jsx(ce,{children:m})]})]})},ge=i.div`
   padding: 2rem;
-`,ye=()=>e.jsx(he,{title:"Загрузка экспонатов",activeNav:"artworks",onNavClick:()=>{},userRole:"admin",children:e.jsx(ge,{children:e.jsx(oe,{})})});export{ye as default};
+`,Ce=()=>e.jsx(he,{title:"Загрузка экспонатов",activeNav:"artworks",onNavClick:()=>{},userRole:"admin",children:e.jsx(ge,{children:e.jsx(oe,{})})});export{Ce as default};
