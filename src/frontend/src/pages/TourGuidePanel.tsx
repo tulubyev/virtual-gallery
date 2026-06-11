@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,8 @@ import {
   TrendingUp,
   BarChart3,
   Eye,
-  Heart
+  Heart,
+  Sparkles,
 } from 'lucide-react';
 
 interface Tour {
@@ -156,6 +158,21 @@ const TourGuidePanel: React.FC = () => {
         >
           Аналитика
         </button>
+        <div className="flex-1" />
+        <Link to="/artwiki" className="pb-3 px-1 flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+          ArtWiki
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+            <Sparkles className="h-2.5 w-2.5" />
+            AI
+          </span>
+        </Link>
+        <Link to="/rag" className="pb-3 px-1 flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
+          RAG
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+            <Sparkles className="h-2.5 w-2.5" />
+            AI
+          </span>
+        </Link>
       </div>
 
       {/* Content based on active tab */}

@@ -4,6 +4,7 @@ import {
   ArrowLeft, Home, Gavel, Hand, Eye, Receipt,
   Menu, X, Wallet, Trophy, Calendar, Loader2,
   CalendarOff, Inbox, EyeOff, LogOut, User,
+  BookOpen, Database, Sparkles,
 } from 'lucide-react';
 
 function formatPrice(val: number | string | null | undefined): string {
@@ -167,6 +168,33 @@ const AuctionParticipantPanel: React.FC = () => {
           </button>
         ))}
       </nav>
+
+      <div className="px-4 pb-2 border-t border-gray-100 pt-2 space-y-1">
+        <Link
+          to="/artwiki"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border-l-4 border-transparent text-gray-700 hover:bg-gray-50 transition-all text-left"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span className="font-medium flex-1">ArtWiki</span>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+            <Sparkles className="h-2.5 w-2.5" />
+            AI
+          </span>
+        </Link>
+        <Link
+          to="/rag"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border-l-4 border-transparent text-gray-700 hover:bg-gray-50 transition-all text-left"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <Database className="w-5 h-5" />
+          <span className="font-medium flex-1">RAG</span>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+            <Sparkles className="h-2.5 w-2.5" />
+            AI
+          </span>
+        </Link>
+      </div>
 
       <div className="p-4 border-t border-gray-100">
         <div className="flex items-center gap-3 mb-3">

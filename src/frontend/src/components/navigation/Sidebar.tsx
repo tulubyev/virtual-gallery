@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Home, GalleryVerticalEnd, Users, Heart, Eye, Calendar, Award, BarChart3, Target, DollarSign, MessageCircle, CheckCircle, MapPin, History, Box, User, Settings } from "lucide-react";
+import { Menu, Home, GalleryVerticalEnd, Users, Heart, Eye, Calendar, Award, BarChart3, Target, DollarSign, MessageCircle, CheckCircle, MapPin, History, Box, User, Settings, BookOpen, Database, Sparkles } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
 interface SidebarItem {
@@ -10,6 +10,7 @@ interface SidebarItem {
   icon: React.ReactNode;
   href: string;
   badge?: number;
+  ai?: boolean;
 }
 
 interface SidebarProps {
@@ -37,6 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           { title: "Аналитика", icon: <BarChart3 className="h-4 w-4" />, href: "/analytics" },
           { title: "Настройки", icon: <Target className="h-4 w-4" />, href: "/settings" },
           { title: "Уведомления", icon: <MessageCircle className="h-4 w-4" />, href: "/notifications", badge: 3 },
+          { title: "ArtWiki", icon: <BookOpen className="h-4 w-4" />, href: "/artwiki", ai: true },
+          { title: "RAG", icon: <Database className="h-4 w-4" />, href: "/rag", ai: true },
         ];
       case "curator":
         return [
@@ -47,6 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           { title: "Выставки", icon: <Award className="h-4 w-4" />, href: "/exhibitions" },
           { title: "Аналитика", icon: <BarChart3 className="h-4 w-4" />, href: "/analytics" },
           { title: "Заявки", icon: <CheckCircle className="h-4 w-4" />, href: "/submissions", badge: 5 },
+          { title: "ArtWiki", icon: <BookOpen className="h-4 w-4" />, href: "/artwiki", ai: true },
+          { title: "RAG", icon: <Database className="h-4 w-4" />, href: "/rag", ai: true },
         ];
       case "staff":
         return [
@@ -57,6 +62,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           { title: "События", icon: <Calendar className="h-4 w-4" />, href: "/events" },
           { title: "Отчеты", icon: <Award className="h-4 w-4" />, href: "/reports" },
           { title: "Задачи", icon: <CheckCircle className="h-4 w-4" />, href: "/tasks", badge: 2 },
+          { title: "ArtWiki", icon: <BookOpen className="h-4 w-4" />, href: "/artwiki", ai: true },
+          { title: "RAG", icon: <Database className="h-4 w-4" />, href: "/rag", ai: true },
         ];
       case "tour-guide":
         return [
@@ -67,6 +74,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           { title: "События", icon: <Calendar className="h-4 w-4" />, href: "/events" },
           { title: "Статистика", icon: <BarChart3 className="h-4 w-4" />, href: "/statistics" },
           { title: "Чат", icon: <MessageCircle className="h-4 w-4" />, href: "/chat", badge: 8 },
+          { title: "ArtWiki", icon: <BookOpen className="h-4 w-4" />, href: "/artwiki", ai: true },
+          { title: "RAG", icon: <Database className="h-4 w-4" />, href: "/rag", ai: true },
         ];
       case "auction-participant":
         return [
@@ -75,6 +84,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           { title: "Мои лоты", icon: <Heart className="h-4 w-4" />, href: "/my-lots" },
           { title: "История", icon: <History className="h-4 w-4" />, href: "/history" },
           { title: "Предложения", icon: <MessageCircle className="h-4 w-4" />, href: "/bids", badge: 1 },
+          { title: "ArtWiki", icon: <BookOpen className="h-4 w-4" />, href: "/artwiki", ai: true },
+          { title: "RAG", icon: <Database className="h-4 w-4" />, href: "/rag", ai: true },
         ];
       default: // Regular user
         return [
@@ -116,6 +127,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               {item.icon}
               <span className="flex-1">{item.title}</span>
+              {item.ai && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  AI
+                </span>
+              )}
               {item.badge && (
                 <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                   {item.badge}
@@ -187,6 +204,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                 >
                   {item.icon}
                   <span className="flex-1">{item.title}</span>
+                  {item.ai && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      AI
+                    </span>
+                  )}
                   {item.badge && (
                     <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                       {item.badge}
