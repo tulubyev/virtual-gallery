@@ -1,4 +1,5 @@
 - [Nav & routing structure](nav-routing.md) — HTML pages stay at /html/* as reference; React SPA handles all routes via catch-all; select HTML fallbacks for pages not yet in React.
+- [Auth debug flag](auth-debug.md) — DEBUG_SKIP_AUTH=true in App.tsx guard() bypasses all role checks; flip to false to restore real auth.
 - [Cache & static serving](cache-static.md) — /assets/* immutable 1y cache; index.html no-store; noCacheMiddleware only on /api/* routes in server.js.
 - [API base URL — Replit rule](replit-api-url.md) — axios/fetch baseURL must be relative (/api), never http://localhost:5000 — browser in Replit can't reach localhost directly.
 - [R3F version pinning](r3f-version-pinning.md) — three ^0.158, @react-three/fiber ^8.17, @react-three/drei ^9.122 are pinned together; upgrading three requires TypeScript 5.x first.
