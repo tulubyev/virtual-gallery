@@ -1,5 +1,5 @@
 const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/GalleryR3F-54WrYH1f.js","assets/vendor-radix-RVnWX0Yt.js","assets/vendor-router-sYWTefjn.js","assets/vendor-r3f-CPrUUYaA.js","assets/vendor-three-D9ub98kG.js"])))=>i.map(i=>d[i]);
-import{_ as f}from"./vendor-r3f-CPrUUYaA.js";import{j as r}from"./vendor-radix-RVnWX0Yt.js";import{r as s,b}from"./vendor-router-sYWTefjn.js";import{a as k}from"./api-8t7-Mwrn.js";import{q as n}from"./vendor-styled-BDXqawyY.js";import"./vendor-three-D9ub98kG.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-BL2NzAJ2.js";import"./vendor-icons-Dw4Oy_FK.js";const w=b.lazy(()=>f(()=>import("./GalleryR3F-54WrYH1f.js"),__vite__mapDeps([0,1,2,3,4]))),d=n.div`
+import{_ as f}from"./vendor-r3f-CPrUUYaA.js";import{j as r}from"./vendor-radix-RVnWX0Yt.js";import{r as s,b}from"./vendor-router-sYWTefjn.js";import{a as k}from"./api-hnr00CxD.js";import{q as n}from"./vendor-styled-BDXqawyY.js";import"./vendor-three-D9ub98kG.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-BkD10ojc.js";import"./vendor-icons-Dw4Oy_FK.js";const w=b.lazy(()=>f(()=>import("./GalleryR3F-54WrYH1f.js"),__vite__mapDeps([0,1,2,3,4]))),d=n.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
