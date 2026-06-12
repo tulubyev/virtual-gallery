@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{j as u,i as b,r as a}from"./vendor-router-sYWTefjn.js";import{q as r}from"./vendor-styled-BDXqawyY.js";import"./api-ciBHSoIn.js";import{a as v}from"./artworkService-Cm-64ilz.js";import{g as y}from"./galleryService-BJyR5Dfh.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-CBRaeLe6.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-UULdN9Jp.js";const w=r.div`
+import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{j as u,i as b,r as a}from"./vendor-router-sYWTefjn.js";import{q as r}from"./vendor-styled-BDXqawyY.js";import"./api-BeVUTASp.js";import{a as v}from"./artworkService-Dc_Jsba_.js";import{g as y}from"./galleryService-CCanVBZm.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-DFfSyK1M.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-UULdN9Jp.js";const w=r.div`
   background: white;
   border-radius: 8px;
   overflow: hidden;
