@@ -67,9 +67,16 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
       if (!res.ok) { setProfileMsg({ ok: false, text: data.error || 'Ошибка сохранения' }); return; }
       if (data.token) {
         localStorage.setItem('authToken', data.token);
-        onUpdate({ id: String(data.user_id), username: data.username, email: data.email, role: data.role, avatar_url: data.avatar_url || currentUser?.avatar_url });
       }
-      setProfile(p => p ? { ...p, username: data.username, email: data.email } : p);
+      const updatedUser: UserType = {
+        id: String(data.user_id ?? currentUser?.id),
+        username: data.username ?? username.trim(),
+        email: data.email ?? email.trim(),
+        role: data.role ?? currentUser?.role ?? 'user',
+        avatar_url: data.avatar_url ?? currentUser?.avatar_url,
+      };
+      onUpdate(updatedUser);
+      setProfile(p => p ? { ...p, username: updatedUser.username, email: updatedUser.email } : p);
       setProfileMsg({ ok: true, text: 'Профиль обновлён' });
     } catch {
       setProfileMsg({ ok: false, text: 'Сетевая ошибка' });
