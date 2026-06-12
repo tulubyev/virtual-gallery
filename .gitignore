@@ -16,6 +16,7 @@ yarn-error.log*
 __pycache__/
 *.pyc
 ai-ml-service/.pip-stamp
+.db-init-stamp
 
 # Caches
 .cache/
