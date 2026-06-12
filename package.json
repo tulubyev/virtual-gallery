@@ -21,7 +21,7 @@
     "build:react": "vite build --config vite.config.ts",
     "build:client": "npm run build:react",
     "init-db": "tsx src/database/init.ts",
-    "init-s3": "node scripts/initS3Bucket.js",
+    "init-s3": "tsx scripts/initS3Bucket.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage --passWithNoTests",
