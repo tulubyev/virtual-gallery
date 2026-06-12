@@ -297,6 +297,7 @@ const FPSCounter: React.FC<{ onFps: (v: number) => void }> = ({ onFps }) => {
 // ─── Main export ──────────────────────────────────────────────────────────────
 interface Props {
   artworks: Artwork[];
+  roomName?: string;
   onArtworkClick: (artwork: Artwork) => void;
   onExitVR: () => void;
 }
@@ -311,7 +312,7 @@ function detectWebGL(): boolean {
   } catch (_) { return false; }
 }
 
-const GalleryR3F: React.FC<Props> = ({ artworks, onArtworkClick, onExitVR }) => {
+const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExitVR }) => {
   const [fps, setFps] = useState(0);
   const [hint, setHint] = useState(true);
   const [webglSupported] = useState(() => detectWebGL());
@@ -397,16 +398,16 @@ const GalleryR3F: React.FC<Props> = ({ artworks, onArtworkClick, onExitVR }) => 
         </div>
       )}
 
-      {/* HUD */}
+      {/* HUD — offset right so it clears the room nav panel */}
       <div style={{
-        position: 'absolute', top: 16, left: 16,
+        position: 'absolute', top: 16, left: 216,
         background: 'rgba(0,0,0,0.6)', color: '#eee',
         padding: '10px 16px', borderRadius: 10, fontSize: 13,
         backdropFilter: 'blur(6px)', lineHeight: 1.6,
       }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>Виртуальная галерея</div>
-        <div>Экспонатов: {artworks.length}</div>
-        <div style={{ color: fps < 30 ? '#f87171' : fps < 50 ? '#fbbf24' : '#4ade80' }}>
+        {roomName && <div style={{ fontWeight: 600, marginBottom: 2 }}>{roomName}</div>}
+        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>Экспонатов: {artworks.length}</div>
+        <div style={{ fontSize: 12, color: fps < 30 ? '#f87171' : fps < 50 ? '#fbbf24' : '#4ade80' }}>
           FPS: {fps}
         </div>
       </div>

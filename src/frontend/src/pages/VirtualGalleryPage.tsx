@@ -1,10 +1,40 @@
 // src/frontend/src/pages/VirtualGalleryPage.tsx
-import React, { Suspense, useState, useEffect } from 'react';
-import api from '../services/api';
+import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 
 const GalleryR3F = React.lazy(() => import('../components/GalleryR3F'));
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ArtworkAssignment {
+  id: number;
+  title: string;
+  artist: string;
+  image_url: string;
+  thumbnail_url?: string | null;
+  style?: string | null;
+}
+
+interface GalleryRoom {
+  id: string;
+  name: string;
+  theme?: string;
+  width?: number;
+  height?: number;
+  depth?: number;
+  slots?: number;
+  lighting?: number;
+  wallColor?: string;
+  artworkAssignments?: Record<string, ArtworkAssignment>;
+}
+
+interface GalleryConfig {
+  rooms: GalleryRoom[];
+  currentRoom?: string;
+}
+
+// ─── Styled components ────────────────────────────────────────────────────────
 
 const LoadingSpinner = styled.div`
   display: flex;
@@ -41,20 +71,10 @@ const LoadingSpinner = styled.div`
   }
 `;
 
-const ErrorMessage = styled.div`
-  color: red;
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-`;
-
 const ArtworkDetailModal = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -73,14 +93,12 @@ const ModalContent = styled.div`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 10px; right: 10px;
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 30px; height: 30px;
   cursor: pointer;
   font-size: 1.2rem;
 `;
@@ -92,58 +110,120 @@ const ArtworkImage = styled.img`
   margin: 0 auto;
 `;
 
-const ArtworkDetailPage: React.FC = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// ─── Theme colour for room cards ──────────────────────────────────────────────
+
+const THEME_BG: Record<string, string> = {
+  classic:     'rgba(120,90,40,0.25)',
+  modern:      'rgba(80,120,180,0.25)',
+  dark:        'rgba(30,30,50,0.5)',
+  impressionist: 'rgba(160,100,180,0.25)',
+  renaissance: 'rgba(140,80,40,0.25)',
+};
+
+// ─── Helper: map artworkAssignments → Artwork[] ───────────────────────────────
+
+function roomArtworks(room: GalleryRoom): Artwork[] {
+  if (!room.artworkAssignments) return [];
+  const seen = new Set<number>();
+  return Object.values(room.artworkAssignments).reduce<Artwork[]>((acc, a) => {
+    if (!seen.has(a.id)) {
+      seen.add(a.id);
+      acc.push({
+        id: String(a.id),
+        artwork_id: a.id,
+        title: a.title ?? 'Без названия',
+        artist: a.artist ?? '',
+        artist_name: a.artist ?? '',
+        image_url: a.image_url ?? '',
+        imageUrl: a.image_url ?? '',
+        style: a.style ?? undefined,
+        year: 0,
+        description: '',
+        tags: [],
+        likes: 0,
+        views: 0,
+        rating: 0,
+        galleryId: '',
+        roomId: room.id,
+        coordinates: { x: 0, y: 0, z: 0 },
+      });
+    }
+    return acc;
+  }, []);
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+const VirtualGalleryPage: React.FC = () => {
+  const [config, setConfig]           = useState<GalleryConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
 
-  useEffect(() => {
-    const fetchArtworks = async () => {
-      try {
-        const response = await api.get('/artworks');
-        const data = response.data;
-        setArtworks(Array.isArray(data) ? data : (data.artworks || []));
-      } catch (err) {
-        console.error('Ошибка при загрузке экспонатов:', err);
-        setError('Не удалось загрузить экспонаты');
-      } finally {
-        setLoading(false);
+  const fetchConfig = useCallback(async (attemptsLeft = 3) => {
+    setConfigLoading(true);
+    try {
+      const res = await fetch('/api/gallery/config');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data: GalleryConfig = await res.json();
+      setConfig(data);
+      setConfigError(null);
+      setSelectedRoomId(prev => prev ?? data.currentRoom ?? data.rooms[0]?.id ?? null);
+      setConfigLoading(false);
+    } catch (err) {
+      if (attemptsLeft > 1) {
+        setTimeout(() => fetchConfig(attemptsLeft - 1), 2000);
+      } else {
+        setConfigError('Не удалось загрузить конфигурацию галереи');
+        setConfigLoading(false);
       }
-    };
-
-    fetchArtworks();
+    }
   }, []);
 
-  const handleArtworkClick = (artwork: Artwork) => {
-    setSelectedArtwork(artwork);
-  };
+  useEffect(() => { fetchConfig(); }, [fetchConfig]);
 
-  const handleCloseModal = () => {
-    setSelectedArtwork(null);
-  };
+  const selectedRoom = config?.rooms.find(r => r.id === selectedRoomId) ?? null;
+  const artworks     = selectedRoom ? roomArtworks(selectedRoom) : [];
 
-  const handleExitVR = () => {
-    // Возвращаемся на главную страницу галереи
-    window.history.back();
-  };
+  const handleExitVR = () => window.history.back();
 
-  if (loading) {
+  // ── Loading ──────────────────────────────────────────────────────────────
+  if (configLoading) {
     return (
       <LoadingSpinner>
         <div className="spinner-ring" />
         <span className="spinner-label">Загрузка виртуальной галереи…</span>
-        <span className="spinner-sub">Инициализация 3D-пространства</span>
+        <span className="spinner-sub">Получение конфигурации залов</span>
       </LoadingSpinner>
     );
   }
 
-  if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
+  // ── Error ────────────────────────────────────────────────────────────────
+  if (configError || !config) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', height: '100vh',
+        background: 'linear-gradient(135deg,#0f0c29,#302b63,#24243e)', color: '#ccc', gap: 16,
+      }}>
+        <div style={{ fontSize: 48 }}>⚠️</div>
+        <div style={{ fontSize: 18, color: '#f87171' }}>{configError}</div>
+        <button
+          onClick={() => fetchConfig()}
+          style={{ padding: '10px 24px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 15 }}
+        >
+          Повторить
+        </button>
+      </div>
+    );
   }
 
+  // ── Gallery: 3D view + room nav panel ────────────────────────────────────
   return (
-    <div>
+    <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+
+      {/* 3D canvas */}
       <Suspense fallback={
         <LoadingSpinner>
           <div className="spinner-ring" />
@@ -153,30 +233,89 @@ const ArtworkDetailPage: React.FC = () => {
       }>
         <GalleryR3F
           artworks={artworks}
-          onArtworkClick={handleArtworkClick}
+          roomName={selectedRoom?.name}
+          onArtworkClick={setSelectedArtwork}
           onExitVR={handleExitVR}
         />
       </Suspense>
 
+      {/* Room navigation panel — left side overlay */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, bottom: 0,
+        width: 200,
+        background: 'rgba(10,8,20,0.82)',
+        backdropFilter: 'blur(8px)',
+        borderRight: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex', flexDirection: 'column',
+        zIndex: 10,
+        overflowY: 'auto',
+      }}>
+        <div style={{
+          padding: '14px 14px 8px',
+          fontSize: 11, fontWeight: 700,
+          color: 'rgba(255,255,255,0.4)',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          Залы галереи
+        </div>
+
+        <div style={{ flex: 1, padding: '8px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {config.rooms.map(room => {
+            const isActive = room.id === selectedRoomId;
+            const artCount = room.artworkAssignments
+              ? new Set(Object.values(room.artworkAssignments).map(a => a.id)).size
+              : 0;
+            const bg = isActive
+              ? 'rgba(99,80,220,0.55)'
+              : (THEME_BG[room.theme ?? ''] ?? 'rgba(255,255,255,0.04)');
+
+            return (
+              <button
+                key={room.id}
+                onClick={() => setSelectedRoomId(room.id)}
+                style={{
+                  background: bg,
+                  border: isActive ? '1px solid rgba(130,100,255,0.7)' : '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 8,
+                  padding: '9px 10px',
+                  cursor: 'pointer',
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.75)',
+                  textAlign: 'left',
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 400,
+                  transition: 'all 0.15s',
+                  lineHeight: 1.3,
+                }}
+              >
+                <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{room.name}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>
+                  {artCount} {artCount === 1 ? 'экспонат' : artCount < 5 ? 'экспоната' : 'экспонатов'}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Artwork detail modal */}
       {selectedArtwork && (
-        <ArtworkDetailModal onClick={handleCloseModal}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            <CloseButton onClick={handleCloseModal}>×</CloseButton>
+        <ArtworkDetailModal onClick={() => setSelectedArtwork(null)}>
+          <ModalContent onClick={e => e.stopPropagation()}>
+            <CloseButton onClick={() => setSelectedArtwork(null)}>×</CloseButton>
             <h2>{selectedArtwork.title}</h2>
-            <p><strong>Художник:</strong> {selectedArtwork.artist_name}</p>
-            {selectedArtwork.year_created && <p><strong>Год создания:</strong> {selectedArtwork.year_created}</p>}
+            <p><strong>Художник:</strong> {selectedArtwork.artist_name || selectedArtwork.artist}</p>
+            {selectedArtwork.year_created && <p><strong>Год:</strong> {selectedArtwork.year_created}</p>}
             {selectedArtwork.medium && <p><strong>Материал:</strong> {selectedArtwork.medium}</p>}
             {selectedArtwork.style && <p><strong>Стиль:</strong> {selectedArtwork.style}</p>}
             {selectedArtwork.dimensions && <p><strong>Размеры:</strong> {selectedArtwork.dimensions}</p>}
             {selectedArtwork.description && <p><strong>Описание:</strong> {selectedArtwork.description}</p>}
-            {selectedArtwork.image_url && (
-              <ArtworkImage 
-                src={selectedArtwork.image_url} 
-                alt={selectedArtwork.title} 
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = 'https://placehold.co/600x400?text=Изображение+недоступно';
-                }}
+            {(selectedArtwork.image_url || selectedArtwork.imageUrl) && (
+              <ArtworkImage
+                src={selectedArtwork.image_url || selectedArtwork.imageUrl}
+                alt={selectedArtwork.title}
+                onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Изображение+недоступно'; }}
               />
             )}
           </ModalContent>
@@ -186,4 +325,4 @@ const ArtworkDetailPage: React.FC = () => {
   );
 };
 
-export default ArtworkDetailPage;
+export default VirtualGalleryPage;

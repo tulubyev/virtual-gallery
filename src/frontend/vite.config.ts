@@ -10,7 +10,7 @@ export default defineConfig({
       name: 'spa-html-redirect',
       configureServer(server) {
         const spaRoutes = ['admin', 'curator', 'auction', 'gallery-3d', 'artwiki', 'rag',
-          'staff', 'user', 'auction-participant', 'about'];
+          'staff', 'user', 'auction-participant', 'about', 'galleries', 'galleries-list'];
         server.middlewares.use((req, _res, next) => {
           const clean = (req.url ?? '/').split('?')[0].replace(/\/$/, '');
           if (spaRoutes.some(r => clean === `/${r}` || clean === `/${r}.html`)) {
