@@ -15,6 +15,9 @@ interface UserRow {
   password_hash?: string;
 }
 
+// How far past expiry we still allow a refresh (7 days)
+const REFRESH_GRACE_SECONDS = 7 * 24 * 60 * 60;
+
 function makeToken(user: UserRow, rememberMe = false): string {
   return jwt.sign(
     { userId: user.user_id, email: user.email, role: user.role, username: user.username },
@@ -169,6 +172,41 @@ router.put('/me/password', async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[auth/me/password]', err.message);
     res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
+router.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true }) as any;
+    } catch {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (decoded.exp && (nowSec - decoded.exp) > REFRESH_GRACE_SECONDS) {
+      return res.status(401).json({ error: 'Token too old to refresh' });
+    }
+
+    const result = await pool.query(
+      'SELECT user_id, username, email, role FROM users WHERE user_id = $1',
+      [decoded.userId]
+    );
+    const user: UserRow = result.rows[0];
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    const originalTTLSeconds = decoded.exp && decoded.iat ? decoded.exp - decoded.iat : 24 * 60 * 60;
+    const rememberMe = originalTTLSeconds > 24 * 60 * 60;
+
+    const newToken = makeToken(user, rememberMe);
+    res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role } });
+  } catch (err: any) {
+    console.error('[auth/refresh]', err.message);
+    res.status(500).json({ error: 'Token refresh failed' });
   }
 });
 

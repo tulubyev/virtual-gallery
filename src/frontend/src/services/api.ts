@@ -35,11 +35,54 @@ function handleSessionExpired(): void {
   }, 1500);
 }
 
+// --- Silent token refresh state ---
+let isRefreshing = false;
+let refreshSubscribers: Array<{ resolve: (token: string) => void; reject: (err: Error) => void }> = [];
+
+function subscribeTokenRefresh(resolve: (token: string) => void, reject: (err: Error) => void): void {
+  refreshSubscribers.push({ resolve, reject });
+}
+
+function onTokenRefreshed(token: string): void {
+  refreshSubscribers.forEach(sub => sub.resolve(token));
+  refreshSubscribers = [];
+}
+
+function onRefreshFailed(err: Error): void {
+  refreshSubscribers.forEach(sub => sub.reject(err));
+  refreshSubscribers = [];
+}
+
+/**
+ * Attempt to get a new JWT using the current one.
+ * Returns the new token on success, or null on failure.
+ */
+export async function tryRefreshToken(): Promise<string | null> {
+  const currentToken = localStorage.getItem('authToken');
+  if (!currentToken) return null;
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/refresh`,
+      {},
+      { headers: { Authorization: `Bearer ${currentToken}` } }
+    );
+    const { token } = response.data;
+    if (token) {
+      localStorage.setItem('authToken', token);
+      return token;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Drop-in replacement for `fetch` that:
  *  - Automatically attaches the Authorization header when a token is present
- *  - Intercepts 401 responses and shows the session-expired toast + redirect
- *    (skipped for auth-only endpoints like /auth/login and /auth/register)
+ *  - Silently refreshes the token on 401 and retries once
+ *  - Shows the session-expired toast + redirect only if refresh also fails
+ *    (skipped entirely for auth-only endpoints like /auth/login)
  */
 export async function fetchWithAuth(
   input: RequestInfo | URL,
@@ -62,6 +105,13 @@ export async function fetchWithAuth(
         : (input as Request).url;
 
     if (!isAuthOnlyPath(requestUrl)) {
+      // Try silent refresh, then retry the original request once
+      const newToken = await tryRefreshToken();
+      if (newToken) {
+        const retryHeaders = new Headers(init.headers);
+        retryHeaders.set('Authorization', `Bearer ${newToken}`);
+        return fetch(input, { ...init, headers: retryHeaders });
+      }
       handleSessionExpired();
     }
   }
@@ -92,16 +142,49 @@ api.interceptors.request.use(
   }
 );
 
-// Перехватчик ответов для обработки ошибок
+// Перехватчик ответов — silently refresh on 401, retry, then show session-expired
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const requestUrl: string = error.config?.url ?? '';
-      if (!isAuthOnlyPath(requestUrl)) {
-        handleSessionExpired();
+  async (error) => {
+    const requestUrl: string = error.config?.url ?? '';
+
+    if (error.response?.status === 401 && !isAuthOnlyPath(requestUrl)) {
+      const originalRequest = error.config;
+
+      // Only attempt refresh once per request
+      if (!originalRequest._retry) {
+        if (isRefreshing) {
+          // Another refresh is in flight — queue this request to retry when done
+          return new Promise<any>((resolve, reject) => {
+            subscribeTokenRefresh(
+              (token: string) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                resolve(api(originalRequest));
+              },
+              (err: Error) => reject(err)
+            );
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        const newToken = await tryRefreshToken();
+        isRefreshing = false;
+
+        if (newToken) {
+          onTokenRefreshed(newToken);
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        } else {
+          const sessionErr = new Error('Session expired');
+          onRefreshFailed(sessionErr);
+          handleSessionExpired();
+          return Promise.reject(sessionErr);
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );

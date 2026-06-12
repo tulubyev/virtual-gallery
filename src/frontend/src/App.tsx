@@ -1,6 +1,7 @@
 // src/frontend/src/App.tsx
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { tryRefreshToken } from './services/api';
 
 // Страницы — динамический импорт для code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -33,6 +34,21 @@ const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
 // Prefetch high-traffic route chunks after the page is interactive so
 // subsequent navigations hit the browser cache instead of waiting on a fetch.
+/**
+ * Parse the `exp` claim from a JWT without verifying the signature.
+ * Returns the expiry as a Unix timestamp (seconds), or null if unavailable.
+ */
+function getTokenExpiry(token: string): number | null {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof decoded.exp === 'number' ? decoded.exp : null;
+  } catch {
+    return null;
+  }
+}
+
 const prefetchHighTrafficRoutes = () => {
   const prefetch = () => {
     import('./pages/ArtworksPage');
@@ -79,6 +95,38 @@ const App: React.FC = () => {
     () => !!localStorage.getItem('currentUser')
   );
 
+  // Timer reference for the proactive token refresh scheduler
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Schedule a silent token refresh ~5 minutes before the current token expires.
+   * If the refresh succeeds the timer reschedules itself for the new token.
+   */
+  const scheduleTokenRefresh = React.useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const expiry = getTokenExpiry(token);
+    if (!expiry) return;
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    // Refresh 5 minutes before expiry; minimum 10 seconds to avoid tight loops
+    const delayMs = Math.max((expiry - nowSec - 5 * 60) * 1000, 10_000);
+
+    refreshTimerRef.current = setTimeout(async () => {
+      const newToken = await tryRefreshToken();
+      if (newToken) {
+        scheduleTokenRefresh();
+      }
+      // If refresh fails, the axios interceptor will handle it on the next API call
+    }, delayMs);
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -89,43 +137,89 @@ const App: React.FC = () => {
       return;
     }
 
-    fetch('/api/auth/verify', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid && data.user) {
-          const raw = data.user;
-          const verified: User = {
-            id: String(raw.user_id),
-            username: raw.username,
-            email: raw.email,
-            role: raw.role,
-          };
-          setCurrentUser(verified);
-          localStorage.setItem('currentUser', JSON.stringify(verified));
-        } else {
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('currentUser');
-          setCurrentUser(null);
+    /**
+     * Try to hydrate the session from a stored token.
+     * 1. Call /verify — succeeds when token is still valid.
+     * 2. If /verify says invalid (expired token is the common case after the
+     *    tab was closed), silently try /auth/refresh before giving up.
+     *    Only clear the session if refresh also fails.
+     */
+    async function hydrateSession(): Promise<void> {
+      let verifyData: any = null;
+
+      try {
+        const res = await fetch('/api/auth/verify', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        verifyData = await res.json();
+      } catch {
+        // Network error — fall through to refresh attempt
+      }
+
+      if (verifyData?.valid && verifyData?.user) {
+        const raw = verifyData.user;
+        const verified: User = {
+          id: String(raw.user_id),
+          username: raw.username,
+          email: raw.email,
+          role: raw.role,
+        };
+        setCurrentUser(verified);
+        localStorage.setItem('currentUser', JSON.stringify(verified));
+        scheduleTokenRefresh();
+        return;
+      }
+
+      // Token was invalid or expired — attempt a silent refresh before
+      // logging the user out (this is the key closed-tab scenario).
+      const newToken = await tryRefreshToken();
+      if (newToken) {
+        try {
+          const res = await fetch('/api/auth/verify', {
+            headers: { Authorization: `Bearer ${newToken}` },
+          });
+          const data = await res.json();
+          if (data.valid && data.user) {
+            const raw = data.user;
+            const restored: User = {
+              id: String(raw.user_id),
+              username: raw.username,
+              email: raw.email,
+              role: raw.role,
+            };
+            setCurrentUser(restored);
+            localStorage.setItem('currentUser', JSON.stringify(restored));
+            scheduleTokenRefresh();
+            return;
+          }
+        } catch {
+          // fall through to clear session
         }
-      })
-      .catch(() => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('currentUser');
-        setCurrentUser(null);
-      })
-      .finally(() => {
-        setAuthChecked(true);
-        prefetchHighTrafficRoutes();
-      });
-  }, []);
+      }
+
+      // Both verify and refresh failed — clear the session
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      setCurrentUser(null);
+    }
+
+    hydrateSession().finally(() => {
+      setAuthChecked(true);
+      prefetchHighTrafficRoutes();
+    });
+
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, [scheduleTokenRefresh]);
 
   const login = (userData: User) => {
     setCurrentUser(userData);
     localStorage.setItem('currentUser', JSON.stringify(userData));
+    scheduleTokenRefresh();
   };
   const logout = () => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     setCurrentUser(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('currentUser');
