@@ -1,7 +1,12 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import pool from '../config/database';
+
+const { uploadWithKey } = require('../services/s3-upload');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
@@ -13,6 +18,7 @@ interface UserRow {
   email: string;
   role: string;
   password_hash?: string;
+  avatar_url?: string;
 }
 
 // How far past expiry we still allow a refresh (7 days)
@@ -26,6 +32,33 @@ function makeToken(user: UserRow, rememberDays: 0 | 7 | 30 = 0): string {
     { expiresIn }
   );
 }
+
+// Multer setup for avatar uploads (disk storage, cleaned up after S3 upload)
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, 'public/uploads'),
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: MAX_AVATAR_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_AVATAR_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG and WebP images are allowed'));
+    }
+  },
+});
+
+// Ensure avatar_url column exists (safe migration)
+pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT`).catch(() => {});
 
 router.post('/register', async (req: Request, res: Response) => {
   try {
@@ -65,7 +98,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     const result = await pool.query(
-      'SELECT user_id, username, email, role, password_hash FROM users WHERE email = $1',
+      'SELECT user_id, username, email, role, password_hash, avatar_url FROM users WHERE email = $1',
       [email]
     );
     const user: UserRow = result.rows[0];
@@ -81,7 +114,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const days = Number(rememberMe);
     const rememberDays: 0 | 7 | 30 = days === 30 ? 30 : days === 7 ? 7 : 0;
     const token = makeToken(user, rememberDays);
-    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, token });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, token });
   } catch (err: any) {
     console.error('[auth/login]', err.message);
     res.status(500).json({ error: 'Login failed' });
@@ -108,12 +141,12 @@ router.get('/me', async (req: Request, res: Response) => {
     if (!decoded) return res.status(401).json({ error: 'Invalid token' });
 
     const result = await pool.query(
-      'SELECT user_id, username, email, role, created_at FROM users WHERE user_id = $1',
+      'SELECT user_id, username, email, role, created_at, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
     const user = result.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, created_at: user.created_at });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, created_at: user.created_at, avatar_url: user.avatar_url || null });
   } catch (err: any) {
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
@@ -139,15 +172,46 @@ router.put('/me', async (req: Request, res: Response) => {
         username = COALESCE($1, username),
         email    = COALESCE($2, email)
        WHERE user_id = $3
-       RETURNING user_id, username, email, role`,
+       RETURNING user_id, username, email, role, avatar_url`,
       [username || null, email || null, decoded.userId]
     );
     const user: UserRow = result.rows[0];
     const newToken = makeToken(user);
-    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, token: newToken });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, token: newToken });
   } catch (err: any) {
     console.error('[auth/me PUT]', err.message);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+router.post('/me/avatar', avatarUpload.single('avatar'), async (req: Request, res: Response) => {
+  const filePath = req.file?.path;
+  try {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    const decoded = await decodeUser(token);
+    if (!decoded) return res.status(401).json({ error: 'Invalid token' });
+
+    if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+
+    let avatarUrl: string;
+    try {
+      avatarUrl = await uploadWithKey(req.file.path, `avatars/${req.file.filename}`, req.file.mimetype);
+    } catch (s3Err: any) {
+      console.error('[auth/me/avatar] S3 upload failed:', s3Err.message);
+      return res.status(502).json({ error: 'Image upload failed — storage unavailable' });
+    }
+
+    await pool.query('UPDATE users SET avatar_url = $1 WHERE user_id = $2', [avatarUrl, decoded.userId]);
+
+    res.json({ avatar_url: avatarUrl });
+  } catch (err: any) {
+    console.error('[auth/me/avatar]', err.message);
+    res.status(500).json({ error: 'Failed to update avatar' });
+  } finally {
+    if (filePath) {
+      fs.unlink(filePath, () => {});
+    }
   }
 });
 
@@ -196,7 +260,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     }
 
     const result = await pool.query(
-      'SELECT user_id, username, email, role FROM users WHERE user_id = $1',
+      'SELECT user_id, username, email, role, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
     const user: UserRow = result.rows[0];
@@ -208,7 +272,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
       originalTTLSeconds >= 7 * 24 * 60 * 60 ? 7 : 0;
 
     const newToken = makeToken(user, rememberDays);
-    res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role } });
+    res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null } });
   } catch (err: any) {
     console.error('[auth/refresh]', err.message);
     res.status(500).json({ error: 'Token refresh failed' });
@@ -222,13 +286,13 @@ router.get('/verify', async (req: Request, res: Response) => {
 
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
     const result = await pool.query(
-      'SELECT user_id, username, email, role FROM users WHERE user_id = $1',
+      'SELECT user_id, username, email, role, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
     const user = result.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    res.json({ valid: true, user });
+    res.json({ valid: true, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null } });
   } catch {
     res.status(401).json({ valid: false, error: 'Invalid or expired token' });
   }

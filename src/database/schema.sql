@@ -9,7 +9,8 @@ CREATE TABLE users (
     role VARCHAR(20) DEFAULT 'user', -- 'admin', 'curator', 'staff', 'tour_guide', 'auction_participant'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    preferences JSONB
+    preferences JSONB,
+    avatar_url TEXT
 );
 
 -- Galleries table

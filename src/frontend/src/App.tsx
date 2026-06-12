@@ -163,6 +163,7 @@ const App: React.FC = () => {
           username: raw.username,
           email: raw.email,
           role: raw.role,
+          avatar_url: raw.avatar_url || undefined,
         };
         setCurrentUser(verified);
         localStorage.setItem('currentUser', JSON.stringify(verified));
@@ -186,6 +187,7 @@ const App: React.FC = () => {
               username: raw.username,
               email: raw.email,
               role: raw.role,
+              avatar_url: raw.avatar_url || undefined,
             };
             setCurrentUser(restored);
             localStorage.setItem('currentUser', JSON.stringify(restored));

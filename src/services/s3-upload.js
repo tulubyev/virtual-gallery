@@ -2,6 +2,23 @@ const fs = require('fs');
 const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { s3Client, S3_BUCKET } = require('../config/s3');
 
+function buildPublicUrl(key) {
+  const endpoint = process.env.S3_ENDPOINT.replace('https://', '').replace('http://', '');
+  return `https://${S3_BUCKET}.${endpoint}/${key}`;
+}
+
+async function uploadWithKey(filePath, key, contentType) {
+  const fileContent = fs.readFileSync(filePath);
+  await s3Client.send(new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: fileContent,
+    ContentType: contentType,
+    ACL: 'public-read'
+  }));
+  return buildPublicUrl(key);
+}
+
 async function uploadToS3(filePath, fileName, contentType) {
   const fileContent = fs.readFileSync(filePath);
   const key = `artworks/${fileName}`;
@@ -38,4 +55,4 @@ async function uploadBufferToS3(buffer, fileName, contentType) {
   return `https://${S3_BUCKET}.${endpoint}/${key}`;
 }
 
-module.exports = { uploadToS3, deleteFromS3, uploadBufferToS3 };
+module.exports = { uploadToS3, uploadWithKey, deleteFromS3, uploadBufferToS3 };

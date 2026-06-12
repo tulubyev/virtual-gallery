@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: 'user' | 'admin' | 'curator' | 'staff' | 'tour_guide' | 'auction_participant';
   preferences?: UserPreferences;
+  avatar_url?: string;
 }
 
 export interface UserPreferences {

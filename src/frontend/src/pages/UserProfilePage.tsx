@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchWithAuth } from '../services/api';
-import { User, Shield, Mail, Calendar, Key, Save, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Shield, Mail, Calendar, Key, Save, CheckCircle, AlertCircle, Loader2, Camera } from 'lucide-react';
 import { User as UserType } from '../types';
 
 interface Props {
@@ -17,8 +17,11 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
   user:                { label: 'Посетитель',      color: 'bg-gray-100 text-gray-700' },
 };
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
 export default function UserProfilePage({ currentUser, onUpdate }: Props) {
-  const [profile, setProfile] = useState<{ username: string; email: string; created_at?: string } | null>(null);
+  const [profile, setProfile] = useState<{ username: string; email: string; created_at?: string; avatar_url?: string | null } | null>(null);
   const [loadError, setLoadError] = useState('');
 
   const [username, setUsername]     = useState('');
@@ -31,6 +34,10 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
   const [confPass, setConfPass] = useState('');
   const [passMsg, setPassMsg]   = useState<{ ok: boolean; text: string } | null>(null);
   const [passSaving, setPassSaving] = useState(false);
+
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -60,7 +67,7 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
       if (!res.ok) { setProfileMsg({ ok: false, text: data.error || 'Ошибка сохранения' }); return; }
       if (data.token) {
         localStorage.setItem('authToken', data.token);
-        onUpdate({ id: String(data.user_id), username: data.username, email: data.email, role: data.role });
+        onUpdate({ id: String(data.user_id), username: data.username, email: data.email, role: data.role, avatar_url: data.avatar_url || currentUser?.avatar_url });
       }
       setProfile(p => p ? { ...p, username: data.username, email: data.email } : p);
       setProfileMsg({ ok: true, text: 'Профиль обновлён' });
@@ -94,6 +101,47 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
     }
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarMsg(null);
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setAvatarMsg({ ok: false, text: 'Допустимые форматы: JPEG, PNG, WebP' });
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setAvatarMsg({ ok: false, text: 'Файл слишком большой (максимум 5 МБ)' });
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const token = localStorage.getItem('authToken');
+      const res = await fetch('/api/auth/me/avatar', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAvatarMsg({ ok: false, text: data.error || 'Ошибка загрузки' });
+        return;
+      }
+      setProfile(p => p ? { ...p, avatar_url: data.avatar_url } : p);
+      onUpdate({ ...(currentUser as UserType), avatar_url: data.avatar_url });
+      setAvatarMsg({ ok: true, text: 'Фото профиля обновлено' });
+    } catch {
+      setAvatarMsg({ ok: false, text: 'Сетевая ошибка при загрузке фото' });
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -104,22 +152,53 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
 
   const roleInfo = ROLE_LABELS[currentUser.role] || ROLE_LABELS.user;
   const initials = (profile?.username || currentUser.username || '?').slice(0, 2).toUpperCase();
+  const avatarUrl = profile?.avatar_url || currentUser.avatar_url;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
 
         <div className="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-5">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-            {initials}
+          {/* Avatar with upload button */}
+          <div className="relative flex-shrink-0">
+            <div
+              className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+              title="Сменить фото профиля"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarUploading}
+              className="absolute -bottom-1 -right-1 w-6 h-6 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-full flex items-center justify-center shadow-md transition-colors"
+              title="Загрузить фото"
+            >
+              {avatarUploading
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <Camera className="w-3 h-3" />}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
           </div>
-          <div>
+
+          <div className="min-w-0">
             <h1 className="text-xl font-semibold text-gray-900">{profile?.username || currentUser.username}</h1>
             <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-              <Mail className="w-3.5 h-3.5" />
+              <Mail className="w-3.5 h-3.5 flex-shrink-0" />
               {profile?.email || currentUser.email}
             </p>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${roleInfo.color}`}>
                 <Shield className="w-3 h-3 inline mr-1" />
                 {roleInfo.label}
@@ -131,6 +210,12 @@ export default function UserProfilePage({ currentUser, onUpdate }: Props) {
                 </span>
               )}
             </div>
+            {avatarMsg && (
+              <div className={`flex items-center gap-1.5 text-xs mt-2 ${avatarMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                {avatarMsg.ok ? <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" /> : <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />}
+                {avatarMsg.text}
+              </div>
+            )}
           </div>
         </div>
 

@@ -118,7 +118,15 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
             {/* Дашборд dropdown — shown when logged in OR as role selector when logged out */}
             <div className="hidden sm:block relative group">
               <button className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors px-2 py-1.5 rounded-md hover:bg-gray-50">
-                <LayoutDashboard className="h-4 w-4" />
+                {currentUser?.avatar_url ? (
+                  <img
+                    src={currentUser.avatar_url}
+                    alt={currentUser.username}
+                    className="h-6 w-6 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <LayoutDashboard className="h-4 w-4" />
+                )}
                 {currentUser ? currentUser.username : 'Дашборд'}
                 <ChevronDown className="h-3 w-3" />
               </button>
