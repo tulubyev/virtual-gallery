@@ -11,7 +11,7 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberDays, setRememberDays] = useState<'0' | '7' | '30'>('0');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       const response = await api.post('/auth/login', {
         email,
         password,
-        rememberMe
+        rememberMe: Number(rememberDays)
       });
 
       const { token, user_id, username, email: uemail, role } = response.data;
@@ -68,17 +68,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             required
           />
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            id="rememberMe"
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-          />
-          <label htmlFor="rememberMe" className="text-sm text-gray-600 cursor-pointer select-none">
-            Запомнить меня (на 7 дней)
+        <div>
+          <label htmlFor="rememberDays" className="block text-sm text-gray-600 mb-1">
+            Оставаться в системе
           </label>
+          <select
+            id="rememberDays"
+            value={rememberDays}
+            onChange={(e) => setRememberDays(e.target.value as '0' | '7' | '30')}
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm text-gray-700"
+          >
+            <option value="0">Только в этом сеансе (24 часа)</option>
+            <option value="7">7 дней</option>
+            <option value="30">30 дней</option>
+          </select>
         </div>
         <button
           type="submit"

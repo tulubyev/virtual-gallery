@@ -18,11 +18,12 @@ interface UserRow {
 // How far past expiry we still allow a refresh (7 days)
 const REFRESH_GRACE_SECONDS = 7 * 24 * 60 * 60;
 
-function makeToken(user: UserRow, rememberMe = false): string {
+function makeToken(user: UserRow, rememberDays: 0 | 7 | 30 = 0): string {
+  const expiresIn = rememberDays === 30 ? '30d' : rememberDays === 7 ? '7d' : '24h';
   return jwt.sign(
     { userId: user.user_id, email: user.email, role: user.role, username: user.username },
     JWT_SECRET,
-    { expiresIn: rememberMe ? '7d' : '24h' }
+    { expiresIn }
   );
 }
 
@@ -77,7 +78,9 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = makeToken(user, !!rememberMe);
+    const days = Number(rememberMe);
+    const rememberDays: 0 | 7 | 30 = days === 30 ? 30 : days === 7 ? 7 : 0;
+    const token = makeToken(user, rememberDays);
     res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, token });
   } catch (err: any) {
     console.error('[auth/login]', err.message);
@@ -200,9 +203,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
     if (!user) return res.status(401).json({ error: 'User not found' });
 
     const originalTTLSeconds = decoded.exp && decoded.iat ? decoded.exp - decoded.iat : 24 * 60 * 60;
-    const rememberMe = originalTTLSeconds > 24 * 60 * 60;
+    const rememberDays: 0 | 7 | 30 =
+      originalTTLSeconds >= 30 * 24 * 60 * 60 ? 30 :
+      originalTTLSeconds >= 7 * 24 * 60 * 60 ? 7 : 0;
 
-    const newToken = makeToken(user, rememberMe);
+    const newToken = makeToken(user, rememberDays);
     res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role } });
   } catch (err: any) {
     console.error('[auth/refresh]', err.message);
