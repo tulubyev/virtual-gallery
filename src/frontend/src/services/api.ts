@@ -7,8 +7,17 @@ const API_BASE_URL = '/api';
 // Avoid firing the session-expired handler more than once per expiry event
 let sessionExpiredHandled = false;
 
-// Auth-only endpoints that legitimately return 401 without meaning "session expired"
-const AUTH_ONLY_PATHS = ['/auth/login', '/auth/register'];
+/**
+ * Endpoints that can legitimately return 401 without meaning the user's
+ * session has expired.  Adding a path here prevents the session-expired
+ * toast + redirect from firing for that request.
+ *
+ *  /auth/login    — bad credentials on a fresh login; user never had a session
+ *  /auth/register — new-account creation; no session exists yet
+ *  /auth/refresh  — the refresh token itself was invalid/expired; the caller
+ *                   handles this case and should decide what to show the user
+ */
+const AUTH_ONLY_PATHS = ['/auth/login', '/auth/register', '/auth/refresh'];
 
 function isAuthOnlyPath(url: string): boolean {
   return AUTH_ONLY_PATHS.some(p => url.includes(p));
