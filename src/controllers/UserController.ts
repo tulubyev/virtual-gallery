@@ -97,8 +97,8 @@ class UserController {
 
   async getUserProfile(req: Request, res: Response): Promise<void> {
     try {
-      // userId должен поступать из JWT токена (через middleware аутентификации)
-      const userId = (req as any).userId;
+      // userId comes from the JWT token via authenticateToken middleware
+      const userId = (req as any).user?.user_id;
 
       const user = await this.userService.getUserById(userId);
       if (!user) {
@@ -114,7 +114,7 @@ class UserController {
   }
 
   async updateUserProfile(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     try {
       const updateData = req.body;
 
@@ -134,7 +134,7 @@ class UserController {
   }
 
   async getUserPreferences(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     try {
       const user = await this.userService.getUserById(userId);
       if (!user) {
@@ -150,7 +150,7 @@ class UserController {
   }
 
   async updateUserPreferences(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     try {
       const preferences = req.body;
 
@@ -188,7 +188,7 @@ class UserController {
   }
 
   async getUserFavorites(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     try {
       const favorites = await this.userService.getFavorites(userId);
       res.json(favorites);
@@ -199,7 +199,7 @@ class UserController {
   }
 
   async addFavorite(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     const { artworkId } = req.params;
     try {
       const result = await this.userService.addFavorite(userId, artworkId);
@@ -211,7 +211,7 @@ class UserController {
   }
 
   async removeFavorite(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     const { artworkId } = req.params;
     try {
       const result = await this.userService.removeFavorite(userId, artworkId);
@@ -223,7 +223,7 @@ class UserController {
   }
 
   async getUserHistory(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).userId; // From JWT token
+    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
     try {
       const history = await this.userService.getHistory(userId);
       res.json(history);
@@ -247,6 +247,10 @@ class UserController {
   async updateUserRole(req: Request, res: Response): Promise<void> {
     const { userId } = req.params;
     const { role } = req.body;
+    if (!role) {
+      res.status(400).json({ error: 'role is required' });
+      return;
+    }
     try {
       const updatedUser = await this.userService.updateRole(userId, role);
       res.json(updatedUser);

@@ -30,6 +30,10 @@ class ArtworkController {
 
   async getArtworkById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Artwork ID must be a positive integer' });
+      return;
+    }
     try {
       const artwork = await this.artworkService.getById(id);
 
@@ -73,6 +77,11 @@ class ArtworkController {
   }
 
   async createArtwork(req: Request, res: Response): Promise<void> {
+    const { title, artist_name } = req.body || {};
+    if (!title || !artist_name) {
+      res.status(400).json({ error: 'title and artist_name are required' });
+      return;
+    }
     try {
       const artworkData = req.body;
       const newArtwork = await this.artworkService.create(artworkData);
@@ -86,6 +95,10 @@ class ArtworkController {
 
   async updateArtwork(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Artwork ID must be a positive integer' });
+      return;
+    }
     try {
       const artworkData = req.body;
       const updatedArtwork = await this.artworkService.update(id, artworkData);
@@ -100,6 +113,10 @@ class ArtworkController {
 
   async deleteArtwork(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Artwork ID must be a positive integer' });
+      return;
+    }
     try {
       await this.artworkService.delete(id);
 
