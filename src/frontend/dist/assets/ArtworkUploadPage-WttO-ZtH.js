@@ -1,4 +1,4 @@
-import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-BrDdbEaP.js";import"./api-BeVUTASp.js";import"./vendor-http-BjtuyMK1.js";import"./react-app-DFfSyK1M.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-icons-UULdN9Jp.js";const K=i.div`
+import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-styled-BDXqawyY.js";import{r as l}from"./vendor-router-sYWTefjn.js";import{i as k}from"./imageProcessingService-xJcmiTon.js";import"./react-app-Bg2uqVhR.js";import"./vendor-r3f-CPrUUYaA.js";import"./vendor-three-D9ub98kG.js";import"./vendor-http-BjtuyMK1.js";import"./vendor-icons-J-XmcL5t.js";const K=i.div`
   max-width: 600px;
   margin: 2rem auto;
   padding: 2rem;
@@ -113,4 +113,4 @@ import{j as e}from"./vendor-radix-RVnWX0Yt.js";import{q as i}from"./vendor-style
   margin: 0;
 `,he=({title:r,children:m,activeNav:c,onNavClick:u,userRole:f})=>{const x=f==="admin"?["Overview","Users","Artworks","Collections","Exhibitions","Auctions","Reports","Settings"]:["Overview","Artworks","Collections","Exhibitions","Reports"];return e.jsxs(ne,{children:[e.jsxs(ie,{children:[e.jsx(pe,{children:r}),e.jsxs("div",{children:["Welcome, ",f.charAt(0).toUpperCase()+f.slice(1),"!"]})]}),e.jsxs(ae,{children:[e.jsx(le,{children:x.map(h=>e.jsx(de,{active:c===h.toLowerCase(),onClick:()=>u(h.toLowerCase()),children:h},h))}),e.jsx(ce,{children:m})]})]})},ge=i.div`
   padding: 2rem;
-`,Ce=()=>e.jsx(he,{title:"Загрузка экспонатов",activeNav:"artworks",onNavClick:()=>{},userRole:"admin",children:e.jsx(ge,{children:e.jsx(oe,{})})});export{Ce as default};
+`,ke=()=>e.jsx(he,{title:"Загрузка экспонатов",activeNav:"artworks",onNavClick:()=>{},userRole:"admin",children:e.jsx(ge,{children:e.jsx(oe,{})})});export{ke as default};
