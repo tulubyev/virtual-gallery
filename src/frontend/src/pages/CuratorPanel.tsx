@@ -148,7 +148,7 @@ const CuratorPanel: React.FC = () => {
   ];
 
   const [galleryConfig, setGalleryConfig] = useState<GalleryConfig | null>(null);
-  const [configLoading, setConfigLoading] = useState(false);
+  const [configLoading, setConfigLoading] = useState(true);
   const [configSaving, setConfigSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
