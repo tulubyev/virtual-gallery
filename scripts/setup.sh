@@ -118,17 +118,54 @@ if [ "$MISSING" -gt 0 ]; then
   echo "Skipping database initialization (credentials incomplete)."
 else
   # ------------------------------------------------------------------
-  # 4. Initialize the database
+  # 4. Initialize the database (skip when schema files are unchanged)
   # ------------------------------------------------------------------
-  echo "Initializing database..."
-  cd "$ROOT_DIR"
+  DB_STAMP="$ROOT_DIR/.db-init-stamp"
+
+  # Collect all schema-related source files to watch
+  DB_SCHEMA_FILES=(
+    "$ROOT_DIR/src/database/init.ts"
+    "$ROOT_DIR/src/database/initialize.ts"
+    "$ROOT_DIR/src/database/init_db.ts"
+    "$ROOT_DIR/src/database/schema.sql"
+    "$ROOT_DIR/src/database/reset.sql"
+    "$ROOT_DIR/src/database/migration.sql"
+    "$ROOT_DIR/src/database/enhanced_schema.sql"
+    "$ROOT_DIR/src/database/ai_ml_schema.sql"
+  )
+
+  # Find the newest mtime among all schema files that actually exist
+  NEWEST_SCHEMA=0
+  for f in "${DB_SCHEMA_FILES[@]}"; do
+    if [ -f "$f" ]; then
+      FMTIME=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null || echo 0)
+      if [ "$FMTIME" -gt "$NEWEST_SCHEMA" ]; then
+        NEWEST_SCHEMA=$FMTIME
+      fi
+    fi
+  done
+
+  # Get the stamp mtime (0 if the stamp doesn't exist yet)
+  STAMP_MTIME=0
+  if [ -f "$DB_STAMP" ]; then
+    STAMP_MTIME=$(stat -c %Y "$DB_STAMP" 2>/dev/null || stat -f %m "$DB_STAMP" 2>/dev/null || echo 0)
+  fi
+
   DB_INIT_OK=0
-  if npm run init-db 2>&1; then
-    ok "Database initialized successfully."
+  if [ "$STAMP_MTIME" -ge "$NEWEST_SCHEMA" ] && [ "$STAMP_MTIME" -gt 0 ]; then
+    ok "Database schema unchanged — skipping db init."
     DB_INIT_OK=1
   else
-    warn "Database initialization failed (see output above)."
-    warn "Once resolved, run: npm run init-db"
+    echo "Initializing database..."
+    cd "$ROOT_DIR"
+    if npm run init-db 2>&1; then
+      ok "Database initialized successfully."
+      touch "$DB_STAMP"
+      DB_INIT_OK=1
+    else
+      warn "Database initialization failed (see output above)."
+      warn "Once resolved, run: npm run init-db"
+    fi
   fi
 fi
 
