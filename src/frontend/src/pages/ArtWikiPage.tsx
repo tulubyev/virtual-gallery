@@ -431,6 +431,7 @@ const ArtWikiPage: React.FC = () => {
   const [aiStatus, setAiStatus] = useState<'checking' | 'online' | 'demo'>('checking');
   const [museumModal, setMuseumModal] = useState<{ url: string; name: string } | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [gallerySearch, setGallerySearch] = useState('');
 
@@ -499,6 +500,7 @@ const ArtWikiPage: React.FC = () => {
 
   function clearChat() {
     setMessages([{ ...WELCOME_MESSAGE, time: now() }]);
+    setShowClearConfirm(false);
   }
 
   function openMuseum(museum: Museum) {
@@ -566,14 +568,32 @@ const ArtWikiPage: React.FC = () => {
                   <p className="text-white/70 text-xs">Эксперт по истории искусства</p>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
-                  <button
-                    onClick={clearChat}
-                    disabled={loading || messages.length <= 1}
-                    title="Новый разговор"
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
-                  >
-                    <span>✕</span> Новый разговор
-                  </button>
+                  {showClearConfirm ? (
+                    <div className="flex items-center gap-2 bg-white/15 rounded-full px-3 py-1">
+                      <span className="text-white text-xs">Очистить чат?</span>
+                      <button
+                        onClick={clearChat}
+                        className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 hover:bg-red-600 text-white transition-colors"
+                      >
+                        Да
+                      </button>
+                      <button
+                        onClick={() => setShowClearConfirm(false)}
+                        className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/25 hover:bg-white/35 text-white transition-colors"
+                      >
+                        Нет
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowClearConfirm(true)}
+                      disabled={loading || messages.length <= 1}
+                      title="Новый разговор"
+                      className="px-3 py-1 rounded-full text-xs font-medium bg-white/15 hover:bg-white/25 text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                    >
+                      <span>✕</span> Новый разговор
+                    </button>
+                  )}
                   <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 backdrop-blur-sm ${
                     aiStatus === 'online' ? 'bg-white/20 text-white' :
                     aiStatus === 'demo'   ? 'bg-amber-500/20 text-white' :
