@@ -424,8 +424,23 @@ const WELCOME_MESSAGE: Message = {
   time: 'Только что',
 };
 
+const CHAT_STORAGE_KEY = 'artwiki_chat_history';
+const MAX_STORED_MESSAGES = 20;
+
+function loadStoredMessages(): Message[] {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Message[];
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+  }
+  return [WELCOME_MESSAGE];
+}
+
 const ArtWikiPage: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState<'checking' | 'online' | 'demo'>('checking');
@@ -446,6 +461,14 @@ const ArtWikiPage: React.FC = () => {
   useEffect(() => {
     checkAiStatus();
   }, []);
+
+  useEffect(() => {
+    try {
+      const toStore = messages.slice(-MAX_STORED_MESSAGES);
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
+    } catch {
+    }
+  }, [messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -499,6 +522,10 @@ const ArtWikiPage: React.FC = () => {
   }
 
   function clearChat() {
+    try {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {
+    }
     setMessages([{ ...WELCOME_MESSAGE, time: now() }]);
     setShowClearConfirm(false);
   }
