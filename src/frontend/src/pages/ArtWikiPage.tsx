@@ -166,6 +166,19 @@ const QUICK_QUESTIONS = [
   'Поп-арт: Уорхол и Лихтенштейн',
 ];
 
+const QUICK_QUESTION_COUNT = 6;
+
+function selectRandomQuickQuestions(): string[] {
+  const questions = [...QUICK_QUESTIONS];
+
+  for (let i = questions.length - 1; i > 0; i -= 1) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    [questions[i], questions[randomIndex]] = [questions[randomIndex], questions[i]];
+  }
+
+  return questions.slice(0, QUICK_QUESTION_COUNT);
+}
+
 const DEMO_ANSWERS: Array<{ keywords: string[]; answer: string }> = [
   {
     keywords: ['импрессионизм', 'impressionism'],
@@ -441,6 +454,7 @@ function loadStoredMessages(): Message[] {
 
 const ArtWikiPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
+  const [quickQuestions] = useState(selectRandomQuickQuestions);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState<'checking' | 'online' | 'demo'>('checking');
@@ -687,7 +701,7 @@ const ArtWikiPage: React.FC = () => {
             <div className="px-4 py-3 bg-white border-t border-gray-100">
               <p className="text-xs text-gray-500 mb-2">Быстрые вопросы:</p>
               <div className="flex flex-wrap gap-2">
-                {QUICK_QUESTIONS.map(q => (
+                {quickQuestions.map(q => (
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
