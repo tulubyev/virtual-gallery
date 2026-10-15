@@ -3,6 +3,29 @@ import { Request, Response } from 'express';
 import { IGalleryService } from '../types/gallery';
 import { ILogger } from '../types/interfaces';
 
+function validateGalleryData(data: unknown, requireName: boolean): string | undefined {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    return 'Gallery data must be an object';
+  }
+
+  const fields = ['name', 'description', 'location', 'opening_hours', 'image_url'];
+  const body = data as Record<string, unknown>;
+  if (requireName && body.name === undefined) {
+    return 'Gallery name is required';
+  }
+  for (const field of fields) {
+    if (body[field] !== undefined && typeof body[field] !== 'string') {
+      return `${field} must be a string`;
+    }
+  }
+  if (typeof body.name === 'string' && !body.name.trim()) {
+    return 'Gallery name must not be empty';
+  }
+  if (!requireName && !fields.some(field => body[field] !== undefined)) {
+    return 'At least one gallery field is required';
+  }
+}
+
 class GalleryController {
   constructor(
     private galleryService: IGalleryService,
@@ -21,6 +44,10 @@ class GalleryController {
 
   async getGalleryById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Invalid gallery ID' });
+      return;
+    }
     try {
       const gallery = await this.galleryService.getById(id);
 
@@ -48,6 +75,11 @@ class GalleryController {
   }
 
   async createGallery(req: Request, res: Response): Promise<void> {
+    const validationError = validateGalleryData(req.body, true);
+    if (validationError) {
+      res.status(400).json({ error: validationError });
+      return;
+    }
     try {
       const galleryData = req.body;
       const newGallery = await this.galleryService.create(galleryData);
@@ -61,6 +93,15 @@ class GalleryController {
 
   async updateGallery(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Invalid gallery ID' });
+      return;
+    }
+    const validationError = validateGalleryData(req.body, false);
+    if (validationError) {
+      res.status(400).json({ error: validationError });
+      return;
+    }
     try {
       const galleryData = req.body;
       const updatedGallery = await this.galleryService.update(id, galleryData);
@@ -75,6 +116,10 @@ class GalleryController {
 
   async deleteGallery(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
+    if (!/^\d+$/.test(id)) {
+      res.status(400).json({ error: 'Invalid gallery ID' });
+      return;
+    }
     try {
       await this.galleryService.delete(id);
 
