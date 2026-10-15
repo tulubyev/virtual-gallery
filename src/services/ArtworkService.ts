@@ -10,6 +10,9 @@ import {
   SearchFilters
 } from '../types/artwork';
 import { ILogger, ICacheable } from '../types/interfaces';
+import { buildOrderBy } from './sortOrder';
+
+const ARTWORK_SORT_COLUMNS = ['created_at', 'title', 'artist_name'] as const;
 
 export interface ArtworkAnalytics {
   artwork_id: number;
@@ -72,9 +75,7 @@ export class ArtworkService extends BaseService implements IArtworkService {
         }
 
         // Add sorting
-        const sortBy = filters.sortBy || 'created_at';
-        const sortOrder = filters.sortOrder || 'DESC';
-        query += ` ORDER BY ${sortBy} ${sortOrder}`;
+        query += buildOrderBy(ARTWORK_SORT_COLUMNS, filters.sortBy, filters.sortOrder);
 
         // Add pagination
         if (filters.limit) {
@@ -379,11 +380,12 @@ export class ArtworkService extends BaseService implements IArtworkService {
         }
 
         // Apply sorting
-        if (filters?.sortBy) {
-          query += ` ORDER BY ${filters.sortBy} ${filters.sortOrder || 'ASC'}`;
-        } else {
-          query += ' ORDER BY created_at DESC'; // Default sort
-        }
+        query += buildOrderBy(
+          ARTWORK_SORT_COLUMNS,
+          filters?.sortBy,
+          filters?.sortOrder,
+          filters?.sortBy ? 'ASC' : 'DESC'
+        );
 
         // Apply pagination
         if (filters?.limit) {

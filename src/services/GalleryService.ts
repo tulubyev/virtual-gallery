@@ -10,6 +10,9 @@ import {
 } from '../types/gallery';
 import { ILogger, ICacheable } from '../types/interfaces';
 import { Artwork } from '../types/artwork';
+import { buildOrderBy } from './sortOrder';
+
+const GALLERY_SORT_COLUMNS = ['created_at', 'name'] as const;
 
 export interface Room {
   room_id?: string;
@@ -56,9 +59,7 @@ export class GalleryService extends BaseService implements IGalleryService {
 
       if (filters) {
         // Add sorting
-        const sortBy = filters.sortBy || 'created_at';
-        const sortOrder = filters.sortOrder || 'DESC';
-        query += ` ORDER BY ${sortBy} ${sortOrder}`;
+        query += buildOrderBy(GALLERY_SORT_COLUMNS, filters.sortBy, filters.sortOrder);
 
         // Add pagination
         if (filters.limit) {
