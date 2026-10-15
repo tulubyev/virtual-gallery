@@ -206,6 +206,33 @@ describe('POST /api/artworks', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
+  describe.each(['title', 'artist_name'])('%s validation', (field) => {
+    it.each([null, '', ' \t\n ', 123, true, [], {}])(
+      'returns 400 for invalid value %p without calling the service',
+      async (value) => {
+        const create = jest.fn();
+        const app = buildApp({ create });
+        const res = await request(app)
+          .post('/api/artworks')
+          .set('Authorization', `Bearer ${validToken()}`)
+          .send({ ...validPayload, [field]: value });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBeDefined();
+        expect(create).not.toHaveBeenCalled();
+      }
+    );
+  });
+
+  it('returns 400 without a request body and does not call the service', async () => {
+    const create = jest.fn();
+    const app = buildApp({ create });
+    const res = await request(app)
+      .post('/api/artworks')
+      .set('Authorization', `Bearer ${validToken()}`);
+    expect(res.status).toBe(400);
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('creates an artwork and returns 201 with a valid token and all required fields', async () => {
     const create = jest.fn().mockResolvedValue(sampleArtwork);
     const app = buildApp({ create });
@@ -228,6 +255,23 @@ describe('POST /api/artworks', () => {
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ title: 'Mona Lisa', medium: 'Oil' }));
   });
 
+  it('defaults omitted tags to an empty array', async () => {
+    const create = jest.fn().mockResolvedValue(sampleArtwork);
+    const payload = { title: 'Mona Lisa', artist_name: 'Da Vinci' };
+    const res = await request(buildApp({ create })).post('/api/artworks')
+      .set('Authorization', `Bearer ${validToken()}`).send(payload);
+    expect(res.status).toBe(201);
+    expect(create).toHaveBeenCalledWith({ ...payload, tags: [] });
+  });
+
+  it.each([null, 'art', {}, [123]])('rejects invalid tags %p before creating', async (tags) => {
+    const create = jest.fn();
+    const res = await request(buildApp({ create })).post('/api/artworks')
+      .set('Authorization', `Bearer ${validToken()}`).send({ ...validPayload, tags });
+    expect(res.status).toBe(400);
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('returns 500 when the service throws', async () => {
     const app = buildApp({ create: jest.fn().mockRejectedValue(new Error('insert failed')) });
     const res = await request(app)
@@ -242,6 +286,26 @@ describe('POST /api/artworks', () => {
 
 describe('PUT /api/artworks/:id', () => {
   const updatePayload = { title: 'Updated Title' };
+
+  it.each([null, 'art', {}, [123]])('rejects invalid tags %p before updating', async (tags) => {
+    const update = jest.fn();
+    const res = await request(buildApp({ update })).put('/api/artworks/1')
+      .set('Authorization', `Bearer ${validToken()}`).send({ tags });
+    expect(res.status).toBe(400);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  describe.each(['title', 'artist_name'])('%s validation', (field) => {
+    it.each([null, '', ' \t ', 123, true, [], {}])('rejects invalid value %p before saving', async (value) => {
+      const update = jest.fn();
+      const res = await request(buildApp({ update }))
+        .put('/api/artworks/1')
+        .set('Authorization', `Bearer ${validToken()}`)
+        .send({ [field]: value });
+      expect(res.status).toBe(400);
+      expect(update).not.toHaveBeenCalled();
+    });
+  });
 
   it('returns 401 without a token', async () => {
     const app = buildApp();

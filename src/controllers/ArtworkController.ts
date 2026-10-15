@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { IArtworkService } from '../types/artwork';
 import { ILogger } from '../types/interfaces';
+import { isObjectBody, isNonEmptyString } from '../utils/requestValidation';
 
 // Import multer types
 interface MulterFile {
@@ -78,12 +79,17 @@ class ArtworkController {
 
   async createArtwork(req: Request, res: Response): Promise<void> {
     const { title, artist_name } = req.body || {};
-    if (!title || !artist_name) {
-      res.status(400).json({ error: 'title and artist_name are required' });
+    if (!isObjectBody(req.body) || !isNonEmptyString(title) || !isNonEmptyString(artist_name)) {
+      res.status(400).json({ error: 'title and artist_name are required and must be non-empty strings' });
+      return;
+    }
+    const tags = req.body.tags === undefined ? [] : req.body.tags;
+    if (!Array.isArray(tags) || !tags.every(tag => typeof tag === 'string')) {
+      res.status(400).json({ error: 'tags must be an array of strings' });
       return;
     }
     try {
-      const artworkData = req.body;
+      const artworkData = { ...req.body, title, artist_name, tags };
       const newArtwork = await this.artworkService.create(artworkData);
       this.logger.info('Artwork created', { artworkId: newArtwork.artwork_id });
       res.status(201).json(newArtwork);
@@ -97,6 +103,15 @@ class ArtworkController {
     const { id } = req.params;
     if (!/^\d+$/.test(id)) {
       res.status(400).json({ error: 'Artwork ID must be a positive integer' });
+      return;
+    }
+    if (!isObjectBody(req.body) ||
+        ['title', 'artist_name'].some(field => field in req.body && !isNonEmptyString(req.body[field]))) {
+      res.status(400).json({ error: 'Provided title and artist_name must be non-empty strings' });
+      return;
+    }
+    if ('tags' in req.body && (!Array.isArray(req.body.tags) || !req.body.tags.every(tag => typeof tag === 'string'))) {
+      res.status(400).json({ error: 'tags must be an array of strings' });
       return;
     }
     try {

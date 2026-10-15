@@ -65,6 +65,75 @@ const sampleUser = {
   preferences: {},
 };
 
+describe('user write validation', () => {
+  it.each([
+    {}, { username: 123, email: 'test@example.com', password: 'secret' },
+    { username: 'test', email: {}, password: 'secret' },
+    { username: 'test', email: 'not-an-email', password: 'secret' },
+    { username: 'test', email: 'test@example.com', password: true },
+    { username: '  ', email: 'test@example.com', password: 'secret' },
+    { username: 'test', email: 'test@example.com', password: 'secret', role: 'admin' },
+    { username: 'test', email: 'test@example.com', password: 'secret', user_id: 999 },
+  ])('rejects invalid registration %p before accessing the service', async (body) => {
+    const createUser = jest.fn();
+    const getUserByEmail = jest.fn();
+    const res = await request(buildApp({ createUser, getUserByEmail }))
+      .post('/api/users/register').send(body);
+    expect(res.status).toBe(400);
+    expect(createUser).not.toHaveBeenCalled();
+    expect(getUserByEmail).not.toHaveBeenCalled();
+  });
+
+  it('registers valid fields without forwarding a role', async () => {
+    const createUser = jest.fn().mockResolvedValue(sampleUser);
+    const body = { username: 'test', email: 'test@example.com', password: 'secret' };
+    const res = await request(buildApp({ createUser })).post('/api/users/register').send(body);
+    expect(res.status).toBe(201);
+    expect(createUser).toHaveBeenCalledWith(body);
+  });
+
+  it.each([
+    { username: '' }, { username: [] }, { email: false }, { email: 'invalid' },
+    { preferences: [] }, { preferences: null }, { role: 'admin' },
+    { user_id: 999 }, { userId: 999 }, { password_hash: 'hash' },
+  ])('rejects invalid or protected profile fields %p before saving', async (body) => {
+    const updateUser = jest.fn();
+    const res = await request(buildApp({ updateUser }))
+      .put('/api/users/profile')
+      .set('Authorization', `Bearer ${validToken()}`).send(body);
+    expect(res.status).toBe(400);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it.each(['/profile', '/preferences'])('rejects an array body at %s before saving', async (path) => {
+    const updateUser = jest.fn();
+    const res = await request(buildApp({ updateUser }))
+      .put(`/api/users${path}`)
+      .set('Authorization', `Bearer ${validToken()}`).send([]);
+    expect(res.status).toBe(400);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('allows an empty preferences object to clear preferences', async () => {
+    const updateUser = jest.fn().mockResolvedValue(sampleUser);
+    const res = await request(buildApp({ updateUser }))
+      .put('/api/users/preferences')
+      .set('Authorization', `Bearer ${validToken()}`).send({});
+    expect(res.status).toBe(200);
+    expect(updateUser).toHaveBeenCalledWith('1', { preferences: {} });
+  });
+
+  it.each([{ email: [], password: 'secret' }, { email: 'test@example.com', password: {} }])(
+    'rejects invalid login fields %p before authentication',
+    async (body) => {
+      const authenticate = jest.fn();
+      const res = await request(buildApp({ authenticate })).post('/api/users/login').send(body);
+      expect(res.status).toBe(400);
+      expect(authenticate).not.toHaveBeenCalled();
+    }
+  );
+});
+
 // ─── GET /api/users/profile ───────────────────────────────────────────────────
 
 describe('GET /api/users/profile', () => {
@@ -99,7 +168,7 @@ describe('GET /api/users/profile', () => {
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
     expect(res.body.email).toBe('test@example.com');
-    expect(getUserById).toHaveBeenCalledWith(1);
+    expect(getUserById).toHaveBeenCalledWith('1');
   });
 
   it('returns 404 when the user is not found', async () => {
@@ -149,7 +218,7 @@ describe('PUT /api/users/profile', () => {
       .set('Authorization', `Bearer ${validToken()}`)
       .send(updatePayload);
     expect(res.status).toBe(200);
-    expect(updateUser).toHaveBeenCalledWith(1, expect.objectContaining({ username: 'newname' }));
+    expect(updateUser).toHaveBeenCalledWith('1', expect.objectContaining({ username: 'newname' }));
   });
 
   it('strips the password field from the update payload', async () => {
@@ -191,7 +260,7 @@ describe('GET /api/users/preferences', () => {
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
     expect(res.body.preferences).toBeDefined();
-    expect(getUserById).toHaveBeenCalledWith(1);
+    expect(getUserById).toHaveBeenCalledWith('1');
   });
 
   it('returns an empty preferences object when user has none set', async () => {
@@ -242,7 +311,7 @@ describe('PUT /api/users/preferences', () => {
       .send(prefsPayload);
     expect(res.status).toBe(200);
     expect(res.body.preferences).toBeDefined();
-    expect(updateUser).toHaveBeenCalledWith(1, { preferences: prefsPayload });
+    expect(updateUser).toHaveBeenCalledWith('1', { preferences: prefsPayload });
   });
 
   it('returns 500 when the service throws', async () => {
@@ -272,7 +341,7 @@ describe('GET /api/users/favorites', () => {
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(getFavorites).toHaveBeenCalledWith(1);
+    expect(getFavorites).toHaveBeenCalledWith('1');
   });
 
   it('returns 500 when the service throws', async () => {
@@ -300,7 +369,7 @@ describe('POST /api/users/favorites/:artworkId', () => {
       .post('/api/users/favorites/42')
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
-    expect(addFavorite).toHaveBeenCalledWith(1, '42');
+    expect(addFavorite).toHaveBeenCalledWith('1', '42');
   });
 
   it('returns 500 when the service throws', async () => {
@@ -328,7 +397,7 @@ describe('DELETE /api/users/favorites/:artworkId', () => {
       .delete('/api/users/favorites/42')
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
-    expect(removeFavorite).toHaveBeenCalledWith(1, '42');
+    expect(removeFavorite).toHaveBeenCalledWith('1', '42');
   });
 
   it('returns 500 when the service throws', async () => {
@@ -357,7 +426,7 @@ describe('GET /api/users/history', () => {
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(getHistory).toHaveBeenCalledWith(1);
+    expect(getHistory).toHaveBeenCalledWith('1');
   });
 
   it('returns 500 when the service throws', async () => {
@@ -366,6 +435,34 @@ describe('GET /api/users/history', () => {
       .get('/api/users/history')
       .set('Authorization', `Bearer ${validToken()}`);
     expect(res.status).toBe(500);
+  });
+});
+
+describe.each([17, 83])('authenticated user identity (%i)', (userId) => {
+  it.each([
+    { method: 'put', path: '/profile', serviceMethod: 'updateUser', body: { username: 'newname' }, extraArgs: [{ username: 'newname' }] },
+    { method: 'put', path: '/preferences', serviceMethod: 'updateUser', body: { theme: 'dark' }, extraArgs: [{ preferences: { theme: 'dark' } }] },
+    { method: 'post', path: '/favorites/42', serviceMethod: 'addFavorite', body: {}, extraArgs: ['42'] },
+    { method: 'delete', path: '/favorites/42', serviceMethod: 'removeFavorite', body: {}, extraArgs: ['42'] },
+    { method: 'get', path: '/favorites', serviceMethod: 'getFavorites', body: {}, extraArgs: [] },
+    { method: 'get', path: '/history', serviceMethod: 'getHistory', body: {}, extraArgs: [] },
+  ])('$method $path passes the token user ID to $serviceMethod', async ({ method, path, serviceMethod, body, extraArgs }) => {
+    const serviceCall = jest.fn().mockResolvedValue(sampleUser);
+    const app = buildApp({ [serviceMethod]: serviceCall });
+    const client = request(app);
+    const sendRequest = {
+      put: () => client.put(`/api/users${path}`),
+      post: () => client.post(`/api/users${path}`),
+      delete: () => client.delete(`/api/users${path}`),
+      get: () => client.get(`/api/users${path}`),
+    }[method];
+    const res = await sendRequest()
+      .query({ userId: 999 })
+      .set('Authorization', `Bearer ${validToken('visitor', userId)}`)
+      .send(body);
+    expect(res.status).toBe(200);
+    expect(serviceCall).toHaveBeenCalledTimes(1);
+    expect(serviceCall).toHaveBeenCalledWith(String(userId), ...extraArgs);
   });
 });
 

@@ -1,7 +1,9 @@
 // controllers/UserController.ts
 import { Request, Response } from 'express';
-import { IUserService, CreateUserDto, UpdateUserDto } from '../types/user';
+import { IUserService, UpdateUserDto } from '../types/user';
 import { ILogger } from '../types/interfaces';
+import type { AuthenticatedRequest } from '../middleware/auth';
+import { isObjectBody, isNonEmptyString, isEmail, hasOnlyFields } from '../utils/requestValidation';
 
 class UserController {
   constructor(
@@ -10,8 +12,13 @@ class UserController {
   ) {}
 
   async registerUser(req: Request, res: Response): Promise<void> {
+    if (!isObjectBody(req.body) || !hasOnlyFields(req.body, ['username', 'email', 'password']) ||
+        !isNonEmptyString(req.body.username) || !isEmail(req.body.email) || !isNonEmptyString(req.body.password)) {
+      res.status(400).json({ error: 'Valid username, email, and password are required; other fields are not allowed' });
+      return;
+    }
     try {
-      const { username, email, password, role } = req.body;
+      const { username, email, password } = req.body;
 
       // Валидация входных данных
       if (!username || !email || !password) {
@@ -30,8 +37,7 @@ class UserController {
       const newUser = await this.userService.createUser({
         username,
         email,
-        password,
-        role
+        password
       });
 
       // Генерация JWT токена
@@ -57,6 +63,10 @@ class UserController {
   }
 
   async loginUser(req: Request, res: Response): Promise<void> {
+    if (!isObjectBody(req.body) || !isEmail(req.body.email) || !isNonEmptyString(req.body.password)) {
+      res.status(400).json({ error: 'Valid email and password are required' });
+      return;
+    }
     try {
       const { email, password } = req.body;
 
@@ -95,10 +105,10 @@ class UserController {
     }
   }
 
-  async getUserProfile(req: Request, res: Response): Promise<void> {
+  async getUserProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       // userId comes from the JWT token via authenticateToken middleware
-      const userId = (req as any).user?.user_id;
+      const userId = String(req.user.user_id);
 
       const user = await this.userService.getUserById(userId);
       if (!user) {
@@ -113,14 +123,20 @@ class UserController {
     }
   }
 
-  async updateUserProfile(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async updateUserProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id); // Service IDs are strings; identity comes only from the token.
+    if (!isObjectBody(req.body) || !hasOnlyFields(req.body, ['username', 'email', 'preferences', 'password']) ||
+        ('username' in req.body && !isNonEmptyString(req.body.username)) ||
+        ('email' in req.body && !isEmail(req.body.email)) ||
+        ('preferences' in req.body && !isObjectBody(req.body.preferences))) {
+      res.status(400).json({ error: 'Invalid profile fields; only username, email, and preferences may be updated' });
+      return;
+    }
     try {
-      const updateData = req.body;
-
-      // Don't allow updating user ID or password through this endpoint
-      if ((updateData as any).password) {
-        delete (updateData as any).password;
+      const updateData: UpdateUserDto = {};
+      // Password changes have a separate endpoint. Never forward identity or role fields.
+      for (const field of ['username', 'email', 'preferences'] as const) {
+        if (field in req.body) updateData[field] = req.body[field];
       }
 
       const updatedUser = await this.userService.updateUser(userId, updateData);
@@ -133,8 +149,8 @@ class UserController {
     }
   }
 
-  async getUserPreferences(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async getUserPreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
     try {
       const user = await this.userService.getUserById(userId);
       if (!user) {
@@ -149,8 +165,13 @@ class UserController {
     }
   }
 
-  async updateUserPreferences(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async updateUserPreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
+    // Preference keys are extensible, but the stored value must be a JSON object.
+    if (!isObjectBody(req.body)) {
+      res.status(400).json({ error: 'Preferences must be an object' });
+      return;
+    }
     try {
       const preferences = req.body;
 
@@ -187,8 +208,8 @@ class UserController {
     }
   }
 
-  async getUserFavorites(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async getUserFavorites(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
     try {
       const favorites = await this.userService.getFavorites(userId);
       res.json(favorites);
@@ -198,8 +219,8 @@ class UserController {
     }
   }
 
-  async addFavorite(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async addFavorite(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
     const { artworkId } = req.params;
     try {
       const result = await this.userService.addFavorite(userId, artworkId);
@@ -210,8 +231,8 @@ class UserController {
     }
   }
 
-  async removeFavorite(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async removeFavorite(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
     const { artworkId } = req.params;
     try {
       const result = await this.userService.removeFavorite(userId, artworkId);
@@ -222,8 +243,8 @@ class UserController {
     }
   }
 
-  async getUserHistory(req: Request, res: Response): Promise<void> {
-    const userId = (req as any).user?.user_id; // From JWT token via authenticateToken
+  async getUserHistory(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = String(req.user.user_id);
     try {
       const history = await this.userService.getHistory(userId);
       res.json(history);
