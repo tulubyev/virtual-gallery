@@ -54,7 +54,7 @@ externalPort = 80
 
 [userenv.production]
 S3_REGION = "ru-msk"
-DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_gallery_db"
+DB_STRING = "postgres://tulubyev:CrossBaikal6times!@90.156.168.149:5432/virtual_gallery_db"
 
 [userenv.development]
 DB_STRING = "postgres://tulubyev:CrossBaikal6times!@62.217.178.173:5432/virtual_gallery_db"
