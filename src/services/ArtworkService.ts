@@ -97,6 +97,7 @@ export class ArtworkService extends BaseService implements IArtworkService {
   }
 
   async create(artwork: CreateArtworkDto): Promise<Artwork> {
+    this.validateArtwork(artwork, true);
     const client = await this.pool.connect();
     try {
       // Convert tags array to PostgreSQL format
@@ -139,12 +140,25 @@ export class ArtworkService extends BaseService implements IArtworkService {
   }
 
   async update(id: string, updates: UpdateArtworkDto): Promise<Artwork> {
+    this.validateArtwork(updates, false);
+    const fields = [
+      'title', 'artist_name', 'year_created', 'medium', 'dimensions',
+      'style', 'description', 'image_url', 'tags', 'gallery_id',
+    ] as const;
+    if (!fields.some(field => updates[field] !== undefined)) {
+      const existing = await this.getById(id);
+      if (!existing) {
+        throw new Error(`Artwork with ID ${id} not found`);
+      }
+      return existing;
+    }
+
     const client = await this.pool.connect();
     try {
       // Build dynamic SQL query based on fields to update
       const updateFields: string[] = [];
       const values: any[] = [];
-      let paramIndex = 2; // Start with 2 because 1 is the id
+      let paramIndex = 1; // The id follows all field values
 
       if (updates.title !== undefined) {
         updateFields.push(`title = $${paramIndex}`);
@@ -210,15 +224,6 @@ export class ArtworkService extends BaseService implements IArtworkService {
       // Add id to the end of values
       values.push(id);
 
-      if (updateFields.length === 0) {
-        // If no fields to update, just return the artwork
-        const existing = await this.getById(id);
-        if (!existing) {
-          throw new Error(`Artwork with ID ${id} not found`);
-        }
-        return existing;
-      }
-
       const query = `UPDATE artworks SET ${updateFields.join(', ')} WHERE artwork_id = $${paramIndex} RETURNING artwork_id, title, artist_name, year_created, medium, dimensions, style, description, image_url, tags, created_at, gallery_id`;
       const result = await client.query(query, values);
 
@@ -240,6 +245,35 @@ export class ArtworkService extends BaseService implements IArtworkService {
       return updatedArtwork;
     } finally {
       client.release();
+    }
+  }
+
+  private validateArtwork(data: CreateArtworkDto | UpdateArtworkDto, creating: boolean): void {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('Artwork data must be an object');
+    }
+
+    for (const field of ['title', 'artist_name'] as const) {
+      const value = data[field];
+      if ((creating || value !== undefined) &&
+          (typeof value !== 'string' || value.trim().length === 0)) {
+        throw new Error(`${field} must be a non-empty string`);
+      }
+    }
+
+    if ((creating || data.tags !== undefined) &&
+        (!Array.isArray(data.tags) || !Array.from(data.tags).every(tag => typeof tag === 'string'))) {
+      throw new Error('tags must be an array of strings');
+    }
+
+    if (data.year_created !== undefined && !Number.isInteger(data.year_created)) {
+      throw new Error('year_created must be an integer');
+    }
+
+    for (const field of ['medium', 'dimensions', 'style', 'description', 'image_url', 'gallery_id'] as const) {
+      if (data[field] !== undefined && typeof data[field] !== 'string') {
+        throw new Error(`${field} must be a string`);
+      }
     }
   }
 
