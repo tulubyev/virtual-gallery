@@ -84,28 +84,14 @@ if [ ! -f "$REQUIREMENTS" ]; then
 fi
 
 PIP_STAMP="$AI_DIR/.pip-stamp"
-CURRENT_HASH=""
-STORED_HASH=""
-
-if command -v sha256sum &>/dev/null; then
-  CURRENT_HASH=$(sha256sum "$REQUIREMENTS" | awk '{print $1}')
-elif command -v shasum &>/dev/null; then
-  CURRENT_HASH=$(shasum -a 256 "$REQUIREMENTS" | awk '{print $1}')
-fi
-
-if [ -f "$PIP_STAMP" ]; then
-  STORED_HASH=$(cat "$PIP_STAMP")
-fi
-
-if [ -n "$CURRENT_HASH" ] && [ "$CURRENT_HASH" = "$STORED_HASH" ]; then
+# A stamp is valid only when it exists and requirements are no newer.
+if [ -f "$PIP_STAMP" ] && [ ! "$REQUIREMENTS" -nt "$PIP_STAMP" ]; then
   ok "Python dependencies are up to date — skipping pip install."
 else
   echo "Installing Python dependencies from ai-ml-service/requirements.txt..."
   if "$PYTHON_CMD" -m pip install -r "$REQUIREMENTS" --quiet; then
+    touch "$PIP_STAMP"
     ok "pip install complete."
-    if [ -n "$CURRENT_HASH" ]; then
-      echo "$CURRENT_HASH" > "$PIP_STAMP"
-    fi
   else
     warn "pip install encountered errors (see output above)."
     warn "You may need to install system dependencies or use a virtual environment."
