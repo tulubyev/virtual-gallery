@@ -3,7 +3,7 @@ import multer from 'multer';
 
 const router = express.Router();
 const { getActiveConfig, saveConfig, updateTextureUrls } = require('../services/gallery-config');
-const { uploadBufferToS3 } = require('../services/s3-upload');
+const { uploadBufferToS3, StorageUnavailableError } = require('../services/s3-upload');
 
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
@@ -97,6 +97,9 @@ router.post('/textures', upload.any(), async (req: Request, res: Response) => {
 
     res.json({ success: true, textureUrls: mergedUrls });
   } catch (error) {
+    if (error instanceof StorageUnavailableError) {
+      return res.status(503).json({ success: false, code: error.code, error: error.message });
+    }
     console.error('Error uploading textures:', error);
     res.status(500).json({ error: 'Failed to upload textures' });
   }

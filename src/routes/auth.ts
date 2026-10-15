@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import pool from '../config/database';
 
-const { uploadWithKey } = require('../services/s3-upload');
+const { uploadWithKey, StorageUnavailableError } = require('../services/s3-upload');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
@@ -194,18 +194,15 @@ router.post('/me/avatar', avatarUpload.single('avatar'), async (req: Request, re
 
     if (!req.file) return res.status(400).json({ error: 'No image file provided' });
 
-    let avatarUrl: string;
-    try {
-      avatarUrl = await uploadWithKey(req.file.path, `avatars/${req.file.filename}`, req.file.mimetype);
-    } catch (s3Err: any) {
-      console.error('[auth/me/avatar] S3 upload failed:', s3Err.message);
-      return res.status(502).json({ error: 'Image upload failed — storage unavailable' });
-    }
+    const avatarUrl = await uploadWithKey(req.file.path, `avatars/${req.file.filename}`, req.file.mimetype);
 
     await pool.query('UPDATE users SET avatar_url = $1 WHERE user_id = $2', [avatarUrl, decoded.userId]);
 
     res.json({ avatar_url: avatarUrl });
   } catch (err: any) {
+    if (err instanceof StorageUnavailableError) {
+      return res.status(503).json({ success: false, code: err.code, error: err.message });
+    }
     console.error('[auth/me/avatar]', err.message);
     res.status(500).json({ error: 'Failed to update avatar' });
   } finally {

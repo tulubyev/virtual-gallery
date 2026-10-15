@@ -10,7 +10,10 @@ export const imageProcessingService = {
     formData.append('image', file);
     formData.append('uploaded_by', userId.toString());
 
-    const response = await api.post('/api/artworks/upload', formData, {
+    const response = await api.post('/artworks/upload', formData, {
+      // The API's normal 10s timeout is shorter than even one S3 deadline.
+      // Allow time for image processing, three sequential 15s uploads and DB work.
+      timeout: 120000,
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -18,6 +21,11 @@ export const imageProcessingService = {
         const progress = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
         console.log(`Загрузка: ${progress}%`);
       }
+    }).catch((error) => {
+      if (error.response?.data?.code === 'STORAGE_UNAVAILABLE') {
+        throw new Error(error.response.data.error);
+      }
+      throw error;
     });
 
     return response.data;

@@ -4,7 +4,7 @@ import path from 'path';
 import pool from '../config/database';
 
 const router = express.Router();
-const { uploadToS3 } = require('../services/s3-upload');
+const { uploadToS3, StorageUnavailableError } = require('../services/s3-upload');
 const { processImage, cleanupFiles } = require('../services/image-processor');
 
 const storage = multer.diskStorage({
@@ -30,15 +30,9 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
     if (variants.thumbnail) filesToCleanup.push(variants.thumbnail.path);
     if (variants.medium) filesToCleanup.push(variants.medium.path);
 
-    try {
-      imageUrl = await uploadToS3(req.file.path, req.file.filename, req.file.mimetype);
-      if (variants.thumbnail) thumbnailUrl = await uploadToS3(variants.thumbnail.path, variants.thumbnail.filename, variants.thumbnail.contentType);
-      if (variants.medium) mediumUrl = await uploadToS3(variants.medium.path, variants.medium.filename, variants.medium.contentType);
-    } catch {
-      imageUrl = '/uploads/' + req.file.filename;
-      if (variants.thumbnail) thumbnailUrl = '/uploads/' + variants.thumbnail.filename;
-      if (variants.medium) mediumUrl = '/uploads/' + variants.medium.filename;
-    }
+    imageUrl = await uploadToS3(req.file.path, req.file.filename, req.file.mimetype);
+    if (variants.thumbnail) thumbnailUrl = await uploadToS3(variants.thumbnail.path, variants.thumbnail.filename, variants.thumbnail.contentType);
+    if (variants.medium) mediumUrl = await uploadToS3(variants.medium.path, variants.medium.filename, variants.medium.contentType);
 
     const result = await pool.query(
       `INSERT INTO artworks (title, artist_name, year_created, medium, dimensions, style, country, epoch, description, image_url, thumbnail_url, tags, status)
@@ -51,6 +45,9 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
     if (mediumUrl) artwork.medium_url = mediumUrl;
     res.json({ success: true, artwork });
   } catch (error: any) {
+    if (error instanceof StorageUnavailableError) {
+      return res.status(503).json({ success: false, code: error.code, error: error.message });
+    }
     res.status(500).json({ error: error.message });
   } finally {
     cleanupFiles(filesToCleanup);

@@ -10,6 +10,6 @@ const s3Client = new S3Client({
   forcePathStyle: true
 });
 
-const S3_BUCKET = process.env.S3_BUCKET;
+const S3_BUCKET = process.env.S3_BUCKET_NAME || process.env.S3_BUCKET;
 
 module.exports = { s3Client, S3_BUCKET };

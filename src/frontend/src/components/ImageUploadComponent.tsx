@@ -216,7 +216,7 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({ onUploadCom
       }, 1000);
     } catch (error) {
       console.error('Ошибка при загрузке изображений:', error);
-      alert('Ошибка при загрузке изображений');
+      alert(error instanceof Error ? error.message : 'Ошибка при загрузке изображений');
       setUploading(false);
       setUploadProgress(null);
     }
