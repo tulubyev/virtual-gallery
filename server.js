@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const pool = require('./src/config/database');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { noCacheMiddleware } = require('./src/middleware/cors');
 const { xssProtection } = require('./src/middleware/security');
 const { accessControl } = require('./src/middleware/accessPolicy');
+const { createThumbnailHandler } = require('./src/services/thumbnails');
 
 // В проде без нормального секрета токены можно подделать (в коде есть запасные значения)
 if (process.env.NODE_ENV === 'production' && (process.env.JWT_SECRET || '').length < 32) {
@@ -21,6 +23,9 @@ app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Сжатие ответов (gzip/deflate): JS-бандлы и JSON
+app.use(compression());
 
 // Заголовки безопасности для всех ответов
 app.use(xssProtection);
@@ -51,7 +56,10 @@ app.use('/api/auctions', noCacheMiddleware, require('./src/routes/auctions'));
 
 // Static assets
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Миниатюры загрузок (WebP) для 3D-галереи и списков
+app.get('/uploads/t/:width/:file', createThumbnailHandler({ uploadsDir: path.join(__dirname, 'public/uploads') }));
+// Имена загрузок уникальны (метка времени) — длинный кэш безопасен
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), { maxAge: '30d', immutable: true }));
 
 // React SPA hashed chunks — immutable cache (filename changes on every build)
 app.use('/assets', express.static(path.join(__dirname, 'src/frontend/dist/assets'), {

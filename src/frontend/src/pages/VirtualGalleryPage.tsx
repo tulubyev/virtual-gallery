@@ -2,6 +2,7 @@
 import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Artwork } from '../types';
+import { textureSource } from '../lib/gallery/imageUrls';
 
 const GalleryR3F = React.lazy(() => import('../components/GalleryR3F'));
 
@@ -152,6 +153,20 @@ function roomArtworks(room: GalleryRoom): Artwork[] {
   }, []);
 }
 
+// ─── Узкий экран (телефон): панель залов сверху, а не слева ───────────────────
+
+function useIsNarrow(): boolean {
+  const query = '(max-width: 767px)';
+  const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return narrow;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const VirtualGalleryPage: React.FC = () => {
@@ -160,6 +175,7 @@ const VirtualGalleryPage: React.FC = () => {
   const [configError, setConfigError] = useState<string | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+  const narrow = useIsNarrow();
 
   const fetchConfig = useCallback(async (attemptsLeft = 3) => {
     setConfigLoading(true);
@@ -236,11 +252,20 @@ const VirtualGalleryPage: React.FC = () => {
           roomName={selectedRoom?.name}
           onArtworkClick={setSelectedArtwork}
           onExitVR={handleExitVR}
+          hudLeft={narrow ? 12 : 216}
+          hudTop={narrow ? 60 : 16}
         />
       </Suspense>
 
       {/* Room navigation panel — left side overlay */}
-      <div style={{
+      <div style={narrow ? {
+        position: 'absolute', top: 0, left: 0, right: 0,
+        background: 'rgba(10,8,20,0.82)',
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        zIndex: 10,
+        overflowX: 'auto', overflowY: 'hidden',
+      } : {
         position: 'absolute', top: 0, left: 0, bottom: 0,
         width: 200,
         background: 'rgba(10,8,20,0.82)',
@@ -250,7 +275,7 @@ const VirtualGalleryPage: React.FC = () => {
         zIndex: 10,
         overflowY: 'auto',
       }}>
-        <div style={{
+        {!narrow && <div style={{
           padding: '14px 14px 8px',
           fontSize: 11, fontWeight: 700,
           color: 'rgba(255,255,255,0.4)',
@@ -259,9 +284,11 @@ const VirtualGalleryPage: React.FC = () => {
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}>
           Залы галереи
-        </div>
+        </div>}
 
-        <div style={{ flex: 1, padding: '8px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={narrow
+          ? { padding: '8px', display: 'flex', flexDirection: 'row', gap: 6, width: 'max-content' }
+          : { flex: 1, padding: '8px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {config.rooms.map(room => {
             const isActive = room.id === selectedRoomId;
             const artCount = room.artworkAssignments
@@ -279,7 +306,8 @@ const VirtualGalleryPage: React.FC = () => {
                   background: bg,
                   border: isActive ? '1px solid rgba(130,100,255,0.7)' : '1px solid rgba(255,255,255,0.06)',
                   borderRadius: 8,
-                  padding: '9px 10px',
+                  padding: narrow ? '6px 12px' : '9px 10px',
+                  flexShrink: 0,
                   cursor: 'pointer',
                   color: isActive ? '#fff' : 'rgba(255,255,255,0.75)',
                   textAlign: 'left',
@@ -313,7 +341,7 @@ const VirtualGalleryPage: React.FC = () => {
             {selectedArtwork.description && <p><strong>Описание:</strong> {selectedArtwork.description}</p>}
             {(selectedArtwork.image_url || selectedArtwork.imageUrl) && (
               <ArtworkImage
-                src={selectedArtwork.image_url || selectedArtwork.imageUrl}
+                src={textureSource(selectedArtwork.image_url || selectedArtwork.imageUrl || '', 'zoom').url}
                 alt={selectedArtwork.title}
                 onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Изображение+недоступно'; }}
               />
