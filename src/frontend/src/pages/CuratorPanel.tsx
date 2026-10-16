@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchWithAuth } from '../services/api';
+import { roomLayout, LIMITS } from '../lib/gallery/roomSpec';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -299,11 +300,17 @@ const CuratorPanel: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...galleryConfig, currentRoom: activeRoomId ?? galleryConfig.currentRoom }),
       });
-      if (!res.ok) throw new Error('Failed to save');
-      setSaveMsg({ ok: true, text: 'Конфигурация сохранена' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || 'Failed to save');
+      }
+      const saved = await res.json().catch(() => null);
+      const warn = Array.isArray(saved?.warnings) && saved.warnings.length > 0 ? ` (исправлено: ${saved.warnings.length})` : '';
+      setSaveMsg({ ok: true, text: 'Конфигурация сохранена' + warn });
       setTimeout(() => setSaveMsg(null), 3000);
-    } catch {
-      setSaveMsg({ ok: false, text: 'Ошибка сохранения — попробуйте ещё раз' });
+    } catch (e) {
+      const m = e instanceof Error && e.message !== 'Failed to save' ? e.message : 'Ошибка сохранения — попробуйте ещё раз';
+      setSaveMsg({ ok: false, text: m });
     } finally {
       setConfigSaving(false);
     }
@@ -343,15 +350,19 @@ const CuratorPanel: React.FC = () => {
     setRoomSettingsOpen(true);
   };
 
+  // Вместимость зала следует из размеров и дверей: стены, минус проёмы.
+  const roomCapacity = (r: GalleryRoom) => Math.min(LIMITS.maxSlots, roomLayout(r).capacity);
+
   const applyRoomSettings = () => {
     if (!editingRoom) return;
-    updateRoomInConfig(editingRoom);
+    // Сменили размеры — лишние места убираем, чтобы картины не оказались «в стене».
+    updateRoomInConfig({ ...editingRoom, slots: Math.max(1, Math.min(editingRoom.slots, roomCapacity(editingRoom))) });
     setRoomSettingsOpen(false);
   };
 
   const changeSlotCount = (delta: number) => {
     if (!activeRoom) return;
-    const newCount = Math.max(1, Math.min(10, activeRoom.slots + delta));
+    const newCount = Math.max(1, Math.min(roomCapacity(activeRoom), activeRoom.slots + delta));
     updateRoomInConfig({ ...activeRoom, slots: newCount });
   };
 
@@ -882,10 +893,10 @@ const CuratorPanel: React.FC = () => {
                                 <Button variant="outline" size="sm" onClick={() => changeSlotCount(-1)} disabled={activeRoom.slots <= 1} className="h-8 w-8 p-0">
                                   <Minus className="h-3.5 w-3.5" />
                                 </Button>
-                                <span className="text-sm font-medium w-16 text-center">
-                                  {activeRoom.slots} слот{activeRoom.slots === 1 ? '' : activeRoom.slots < 5 ? 'а' : 'ов'}
+                                <span className="text-sm font-medium w-28 text-center" title="Сколько картин помещается на стенах зала при таких размерах">
+                                  {activeRoom.slots} из {roomCapacity(activeRoom)} мест
                                 </span>
-                                <Button variant="outline" size="sm" onClick={() => changeSlotCount(1)} disabled={activeRoom.slots >= 10} className="h-8 w-8 p-0">
+                                <Button variant="outline" size="sm" onClick={() => changeSlotCount(1)} disabled={activeRoom.slots >= roomCapacity(activeRoom)} className="h-8 w-8 p-0">
                                   <Plus className="h-3.5 w-3.5" />
                                 </Button>
                               </div>
@@ -1646,20 +1657,24 @@ const CuratorPanel: React.FC = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Ширина (м)</label>
-                  <input type="number" min={3} max={50} value={editingRoom.width}
+                  <input type="number" min={LIMITS.dimMin} max={LIMITS.dimMax} value={editingRoom.width}
                     onChange={e => setEditingRoom({ ...editingRoom, width: Number(e.target.value) })} className={inputCls} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Глубина (м)</label>
-                  <input type="number" min={3} max={50} value={editingRoom.depth}
+                  <input type="number" min={LIMITS.dimMin} max={LIMITS.dimMax} value={editingRoom.depth}
                     onChange={e => setEditingRoom({ ...editingRoom, depth: Number(e.target.value) })} className={inputCls} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Высота (м)</label>
-                  <input type="number" min={3} max={15} value={editingRoom.height}
+                  <input type="number" min={LIMITS.heightMin} max={LIMITS.heightMax} value={editingRoom.height}
                     onChange={e => setEditingRoom({ ...editingRoom, height: Number(e.target.value) })} className={inputCls} />
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground -mt-2">
+                При таких размерах на стенах помещается до {roomCapacity(editingRoom)} картин
+                {editingRoom.slots > roomCapacity(editingRoom) ? ` — лишние места (${editingRoom.slots - roomCapacity(editingRoom)}) будут убраны` : ''}.
+              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
