@@ -51,6 +51,15 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 - Python AI/ML-сервис (`ai-ml-service/`) в деплой пока не включён: без него работает демо-режим
   (`AI_CORE_URL`).
 
+## Безопасность
+
+- Доступ к `/api` задаёт одна таблица — `src/middleware/accessPolicy.ts` (`RULES`), подключена в `server.js`
+  перед всеми роутами. **Новый маршрут добавляется в таблицу**, иначе: чтение — любой вошедший, изменение —
+  только администратор. Роль берётся из БД, а не из токена. Тесты — `src/test/middleware/accessPolicy.test.ts`.
+- Секрет JWT: `getJwtSecret()` (`src/config/jwt.ts`), запасных значений нет.
+- Лимиты: вход и регистрация — 20 за 15 минут с IP, `/api/ai` — 60 за 10 минут.
+- Сидер (`scripts/populate-db.ts`) берёт пароль из `SEED_PASSWORD` или генерирует случайный; на боевую БД не запускать.
+
 ## Устройство
 
 - `server.js` — Express: `/api/*` (роуты в `src/routes/*.ts`), статика, SPA-фолбэк на `src/frontend/dist`.

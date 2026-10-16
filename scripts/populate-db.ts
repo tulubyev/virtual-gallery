@@ -1,6 +1,7 @@
 // scripts/populate-db.ts
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import 'dotenv/config';
 
 async function populateDatabase() {
@@ -17,7 +18,9 @@ async function populateDatabase() {
     const client = await pool.connect();
 
     // Хешируем пароль для тестовых пользователей
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    // Пароль тестовых пользователей: SEED_PASSWORD или случайный (печатается в конце)
+    const seedPassword = process.env.SEED_PASSWORD || crypto.randomBytes(9).toString('base64url');
+    const hashedPassword = await bcrypt.hash(seedPassword, 10);
 
     // Создаем тестовых пользователей для разных ролей
     // Примечание: в текущей структуре таблицы users нет колонки role,
@@ -57,13 +60,12 @@ async function populateDatabase() {
 
     for (const user of testUsers) {
       const result = await client.query(
-        `INSERT INTO users (username, email, password_hash, preferences)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO users (username, email, password_hash, role, preferences)
+         VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (email) DO NOTHING
          RETURNING user_id`,
-        [user.username, user.email, user.password_hash, user.preferences]
+        [user.username, user.email, user.password_hash, JSON.parse(user.preferences).role, user.preferences]
       );
-      // Извлекаем роль из preferences для вывода
       const role = JSON.parse(user.preferences).role;
       console.log(`Пользователь ${user.username} (${role}) добавлен с ID:`, result.rows[0]?.user_id);
     }
@@ -150,11 +152,12 @@ async function populateDatabase() {
     
     console.log('\nТестовые данные успешно добавлены!');
     console.log('\nТестовые учетные записи:');
-    console.log('Администратор: admin@example.com / password123');
-    console.log('Куратор: curator@example.com / password123');
-    console.log('Сотрудник: staff@example.com / password123');
-    console.log('Гид: tourguide@example.com / password123');
-    console.log('Участник аукциона: auction@example.com / password123');
+    console.log('Администратор: admin@example.com');
+    console.log('Куратор: curator@example.com');
+    console.log('Сотрудник: staff@example.com');
+    console.log('Гид: tourguide@example.com');
+    console.log('Участник аукциона: auction@example.com');
+    console.log(`Пароль у всех: ${seedPassword}`);
   } catch (err) {
     console.error('Ошибка при заполнении базы данных:', err);
   } finally {

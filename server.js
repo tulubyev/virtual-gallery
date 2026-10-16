@@ -2,7 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const pool = require('./src/config/database');
+const rateLimit = require('express-rate-limit');
 const { noCacheMiddleware } = require('./src/middleware/cors');
+const { xssProtection } = require('./src/middleware/security');
+const { accessControl } = require('./src/middleware/accessPolicy');
 
 // В проде без нормального секрета токены можно подделать (в коде есть запасные значения)
 if (process.env.NODE_ENV === 'production' && (process.env.JWT_SECRET || '').length < 32) {
@@ -18,6 +21,18 @@ app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Заголовки безопасности для всех ответов
+app.use(xssProtection);
+
+// Лимиты: перебор паролей и платные ИИ-запросы
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false, message: { error: 'Слишком много попыток, попробуйте позже.' } });
+const aiLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false, message: { error: 'Слишком много запросов, попробуйте позже.' } });
+app.use(['/api/auth/login', '/api/auth/register'], authLimiter);
+app.use('/api/ai', aiLimiter);
+
+// Единая политика доступа ко всему /api (см. src/middleware/accessPolicy.ts)
+app.use('/api', accessControl);
 
 // API Routes — no-cache so clients always get fresh data
 app.use('/api/auth', noCacheMiddleware, require('./src/routes/auth'));
