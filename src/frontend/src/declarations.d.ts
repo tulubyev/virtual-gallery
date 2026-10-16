@@ -251,15 +251,6 @@ declare module 'sonner' {
   export const toast: any;
 }
 
-declare module '@react-three/fiber' {
-  export const Canvas: any;
-  export const useFrame: any;
-  export const useThree: any;
-  export const extend: any;
-  export type ThreeElements = any;
-  export type RootState = any;
-}
-
 // Declare missing model module referenced by RoomService
 declare module '../../models/Room' {
   export interface RoomType {
@@ -315,19 +306,3 @@ declare module '../../../models/Room' {
   }
 }
 
-// Extend JSX IntrinsicElements for Three.js/React Three Fiber JSX elements
-declare namespace JSX {
-  interface IntrinsicElements {
-    mesh: any;
-    group: any;
-    ambientLight: any;
-    directionalLight: any;
-    pointLight: any;
-    boxGeometry: any;
-    meshStandardMaterial: any;
-    meshBasicMaterial: any;
-    planeGeometry: any;
-    sphereGeometry: any;
-    cylinderGeometry: any;
-  }
-}
