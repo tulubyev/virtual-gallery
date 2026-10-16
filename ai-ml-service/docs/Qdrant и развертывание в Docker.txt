@@ -2,8 +2,8 @@
 
    ### ✅ Credentials добавлены:
 
-       QDRANT_URL=https://74af1b17-c379-483f-a90f-48a9d9bd1a78.us-east4-0.gcp.cloud.qdrant.io:6333
-       QDRANT_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.YStIZv7DI0bRRFCh1Px1LuPtkVLU_KD48s7iMZCyKhw
+       QDRANT_URL=https://your-cluster.cloud.qdrant.io:6333
+       QDRANT_API_KEY=your-qdrant-api-key
 
    ### ✅ Production конфигурация обновлена:
 

@@ -4,7 +4,7 @@ REM Script to initialize beget.com database with proper environment setup (Windo
 echo 🚀 Initializing AI/ML database on beget.com...
 
 REM Set the DATABASE_URL environment variable
-set DATABASE_URL=postgresql://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/aimlservice_db
+set DATABASE_URL=postgresql://tulubyev:CHANGE_ME@your-db-host:5432/aimlservice_db
 
 echo 🔗 Using DATABASE_URL: %DATABASE_URL%
 

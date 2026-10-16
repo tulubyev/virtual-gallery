@@ -209,7 +209,7 @@ npm run test:e2e
 npm run db:init-beget-auto
 
 # Или вручную:
-export DATABASE_URL="postgresql://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/aimlservice_db"
+export DATABASE_URL="postgresql://tulubyev:CHANGE_ME@your-db-host:5432/aimlservice_db"
 npm run db:init-beget
 ```
 
