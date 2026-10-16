@@ -3,6 +3,7 @@ import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 import { textureSource } from '../lib/gallery/imageUrls';
+import { useMediaConfig } from '../lib/gallery/useMediaConfig';
 
 const GalleryR3F = React.lazy(() => import('../components/GalleryR3F'));
 
@@ -176,6 +177,7 @@ const VirtualGalleryPage: React.FC = () => {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
   const narrow = useIsNarrow();
+  const media = useMediaConfig();
 
   const fetchConfig = useCallback(async (attemptsLeft = 3) => {
     setConfigLoading(true);
@@ -205,7 +207,7 @@ const VirtualGalleryPage: React.FC = () => {
   const handleExitVR = () => window.history.back();
 
   // ── Loading ──────────────────────────────────────────────────────────────
-  if (configLoading) {
+  if (configLoading || !media) {
     return (
       <LoadingSpinner>
         <div className="spinner-ring" />
@@ -252,6 +254,7 @@ const VirtualGalleryPage: React.FC = () => {
           roomName={selectedRoom?.name}
           onArtworkClick={setSelectedArtwork}
           onExitVR={handleExitVR}
+          media={media}
           hudLeft={narrow ? 12 : 216}
           hudTop={narrow ? 60 : 16}
         />
@@ -341,7 +344,7 @@ const VirtualGalleryPage: React.FC = () => {
             {selectedArtwork.description && <p><strong>Описание:</strong> {selectedArtwork.description}</p>}
             {(selectedArtwork.image_url || selectedArtwork.imageUrl) && (
               <ArtworkImage
-                src={textureSource(selectedArtwork.image_url || selectedArtwork.imageUrl || '', 'zoom').url}
+                src={textureSource(selectedArtwork.image_url || selectedArtwork.imageUrl || '', 'zoom', media).url}
                 alt={selectedArtwork.title}
                 onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Изображение+недоступно'; }}
               />

@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { Artwork } from '../types';
 import { ROOM_W, ROOM_D, WALL_H, MAX_SLOTS, buildSlots, WallSlot } from '../lib/gallery/slots';
 import { fitInside } from '../lib/gallery/fit';
-import { textureSource, TexLevel, LEVEL_PX } from '../lib/gallery/imageUrls';
+import { textureSource, TexLevel, LEVEL_PX, MediaConfig, NO_MEDIA } from '../lib/gallery/imageUrls';
 import { TieredTextureCache } from '../lib/gallery/textureCache';
 
 // ─── Параметры ────────────────────────────────────────────────────────────────
@@ -356,11 +356,12 @@ interface SceneProps {
   artworks: Artwork[];
   slots: WallSlot[];
   lowPower: boolean;
+  media: MediaConfig;
   onArtworkClick: (a: Artwork) => void;
   onNearest: (a: Artwork | null) => void;
 }
 
-const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick, onNearest }) => {
+const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, media, onArtworkClick, onNearest }) => {
   const { camera, gl, invalidate } = useThree();
   const frames = useRef(new Map<string, FrameHandle>());
   const register = useCallback((id: string, h: FrameHandle | null) => {
@@ -386,7 +387,7 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
       maxConcurrent: lowPower ? 2 : 4,
       load: (id, level) => {
         const art = artworks[byId.get(id)!];
-        const src = textureSource(art.image_url || '', level);
+        const src = textureSource(art.image_url || '', level, media);
         if (!art.image_url) return Promise.reject(new Error('no image'));
         return loadTexture(src.url, src.clientMaxSize, anisotropy);
       },
@@ -431,7 +432,7 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
       onNearest(null);
       invalidate();
     };
-  }, [artworks, ids, slots, lowPower, camera, gl, invalidate, onNearest]);
+  }, [artworks, ids, slots, lowPower, media, camera, gl, invalidate, onNearest]);
 
   return (
     <>
@@ -498,12 +499,14 @@ interface Props {
   roomName?: string;
   onArtworkClick: (artwork: Artwork) => void;
   onExitVR: () => void;
+  /** Откуда брать картинки (CDN, бакет S3); по умолчанию — тот же сервер. */
+  media?: MediaConfig;
   /** Отступы HUD (на телефоне панель залов сверху, а не слева). */
   hudLeft?: number;
   hudTop?: number;
 }
 
-const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExitVR, hudLeft = 216, hudTop = 16 }) => {
+const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExitVR, media = NO_MEDIA, hudLeft = 216, hudTop = 16 }) => {
   const [hint, setHint] = useState(true);
   const [nearest, setNearest] = useState<Artwork | null>(null);
   const [fps, setFps] = useState<number | null>(null);
@@ -555,7 +558,7 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
         }}
       >
         <Controls joy={joy} lowPower={lowPower} onInteract={onInteract} onFps={setFps} />
-        <Scene artworks={shown} slots={slots} lowPower={lowPower} onArtworkClick={handleClick} onNearest={setNearest} />
+        <Scene artworks={shown} slots={slots} lowPower={lowPower} media={media} onArtworkClick={handleClick} onNearest={setNearest} />
       </Canvas>
 
       {touch && <Joystick joy={joy} poke={poke} />}

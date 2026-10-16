@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit');
 const { noCacheMiddleware } = require('./src/middleware/cors');
 const { xssProtection } = require('./src/middleware/security');
 const { accessControl } = require('./src/middleware/accessPolicy');
-const { createThumbnailHandler } = require('./src/services/thumbnails');
+const { createMediaHandler } = require('./src/services/media');
 
 // В проде без нормального секрета токены можно подделать (в коде есть запасные значения)
 if (process.env.NODE_ENV === 'production' && (process.env.JWT_SECRET || '').length < 32) {
@@ -52,12 +52,14 @@ app.use('/api/watermark', noCacheMiddleware, require('./src/routes/watermark'));
 app.use('/api/archive', noCacheMiddleware, require('./src/routes/archive'));
 app.use('/api/display-settings', noCacheMiddleware, require('./src/routes/display-settings'));
 app.use('/api/stats', noCacheMiddleware, require('./src/routes/stats'));
+app.use('/api/public-config', noCacheMiddleware, require('./src/routes/public-config'));
 app.use('/api/auctions', noCacheMiddleware, require('./src/routes/auctions'));
 
 // Static assets
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 // Миниатюры загрузок (WebP) для 3D-галереи и списков
-app.get('/uploads/t/:width/:file', createThumbnailHandler({ uploadsDir: path.join(__dirname, 'public/uploads') }));
+// /media/t/<ширина>/u/<файл> — локальные загрузки, /media/t/<ширина>/s/<ключ> — объекты S3; отдаются и через CDN
+app.get('/media/t/:width/:kind(u|s)/*', createMediaHandler({ uploadsDir: path.join(__dirname, 'public/uploads') }));
 // Имена загрузок уникальны (метка времени) — длинный кэш безопасен
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), { maxAge: '30d', immutable: true }));
 

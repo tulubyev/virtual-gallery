@@ -55,15 +55,34 @@ describe('fitInside', () => {
 });
 
 describe('textureSource', () => {
+  const S3 = 'https://bucket.s3.example.net';
+
   it('локальные загрузки идут через миниатюры нужного размера', () => {
-    expect(textureSource('/uploads/artwork-1.jpg', 'thumb')).toEqual({ url: '/uploads/t/256/artwork-1.jpg', clientMaxSize: null });
-    expect(textureSource('/uploads/artwork-1.jpg', 'detail').url).toBe('/uploads/t/1024/artwork-1.jpg');
-    expect(textureSource('/uploads/artwork-1.jpg', 'zoom').url).toBe('/uploads/t/2048/artwork-1.jpg');
+    expect(textureSource('/uploads/artwork-1.jpg', 'thumb')).toEqual({ url: '/media/t/256/u/artwork-1.jpg', clientMaxSize: null });
+    expect(textureSource('/uploads/artwork-1.jpg', 'detail').url).toBe('/media/t/1024/u/artwork-1.jpg');
+    expect(textureSource('/uploads/artwork-1.jpg', 'zoom').url).toBe('/media/t/2048/u/artwork-1.jpg');
   });
-  it('внешние URL остаются как есть и уменьшаются на клиенте', () => {
-    expect(textureSource('https://cdn.example/x.jpg', 'detail')).toEqual({ url: 'https://cdn.example/x.jpg', clientMaxSize: LEVEL_PX.detail });
+
+  it('с CDN адреса ведут на домен CDN', () => {
+    const media = { cdnBaseUrl: 'https://cdn.virtgal.ru', s3PublicBase: S3 };
+    expect(textureSource('/uploads/a.jpg', 'thumb', media).url).toBe('https://cdn.virtgal.ru/media/t/256/u/a.jpg');
+    expect(textureSource(`${S3}/artworks/art-1.jpg`, 'detail', media).url).toBe('https://cdn.virtgal.ru/media/t/1024/s/artworks/art-1.jpg');
   });
-  it('подозрительные пути не превращаются в миниатюры', () => {
+
+  it('объекты нашего S3 берутся уменьшенными, без CDN — с этого же сервера', () => {
+    const media = { cdnBaseUrl: '', s3PublicBase: S3 };
+    expect(textureSource(`${S3}/artworks/art-1.jpg?x=1`, 'thumb', media)).toEqual({ url: '/media/t/256/s/artworks/art-1.jpg', clientMaxSize: null });
+    expect(textureSource(`${S3}/textures/t.png`, 'zoom', media).url).toBe('/media/t/2048/s/textures/t.png');
+  });
+
+  it('чужие адреса и другие каталоги бакета остаются как есть и уменьшаются на клиенте', () => {
+    const media = { cdnBaseUrl: '', s3PublicBase: S3 };
+    for (const u of ['https://cdn.example/x.jpg', `${S3}/private/secret.jpg`, `${S3}/artworks/../private/x.jpg`, `${S3}/artworks/a%2Fb.jpg`]) {
+      expect(textureSource(u, 'detail', media)).toEqual({ url: u, clientMaxSize: LEVEL_PX.detail });
+    }
+  });
+
+  it('подозрительные локальные пути не превращаются в миниатюры', () => {
     for (const u of ['/uploads/../secret.jpg', '/uploads/a/b.jpg', '/uploads/.env']) {
       expect(textureSource(u, 'thumb').url).toBe(u);
     }

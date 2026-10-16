@@ -44,6 +44,7 @@ const TOKENS: Record<Who, string | null> = {
 const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   // публичное чтение
   ['GET', '/api/health', { anon: 200 }],
+  ['GET', '/api/public-config', { anon: 200 }],
   ['GET', '/api/artworks', { anon: 200 }],
   ['GET', '/api/artworks/42', { anon: 200 }],
   ['GET', '/api/artworks/random', { anon: 200 }],
