@@ -6,7 +6,7 @@ require('dotenv').config();
 
 // Create a connection pool
 const pool = new Pool({
-    connectionString: process.env.DB_STRING || 'postgres://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/virtual_gallery_db',
+    connectionString: process.env.DB_STRING,
     ssl: {
         rejectUnauthorized: false // Required for many hosted PostgreSQL services
     }

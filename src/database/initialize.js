@@ -10,8 +10,8 @@ const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     database: process.env.DB_NAME || 'virtual_gallery_db',
-    user: process.env.DB_USER || 'tulubyev',
-    password: process.env.DB_PASSWORD || 'CrossBaikal6times!',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     ssl: {
         rejectUnauthorized: false // Required for many hosted PostgreSQL services
     }
