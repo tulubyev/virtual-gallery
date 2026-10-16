@@ -62,13 +62,28 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 
 ## 3D-галерея
 
-- Движок — `src/frontend/src/components/GalleryR3F.tsx` (react-three-fiber), логика без three — в
-  `src/frontend/src/lib/gallery/` (слоты на стенах, URL миниатюр, кэш текстур) и покрыта тестами в `src/test/frontend/`.
+- Подробно — `docs/ARCHITECTURE-gallery.md`. Модель зала и раскладка по размерам — `src/frontend/src/lib/gallery/roomSpec.ts`
+  (общая для сервера и клиента: `normalizeConfig`, `roomLayout`, `lightingPlan`), движок — `components/GalleryR3F.tsx`
+  (react-three-fiber), кэш текстур и URL — `lib/gallery/`; тесты — `src/test/frontend/`, `src/test/routes/galleryConfig.test.ts`.
+- Размеры зала (3–50 × 3–50 × 3–15 м) определяют размер картин, число мест (вместимость) и границы ходьбы; залы связаны
+  дверями (`connections`) — подошёл к проёму и перешёл в соседний зал.
 - Картины грузятся по уровням: 256 px (все, сразу) → 1024 px (ближе 11 м, в кадре) → 2048 px (ближе 4,5 м, не на слабых
-  устройствах); число текстур ограничено, лишние освобождаются. Миниатюры делает сервер: `/uploads/t/<256|512|1024|2048>/<файл>`
-  (`src/services/thumbnails.ts`, кэш в `THUMB_CACHE_DIR`, по умолчанию `/tmp/vg-thumbs`).
-- Вместимость зала — 72 картины (`MAX_SLOTS`); рендер «по требованию» (в покое кадры не рисуются); `?fps` в адресе показывает FPS.
-- Внешние (не `/uploads/`) изображения миниатюр не имеют: уменьшаются на клиенте, но скачиваются целиком.
+  устройствах); число текстур ограничено, лишние освобождаются. Миниатюры делает сервер:
+  `/media/t/<256|512|1024|2048>/<u|s>/<файл|ключ S3>` (`src/services/media.ts`, кэш в `THUMB_CACHE_DIR`, по умолчанию `/tmp/vg-thumbs`).
+- CDN: `CDN_BASE_URL` (например `https://cdn.virtgal.ru`) — nginx-кэш перед `/media/*` (`docker/cdn/nginx.conf`, сервис `cdn`
+  в `docker-compose.prod.yml`); адрес клиент берёт из `/api/public-config`. Пусто — картинки идут с основного сервера.
+- Рендер «по требованию» (в покое кадры не рисуются); `?fps` в адресе показывает FPS.
+- Внешние (не `/uploads/`, не S3) изображения миниатюр не имеют: уменьшаются на клиенте, но скачиваются целиком.
+
+## Дашборды
+
+- Цифры — только из БД: `GET /api/stats/overview` (`src/services/dashboardStats.ts`, доступ — staff/curator/admin, данные о
+  пользователях — только admin), клиент — `src/frontend/src/lib/dashboardStats.ts`. Блок, которого нет в схеме БД, приходит
+  как `null` и показывается как «—»; выдуманных значений и «демо»-списков в панелях быть не должно.
+- Модулей без серверной части пока нет данных: туры (TourGuidePanel), задачи сотрудника, ИИ-анализ и оцифровка в StaffPanel —
+  они помечены в интерфейсе как «не подключено».
+- `src/database/schema.sql` отстаёт от боевой БД (нет `artworks.status/country/epoch/collection`, `collections.slug/is_active`, …);
+  код, которому нужны эти колонки, на чистой схеме из `schema.sql` не работает.
 
 ## Устройство
 

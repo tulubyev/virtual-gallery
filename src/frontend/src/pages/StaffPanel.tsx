@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useOverview, fmt, changeText, ago, DASH } from '../lib/dashboardStats';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Users,
-  Heart,
   GalleryVerticalEnd,
   Image,
-  Star,
   Activity,
   BarChart3,
   AlertTriangle,
@@ -144,28 +143,20 @@ const DropZone: React.FC<DropZoneProps> = ({
 const StaffPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // ── Tasks ─────────────────────────────────────────────────────────────────
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: 'Проверить новые экспонаты', description: 'Проверить 15 новых экспонатов, загруженных за вчера', priority: 'high', status: 'in-progress', assignedTo: 'Василий Петров', dueDate: '2023-11-20' },
-    { id: 2, title: 'Обновить описания', description: 'Обновить описания для 20 экспонатов в галерее', priority: 'medium', status: 'pending', assignedTo: 'Мария Иванова', dueDate: '2023-11-22' },
-    { id: 3, title: 'Ответить на отзывы', description: 'Ответить на 12 новых отзывов пользователей', priority: 'low', status: 'pending', assignedTo: 'Алексей Сидоров', dueDate: '2023-11-25' },
-  ]);
-
-  // ── Stats ─────────────────────────────────────────────────────────────────
+  // ── Сводка (реальные данные) ──────────────────────────────────────────────
+  const { data: overview } = useOverview();
+  const byStatus = overview?.artworks?.byStatus ?? null;
+  const artTrend = changeText(overview?.artworks);
   const stats = [
-    { title: 'Всего задач', value: '24', change: '+5%' },
-    { title: 'Выполнено', value: '18', change: '+12%' },
-    { title: 'В работе', value: '4', change: '-2%' },
-    { title: 'Просрочено', value: '2', change: '-1%' },
+    { title: 'Всего экспонатов', value: fmt(overview?.artworks?.total), change: artTrend.text, trend: artTrend.trend },
+    { title: 'Новых за сутки', value: fmt(overview?.artworks?.today), change: '', trend: 'flat' as const },
+    { title: 'На проверке', value: byStatus ? fmt(byStatus.pending ?? 0) : DASH, change: byStatus ? '' : 'нет статусов в БД', trend: 'flat' as const },
+    { title: 'Опубликовано', value: byStatus ? fmt((byStatus.approved ?? 0) + (byStatus.published ?? 0) + (byStatus.active ?? 0)) : DASH, change: '', trend: 'flat' as const },
   ];
+  const recentActivities = overview?.recentActivity ?? [];
 
-  const recentActivities = [
-    { id: 1, user: 'Александр Петров', action: 'Добавил новый экспонат', time: '2 минуты назад', type: 'add' },
-    { id: 2, user: 'Мария Иванова', action: 'Оставил отзыв', time: '15 минут назад', type: 'review' },
-    { id: 3, user: 'Дмитрий Сидоров', action: 'Создал коллекцию', time: '1 час назад', type: 'collection' },
-    { id: 4, user: 'Елена Козлова', action: 'Присоединился к платформе', time: '2 часа назад', type: 'join' },
-    { id: 5, user: 'Сергей Новиков', action: 'Оценил экспонат', time: '3 часа назад', type: 'rate' },
-  ];
+  // ── Задачи: серверной части нет, список пустой (ничего не выдумываем) ───────
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   // ── Upload form ───────────────────────────────────────────────────────────
   const [uploadForm, setUploadForm] = useState({
@@ -175,16 +166,22 @@ const StaffPanel: React.FC = () => {
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const aiAnalyzing = false;
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');
 
-  // ── Upload history ────────────────────────────────────────────────────────
-  const [uploadHistory] = useState<UploadHistoryItem[]>([
-    { id: 1, title: 'Летний пейзаж', artist: 'И. Шишкин', style: 'Реализм', uploadedAt: '12.06.2026', status: 'approved' },
-    { id: 2, title: 'Композиция №7', artist: 'В. Кандинский', style: 'Абстракционизм', uploadedAt: '11.06.2026', status: 'pending' },
-    { id: 3, title: 'Женский портрет', artist: 'И. Репин', style: 'Реализм', uploadedAt: '10.06.2026', status: 'approved' },
-  ]);
+  // ── Последние загруженные (из базы) ───────────────────────────────────────
+  const [uploadHistory, setUploadHistory] = useState<UploadHistoryItem[]>([]);
+  useEffect(() => {
+    fetch('/api/artworks?limit=20').then(r => r.ok ? r.json() : null).then(j => {
+      if (!j?.artworks) return;
+      setUploadHistory(j.artworks.map((a: any): UploadHistoryItem => ({
+        id: a.id, title: a.title, artist: a.artist, style: a.style ?? DASH,
+        uploadedAt: a.created_at ? new Date(a.created_at).toLocaleDateString('ru-RU') : DASH,
+        status: a.status === 'pending' ? 'pending' : a.status === 'rejected' ? 'rejected' : 'approved',
+      })));
+    }).catch(() => {});
+  }, [uploadSuccess]);
 
   // ── Digitize state ────────────────────────────────────────────────────────
   const [frontFile, setFrontFile] = useState<File | null>(null);
@@ -194,7 +191,7 @@ const StaffPanel: React.FC = () => {
   const [backPreview, setBackPreview] = useState<string | null>(null);
   const [backDrag, setBackDrag] = useState(false);
   const [watermarkType, setWatermarkType] = useState<'visible' | 'invisible' | 'nft'>('visible');
-  const [digitizing, setDigitizing] = useState(false);
+  const digitizing = false;
   const [digitizeSuccess, setDigitizeSuccess] = useState('');
 
   const applyFile = (f: File, setFile: typeof setUploadFile, setPreview: typeof setUploadPreview) => {
@@ -238,28 +235,10 @@ const StaffPanel: React.FC = () => {
     }
   };
 
-  const handleAiAnalyze = async () => {
-    if (!uploadFile) { setUploadError('Сначала выберите изображение'); return; }
-    setAiAnalyzing(true);
-    setUploadError('');
-    await new Promise(r => setTimeout(r, 1500));
-    setUploadForm(f => ({
-      ...f,
-      style: f.style || 'Импрессионизм',
-      epoch: f.epoch || 'XIX век',
-      medium: f.medium || 'Холст, масло',
-    }));
-    setAiAnalyzing(false);
-  };
-
-  const handleDigitize = async () => {
-    if (!frontFile) { return; }
-    setDigitizing(true);
-    setDigitizeSuccess('');
-    await new Promise(r => setTimeout(r, 1800));
-    setDigitizing(false);
-    setDigitizeSuccess('Оцифровка завершена. Водяной знак применён.');
-  };
+  // ИИ-анализ и оцифровка требуют AI-сервиса (в деплой пока не включён): ничего не подставляем.
+  const AI_UNAVAILABLE = 'ИИ-анализ пока недоступен: AI-сервис не подключён. Заполните поля вручную.';
+  const handleAiAnalyze = () => { setUploadError(AI_UNAVAILABLE); };
+  const handleDigitize = () => { setDigitizeSuccess(''); };
 
   const handleTaskStatusChange = (taskId: number, newStatus: Task['status']) => {
     setTasks(tasks.map(task => task.id === taskId ? { ...task, status: newStatus } : task));
@@ -304,9 +283,11 @@ const StaffPanel: React.FC = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">{stat.title}</p>
               <p className="text-2xl font-bold">{stat.value}</p>
-              <div className="flex items-center text-xs text-green-500 mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />{stat.change}
-              </div>
+              {stat.change && (
+                <div className={`flex items-center text-xs mt-1 ${stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  {stat.trend !== 'flat' && <TrendingUp className={`h-3 w-3 mr-1 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />}{stat.change}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -331,25 +312,24 @@ const StaffPanel: React.FC = () => {
           <Card className="lg:col-span-2 border-0 shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Недавние действия</CardTitle>
-                <Button variant="outline" size="sm">Просмотреть все</Button>
+                <CardTitle>Недавние события</CardTitle>
               </div>
-              <CardDescription>Последние действия пользователей на платформе</CardDescription>
+              <CardDescription>Новые произведения и ставки на платформе</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivities.map(a => (
-                  <div key={a.id} className="flex items-start gap-4">
-                    <div className={`p-2 rounded-full shrink-0 ${a.type === 'add' ? 'bg-blue-100 text-blue-600' : a.type === 'review' ? 'bg-green-100 text-green-600' : a.type === 'collection' ? 'bg-purple-100 text-purple-600' : a.type === 'join' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600'}`}>
-                      {a.type === 'add' ? <GalleryVerticalEnd className="h-4 w-4" /> : a.type === 'review' ? <Star className="h-4 w-4" /> : a.type === 'collection' ? <BarChart3 className="h-4 w-4" /> : a.type === 'join' ? <Users className="h-4 w-4" /> : <Heart className="h-4 w-4" />}
+                {recentActivities.map((a, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className={`p-2 rounded-full shrink-0 ${a.type === 'artwork' ? 'bg-blue-100 text-blue-600' : a.type === 'user' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
+                      {a.type === 'artwork' ? <GalleryVerticalEnd className="h-4 w-4" /> : a.type === 'user' ? <Users className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{a.user}</p>
-                      <p className="text-sm text-muted-foreground">{a.action}</p>
-                      <p className="text-xs text-muted-foreground">{a.time}</p>
+                      <p className="text-sm">{a.text}</p>
+                      <p className="text-xs text-muted-foreground">{ago(a.at)}</p>
                     </div>
                   </div>
                 ))}
+                {recentActivities.length === 0 && <p className="text-sm text-muted-foreground">Событий пока нет</p>}
               </div>
             </CardContent>
           </Card>
@@ -358,9 +338,8 @@ const StaffPanel: React.FC = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Мои задачи</CardTitle>
-                <Button variant="outline" size="sm">Создать</Button>
               </div>
-              <CardDescription>Задачи, назначенные вам</CardDescription>
+              <CardDescription>Раздел задач ещё не подключён к серверу</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -498,6 +477,7 @@ const StaffPanel: React.FC = () => {
                     variant="outline"
                     onClick={handleAiAnalyze}
                     disabled={aiAnalyzing || !uploadFile}
+                    title="AI-сервис пока не подключён"
                     className="gap-1.5 text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100"
                   >
                     {aiAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -609,7 +589,8 @@ const StaffPanel: React.FC = () => {
               <div className="flex gap-3 mt-5">
                 <Button
                   onClick={handleDigitize}
-                  disabled={digitizing || !frontFile}
+                  disabled
+                  title="Оцифровка с водяным знаком ещё не подключена"
                   className="gap-1.5"
                 >
                   {digitizing ? <><Loader2 className="h-4 w-4 animate-spin" />Оцифровка…</> : <><ScanLine className="h-4 w-4" />Оцифровать</>}
@@ -680,9 +661,9 @@ const StaffPanel: React.FC = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Управление задачами</CardTitle>
-              <Button size="sm"><AlertTriangle className="h-4 w-4 mr-2" />Создать задачу</Button>
+              <Button size="sm" disabled title="Раздел задач ещё не подключён к серверу"><AlertTriangle className="h-4 w-4 mr-2" />Создать задачу</Button>
             </div>
-            <CardDescription>Назначение, отслеживание и выполнение задач</CardDescription>
+            <CardDescription>Раздел задач ещё не подключён к серверу — список появится вместе с серверной частью</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">

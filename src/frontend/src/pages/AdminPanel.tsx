@@ -1,233 +1,204 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  Eye, 
-  Heart, 
-  TrendingUp, 
-  GalleryVerticalEnd, 
-  Image, 
-  Star,
-  Activity,
-  BarChart3,
-  Sparkles,
+import {
+  Users, Eye, Heart, TrendingUp, GalleryVerticalEnd, Image, Activity, BarChart3, Sparkles, Gavel, LayoutGrid,
 } from 'lucide-react';
+import { fetchWithAuth } from '../services/api';
+import { useOverview, fmt, changeText, ago, DASH, type Trend } from '../lib/dashboardStats';
 
-interface StatCardProps {
-  title: string;
-  value: string;
-  change: string;
-  icon: React.ReactNode;
-  trend: 'up' | 'down';
-}
+interface StatCardProps { title: string; value: string; change: string; icon: React.ReactNode; trend: 'up' | 'down' | 'flat' }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend }) => {
+const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend }) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <div className="p-2 bg-primary/10 rounded-lg text-primary">{icon}</div>
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">{value}</div>
+      <p className={`text-xs flex items-center ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-500' : 'text-muted-foreground'}`}>
+        {trend !== 'flat' && <TrendingUp className={`h-3 w-3 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`} />}
+        {change}
+      </p>
+    </CardContent>
+  </Card>
+);
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Администратор', curator: 'Куратор', staff: 'Сотрудник',
+  tour_guide: 'Гид', auction_participant: 'Участник аукциона', user: 'Посетитель',
+};
+const ROLES = Object.keys(ROLE_LABELS);
+
+interface UserRow { user_id: number; username: string; email: string; role: string; created_at: string }
+interface ArtworkRow { id: number; title: string; artist: string; style?: string | null; image_url?: string | null; status?: string | null }
+
+const Bar: React.FC<{ label: string; value: number; max: number }> = ({ label, value, max }) => (
+  <div>
+    <div className="flex justify-between text-sm mb-1"><span>{label}</span><span className="font-medium">{fmt(value)}</span></div>
+    <div className="h-2 rounded bg-muted overflow-hidden"><div className="h-full bg-primary" style={{ width: `${max > 0 ? Math.max(2, (value / max) * 100) : 0}%` }} /></div>
+  </div>
+);
+
+const TrendRow: React.FC<{ label: string; t: Trend | null | undefined }> = ({ label, t }) => {
+  const c = changeText(t);
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          {icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className={`text-xs ${trend === 'up' ? 'text-green-500' : 'text-red-500'} flex items-center`}>
-          {trend === 'up' ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingUp className="h-3 w-3 mr-1 rotate-180" />}
-          {change}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="flex justify-between text-sm py-2 border-b last:border-0">
+      <span>{label}</span>
+      <span><b>{fmt(t?.last30)}</b> <span className="text-muted-foreground">за 30 дней (раньше: {fmt(t?.prev30)}) · {c.text}</span></span>
+    </div>
   );
 };
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { data, loading, error, reload } = useOverview();
 
-  // Mock data for statistics
-  const stats = [
-    {
-      title: 'Всего пользователей',
-      value: '12,361',
-      change: '+18.2% с прошлого месяца',
-      icon: <Users className="h-4 w-4" />,
-      trend: 'up' as const
-    },
-    {
-      title: 'Просмотров экспонатов',
-      value: '1.2M',
-      change: '+22.5% с прошлого месяца',
-      icon: <Eye className="h-4 w-4" />,
-      trend: 'up' as const
-    },
-    {
-      title: 'Лайков',
-      value: '45.2K',
-      change: '+12.3% с прошлого месяца',
-      icon: <Heart className="h-4 w-4" />,
-      trend: 'up' as const
-    },
-    {
-      title: 'Экспонатов',
-      value: '8,421',
-      change: '+5.7% с прошлого месяца',
-      icon: <Image className="h-4 w-4" />,
-      trend: 'up' as const
-    }
+  // ── Пользователи ─────────────────────────────────────────────────────────
+  const [users, setUsers] = useState<UserRow[] | null>(null);
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [userSearch, setUserSearch] = useState('');
+  const [usersError, setUsersError] = useState<string | null>(null);
+
+  const loadUsers = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth(`/api/admin/users?limit=50${userSearch ? `&search=${encodeURIComponent(userSearch)}` : ''}`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const j = await res.json();
+      setUsers(j.users); setUsersTotal(j.total); setUsersError(null);
+    } catch (e) { setUsersError(e instanceof Error ? e.message : 'Ошибка'); }
+  }, [userSearch]);
+
+  const changeRole = async (u: UserRow, role: string) => {
+    if (role === u.role) return;
+    if (!window.confirm(`Сменить роль «${u.username}» на «${ROLE_LABELS[role] ?? role}»?`)) return;
+    const res = await fetchWithAuth(`/api/admin/users/${u.user_id}/role`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }),
+    });
+    if (res.ok) { setUsers(list => list && list.map(x => x.user_id === u.user_id ? { ...x, role } : x)); reload(); }
+    else setUsersError('Не удалось сменить роль');
+  };
+
+  // ── Экспонаты ────────────────────────────────────────────────────────────
+  const [artworks, setArtworks] = useState<ArtworkRow[] | null>(null);
+  const [artworksTotal, setArtworksTotal] = useState(0);
+  const [artworksError, setArtworksError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeTab === 'users') loadUsers();
+  }, [activeTab, loadUsers]);
+
+  useEffect(() => {
+    if (activeTab !== 'artworks' || artworks) return;
+    fetch('/api/artworks?limit=24')
+      .then(async r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(j => { setArtworks(j.artworks); setArtworksTotal(j.total); })
+      .catch(e => setArtworksError(e instanceof Error ? e.message : 'Ошибка'));
+  }, [activeTab, artworks]);
+
+  // ── Карточки сверху ──────────────────────────────────────────────────────
+  const views = changeText(data?.engagement?.views);
+  const likes = changeText(data?.engagement?.likes);
+  const users30 = changeText(data?.users);
+  const art30 = changeText(data?.artworks);
+  const stats: StatCardProps[] = [
+    { title: 'Пользователей', value: fmt(data?.users?.total), change: users30.text, icon: <Users className="h-4 w-4" />, trend: users30.trend },
+    { title: 'Просмотров экспонатов', value: fmt(data?.engagement?.views.total), change: views.text, icon: <Eye className="h-4 w-4" />, trend: views.trend },
+    { title: 'Лайков', value: fmt(data?.engagement?.likes.total), change: likes.text, icon: <Heart className="h-4 w-4" />, trend: likes.trend },
+    { title: 'Экспонатов', value: fmt(data?.artworks?.total), change: art30.text, icon: <Image className="h-4 w-4" />, trend: art30.trend },
   ];
 
-  // Mock data for recent activities
-  const recentActivities = [
-    { id: 1, user: 'Александр Петров', action: 'Добавил новый экспонат', time: '2 минуты назад', type: 'add' },
-    { id: 2, user: 'Мария Иванова', action: 'Оставил отзыв', time: '15 минут назад', type: 'review' },
-    { id: 3, user: 'Дмитрий Сидоров', action: 'Создал коллекцию', time: '1 час назад', type: 'collection' },
-    { id: 4, user: 'Елена Козлова', action: 'Присоединился к платформе', time: '2 часа назад', type: 'join' },
-    { id: 5, user: 'Сергей Новиков', action: 'Оценил экспонат', time: '3 часа назад', type: 'rate' },
-  ];
-
-  // Mock data for top artworks
-  const topArtworks = [
-    { id: 1, title: 'Абстрактная композиция №1', artist: 'Александр Петров', likes: 1240, views: 12400 },
-    { id: 2, title: 'Городской пейзаж', artist: 'Мария Иванова', likes: 980, views: 9800 },
-    { id: 3, title: 'Цифровая инсталляция', artist: 'Анна Смирнова', likes: 2100, views: 21000 },
-    { id: 4, title: 'Портрет женщины', artist: 'Дмитрий Козлов', likes: 1560, views: 15600 },
-    { id: 5, title: 'Морской пейзаж', artist: 'Елена Васильева', likes: 780, views: 7800 },
-  ];
+  const tabBtn = (id: string, label: string) => (
+    <button
+      className={`pb-3 px-1 ${activeTab === id ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+      onClick={() => setActiveTab(id)}
+    >{label}</button>
+  );
 
   return (
     <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Админ-панель</h1>
-        <p className="text-muted-foreground">Управление платформой виртуальной галереи</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Админ-панель</h1>
+          <p className="text-muted-foreground">Управление платформой виртуальной галереи</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={reload} disabled={loading}>{loading ? 'Обновление…' : 'Обновить'}</Button>
       </div>
 
-      {/* Stats Overview */}
+      {error && <div className="mb-6 p-3 rounded-lg bg-red-50 text-red-700 text-sm">Не удалось загрузить статистику ({error}). Показаны прочерки.</div>}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <StatCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            change={stat.change}
-            icon={stat.icon}
-            trend={stat.trend}
-          />
-        ))}
+        {stats.map(s => <StatCard key={s.title} {...s} />)}
       </div>
 
-      {/* Tabs */}
       <div className="flex space-x-4 mb-6 border-b">
-        <button
-          className={`pb-3 px-1 ${activeTab === 'overview' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Обзор
-        </button>
-        <button
-          className={`pb-3 px-1 ${activeTab === 'users' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Пользователи
-        </button>
-        <button
-          className={`pb-3 px-1 ${activeTab === 'artworks' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
-          onClick={() => setActiveTab('artworks')}
-        >
-          Экспонаты
-        </button>
-        <button
-          className={`pb-3 px-1 ${activeTab === 'analytics' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          Аналитика
-        </button>
+        {tabBtn('overview', 'Обзор')}
+        {tabBtn('users', 'Пользователи')}
+        {tabBtn('artworks', 'Экспонаты')}
+        {tabBtn('analytics', 'Аналитика')}
         <div className="flex-1" />
         <Link to="/artwiki" className="pb-3 px-1 flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
           ArtWiki
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
-            <Sparkles className="h-2.5 w-2.5" />
-            AI
-          </span>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none"><Sparkles className="h-2.5 w-2.5" />AI</span>
         </Link>
         <Link to="/rag" className="pb-3 px-1 flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
           RAG
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none">
-            <Sparkles className="h-2.5 w-2.5" />
-            AI
-          </span>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-100 text-violet-600 leading-none"><Sparkles className="h-2.5 w-2.5" />AI</span>
         </Link>
       </div>
 
-      {/* Content based on active tab */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Activities */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Недавние действия</CardTitle>
-                <Button variant="outline" size="sm">Просмотреть все</Button>
-              </div>
-              <CardDescription>Последние действия пользователей на платформе</CardDescription>
+              <CardTitle>Недавние события</CardTitle>
+              <CardDescription>Новые произведения, пользователи и ставки</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map(activity => (
-                  <div key={activity.id} className="flex items-start space-x-4">
-                    <div className={`p-2 rounded-full ${
-                      activity.type === 'add' ? 'bg-blue-100 text-blue-600' :
-                      activity.type === 'review' ? 'bg-green-100 text-green-600' :
-                      activity.type === 'collection' ? 'bg-purple-100 text-purple-600' :
-                      activity.type === 'join' ? 'bg-orange-100 text-orange-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {activity.type === 'add' ? <GalleryVerticalEnd className="h-4 w-4" /> :
-                       activity.type === 'review' ? <Star className="h-4 w-4" /> :
-                       activity.type === 'collection' ? <BarChart3 className="h-4 w-4" /> :
-                       activity.type === 'join' ? <Users className="h-4 w-4" /> :
-                       <Heart className="h-4 w-4" />}
+              {data?.recentActivity?.length ? (
+                <div className="space-y-4">
+                  {data.recentActivity.map((a, i) => (
+                    <div key={i} className="flex items-start space-x-4">
+                      <div className={`p-2 rounded-full ${a.type === 'artwork' ? 'bg-blue-100 text-blue-600' : a.type === 'user' ? 'bg-orange-100 text-orange-600' : 'bg-purple-100 text-purple-600'}`}>
+                        {a.type === 'artwork' ? <GalleryVerticalEnd className="h-4 w-4" /> : a.type === 'user' ? <Users className="h-4 w-4" /> : <Gavel className="h-4 w-4" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm">{a.text}</p>
+                        <p className="text-xs text-muted-foreground">{ago(a.at)}</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{activity.user}</p>
-                      <p className="text-sm text-muted-foreground">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">{loading ? 'Загрузка…' : 'Событий пока нет'}</p>}
             </CardContent>
           </Card>
 
-          {/* Top Artworks */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Топ экспонатов</CardTitle>
-                <Button variant="outline" size="sm">Просмотреть все</Button>
-              </div>
-              <CardDescription>Самые популярные экспонаты за последний месяц</CardDescription>
+              <CardTitle>Топ экспонатов</CardTitle>
+              <CardDescription>По лайкам и просмотрам за всё время</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {topArtworks.map(artwork => (
-                  <div key={artwork.id} className="flex items-center space-x-4">
-                    <div className="bg-muted rounded-lg p-2">
-                      <Image className="h-8 w-8 text-primary" />
+              {data?.topArtworks?.length ? (
+                <div className="space-y-4">
+                  {data.topArtworks.map(a => (
+                    <div key={a.id} className="flex items-center space-x-4">
+                      <div className="bg-muted rounded-lg p-2"><Image className="h-8 w-8 text-primary" /></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{a.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{a.artist}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">{fmt(a.likes)} лайков</p>
+                        <p className="text-xs text-muted-foreground">{fmt(a.views)} просмотров</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{artwork.title}</p>
-                      <p className="text-xs text-muted-foreground">{artwork.artist}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{artwork.likes} лайков</p>
-                      <p className="text-xs text-muted-foreground">{artwork.views} просмотров</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">{loading ? 'Загрузка…' : 'Пока нет просмотров и лайков'}</p>}
             </CardContent>
           </Card>
         </div>
@@ -236,54 +207,36 @@ const AdminPanel: React.FC = () => {
       {activeTab === 'users' && (
         <Card>
           <CardHeader>
-            <CardTitle>Управление пользователями</CardTitle>
-            <CardDescription>Просмотр и управление аккаунтами пользователей</CardDescription>
+            <CardTitle>Пользователи</CardTitle>
+            <CardDescription>Всего: {fmt(usersTotal || data?.users?.total)}. Роль можно сменить прямо в таблице.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Список пользователей</h3>
-              <Button>Добавить пользователя</Button>
-            </div>
-            
-            <div className="border rounded-lg">
-              <table className="w-full">
+            <form className="flex gap-2 mb-4" onSubmit={e => { e.preventDefault(); loadUsers(); }}>
+              <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Имя или e-mail"
+                className="flex-1 px-3 py-2 border rounded-lg bg-background text-sm" />
+              <Button type="submit" variant="outline">Найти</Button>
+            </form>
+            {usersError && <p className="text-sm text-red-600 mb-3">{usersError}</p>}
+            <div className="border rounded-lg overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead className="border-b">
-                  <tr>
-                    <th className="text-left p-4">Пользователь</th>
-                    <th className="text-left p-4">Роль</th>
-                    <th className="text-left p-4">Дата регистрации</th>
-                    <th className="text-left p-4">Статус</th>
-                    <th className="text-left p-4">Действия</th>
-                  </tr>
+                  <tr><th className="text-left p-3">Пользователь</th><th className="text-left p-3">Роль</th><th className="text-left p-3">Регистрация</th></tr>
                 </thead>
                 <tbody>
-                  {[1, 2, 3, 4, 5].map(item => (
-                    <tr key={item} className="border-b hover:bg-muted/50">
-                      <td className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="bg-primary/10 p-2 rounded-full">
-                            <Users className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium">Пользователь {item}</p>
-                            <p className="text-sm text-muted-foreground">user{item}@example.com</p>
-                          </div>
-                        </div>
+                  {(users ?? []).map(u => (
+                    <tr key={u.user_id} className="border-b hover:bg-muted/50">
+                      <td className="p-3"><p className="font-medium">{u.username}</p><p className="text-xs text-muted-foreground">{u.email}</p></td>
+                      <td className="p-3">
+                        <select value={u.role} onChange={e => changeRole(u, e.target.value)} className="border rounded-md bg-background px-2 py-1 text-sm">
+                          {ROLES.includes(u.role) ? null : <option value={u.role}>{u.role}</option>}
+                          {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
+                        </select>
                       </td>
-                      <td className="p-4">
-                        <Badge variant="outline">{item === 1 ? 'admin' : item === 2 ? 'curator' : 'user'}</Badge>
-                      </td>
-                      <td className="p-4">15.{item}.2023</td>
-                      <td className="p-4">
-                        <Badge variant={item % 2 === 0 ? 'default' : 'secondary'}>
-                          {item % 2 === 0 ? 'Активен' : 'Неактивен'}
-                        </Badge>
-                      </td>
-                      <td className="p-4">
-                        <Button variant="outline" size="sm">Редактировать</Button>
-                      </td>
+                      <td className="p-3">{u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : DASH}</td>
                     </tr>
                   ))}
+                  {users && users.length === 0 && <tr><td colSpan={3} className="p-4 text-muted-foreground">Никого не найдено</td></tr>}
+                  {!users && !usersError && <tr><td colSpan={3} className="p-4 text-muted-foreground">Загрузка…</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -294,41 +247,33 @@ const AdminPanel: React.FC = () => {
       {activeTab === 'artworks' && (
         <Card>
           <CardHeader>
-            <CardTitle>Управление экспонатами</CardTitle>
-            <CardDescription>Просмотр и управление экспонатами галереи</CardDescription>
+            <CardTitle>Экспонаты</CardTitle>
+            <CardDescription>Последние добавленные ({fmt(artworksTotal || data?.artworks?.total)} всего). Загрузка и редактирование — в панели куратора.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Список экспонатов</h3>
-              <Button>Добавить экспонат</Button>
-            </div>
-            
+            {artworksError && <p className="text-sm text-red-600 mb-3">{artworksError}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3, 4, 5, 6].map(item => (
-                <Card key={item} className="overflow-hidden">
-                  <div className="bg-muted aspect-video flex items-center justify-center">
-                    <Image className="h-12 w-12 text-primary/20" />
+              {(artworks ?? []).map(a => (
+                <Card key={a.id} className="overflow-hidden">
+                  <div className="bg-muted aspect-video flex items-center justify-center overflow-hidden">
+                    {a.image_url
+                      ? <img src={a.image_url.startsWith('/uploads/') ? `/media/t/512/u/${a.image_url.slice('/uploads/'.length)}` : a.image_url} alt={a.title} loading="lazy" className="w-full h-full object-cover" />
+                      : <Image className="h-12 w-12 text-primary/20" />}
                   </div>
                   <CardHeader>
-                    <CardTitle className="text-lg">Экспонат {item}</CardTitle>
-                    <CardDescription>Художник {item}</CardDescription>
+                    <CardTitle className="text-lg truncate">{a.title}</CardTitle>
+                    <CardDescription className="truncate">{a.artist}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex justify-between items-center">
-                      <Badge variant="outline">Категория {item}</Badge>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Heart className="h-4 w-4 mr-1" />
-                        <span>{Math.floor(Math.random() * 1000)}</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex space-x-2">
-                      <Button variant="outline" size="sm" className="flex-1">Просмотр</Button>
-                      <Button size="sm">Редактировать</Button>
+                    <div className="flex gap-2 flex-wrap">
+                      {a.style && <Badge variant="outline">{a.style}</Badge>}
+                      {a.status && <Badge variant="secondary">{a.status}</Badge>}
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+            {artworks && artworks.length === 0 && <p className="text-sm text-muted-foreground">Экспонатов пока нет</p>}
           </CardContent>
         </Card>
       )}
@@ -337,33 +282,50 @@ const AdminPanel: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>Аналитика платформы</CardTitle>
-            <CardDescription>Статистика использования и взаимодействия пользователей</CardDescription>
+            <CardDescription>Считается по базе данных; посещаемость по дням пока не собирается</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Посещаемость</CardTitle>
-                  <CardDescription>Посетители за последние 30 дней</CardDescription>
-                </CardHeader>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4" />Активность за 30 дней</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
-                    <Activity className="h-12 w-12 text-primary/20" />
-                    <p className="ml-4 text-muted-foreground">График посещаемости</p>
-                  </div>
+                  <TrendRow label="Просмотры" t={data?.engagement?.views} />
+                  <TrendRow label="Лайки" t={data?.engagement?.likes} />
+                  <TrendRow label="Новые экспонаты" t={data?.artworks} />
+                  <TrendRow label="Новые пользователи" t={data?.users} />
                 </CardContent>
               </Card>
-              
+
               <Card>
-                <CardHeader>
-                  <CardTitle>Популярность экспонатов</CardTitle>
-                  <CardDescription>Топ-10 самых просматриваемых экспонатов</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
-                    <BarChart3 className="h-12 w-12 text-primary/20" />
-                    <p className="ml-4 text-muted-foreground">График популярности</p>
-                  </div>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-4 w-4" />Пользователи по ролям</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  {data?.users ? (() => {
+                    const entries = Object.entries(data.users.byRole).sort((a, b) => b[1] - a[1]);
+                    const max = Math.max(1, ...entries.map(e => e[1]));
+                    return entries.map(([r, n]) => <Bar key={r} label={ROLE_LABELS[r] ?? r} value={n} max={max} />);
+                  })() : <p className="text-sm text-muted-foreground">{DASH}</p>}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />Экспонаты по статусам</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  {data?.artworks?.byStatus ? (() => {
+                    const entries = Object.entries(data.artworks.byStatus);
+                    const max = Math.max(1, ...entries.map(e => e[1]));
+                    return entries.map(([s, n]) => <Bar key={s} label={s} value={n} max={max} />);
+                  })() : <p className="text-sm text-muted-foreground">{DASH} (в базе нет статусов)</p>}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><LayoutGrid className="h-4 w-4" />Залы и аукционы</CardTitle></CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="flex justify-between"><span>Залов</span><b>{fmt(data?.rooms?.total)}</b></div>
+                  <div className="flex justify-between"><span>Мест для картин (вместимость)</span><b>{fmt(data?.rooms?.capacity)}</b></div>
+                  <div className="flex justify-between"><span>Коллекций</span><b>{fmt(data?.collections?.total)}</b></div>
+                  <div className="flex justify-between"><span>Аукционов идёт / запланировано</span><b>{data?.auctions ? `${fmt(data.auctions.active)} / ${fmt(data.auctions.scheduled)}` : DASH}</b></div>
+                  <div className="flex justify-between"><span>Лотов / ставок</span><b>{data?.auctions ? `${fmt(data.auctions.lots)} / ${fmt(data.auctions.bids)}` : DASH}</b></div>
                 </CardContent>
               </Card>
             </div>

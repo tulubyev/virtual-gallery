@@ -1,39 +1,15 @@
 // src/frontend/src/pages/VirtualGalleryPage.tsx
-import React, { Suspense, useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Artwork } from '../types';
 import { textureSource } from '../lib/gallery/imageUrls';
+import { useMediaConfig } from '../lib/gallery/useMediaConfig';
+import { normalizeConfig, roomLayout, placedArtworks, type Assignment, type GalleryConfig, type RoomSpec } from '../lib/gallery/roomSpec';
+import type { PlacedItem } from '../components/GalleryR3F';
 
 const GalleryR3F = React.lazy(() => import('../components/GalleryR3F'));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ArtworkAssignment {
-  id: number;
-  title: string;
-  artist: string;
-  image_url: string;
-  thumbnail_url?: string | null;
-  style?: string | null;
-}
-
-interface GalleryRoom {
-  id: string;
-  name: string;
-  theme?: string;
-  width?: number;
-  height?: number;
-  depth?: number;
-  slots?: number;
-  lighting?: number;
-  wallColor?: string;
-  artworkAssignments?: Record<string, ArtworkAssignment>;
-}
-
-interface GalleryConfig {
-  rooms: GalleryRoom[];
-  currentRoom?: string;
-}
 
 // ─── Styled components ────────────────────────────────────────────────────────
 
@@ -117,40 +93,42 @@ const THEME_BG: Record<string, string> = {
   classic:     'rgba(120,90,40,0.25)',
   modern:      'rgba(80,120,180,0.25)',
   dark:        'rgba(30,30,50,0.5)',
-  impressionist: 'rgba(160,100,180,0.25)',
-  renaissance: 'rgba(140,80,40,0.25)',
+  minimal:     'rgba(200,200,200,0.15)',
 };
 
-// ─── Helper: map artworkAssignments → Artwork[] ───────────────────────────────
+// ─── Картина из назначения в зале ─────────────────────────────────────────────
 
-function roomArtworks(room: GalleryRoom): Artwork[] {
-  if (!room.artworkAssignments) return [];
-  const seen = new Set<number>();
-  return Object.values(room.artworkAssignments).reduce<Artwork[]>((acc, a) => {
-    if (!seen.has(a.id)) {
-      seen.add(a.id);
-      acc.push({
-        id: String(a.id),
-        artwork_id: a.id,
-        title: a.title ?? 'Без названия',
-        artist: a.artist ?? '',
-        artist_name: a.artist ?? '',
-        image_url: a.image_url ?? '',
-        imageUrl: a.image_url ?? '',
-        style: a.style ?? undefined,
-        year: 0,
-        description: '',
-        tags: [],
-        likes: 0,
-        views: 0,
-        rating: 0,
-        galleryId: '',
-        roomId: room.id,
-        coordinates: { x: 0, y: 0, z: 0 },
-      });
-    }
-    return acc;
-  }, []);
+function toArtwork(a: Assignment, roomId: string): Artwork {
+  const numericId = typeof a.id === 'number' ? a.id : Number(a.id);
+  return {
+    id: String(a.id),
+    artwork_id: Number.isFinite(numericId) ? numericId : 0,
+    title: a.title ?? 'Без названия',
+    artist: a.artist ?? '',
+    artist_name: a.artist ?? '',
+    image_url: a.image_url ?? '',
+    imageUrl: a.image_url ?? '',
+    style: a.style ?? undefined,
+    year: 0,
+    description: '',
+    tags: [],
+    likes: 0,
+    views: 0,
+    rating: 0,
+    galleryId: '',
+    roomId,
+    coordinates: { x: 0, y: 0, z: 0 },
+  };
+}
+
+function roomItems(room: RoomSpec): PlacedItem[] {
+  return placedArtworks(room, roomLayout(room)).map(({ slot, assignment, placement }) => ({
+    slot, placement, artwork: toArtwork(assignment, room.id),
+  }));
+}
+
+function countArtworks(room: RoomSpec): number {
+  return new Set(Object.values(room.artworkAssignments).filter(Boolean).map(a => String(a!.id))).size;
 }
 
 // ─── Узкий экран (телефон): панель залов сверху, а не слева ───────────────────
@@ -174,15 +152,17 @@ const VirtualGalleryPage: React.FC = () => {
   const [configLoading, setConfigLoading] = useState(true);
   const [configError, setConfigError] = useState<string | null>(null);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [arrivedFrom, setArrivedFrom] = useState<string | null>(null);
   const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
   const narrow = useIsNarrow();
+  const media = useMediaConfig();
 
   const fetchConfig = useCallback(async (attemptsLeft = 3) => {
     setConfigLoading(true);
     try {
       const res = await fetch('/api/gallery/config');
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data: GalleryConfig = await res.json();
+      const { config: data } = normalizeConfig(await res.json());
       setConfig(data);
       setConfigError(null);
       setSelectedRoomId(prev => prev ?? data.currentRoom ?? data.rooms[0]?.id ?? null);
@@ -200,12 +180,26 @@ const VirtualGalleryPage: React.FC = () => {
   useEffect(() => { fetchConfig(); }, [fetchConfig]);
 
   const selectedRoom = config?.rooms.find(r => r.id === selectedRoomId) ?? null;
-  const artworks     = selectedRoom ? roomArtworks(selectedRoom) : [];
+  const items = useMemo(() => (selectedRoom ? roomItems(selectedRoom) : []), [selectedRoom]);
+  const roomNames = useMemo(
+    () => Object.fromEntries((config?.rooms ?? []).map(r => [r.id, r.name])) as Record<string, string>,
+    [config],
+  );
+
+  // Через дверь: появляемся у двери, ведущей обратно; из списка залов — у входа по умолчанию.
+  const goThroughDoor = useCallback((toId: string) => {
+    setArrivedFrom(selectedRoomId);
+    setSelectedRoomId(toId);
+  }, [selectedRoomId]);
+  const pickRoom = useCallback((id: string) => {
+    setArrivedFrom(null);
+    setSelectedRoomId(id);
+  }, []);
 
   const handleExitVR = () => window.history.back();
 
   // ── Loading ──────────────────────────────────────────────────────────────
-  if (configLoading) {
+  if (configLoading || !media) {
     return (
       <LoadingSpinner>
         <div className="spinner-ring" />
@@ -247,14 +241,18 @@ const VirtualGalleryPage: React.FC = () => {
           <span className="spinner-sub">Three.js / WebXR</span>
         </LoadingSpinner>
       }>
-        <GalleryR3F
-          artworks={artworks}
-          roomName={selectedRoom?.name}
+        {selectedRoom && <GalleryR3F
+          room={selectedRoom!}
+          items={items}
+          roomNames={roomNames}
+          arrivedFrom={arrivedFrom}
+          onNavigate={goThroughDoor}
           onArtworkClick={setSelectedArtwork}
           onExitVR={handleExitVR}
+          media={media}
           hudLeft={narrow ? 12 : 216}
           hudTop={narrow ? 60 : 16}
-        />
+        />}
       </Suspense>
 
       {/* Room navigation panel — left side overlay */}
@@ -291,9 +289,7 @@ const VirtualGalleryPage: React.FC = () => {
           : { flex: 1, padding: '8px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {config.rooms.map(room => {
             const isActive = room.id === selectedRoomId;
-            const artCount = room.artworkAssignments
-              ? new Set(Object.values(room.artworkAssignments).map(a => a.id)).size
-              : 0;
+            const artCount = countArtworks(room);
             const bg = isActive
               ? 'rgba(99,80,220,0.55)'
               : (THEME_BG[room.theme ?? ''] ?? 'rgba(255,255,255,0.04)');
@@ -301,7 +297,7 @@ const VirtualGalleryPage: React.FC = () => {
             return (
               <button
                 key={room.id}
-                onClick={() => setSelectedRoomId(room.id)}
+                onClick={() => pickRoom(room.id)}
                 style={{
                   background: bg,
                   border: isActive ? '1px solid rgba(130,100,255,0.7)' : '1px solid rgba(255,255,255,0.06)',
@@ -341,7 +337,7 @@ const VirtualGalleryPage: React.FC = () => {
             {selectedArtwork.description && <p><strong>Описание:</strong> {selectedArtwork.description}</p>}
             {(selectedArtwork.image_url || selectedArtwork.imageUrl) && (
               <ArtworkImage
-                src={textureSource(selectedArtwork.image_url || selectedArtwork.imageUrl || '', 'zoom').url}
+                src={textureSource(selectedArtwork.image_url || selectedArtwork.imageUrl || '', 'zoom', media).url}
                 alt={selectedArtwork.title}
                 onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Изображение+недоступно'; }}
               />

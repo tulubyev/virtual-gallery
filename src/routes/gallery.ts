@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import multer from 'multer';
+import { normalizeConfig } from '../frontend/src/lib/gallery/roomSpec';
 
 const router = express.Router();
 const { getActiveConfig, saveConfig, updateTextureUrls } = require('../services/gallery-config');
@@ -44,26 +45,32 @@ router.get('/rooms', (_req: Request, res: Response) => {
 });
 
 router.get('/config', async (_req: Request, res: Response) => {
+  // Что бы ни лежало в БД (старые данные, пустой объект), клиент получает допустимую конфигурацию
+  const sanitize = (raw: unknown) => {
+    try { return normalizeConfig(raw).config; } catch { return normalizeConfig(defaultConfig).config; }
+  };
   try {
     const dbConfig = await getActiveConfig();
-    if (dbConfig) {
-      const response = dbConfig.config || defaultConfig;
-      if (dbConfig.texture_urls) response.texture_urls = dbConfig.texture_urls;
-      res.json(response);
-    } else {
-      res.json(defaultConfig);
-    }
+    const response: any = sanitize(dbConfig ? dbConfig.config : defaultConfig);
+    if (dbConfig && dbConfig.texture_urls) response.texture_urls = dbConfig.texture_urls;
+    res.json(response);
   } catch (error) {
     console.error('Error loading gallery config:', error);
-    res.json(defaultConfig);
+    res.json(sanitize(defaultConfig));
   }
 });
 
 router.post('/config', async (req: Request, res: Response) => {
   try {
-    const { textureUrls, ...config } = req.body;
-    await saveConfig(config, textureUrls || null);
-    res.json({ success: true });
+    const { textureUrls, ...raw } = req.body ?? {};
+    let normalized;
+    try {
+      normalized = normalizeConfig(raw);
+    } catch (e) {
+      return res.status(400).json({ success: false, error: (e as Error).message });
+    }
+    await saveConfig(normalized.config, textureUrls || null);
+    res.json({ success: true, warnings: normalized.warnings, config: normalized.config });
   } catch (error) {
     console.error('Error saving gallery config:', error);
     res.status(500).json({ success: false, error: 'Failed to save configuration' });

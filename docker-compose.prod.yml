@@ -48,6 +48,37 @@ services:
       - "traefik.http.middlewares.virtgal-www-redirect.redirectregex.replacement=https://virtgal.ru/$${1}"
       - "traefik.http.middlewares.virtgal-www-redirect.redirectregex.permanent=true"
 
+  # ── CDN для изображений (cdn.virtgal.ru) ──────────────────────────────────────
+  # Нужна DNS-запись cdn.virtgal.ru → 90.156.168.149 и CDN_BASE_URL=https://cdn.virtgal.ru в .env.
+  # Без этого сайт работает как обычно, картинки отдаёт само приложение.
+  cdn:
+    image: nginxinc/nginx-unprivileged:1.27-alpine
+    container_name: virtual-gallery-cdn
+    restart: always
+    depends_on:
+      - virtual-gallery
+    expose:
+      - "8080"
+    volumes:
+      - ./docker/cdn/nginx.conf:/etc/nginx/nginx.conf:ro
+      - cdn-cache:/var/cache/nginx
+    networks:
+      - traefik-public
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.virtgal-cdn.rule=Host(`cdn.virtgal.ru`)"
+      - "traefik.http.routers.virtgal-cdn.entrypoints=websecure"
+      - "traefik.http.routers.virtgal-cdn.tls.certresolver=letsencrypt"
+      - "traefik.http.services.virtgal-cdn.loadbalancer.server.port=8080"
+
+volumes:
+  cdn-cache:
+
 networks:
   traefik-public:
     name: traefik-public

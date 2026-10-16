@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Play,
   Flag,
-  TrendingUp,
   BarChart3,
   Eye,
   Heart,
@@ -77,23 +76,15 @@ const TourGuidePanel: React.FC = () => {
     }
   ]);
 
-  // Mock data for statistics
+  // Серверной части туров пока нет (нет таблиц и API), поэтому цифр нет: прочерки вместо выдуманных значений.
   const stats = [
-    { title: 'Всего туров', value: '42', change: '+8%' },
-    { title: 'Проведено', value: '38', change: '+12%' },
-    { title: 'Участников', value: '420', change: '+15%' },
-    { title: 'Средний рейтинг', value: '4.7', change: '+0.2' },
+    { title: 'Всего туров', value: '—', change: 'нет данных' },
+    { title: 'Проведено', value: '—', change: 'нет данных' },
+    { title: 'Участников', value: '—', change: 'нет данных' },
+    { title: 'Средний рейтинг', value: '—', change: 'нет данных' },
   ];
 
-
-  // Mock data for visitors
-  const visitors: Visitor[] = [
-    { id: 1, name: 'Александр Петров', email: 'alex@example.com', joinedTour: 'Введение в современное искусство', engagement: 92 },
-    { id: 2, name: 'Мария Иванова', email: 'maria@example.com', joinedTour: 'История импрессионизма', engagement: 87 },
-    { id: 3, name: 'Дмитрий Сидоров', email: 'dmitry@example.com', joinedTour: 'Цифровые инсталляции', engagement: 95 },
-    { id: 4, name: 'Елена Козлова', email: 'elena@example.com', joinedTour: 'Введение в современное искусство', engagement: 78 },
-    { id: 5, name: 'Сергей Новиков', email: 'sergey@example.com', joinedTour: 'Классическая живопись', engagement: 89 },
-  ];
+  const visitors: Visitor[] = [];
 
   const handleStartTour = (tourId: number) => {
     setTours(tours.map(tour => 
@@ -114,6 +105,11 @@ const TourGuidePanel: React.FC = () => {
         <p className="text-muted-foreground">Управление виртуальными турами и взаимодействие с участниками</p>
       </div>
 
+      <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-sm">
+        Модуль туров ещё не подключён к серверу: расписание ниже — образец оформления и не сохраняется,
+        статистика и список участников появятся вместе с серверной частью.
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
@@ -123,10 +119,7 @@ const TourGuidePanel: React.FC = () => {
               <CardTitle className="text-2xl">{stat.value}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center text-sm text-green-500">
-                <TrendingUp className="h-4 w-4 mr-1" />
-                {stat.change}
-              </div>
+              <div className="flex items-center text-sm text-muted-foreground">{stat.change}</div>
             </CardContent>
           </Card>
         ))}
@@ -398,6 +391,9 @@ const TourGuidePanel: React.FC = () => {
                       </td>
                     </tr>
                   ))}
+                  {visitors.length === 0 && (
+                    <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Данных об участниках пока нет</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>

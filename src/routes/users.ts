@@ -4,7 +4,7 @@ import pool from '../config/database';
 const router = express.Router();
 
 const VALID_SORT_COLUMNS = ['user_id', 'username', 'email', 'role', 'created_at'];
-const VALID_ROLES = ['admin', 'curator', 'staff', 'guide', 'user'];
+const VALID_ROLES = ['admin', 'curator', 'staff', 'tour_guide', 'auction_participant', 'user'];
 
 router.get('/', async (req: Request, res: Response) => {
   try {

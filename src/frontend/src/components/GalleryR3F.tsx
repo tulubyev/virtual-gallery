@@ -1,5 +1,6 @@
 // src/frontend/src/components/GalleryR3F.tsx
 // 3D-зал галереи (react-three-fiber). Принципы:
+//  • зал строится по своей модели (размеры, тема, цвет стен, свет, двери в связанные залы);
 //  • картины видны сразу (миниатюры 256 px), детали подгружаются вблизи, видеопамять ограничена;
 //  • рендер «по требованию» — в покое кадры не рисуются (батарея, нагрев);
 //  • ходьба в первом лице со скоростью, не зависящей от частоты кадров; клавиатура, мышь и тач;
@@ -8,19 +9,16 @@ import React, { useRef, useState, useEffect, useLayoutEffect, useMemo, useCallba
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Artwork } from '../types';
-import { ROOM_W, ROOM_D, WALL_H, MAX_SLOTS, buildSlots, WallSlot } from '../lib/gallery/slots';
+import { RoomSpec, RoomLayout, Door, Placement, THEME_STYLE, lightingPlan, roomLayout, spawnPoint } from '../lib/gallery/roomSpec';
 import { fitInside } from '../lib/gallery/fit';
-import { textureSource, TexLevel, LEVEL_PX } from '../lib/gallery/imageUrls';
+import { textureSource, TexLevel, MediaConfig, NO_MEDIA } from '../lib/gallery/imageUrls';
 import { TieredTextureCache } from '../lib/gallery/textureCache';
 
 // ─── Параметры ────────────────────────────────────────────────────────────────
 const EYE_Y = 1.6;
-const START_POS: [number, number, number] = [0, EYE_Y, 11];
-const BOUND = 20.4;                // граница перемещения (стены на ±22)
 const WALK_SPEED = 3.8;            // м/с
 const RUN_SPEED = 7;
 const TURN_SPEED = 1.8;            // рад/с при повороте стрелками
-const ART_SIZE = 2.2;              // максимальная сторона картины
 const FRAME_BORDER = 0.12;
 const DETAIL_DIST = 11;            // ближе — грузим 1024 px
 const ZOOM_DIST = 4.5;             // ближе — грузим 2048 px
@@ -28,6 +26,9 @@ const LABEL_DIST = 6;              // ближе — показываем под
 const PLACEHOLDER = '#2d2d3a';
 
 interface MoveInput { x: number; y: number }
+
+/** Картина и место, на котором она висит. */
+export interface PlacedItem { slot: number; artwork: Artwork; placement: Placement }
 
 // ─── Возможности устройства ──────────────────────────────────────────────────
 export function detectLowPower(): boolean {
@@ -80,6 +81,21 @@ function loadTexture(url: string, clientMaxSize: number | null, anisotropy: numb
   });
 }
 
+/** Надпись на плашке (над дверью): рисуется на canvas, без DOM и без шрифтовых файлов. */
+function makeLabelTexture(text: string): THREE.CanvasTexture {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = 'rgba(12,12,22,0.88)';
+  ctx.beginPath(); ctx.roundRect?.(4, 4, 504, 120, 18); ctx.fill();
+  ctx.fillStyle = '#f4f4f8'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let size = 48;
+  do { ctx.font = `600 ${size}px system-ui, sans-serif`; size -= 4; } while (ctx.measureText(text).width > 470 && size > 18);
+  ctx.fillText(text, 256, 66);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
 // ─── Картина ─────────────────────────────────────────────────────────────────
 interface FrameHandle {
   setTexture(level: TexLevel, tex: THREE.Texture): void;
@@ -95,13 +111,14 @@ interface SharedResources {
 interface ArtworkFrameProps {
   id: string;
   artwork: Artwork;
-  slot: WallSlot;
+  placement: Placement;
+  artSize: number;
   shared: SharedResources;
   register: (id: string, handle: FrameHandle | null) => void;
   onClick: (artwork: Artwork) => void;
 }
 
-const ArtworkFrame: React.FC<ArtworkFrameProps> = React.memo(({ id, artwork, slot, shared, register, onClick }) => {
+const ArtworkFrame: React.FC<ArtworkFrameProps> = React.memo(({ id, artwork, placement, artSize, shared, register, onClick }) => {
   const invalidate = useThree(s => s.invalidate);
   const frameRef = useRef<THREE.Mesh>(null!);
   const surfRef = useRef<THREE.Mesh>(null!);
@@ -110,9 +127,10 @@ const ArtworkFrame: React.FC<ArtworkFrameProps> = React.memo(({ id, artwork, slo
 
   useEffect(() => {
     const tex: Record<TexLevel, THREE.Texture | null> = { thumb: null, detail: null, zoom: null };
+    let aspect = 1;
 
-    const setAspect = (aspect: number) => {
-      const { w, h } = fitInside(aspect, ART_SIZE);
+    const layoutMeshes = () => {
+      const { w, h } = fitInside(aspect, artSize);
       surfRef.current?.scale.set(w, h, 1);
       frameRef.current?.scale.set(w + FRAME_BORDER * 2, h + FRAME_BORDER * 2, 0.09);
     };
@@ -130,21 +148,21 @@ const ArtworkFrame: React.FC<ArtworkFrameProps> = React.memo(({ id, artwork, slo
       setTexture(level, t) {
         tex[level] = t;
         const img = t.image as { width?: number; height?: number } | undefined;
-        if (level === 'thumb' && img?.width && img?.height) setAspect(img.width / img.height);
+        if (level === 'thumb' && img?.width && img?.height) { aspect = img.width / img.height; layoutMeshes(); }
         apply();
       },
       clearTexture(level) { tex[level] = null; apply(); },
     });
-    setAspect(1);
+    layoutMeshes();
     return () => register(id, null);
-  }, [id, material, register, invalidate]);
+  }, [id, artSize, material, register, invalidate]);
 
   useEffect(() => () => material.dispose(), [material]);
 
   return (
     <group
-      position={[slot.x, slot.y, slot.z]}
-      rotation={[0, slot.rotY, 0]}
+      position={[placement.x, placement.y, placement.z]}
+      rotation={[0, placement.rotY, 0]}
       onClick={(e: { stopPropagation: () => void; delta: number }) => {
         e.stopPropagation();
         if (e.delta > 6) return; // это было перетаскивание (осмотр), а не клик
@@ -158,44 +176,50 @@ const ArtworkFrame: React.FC<ArtworkFrameProps> = React.memo(({ id, artwork, slo
 });
 
 // ─── Зал ─────────────────────────────────────────────────────────────────────
-const GalleryRoom: React.FC = () => {
-  const hw = ROOM_W / 2, hd = ROOM_D / 2;
+const GalleryRoom: React.FC<{ room: RoomSpec }> = ({ room }) => {
+  const { width: W, depth: D, height: H, theme, wallColor } = room;
+  const style = THEME_STYLE[theme];
+  const hw = W / 2, hd = D / 2;
   const columns = useRef<THREE.InstancedMesh>(null!);
 
   const floorTex = useMemo(() => {
     const c = document.createElement('canvas'); c.width = c.height = 256;
     const ctx = c.getContext('2d')!;
-    ctx.fillStyle = '#3a322b'; ctx.fillRect(0, 0, 256, 256);
-    ctx.strokeStyle = '#4a4036'; ctx.lineWidth = 2;
-    for (let i = 0; i <= 256; i += 64) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
+    ctx.fillStyle = style.floor; ctx.fillRect(0, 0, 256, 256);
+    if (style.floorGrid) {
+      ctx.strokeStyle = style.floorGrid; ctx.lineWidth = 2;
+      for (let i = 0; i <= 256; i += 64) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
+      }
     }
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
-    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(11, 11);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(Math.max(1, W / 4), Math.max(1, D / 4)); // плитка ≈ 4 м независимо от размера зала
     return t;
-  }, []);
+  }, [style, W, D]);
   useEffect(() => () => floorTex.dispose(), [floorTex]);
 
   // Колонны в углах — не закрывают картины
   useLayoutEffect(() => {
+    if (!columns.current) return;
     const m = new THREE.Matrix4();
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz], i) => {
-      m.setPosition(sx * (hw - 0.8), WALL_H / 2, sz * (hd - 0.8));
+      m.setPosition(sx * (hw - 0.6), H / 2, sz * (hd - 0.6));
       columns.current.setMatrixAt(i, m);
     });
     columns.current.instanceMatrix.needsUpdate = true;
-  }, [hw, hd]);
+  }, [hw, hd, H, style.columns]);
 
   type V3 = [number, number, number];
   const surfaces: { pos: V3; rot: V3; w: number; h: number; kind: 'floor' | 'ceil' | 'wall' }[] = [
-    { pos: [0, 0, 0],          rot: [-Math.PI / 2, 0, 0], w: ROOM_W, h: ROOM_D, kind: 'floor' },
-    { pos: [0, WALL_H, 0],     rot: [Math.PI / 2, 0, 0],  w: ROOM_W, h: ROOM_D, kind: 'ceil' },
-    { pos: [0, WALL_H / 2, -hd], rot: [0, 0, 0],          w: ROOM_W, h: WALL_H, kind: 'wall' },
-    { pos: [0, WALL_H / 2,  hd], rot: [0, Math.PI, 0],    w: ROOM_W, h: WALL_H, kind: 'wall' },
-    { pos: [-hw, WALL_H / 2, 0], rot: [0,  Math.PI / 2, 0], w: ROOM_D, h: WALL_H, kind: 'wall' },
-    { pos: [ hw, WALL_H / 2, 0], rot: [0, -Math.PI / 2, 0], w: ROOM_D, h: WALL_H, kind: 'wall' },
+    { pos: [0, 0, 0],          rot: [-Math.PI / 2, 0, 0], w: W, h: D, kind: 'floor' },
+    { pos: [0, H, 0],          rot: [Math.PI / 2, 0, 0],  w: W, h: D, kind: 'ceil' },
+    { pos: [0, H / 2, -hd],    rot: [0, 0, 0],            w: W, h: H, kind: 'wall' },
+    { pos: [0, H / 2, hd],     rot: [0, Math.PI, 0],      w: W, h: H, kind: 'wall' },
+    { pos: [-hw, H / 2, 0],    rot: [0, Math.PI / 2, 0],  w: D, h: H, kind: 'wall' },
+    { pos: [hw, H / 2, 0],     rot: [0, -Math.PI / 2, 0], w: D, h: H, kind: 'wall' },
   ];
 
   return (
@@ -204,53 +228,91 @@ const GalleryRoom: React.FC = () => {
         <mesh key={i} position={s.pos} rotation={s.rot}>
           <planeGeometry args={[s.w, s.h]} />
           {s.kind === 'floor' ? <meshLambertMaterial map={floorTex} />
-            : s.kind === 'ceil' ? <meshBasicMaterial color="#2a2a34" />
-            : <meshLambertMaterial color="#8d8a96" />}
+            : s.kind === 'ceil' ? <meshBasicMaterial color={style.ceiling} />
+            : <meshLambertMaterial color={wallColor} />}
         </mesh>
       ))}
-      <instancedMesh ref={columns} args={[undefined as any, undefined as any, 4]} frustumCulled={false}>
-        <cylinderGeometry args={[0.5, 0.55, WALL_H, 16]} />
-        <meshLambertMaterial color="#6b6878" />
-      </instancedMesh>
+      {style.columns && (
+        <instancedMesh ref={columns} args={[undefined as any, undefined as any, 4]} frustumCulled={false}>
+          <cylinderGeometry args={[0.45, 0.5, H, 16]} />
+          <meshLambertMaterial color="#6b6878" />
+        </instancedMesh>
+      )}
     </>
   );
 };
 
-// ─── Освещение (физические единицы three ≥ r155) ─────────────────────────────
-const GalleryLighting: React.FC = () => (
-  <>
-    <ambientLight color="#fff3e6" intensity={1.6} />
-    <hemisphereLight args={['#fff5e6', '#3a3346', 1.1]} />
-    {[-12, 0, 12].map(z => (
-      <pointLight key={z} color="#ffe2b8" intensity={110} decay={2} position={[0, WALL_H - 0.8, z]} />
-    ))}
-  </>
-);
+// ─── Двери в связанные залы ──────────────────────────────────────────────────
+const Doors: React.FC<{ doors: Door[]; depth: number; names: Record<string, string> }> = ({ doors, depth, names }) => {
+  const labels = useMemo(() => doors.map(d => makeLabelTexture(names[d.toId] || d.toId)), [doors, names]);
+  useEffect(() => () => labels.forEach(t => t.dispose()), [labels]);
+
+  return (
+    <>
+      {doors.map((d, i) => (
+        // Группа повёрнута на π: локальная +Z смотрит внутрь зала
+        <group key={d.toId} position={[d.x, d.height / 2, depth / 2 - 0.02]} rotation={[0, Math.PI, 0]}>
+          <mesh position={[0, 0.05, 0]}>
+            <planeGeometry args={[d.width + 0.35, d.height + 0.2]} />
+            <meshBasicMaterial color="#c9b27c" />
+          </mesh>
+          <mesh position={[0, 0, 0.01]}>
+            <planeGeometry args={[d.width, d.height]} />
+            <meshBasicMaterial color="#0b0b12" />
+          </mesh>
+          <mesh position={[0, d.height / 2 + 0.55, 0.01]}>
+            <planeGeometry args={[2.6, 0.65]} />
+            <meshBasicMaterial map={labels[i]} transparent toneMapped={false} />
+          </mesh>
+        </group>
+      ))}
+    </>
+  );
+};
+
+// ─── Освещение по плану зала ─────────────────────────────────────────────────
+const GalleryLighting: React.FC<{ room: RoomSpec }> = ({ room }) => {
+  const plan = useMemo(() => lightingPlan(room), [room]);
+  return (
+    <>
+      <ambientLight color="#fff3e6" intensity={plan.ambient} />
+      <hemisphereLight args={['#fff5e6', '#3a3346', plan.hemisphere]} />
+      {plan.lights.map((l, i) => (
+        <pointLight key={i} color={plan.lightColor} intensity={l.intensity} decay={2} position={[l.x, l.y, l.z]} />
+      ))}
+    </>
+  );
+};
 
 // ─── Управление: клавиатура / мышь / тач ─────────────────────────────────────
 interface ControlsProps {
   joy: React.MutableRefObject<MoveInput>;
   lowPower: boolean;
+  layout: RoomLayout;
+  spawn: { x: number; z: number; yaw: number };
+  onDoor: (toId: string) => void;
   onInteract: () => void;
   onFps: (fps: number) => void;
 }
 
 const MOVE_CODES = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight']);
 
-const Controls: React.FC<ControlsProps> = ({ joy, lowPower, onInteract, onFps }) => {
+const Controls: React.FC<ControlsProps> = ({ joy, lowPower, layout, spawn, onDoor, onInteract, onFps }) => {
   const { camera, gl, invalidate, setDpr } = useThree();
   const st = useRef({
-    yaw: 0, pitch: 0, vx: 0, vz: 0,
+    yaw: spawn.yaw, pitch: 0, vx: 0, vz: 0,
     keys: new Set<string>(),
-    dragging: false, lastX: 0, lastY: 0,
+    dragging: false, lastX: 0, lastY: 0, doorFired: false,
     dpr: gl.getPixelRatio(), samples: 0, sum: 0, fpsSamples: 0, fpsSum: 0,
   });
   const maxDpr = useRef(gl.getPixelRatio());
+  const onDoorRef = useRef(onDoor);
+  onDoorRef.current = onDoor;
 
   useEffect(() => {
     camera.rotation.order = 'YXZ';
-    camera.position.set(...START_POS);
-    camera.rotation.set(0, 0, 0);
+    camera.position.set(spawn.x, EYE_Y, spawn.z);
+    camera.rotation.set(0, spawn.yaw, 0);
     invalidate();
 
     const el = gl.domElement;
@@ -301,7 +363,7 @@ const Controls: React.FC<ControlsProps> = ({ joy, lowPower, onInteract, onFps })
       el.removeEventListener('pointerup', onPointerUp);
       el.removeEventListener('pointercancel', onPointerUp);
     };
-  }, [camera, gl, invalidate, onInteract]);
+  }, [camera, gl, invalidate, onInteract, spawn.x, spawn.z, spawn.yaw]);
 
   useFrame((_, rawDt) => {
     const s = st.current;
@@ -328,9 +390,16 @@ const Controls: React.FC<ControlsProps> = ({ joy, lowPower, onInteract, onFps })
     s.vx += (tx - s.vx) * a;
     s.vz += (tz - s.vz) * a;
 
-    camera.position.x = Math.max(-BOUND, Math.min(BOUND, camera.position.x + s.vx * dt));
-    camera.position.z = Math.max(-BOUND, Math.min(BOUND, camera.position.z + s.vz * dt));
+    const { x: bx, z: bz } = layout.bounds;
+    camera.position.x = Math.max(-bx, Math.min(bx, camera.position.x + s.vx * dt));
+    camera.position.z = Math.max(-bz, Math.min(bz, camera.position.z + s.vz * dt));
     camera.position.y = EYE_Y;
+
+    // Дверь: подошли вплотную к проёму — переходим в связанный зал
+    if (!s.doorFired) {
+      const door = layout.doors.find(d => Math.abs(camera.position.x - d.x) < d.width / 2 && camera.position.z > bz - 0.15);
+      if (door) { s.doorFired = true; onDoorRef.current(door.toId); }
+    }
 
     const active = Math.abs(s.vx) > 0.02 || Math.abs(s.vz) > 0.02 || len > 0 || k.has('ArrowLeft') || k.has('ArrowRight') || s.dragging;
     if (!active) return;
@@ -353,28 +422,32 @@ const Controls: React.FC<ControlsProps> = ({ joy, lowPower, onInteract, onFps })
 
 // ─── Сцена: картины, загрузка текстур по расстоянию ──────────────────────────
 interface SceneProps {
-  artworks: Artwork[];
-  slots: WallSlot[];
+  room: RoomSpec;
+  layout: RoomLayout;
+  items: PlacedItem[];
+  names: Record<string, string>;
   lowPower: boolean;
+  media: MediaConfig;
   onArtworkClick: (a: Artwork) => void;
   onNearest: (a: Artwork | null) => void;
 }
 
-const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick, onNearest }) => {
+const Scene: React.FC<SceneProps> = ({ room, layout, items, names, lowPower, media, onArtworkClick, onNearest }) => {
   const { camera, gl, invalidate } = useThree();
   const frames = useRef(new Map<string, FrameHandle>());
   const register = useCallback((id: string, h: FrameHandle | null) => {
     if (h) frames.current.set(id, h); else frames.current.delete(id);
   }, []);
 
+  const style = THEME_STYLE[room.theme];
   const shared = useMemo<SharedResources>(() => ({
     plane: new THREE.PlaneGeometry(1, 1),
     box: new THREE.BoxGeometry(1, 1, 1),
-    frameMat: new THREE.MeshStandardMaterial({ color: '#6b4a26', roughness: 0.55, metalness: 0.2 }),
-  }), []);
+    frameMat: new THREE.MeshStandardMaterial({ color: style.frame, roughness: 0.55, metalness: style.frameMetal }),
+  }), [style]);
   useEffect(() => () => { shared.plane.dispose(); shared.box.dispose(); shared.frameMat.dispose(); }, [shared]);
 
-  const ids = useMemo(() => artworks.map((a, i) => String(a.artwork_id ?? i)), [artworks]);
+  const ids = useMemo(() => items.map(i => `s${i.slot}`), [items]);
 
   // Кэш текстур и «директор»: выбирает, какие картины нужны в каком качестве
   useEffect(() => {
@@ -385,9 +458,9 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
       caps: lowPower ? { thumb: Infinity, detail: 6, zoom: 0 } : { thumb: Infinity, detail: 12, zoom: 2 },
       maxConcurrent: lowPower ? 2 : 4,
       load: (id, level) => {
-        const art = artworks[byId.get(id)!];
-        const src = textureSource(art.image_url || '', level);
+        const art = items[byId.get(id)!].artwork;
         if (!art.image_url) return Promise.reject(new Error('no image'));
+        const src = textureSource(art.image_url, level, media);
         return loadTexture(src.url, src.clientMaxSize, anisotropy);
       },
       dispose: tex => tex.dispose(),
@@ -398,6 +471,7 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
     const frustum = new THREE.Frustum();
     const m = new THREE.Matrix4();
     const sphere = new THREE.Sphere();
+    const radius = layout.artSize * 0.8;
     let lastNearest: string | null = null;
 
     const update = () => {
@@ -405,21 +479,21 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
       m.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
       frustum.setFromProjectionMatrix(m);
 
-      const items = ids.map((id, i) => {
-        const s = slots[i];
-        sphere.center.set(s.x, s.y, s.z); sphere.radius = 1.8;
+      const list = ids.map((id, i) => {
+        const p = items[i].placement;
+        sphere.center.set(p.x, p.y, p.z); sphere.radius = radius;
         return { id, d: camera.position.distanceTo(sphere.center), visible: frustum.intersectsSphere(sphere) };
       }).sort((a, b) => a.d - b.d);
 
-      cache.setWanted('thumb', items.map(i => i.id));
-      cache.setWanted('detail', items.filter(i => i.visible && i.d < DETAIL_DIST).map(i => i.id));
-      cache.setWanted('zoom', lowPower ? [] : items.filter(i => i.visible && i.d < ZOOM_DIST).map(i => i.id));
+      cache.setWanted('thumb', list.map(i => i.id));
+      cache.setWanted('detail', list.filter(i => i.visible && i.d < DETAIL_DIST).map(i => i.id));
+      cache.setWanted('zoom', lowPower ? [] : list.filter(i => i.visible && i.d < ZOOM_DIST).map(i => i.id));
 
-      const near = items.find(i => i.visible && i.d < LABEL_DIST);
+      const near = list.find(i => i.visible && i.d < LABEL_DIST);
       const nearId = near ? near.id : null;
       if (nearId !== lastNearest) {
         lastNearest = nearId;
-        onNearest(nearId ? artworks[byId.get(nearId)!] : null);
+        onNearest(nearId ? items[byId.get(nearId)!].artwork : null);
       }
     };
 
@@ -431,18 +505,20 @@ const Scene: React.FC<SceneProps> = ({ artworks, slots, lowPower, onArtworkClick
       onNearest(null);
       invalidate();
     };
-  }, [artworks, ids, slots, lowPower, camera, gl, invalidate, onNearest]);
+  }, [items, ids, layout, lowPower, media, camera, gl, invalidate, onNearest]);
 
   return (
     <>
-      <GalleryLighting />
-      <GalleryRoom />
-      {artworks.map((artwork, i) => (
+      <GalleryLighting room={room} />
+      <GalleryRoom room={room} />
+      <Doors doors={layout.doors} depth={room.depth} names={names} />
+      {items.map((item, i) => (
         <ArtworkFrame
           key={ids[i]}
           id={ids[i]}
-          artwork={artwork}
-          slot={slots[i]}
+          artwork={item.artwork}
+          placement={item.placement}
+          artSize={layout.artSize}
           shared={shared}
           register={register}
           onClick={onArtworkClick}
@@ -494,16 +570,24 @@ const Joystick: React.FC<{ joy: React.MutableRefObject<MoveInput>; poke: () => v
 
 // ─── Главный компонент ───────────────────────────────────────────────────────
 interface Props {
-  artworks: Artwork[];
-  roomName?: string;
+  room: RoomSpec;
+  /** Картины на местах (из `placedArtworks`). */
+  items: PlacedItem[];
+  /** id зала → название (подписи над дверями). */
+  roomNames?: Record<string, string>;
+  /** Из какого зала пришёл посетитель: он появится у соответствующей двери. */
+  arrivedFrom?: string | null;
+  onNavigate?: (roomId: string) => void;
   onArtworkClick: (artwork: Artwork) => void;
   onExitVR: () => void;
+  /** Откуда брать картинки (CDN, бакет S3); по умолчанию — тот же сервер. */
+  media?: MediaConfig;
   /** Отступы HUD (на телефоне панель залов сверху, а не слева). */
   hudLeft?: number;
   hudTop?: number;
 }
 
-const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExitVR, hudLeft = 216, hudTop = 16 }) => {
+const GalleryR3F: React.FC<Props> = ({ room, items, roomNames = {}, arrivedFrom = null, onNavigate, onArtworkClick, onExitVR, media = NO_MEDIA, hudLeft = 216, hudTop = 16 }) => {
   const [hint, setHint] = useState(true);
   const [nearest, setNearest] = useState<Artwork | null>(null);
   const [fps, setFps] = useState<number | null>(null);
@@ -515,11 +599,12 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
   const joy = useRef<MoveInput>({ x: 0, y: 0 });
   const invalidateRef = useRef<() => void>(() => {});
 
-  const shown = useMemo(() => artworks.slice(0, MAX_SLOTS), [artworks]);
-  const slots = useMemo(() => buildSlots(shown.length), [shown.length]);
+  const layout = useMemo(() => roomLayout(room), [room]);
+  const spawn = useMemo(() => spawnPoint(layout, room.depth, arrivedFrom), [layout, room.depth, arrivedFrom]);
 
   const handleClick = useCallback((artwork: Artwork) => { setHint(false); onArtworkClick(artwork); }, [onArtworkClick]);
   const onInteract = useCallback(() => setHint(false), []);
+  const onDoor = useCallback((toId: string) => onNavigate?.(toId), [onNavigate]);
   const poke = useCallback(() => invalidateRef.current(), []);
 
   if (!webglSupported) {
@@ -538,12 +623,13 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
   }
 
   const maxDpr = Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2);
+  const hasDoors = layout.doors.length > 0;
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0e0e14' }}>
       <Canvas
         frameloop="demand"
-        camera={{ fov: 70, near: 0.1, far: 90, position: START_POS }}
+        camera={{ fov: 70, near: 0.1, far: Math.max(60, Math.hypot(room.width, room.depth) * 1.5), position: [spawn.x, EYE_Y, spawn.z] }}
         gl={{ antialias: !lowPower, powerPreference: 'high-performance', toneMapping: THREE.NoToneMapping }}
         dpr={[1, maxDpr]}
         shadows={false}
@@ -554,8 +640,8 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
           gl.domElement.addEventListener('webglcontextrestored', () => { setContextLost(false); invalidate(); });
         }}
       >
-        <Controls joy={joy} lowPower={lowPower} onInteract={onInteract} onFps={setFps} />
-        <Scene artworks={shown} slots={slots} lowPower={lowPower} onArtworkClick={handleClick} onNearest={setNearest} />
+        <Controls key={`c-${room.id}-${arrivedFrom ?? ''}`} joy={joy} lowPower={lowPower} layout={layout} spawn={spawn} onDoor={onDoor} onInteract={onInteract} onFps={setFps} />
+        <Scene key={`s-${room.id}`} room={room} layout={layout} items={items} names={roomNames} lowPower={lowPower} media={media} onArtworkClick={handleClick} onNearest={setNearest} />
       </Canvas>
 
       {touch && <Joystick joy={joy} poke={poke} />}
@@ -573,13 +659,14 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
           {touch
             ? 'Левый джойстик — ходьба · Перетаскивание — осмотр · Нажмите на картину — подробнее'
             : 'WASD — ходьба (Shift — быстрее) · ←/→ — поворот · Мышь с зажатой кнопкой — осмотр · Клик на картину — подробнее'}
+          {hasDoors ? ' · Двери ведут в соседние залы' : ''}
         </div>
       )}
 
       <div style={{ position: 'absolute', top: hudTop, left: hudLeft, background: 'rgba(0,0,0,0.6)', color: '#eee', padding: '8px 14px', borderRadius: 10, fontSize: 13, backdropFilter: 'blur(6px)', lineHeight: 1.5, pointerEvents: 'none' }}>
-        {roomName && <div style={{ fontWeight: 600 }}>{roomName}</div>}
+        <div style={{ fontWeight: 600 }}>{room.name}</div>
         <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-          Экспонатов: {shown.length}{artworks.length > shown.length ? ` из ${artworks.length}` : ''}
+          {room.width}×{room.depth}×{room.height} м · экспонатов: {items.length}
         </div>
         {showFps && <div style={{ fontSize: 12, color: '#4ade80' }}>FPS: {fps ?? '—'}</div>}
       </div>
@@ -603,5 +690,3 @@ const GalleryR3F: React.FC<Props> = ({ artworks, roomName, onArtworkClick, onExi
 };
 
 export default GalleryR3F;
-// Для тестов и отладки
-export { LEVEL_PX };

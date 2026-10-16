@@ -34,7 +34,7 @@ const BIDDERS = ['admin', 'auction_participant'] as const;
 
 export const RULES: readonly Rule[] = [
   // ── служебные и вход ────────────────────────────────────────────────
-  { methods: GET, path: /^\/(health|ai\/health)$/, access: 'public' },
+  { methods: GET, path: /^\/(health|ai\/health|public-config)$/, access: 'public' },
   { methods: ALL, path: /^\/infra\/status$/, access: ADMIN },
   { methods: ['POST'], path: /^\/auth\/(login|register|refresh)$/, access: 'public' },
   { methods: GET, path: /^\/auth\/verify$/, access: 'public' }, // сам проверяет токен
@@ -59,7 +59,7 @@ export const RULES: readonly Rule[] = [
   { methods: ALL, path: /^\/archive(\/.*)?$/, access: CURATORS },
   { methods: GET, path: /^\/display-settings$/, access: 'public' },
   { methods: ALL, path: /^\/display-settings(\/.*)?$/, access: ADMIN },
-  { methods: GET, path: /^\/stats\/dashboard$/, access: STAFF },
+  { methods: GET, path: /^\/stats\/(dashboard|overview)$/, access: STAFF },
   { methods: ['POST'], path: /^\/watermark\/(apply|verify)$/, access: STAFF },
 
   // ── аукционы ────────────────────────────────────────────────────────
