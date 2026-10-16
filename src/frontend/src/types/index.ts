@@ -167,6 +167,7 @@ export interface ImageQualityMetrics {
 }
 
 export interface ArtworkUpload {
+  artwork_id?: number;
   file: File;
   filename: string;
   original_name: string;

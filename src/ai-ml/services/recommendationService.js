@@ -1,7 +1,12 @@
 // src/ai-ml/services/recommendationService.js
 // Advanced recommendation service for the virtual art gallery
 
-const db = require('../../backend/models/db');
+const { UserService, ArtworkService } = require('../../services');
+const db = {
+    getAllUsers: () => UserService.getAllUsers(),
+    getAllArtworks: () => ArtworkService.getAllArtworks(),
+    getArtworkById: (id) => ArtworkService.getArtworkById(id)
+};
 
 class RecommendationService {
     constructor() {

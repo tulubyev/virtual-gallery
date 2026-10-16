@@ -19,6 +19,10 @@ const HeroSection = styled.section`
   margin-bottom: 2rem;
 `;
 
+const Section = styled.section`
+  margin-bottom: 2rem;
+`;
+
 const SectionTitle = styled.h2`
   font-size: 2rem;
   margin-bottom: 1.5rem;
@@ -84,7 +88,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/artworks');
+        const response = await axios.get('/api/artworks');
         // Берем первые 6 экспонатов как "избранные"
         setFeaturedArtworks(response.data.slice(0, 6));
       } catch (error) {

@@ -5,7 +5,6 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const AdmZip = require('adm-zip'); // Для работы с ZIP-архивами
 const sharp = require('sharp'); // Для обработки изображений
-const db = require('../models/db');
 const artworkAnalyzer = require('../../ai-ml/models/artworkAnalyzer'); // Используем ИИ-анализатор изображений
 const s3Service = require('../../backend/services/s3Service'); // Сервис для работы с S3
 
@@ -51,7 +50,7 @@ const artworkUploadController = {
   // Загрузить изображение экспоната
   uploadArtwork: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     // Мидлвар для загрузки файла
     upload.single('image'),
     // Основная функция контроллера
@@ -154,7 +153,7 @@ const artworkUploadController = {
   // Запустить ИИ-анализ загруженного изображения
   analyzeUploadedArtwork: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const { uploadId } = req.params;
@@ -187,7 +186,7 @@ const artworkUploadController = {
   // Сгенерировать NFT для произведения искусства
   generateNFT: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const userId = req.userId;
@@ -230,7 +229,7 @@ const artworkUploadController = {
   // Получить результаты ИИ-анализа
   getAnalysisResults: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const { uploadId } = req.params;
@@ -276,7 +275,7 @@ const artworkUploadController = {
   // Отправить экспонат на проверку куратору
   submitForReview: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const userId = req.userId;
@@ -312,7 +311,7 @@ const artworkUploadController = {
   // Получить все загрузки пользователя
   getUserUploads: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const userId = req.userId;
@@ -365,11 +364,11 @@ const artworkUploadController = {
   // Получить все материалы на проверке (только для кураторов и администраторов)
   getSubmissionsForReview: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const userId = req.userId;
-        const userRole = req.userRole; // Роль пользователя из токена
+        const userRole = req.role; // Роль пользователя из токена
 
         // Проверяем, имеет ли пользователь права на проверку материалов
         if (userRole !== 'curator' && userRole !== 'admin') {
@@ -428,12 +427,12 @@ const artworkUploadController = {
   // Одобрить экспонат (только для кураторов и администраторов)
   approveSubmission: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const { submissionId } = req.params;
         const userId = req.userId;
-        const userRole = req.userRole; // Роль пользователя из токена
+        const userRole = req.role; // Роль пользователя из токена
         const artworkData = req.body; // Дополнительные данные для создания экспоната
 
         // Проверяем, имеет ли пользователь права на одобрение материалов
@@ -463,12 +462,12 @@ const artworkUploadController = {
   // Отклонить экспонат (только для кураторов и администраторов)
   rejectSubmission: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const { submissionId } = req.params;
         const userId = req.userId;
-        const userRole = req.userRole; // Роль пользователя из токена
+        const userRole = req.role; // Роль пользователя из токена
         const { reason } = req.body; // Причина отклонения
 
         // Проверяем, имеет ли пользователь права на отклонение материалов
@@ -497,7 +496,7 @@ const artworkUploadController = {
   // Запросить повторный анализ изображения
   reanalyzeImage: [
     // Мидлвар для аутентификации
-    require('../middleware/auth').authenticateToken,
+    require('../../middleware/auth').authenticateToken,
     async (req, res) => {
       try {
         const { uploadId } = req.params;

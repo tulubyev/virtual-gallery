@@ -235,7 +235,7 @@ class ThreeDGalleryService {
       const frame = new THREE.Mesh(frameGeometry, frameMaterial);
       frame.position.set(x, y, z);
       frame.userData = { type: 'artwork', artworkId: artwork.artwork_id, artwork };
-      this.scene.add(frame);
+      this.scene?.add(frame);
 
       // Создаем поверхность экспоната (изображение)
       const artworkGeometry = new THREE.PlaneGeometry(2.3, 2.3);
@@ -249,7 +249,7 @@ class ThreeDGalleryService {
       const artworkSurface = new THREE.Mesh(artworkGeometry, artworkMaterial);
       artworkSurface.position.set(x, y, z + 0.06); // Немного впереди рамки
       artworkSurface.userData = { type: 'artwork', artworkId: artwork.artwork_id, artwork };
-      this.scene.add(artworkSurface);
+      this.scene?.add(artworkSurface);
 
       // Сохраняем ссылку на объект для обработки кликов
       this.galleryObjects.set(artwork.artwork_id, artworkSurface);

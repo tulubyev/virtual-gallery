@@ -8,9 +8,9 @@ import styled from 'styled-components';
 import HomePage from './pages/HomePage';
 import AdminPanel from './pages/AdminPanel';
 import CuratorPanel from './pages/CuratorPanel';
-import StaffPanel from './pages/StaffPanel';
-import TourGuidePanel from './pages/TourGuidePanel';
-import AuctionParticipantPanel from './pages/AuctionParticipantPanel';
+import ArtworksPage from './pages/ArtworksPage';
+import GalleriesListPage from './pages/GalleriesListPage';
+import ComingSoonPage from './pages/ComingSoonPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ArtworkDetailPage from './pages/ArtworkDetailPage';
@@ -47,7 +47,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Инициализация сокета
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io();
     setSocket(newSocket);
 
     // Проверка аутентификации при загрузке
@@ -101,15 +101,15 @@ const App: React.FC = () => {
             />
             <Route
               path="/staff"
-              element={currentUser?.role === 'staff' ? <StaffPanel /> : <Navigate to="/login" />}
+              element={currentUser?.role === 'staff' ? <StaffDashboardPage /> : <Navigate to="/login" />}
             />
             <Route
               path="/tour-guide"
-              element={currentUser?.role === 'tour_guide' ? <TourGuidePanel /> : <Navigate to="/login" />}
+              element={currentUser?.role === 'tour_guide' ? <ComingSoonPage title="Панель экскурсовода" /> : <Navigate to="/login" />}
             />
             <Route
               path="/auction-participant"
-              element={currentUser?.role === 'auction_participant' ? <AuctionParticipantPanel /> : <Navigate to="/login" />}
+              element={currentUser?.role === 'auction_participant' ? <ComingSoonPage title="Панель участника аукциона" /> : <Navigate to="/login" />}
             />
             <Route
               path="/login"

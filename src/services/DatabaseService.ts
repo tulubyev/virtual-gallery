@@ -8,9 +8,8 @@ class DatabaseService {
   constructor() {
     this.pool = new Pool({
       connectionString: process.env.DB_STRING,
-      ssl: {
-        rejectUnauthorized: false // Required for many hosted PostgreSQL services
-      }
+      // SSL нужен для внешних хостингов БД; PostgreSQL на том же VPS работает без него
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
     });
 
     // Тест подключения

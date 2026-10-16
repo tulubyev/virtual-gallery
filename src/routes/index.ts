@@ -2,4 +2,7 @@
 export { authRoutes } from './authRoutes';
 export { userRoutes } from './userRoutes';
 export { artworkRoutes } from './artworkRoutes';
-// Добавьте другие маршруты по мере их создания
+export { galleryRoutes } from './galleryRoutes';
+export { aiRoutes } from './aiRoutes';
+export { userManagementRoutes } from './userManagementRoutes';
+export { artworkUploadRoutes } from './artworkUploadRoutes';

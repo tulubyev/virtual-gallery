@@ -1,0 +1,12 @@
+**/node_modules
+dist
+src/frontend/dist
+.git
+.github
+.env
+.env.*
+!.env.example
+*.md
+temp_clone
+tmp
+uploads

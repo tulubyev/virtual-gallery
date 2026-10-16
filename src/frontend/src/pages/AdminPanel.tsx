@@ -80,7 +80,7 @@ const AdminPanel: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/admin/users', {
+        const response = await axios.get('/api/admin/users', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
@@ -99,7 +99,7 @@ const AdminPanel: React.FC = () => {
   const updateUserRole = async (userId: number, newRole: string) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/users/${userId}/role`,
+        `/api/admin/users/${userId}/role`,
         { role: newRole },
         {
           headers: {
@@ -123,7 +123,7 @@ const AdminPanel: React.FC = () => {
   const deleteUser = async (userId: number) => {
     if (window.confirm('Вы уверены, что хотите удалить этого пользователя?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+        await axios.delete(`/api/admin/users/${userId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }

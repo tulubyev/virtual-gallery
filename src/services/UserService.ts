@@ -1,6 +1,9 @@
 // services/UserService.ts
 import DatabaseService from './DatabaseService';
 import { User, CreateUserInput, UpdateUserInput } from '../models';
+import { pickColumns } from './columns';
+
+const USER_COLUMNS = ['username', 'email', 'preferences', 'role'] as const;
 
 class UserService {
   async getAllUsers(): Promise<User[]> {
@@ -37,19 +40,14 @@ class UserService {
   }
 
   async updateUser(id: number, updateData: UpdateUserInput): Promise<User | null> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let query = 'UPDATE users SET ';
-
-    let paramCount = 1;
-    for (const [key, value] of Object.entries(updateData)) {
-      fields.push(`${key} = $${paramCount}`);
-      values.push(key === 'preferences' ? JSON.stringify(value) : value);
-      paramCount++;
+    const entries = pickColumns(updateData, USER_COLUMNS);
+    if (entries.length === 0) {
+      return (await this.getUserById(id)) ?? null;
     }
 
-    query += fields.join(', ') + ` WHERE user_id = $${paramCount} RETURNING user_id, username, email, role, preferences`;
-    values.push(id);
+    const setClause = entries.map(([key], i) => `${key} = $${i + 1}`).join(', ');
+    const values = [...entries.map(([key, value]) => (key === 'preferences' ? JSON.stringify(value) : value)), id];
+    const query = `UPDATE users SET ${setClause} WHERE user_id = $${values.length} RETURNING user_id, username, email, role, preferences`;
 
     const result = await DatabaseService.query(query, values);
     return result.rows[0] || null;
@@ -61,6 +59,27 @@ class UserService {
       [role]
     );
     return result.rows;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await DatabaseService.query('DELETE FROM users WHERE user_id = $1 RETURNING user_id', [id]);
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getUserStats(): Promise<{ total_users: number; new_users_today: number; users_by_role: Record<string, number> }> {
+    const byRole = await DatabaseService.query('SELECT role, COUNT(*)::int AS count FROM users GROUP BY role');
+    const today = await DatabaseService.query(
+      'SELECT COUNT(*)::int AS count FROM users WHERE created_at >= CURRENT_DATE'
+    );
+
+    const users_by_role: Record<string, number> = {};
+    let total_users = 0;
+    for (const row of byRole.rows) {
+      users_by_role[row.role] = row.count;
+      total_users += row.count;
+    }
+
+    return { total_users, new_users_today: today.rows[0].count, users_by_role };
   }
 }
 

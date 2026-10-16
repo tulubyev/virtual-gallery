@@ -122,14 +122,14 @@ const CuratorPanel: React.FC = () => {
     const fetchData = async () => {
       try {
         // Fetch collections
-        const collectionsResponse = await axios.get('http://localhost:5000/api/ai/collections', {
+        const collectionsResponse = await axios.get('/api/ai/collections', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
         });
         
         // Fetch artworks
-        const artworksResponse = await axios.get('http://localhost:5000/api/artworks', {
+        const artworksResponse = await axios.get('/api/artworks', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
@@ -152,7 +152,7 @@ const CuratorPanel: React.FC = () => {
     
     try {
       await axios.post(
-        'http://localhost:5000/api/ai/collections/generate',
+        '/api/ai/collections/generate',
         {
           name: collectionName,
           description: collectionDescription,
@@ -175,7 +175,7 @@ const CuratorPanel: React.FC = () => {
       setSelectedArtworks([]);
       
       // Reload collections
-      const response = await axios.get('http://localhost:5000/api/ai/collections', {
+      const response = await axios.get('/api/ai/collections', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }

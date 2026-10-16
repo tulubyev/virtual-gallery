@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../services';
+import { getJwtSecret } from '../config/jwt';
 
 // Тип для расширения Request объекта
 interface AuthenticatedRequest extends Request {
@@ -19,7 +20,7 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key', async (err, decoded: any) => {
+  jwt.verify(token, getJwtSecret(), async (err, decoded: any) => {
     if (err) {
       res.status(403).json({ error: 'Invalid or expired token' });
       return;

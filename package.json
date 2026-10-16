@@ -7,10 +7,10 @@
     "start": "node dist/server.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "nodemon --exec ts-node src/server.ts",
-    "dev:client": "cd src/frontend && npm run dev",
-    "build": "tsc && cd src/frontend && npm run build",
+    "dev:client": "npm --prefix src/frontend run dev",
+    "build": "tsc && npm run build:client",
     "build:server": "tsc",
-    "build:client": "cd src/frontend && npm run build",
+    "build:client": "npm --prefix src/frontend run build",
     "init-db": "ts-node src/database/init.ts",
     "init-s3": "node scripts/initS3Bucket.js"
   },
@@ -31,6 +31,7 @@
     "adm-zip": "^0.5.16",
     "aws-sdk": "^2.1693.0",
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
@@ -42,6 +43,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "concurrently": "^9.2.1",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.2",

@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserService } from '../services';
 import { CreateUserInput } from '../models';
+import { getJwtSecret } from '../config/jwt';
 
 class AuthController {
   async register(req: Request, res: Response): Promise<void> {
@@ -36,7 +37,7 @@ class AuthController {
       // Генерация JWT токена
       const token = jwt.sign(
         { userId: newUser.user_id, username: newUser.username },
-        process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
 
@@ -79,7 +80,7 @@ class AuthController {
       // Генерация JWT токена
       const token = jwt.sign(
         { userId: user.user_id, username: user.username },
-        process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
 
@@ -108,7 +109,7 @@ class AuthController {
 
       const token = jwt.sign(
         { userId: user.user_id, username: user.username },
-        process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
 

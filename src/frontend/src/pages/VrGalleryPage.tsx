@@ -12,7 +12,7 @@ const VrGalleryPage: React.FC = () => {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/artworks');
+        const response = await axios.get('/api/artworks');
         setArtworks(response.data);
       } catch (err) {
         console.error('Error fetching artworks:', err);

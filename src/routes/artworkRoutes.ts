@@ -8,6 +8,9 @@ const router = Router();
 // Get all artworks
 router.get('/', ArtworkController.getAllArtworks);
 
+// Get recommended artworks for a user (requires authentication)
+router.get('/recommendations', authenticateToken, ArtworkController.getRecommendedArtworks);
+
 // Get artwork by ID
 router.get('/:id', ArtworkController.getArtworkById);
 
@@ -25,9 +28,6 @@ router.put('/:id', authenticateToken, ArtworkController.updateArtwork);
 
 // Delete artwork (requires authentication)
 router.delete('/:id', authenticateToken, ArtworkController.deleteArtwork);
-
-// Get recommended artworks for a user (requires authentication)
-router.get('/recommendations', authenticateToken, ArtworkController.getRecommendedArtworks);
 
 // Get similar artworks to a given artwork
 router.get('/:id/similar', ArtworkController.getSimilarArtworks);

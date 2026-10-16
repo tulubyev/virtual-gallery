@@ -26,9 +26,10 @@ class UserController {
       const userId = (req as any).userId; // From JWT token
       const updateData = req.body as UpdateUserInput;
 
-      // Don't allow updating user ID or password through this endpoint
-      delete updateData.user_id;
+      // Don't allow updating user ID, password or role through this endpoint
+      delete (updateData as any).user_id;
       delete (updateData as any).password;
+      delete (updateData as any).role;
 
       const updatedUser = await UserService.updateUser(userId, updateData);
       if (!updatedUser) {
