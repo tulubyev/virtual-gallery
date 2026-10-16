@@ -7,7 +7,6 @@
 | | |
 |---|---|
 | GitHub | https://github.com/tulubyev/virtual-gallery |
-| Локально | `~/Dropbox/DEV/Virtgal` |
 | VPS | 90.156.168.149, `/var/www/virtual-gallery` (Docker + Traefik, см. `vps-server-infra`) |
 | Прод | https://virtgal.ru |
 | Стек | Node/Express (`server.js` + TS-роуты через tsx), React + Vite + Tailwind/shadcn (`src/frontend`), Three.js/WebXR, PostgreSQL 16 (`virtual_gallery_db` на VPS), S3 Beget, Python AI/ML-сервис (`ai-ml-service/`, Qdrant) |
@@ -42,9 +41,11 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 
 ## Деплой (VPS)
 
+- Пошаговое описание, обновление, CDN и сброс пароля — `docs/DEPLOY.md`.
 - Проект: `/var/www/virtual-gallery`, образ собирается `Dockerfile`, маршрут Traefik — labels в
   `docker-compose.prod.yml` (`virtgal.ru`, `www` → 301). Порты наружу не публикуются.
-- БД — системный PostgreSQL 16 на хосте, из контейнера `172.28.0.1:5432`, БД `virtual_gallery_db`.
+- БД — системный PostgreSQL 16 на хосте, из контейнера `172.28.0.1:5432`, БД `virtual_gallery_db`, роль приложения `virtgal_app`
+  (проверять подключение нужно с адреса контейнера, а не с хоста: правило `pg_hba` — `172.28.0.0/16`).
 - Загрузки — каталог `public/uploads` (том `./public/uploads`, владелец uid 1000).
 - В production `server.js` не стартует, если `JWT_SECRET` короче 32 символов.
 - **`npm run init-db` удаляет все таблицы** (нужен `CONFIRM_DB_RESET=yes`) — на боевой БД не запускать.
