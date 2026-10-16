@@ -4,8 +4,17 @@ const path = require('path');
 const pool = require('./src/config/database');
 const { noCacheMiddleware } = require('./src/middleware/cors');
 
+// В проде без нормального секрета токены можно подделать (в коде есть запасные значения)
+if (process.env.NODE_ENV === 'production' && (process.env.JWT_SECRET || '').length < 32) {
+  console.error('JWT_SECRET не задан или короче 32 символов — сервер не запущен');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// За Traefik: корректные req.ip / протокол (rate limit, логи)
+app.set('trust proxy', 1);
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));

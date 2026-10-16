@@ -5,7 +5,7 @@ dotenv.config();
 
 const dbConnectionString = process.env.DB_STRING || process.env.DATABASE_URL;
 const dbHost = (dbConnectionString || '').replace(/^.*@/, '').replace(/\/.*$/, '');
-console.log('Database connection:', dbConnectionString ? `Using DB_STRING (${dbHost})` : 'Using DATABASE_URL (Replit)');
+console.log('Database connection:', dbConnectionString ? `Using DB_STRING (${dbHost})` : 'Using DATABASE_URL');
 
 const pool = new Pool({
   connectionString: dbConnectionString,

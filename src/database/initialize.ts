@@ -12,9 +12,7 @@ const dbConfig = {
     database: process.env.DB_NAME || 'virtual_gallery_db',
     user: process.env.DB_USER || 'tulubyev',
     password: process.env.DB_PASSWORD,
-    ssl: {
-        rejectUnauthorized: false // Required for many hosted PostgreSQL services
-    }
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined // SSL только для внешних БД
 };
 
 // Create a connection pool

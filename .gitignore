@@ -23,3 +23,9 @@ ai-ml-service/.pip-stamp
 
 # Attached assets (development only)
 attached_assets/
+# Артефакты сборки (собираются в Docker / CI)
+dist/
+src/frontend/dist/
+test-results/
+.env.*
+!.env.example

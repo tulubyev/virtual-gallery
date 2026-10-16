@@ -7,7 +7,7 @@ const TEST_SECRET = 'login_route_test_jwt_secret';
 
 jest.mock('../../config/database', () => ({
   __esModule: true,
-  default: { query: jest.fn() },
+  default: { query: jest.fn(() => Promise.resolve({ rows: [] })) },
 }));
 
 jest.mock('bcrypt', () => ({
