@@ -75,6 +75,16 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 - Рендер «по требованию» (в покое кадры не рисуются); `?fps` в адресе показывает FPS.
 - Внешние (не `/uploads/`, не S3) изображения миниатюр не имеют: уменьшаются на клиенте, но скачиваются целиком.
 
+## Дашборды
+
+- Цифры — только из БД: `GET /api/stats/overview` (`src/services/dashboardStats.ts`, доступ — staff/curator/admin, данные о
+  пользователях — только admin), клиент — `src/frontend/src/lib/dashboardStats.ts`. Блок, которого нет в схеме БД, приходит
+  как `null` и показывается как «—»; выдуманных значений и «демо»-списков в панелях быть не должно.
+- Модулей без серверной части пока нет данных: туры (TourGuidePanel), задачи сотрудника, ИИ-анализ и оцифровка в StaffPanel —
+  они помечены в интерфейсе как «не подключено».
+- `src/database/schema.sql` отстаёт от боевой БД (нет `artworks.status/country/epoch/collection`, `collections.slug/is_active`, …);
+  код, которому нужны эти колонки, на чистой схеме из `schema.sql` не работает.
+
 ## Устройство
 
 - `server.js` — Express: `/api/*` (роуты в `src/routes/*.ts`), статика, SPA-фолбэк на `src/frontend/dist`.

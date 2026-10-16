@@ -59,7 +59,7 @@ export const RULES: readonly Rule[] = [
   { methods: ALL, path: /^\/archive(\/.*)?$/, access: CURATORS },
   { methods: GET, path: /^\/display-settings$/, access: 'public' },
   { methods: ALL, path: /^\/display-settings(\/.*)?$/, access: ADMIN },
-  { methods: GET, path: /^\/stats\/dashboard$/, access: STAFF },
+  { methods: GET, path: /^\/stats\/(dashboard|overview)$/, access: STAFF },
   { methods: ['POST'], path: /^\/watermark\/(apply|verify)$/, access: STAFF },
 
   // ── аукционы ────────────────────────────────────────────────────────

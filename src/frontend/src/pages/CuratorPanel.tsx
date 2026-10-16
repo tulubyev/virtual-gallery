@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchWithAuth } from '../services/api';
 import { roomLayout, LIMITS } from '../lib/gallery/roomSpec';
+import { useOverview, fmt, changeText, ago, DASH } from '../lib/dashboardStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Image,
   Star,
-  Eye,
   GalleryVerticalEnd,
   Plus,
   Minus,
@@ -103,11 +103,12 @@ interface ArtworkReview {
   id: number;
   title: string;
   artist: string;
-  submittedBy: string;
+  style?: string | null;
   submissionDate: string;
-  status: 'pending' | 'approved' | 'rejected';
-  image: string;
+  status: 'pending' | 'approved' | 'rejected' | string;
 }
+
+interface CollectionRow { id: number; name: string; description?: string | null; artwork_count?: number | string }
 
 interface GalleryRoom {
   id: string;
@@ -204,26 +205,31 @@ const CuratorPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('gallery');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // ── Mock data ─────────────────────────────────────────────────────────────
-  const [reviews, setReviews] = useState<ArtworkReview[]>([
-    { id: 1, title: 'Абстрактная композиция', artist: 'Александр Петров', submittedBy: 'Мария Иванова', submissionDate: '2023-11-15', status: 'pending', image: '/placeholder-artwork.jpg' },
-    { id: 2, title: 'Городской пейзаж', artist: 'Мария Иванова', submittedBy: 'Дмитрий Сидоров', submissionDate: '2023-11-14', status: 'approved', image: '/placeholder-artwork.jpg' },
-    { id: 3, title: 'Цифровая инсталляция', artist: 'Анна Смирнова', submittedBy: 'Елена Козлова', submissionDate: '2023-11-13', status: 'rejected', image: '/placeholder-artwork.jpg' },
-  ]);
+  // ── Сводка и очередь на проверку (реальные данные) ────────────────────────
+  const { data: overview } = useOverview();
+  const [reviews, setReviews] = useState<ArtworkReview[]>([]);
+  const [recentSubmissions, setRecentSubmissions] = useState<Array<{ id: number; title: string; artist: string; date: string; status: string }>>([]);
+  const [collections, setCollections] = useState<CollectionRow[] | null>(null);
 
+  const byStatus = overview?.artworks?.byStatus ?? null;
+  const artTrend = changeText(overview?.artworks);
   const stats = [
-    { title: 'Всего экспонатов', value: '1 240', change: '+12%' },
-    { title: 'Новых за сегодня', value: '12', change: '+5%' },
-    { title: 'На рассмотрении', value: '24', change: '-3%' },
-    { title: 'Одобренных', value: '1 190', change: '+15%' },
+    { title: 'Всего экспонатов', value: fmt(overview?.artworks?.total), change: artTrend.text, trend: artTrend.trend },
+    { title: 'Новых за сутки', value: fmt(overview?.artworks?.today), change: '', trend: 'flat' as const },
+    { title: 'На рассмотрении', value: byStatus ? fmt(byStatus.pending ?? 0) : DASH, change: byStatus ? '' : 'нет статусов в БД', trend: 'flat' as const },
+    { title: 'Одобрено и опубликовано', value: byStatus ? fmt((byStatus.approved ?? 0) + (byStatus.published ?? 0) + (byStatus.active ?? 0)) : DASH, change: '', trend: 'flat' as const },
   ];
 
-  const recentSubmissions = [
-    { id: 1, title: 'Абстрактная композиция', artist: 'Александр Петров', date: '2 часа назад', status: 'pending' },
-    { id: 2, title: 'Городской пейзаж', artist: 'Мария Иванова', date: '5 часов назад', status: 'approved' },
-    { id: 3, title: 'Цифровая инсталляция', artist: 'Анна Смирнова', date: '1 день назад', status: 'rejected' },
-    { id: 4, title: 'Портрет женщины', artist: 'Дмитрий Козлов', date: '2 дня назад', status: 'pending' },
-  ];
+  useEffect(() => {
+    const toReview = (a: any): ArtworkReview => ({ id: a.id, title: a.title, artist: a.artist, style: a.style, status: a.status ?? 'approved', submissionDate: a.created_at ? new Date(a.created_at).toLocaleDateString('ru-RU') : DASH });
+    fetch('/api/artworks?limit=5').then(r => r.ok ? r.json() : null).then(j => {
+      if (j?.artworks) setRecentSubmissions(j.artworks.map((a: any) => ({ id: a.id, title: a.title, artist: a.artist, date: a.created_at ? ago(new Date(a.created_at).toISOString()) : DASH, status: a.status ?? 'approved' })));
+    }).catch(() => {});
+    fetch('/api/artworks?status=pending&limit=50').then(r => r.ok ? r.json() : null).then(j => {
+      if (j?.artworks) setReviews(j.artworks.map(toReview));
+    }).catch(() => {});
+    fetch('/api/collections?all=true').then(r => r.ok ? r.json() : null).then(j => setCollections(j?.collections ?? [])).catch(() => setCollections([]));
+  }, []);
 
   // ── Gallery config ────────────────────────────────────────────────────────
   const [galleryConfig, setGalleryConfig] = useState<GalleryConfig | null>(null);
@@ -593,8 +599,15 @@ const CuratorPanel: React.FC = () => {
     }
   };
 
-  const handleApprove = (id: number) => setReviews(reviews.map(r => r.id === id ? { ...r, status: 'approved' } : r));
-  const handleReject = (id: number) => setReviews(reviews.map(r => r.id === id ? { ...r, status: 'rejected' } : r));
+  const decide = async (id: number, status: 'approved' | 'rejected') => {
+    const res = await fetchWithAuth(`/api/artworks/${id}/status`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
+    });
+    if (res.ok) setReviews(list => list.map(r => r.id === id ? { ...r, status } : r));
+    else setSaveMsg({ ok: false, text: 'Не удалось сохранить решение' });
+  };
+  const handleApprove = (id: number) => decide(id, 'approved');
+  const handleReject = (id: number) => decide(id, 'rejected');
 
   const filteredArtworksList = artworksList.filter(a => {
     const q = artworkListSearch.toLowerCase();
@@ -742,9 +755,11 @@ const CuratorPanel: React.FC = () => {
                 <CardContent className="p-4">
                   <p className="text-xs text-muted-foreground mb-1">{stat.title}</p>
                   <p className="text-2xl font-bold">{stat.value}</p>
-                  <div className="flex items-center text-xs text-green-500 mt-1">
-                    <TrendingUp className="h-3 w-3 mr-1" />{stat.change}
-                  </div>
+                  {stat.change && (
+                    <div className={`flex items-center text-xs mt-1 ${stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-500' : 'text-muted-foreground'}`}>
+                      {stat.trend !== 'flat' && <TrendingUp className={`h-3 w-3 mr-1 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />}{stat.change}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -1226,7 +1241,6 @@ const CuratorPanel: React.FC = () => {
                       <tr>
                         <th className="text-left p-4">Экспонат</th>
                         <th className="text-left p-4">Автор</th>
-                        <th className="text-left p-4">Отправитель</th>
                         <th className="text-left p-4">Дата</th>
                         <th className="text-left p-4">Статус</th>
                         <th className="text-left p-4">Действия</th>
@@ -1242,7 +1256,6 @@ const CuratorPanel: React.FC = () => {
                             </div>
                           </td>
                           <td className="p-4">{review.artist}</td>
-                          <td className="p-4">{review.submittedBy}</td>
                           <td className="p-4">{review.submissionDate}</td>
                           <td className="p-4">
                             <Badge variant={review.status === 'pending' ? 'default' : review.status === 'approved' ? 'secondary' : 'destructive'}>
@@ -1265,6 +1278,9 @@ const CuratorPanel: React.FC = () => {
                           </td>
                         </tr>
                       ))}
+                      {reviews.length === 0 && (
+                        <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">Очередь пуста — нет произведений на рассмотрении</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1284,30 +1300,21 @@ const CuratorPanel: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {[1, 2, 3, 4, 5, 6].map(item => (
-                    <Card key={item} className="overflow-hidden border shadow-sm">
+                  {(collections ?? []).map(c => (
+                    <Card key={c.id} className="overflow-hidden border shadow-sm">
                       <div className="bg-muted aspect-video flex items-center justify-center">
                         <GalleryVerticalEnd className="h-12 w-12 text-primary/20" />
                       </div>
                       <CardHeader>
-                        <CardTitle className="text-base">Коллекция {item}</CardTitle>
-                        <CardDescription>{item * 7 + 3} экспонатов</CardDescription>
+                        <CardTitle className="text-base">{c.name}</CardTitle>
+                        <CardDescription>{fmt(Number(c.artwork_count ?? 0))} экспонатов</CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="flex justify-between items-center">
-                          <Badge variant="outline">Тема {item}</Badge>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Eye className="h-4 w-4 mr-1" /><span>{item * 137}</span>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1">Просмотр</Button>
-                          <Button size="sm">Редактировать</Button>
-                        </div>
-                      </CardContent>
+                      {c.description && <CardContent><p className="text-sm text-muted-foreground line-clamp-3">{c.description}</p></CardContent>}
                     </Card>
                   ))}
                 </div>
+                {collections && collections.length === 0 && <p className="text-sm text-muted-foreground">Коллекций пока нет</p>}
+                {!collections && <p className="text-sm text-muted-foreground">Загрузка…</p>}
               </CardContent>
             </Card>
           )}
@@ -1316,35 +1323,27 @@ const CuratorPanel: React.FC = () => {
           {activeTab === 'analytics' && (
             <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>Аналитика куратора</CardTitle>
-                <CardDescription>Статистика ваших действий и принятых решений</CardDescription>
+                <CardTitle>Аналитика</CardTitle>
+                <CardDescription>Считается по базе данных</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Решения по материалам</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-56 flex items-center justify-center bg-muted rounded-xl">
-                        <div className="text-center">
-                          <GalleryVerticalEnd className="h-12 w-12 text-primary/20 mx-auto" />
-                          <p className="mt-2 text-muted-foreground text-sm">График решений</p>
-                        </div>
-                      </div>
+                    <CardHeader><CardTitle className="text-base">Материалы по статусам</CardTitle></CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      {byStatus ? Object.entries(byStatus).map(([st, n]) => (
+                        <div key={st} className="flex justify-between"><span>{st}</span><b>{fmt(n)}</b></div>
+                      )) : <p className="text-muted-foreground">{DASH} (в базе нет статусов)</p>}
                     </CardContent>
                   </Card>
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Популярность коллекций</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-56 flex items-center justify-center bg-muted rounded-xl">
-                        <div className="text-center">
-                          <Star className="h-12 w-12 text-primary/20 mx-auto" />
-                          <p className="mt-2 text-muted-foreground text-sm">График популярности</p>
-                        </div>
-                      </div>
+                    <CardHeader><CardTitle className="text-base">Залы и вовлечённость</CardTitle></CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <div className="flex justify-between"><span>Залов</span><b>{fmt(overview?.rooms?.total)}</b></div>
+                      <div className="flex justify-between"><span>Мест для картин</span><b>{fmt(overview?.rooms?.capacity)}</b></div>
+                      <div className="flex justify-between"><span>Коллекций</span><b>{fmt(overview?.collections?.total)}</b></div>
+                      <div className="flex justify-between"><span>Просмотров за 30 дней</span><b>{fmt(overview?.engagement?.views.last30)}</b></div>
+                      <div className="flex justify-between"><span>Лайков за 30 дней</span><b>{fmt(overview?.engagement?.likes.last30)}</b></div>
                     </CardContent>
                   </Card>
                 </div>
