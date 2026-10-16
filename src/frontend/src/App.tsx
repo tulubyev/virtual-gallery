@@ -227,10 +227,9 @@ const App: React.FC = () => {
     localStorage.removeItem('currentUser');
   };
 
-  const DEBUG_SKIP_AUTH = true; // set to false to restore real auth
 
   const guard = (roles: string[], element: React.ReactElement) =>
-    DEBUG_SKIP_AUTH || (currentUser && roles.includes(currentUser.role))
+    currentUser && roles.includes(currentUser.role)
       ? element
       : <Navigate to="/login" />;
 

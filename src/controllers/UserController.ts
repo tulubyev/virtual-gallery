@@ -1,5 +1,6 @@
 // controllers/UserController.ts
 import { Request, Response } from 'express';
+import { getJwtSecret } from '../config/jwt';
 import { IUserService, UpdateUserDto } from '../types/user';
 import { ILogger } from '../types/interfaces';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -44,7 +45,7 @@ class UserController {
       const jwtModule = await import('jsonwebtoken');
       const token = jwtModule.sign(
         { userId: newUser.user_id, username: newUser.username },
-        process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
 
@@ -87,7 +88,7 @@ class UserController {
       const jwtModule = await import('jsonwebtoken');
       const token = jwtModule.sign(
         { userId: user.user_id, username: user.username },
-        process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+        getJwtSecret(),
         { expiresIn: '24h' }
       );
 

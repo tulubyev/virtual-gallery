@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { getJwtSecret } from '../config/jwt';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -9,7 +10,6 @@ import pool from '../config/database';
 const { uploadWithKey, StorageUnavailableError } = require('../services/s3-upload');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key';
 const SALT_ROUNDS = 10;
 
 interface UserRow {
@@ -28,7 +28,7 @@ function makeToken(user: UserRow, rememberDays: 0 | 7 | 30 = 0): string {
   const expiresIn = rememberDays === 30 ? '30d' : rememberDays === 7 ? '7d' : '24h';
   return jwt.sign(
     { userId: user.user_id, email: user.email, role: user.role, username: user.username },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn }
   );
 }
@@ -127,7 +127,7 @@ function getToken(req: Request): string | null {
 
 async function decodeUser(token: string): Promise<{ userId: number } | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as { userId: number };
+    return jwt.verify(token, getJwtSecret()) as { userId: number };
   } catch {
     return null;
   }
@@ -246,7 +246,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
     let decoded: any;
     try {
-      decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true }) as any;
+      decoded = jwt.verify(token, getJwtSecret(), { ignoreExpiration: true }) as any;
     } catch {
       return res.status(401).json({ error: 'Invalid token' });
     }
@@ -281,7 +281,7 @@ router.get('/verify', async (req: Request, res: Response) => {
     const token = (req.headers['authorization'] || '').replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+    const decoded = jwt.verify(token, getJwtSecret()) as { userId: number };
     const result = await pool.query(
       'SELECT user_id, username, email, role, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]

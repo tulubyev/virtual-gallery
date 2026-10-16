@@ -1,5 +1,6 @@
 // src/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
+import { getJwtSecret } from '../config/jwt';
 import jwt from 'jsonwebtoken';
 
 // Тип для пользователя
@@ -23,7 +24,7 @@ export interface AuthenticatedRequest extends Request {
 
 // Функция для генерации JWT токена
 export const generateToken = (user: User): string => {
-  const secret = process.env.JWT_SECRET || 'fallback_secret_key';
+  const secret = getJwtSecret();
   // Токен будет действителен 24 часа
   return jwt.sign(
     { userId: user.user_id, email: user.email, role: user.role },
@@ -41,7 +42,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  const secret = process.env.JWT_SECRET || 'fallback_secret_key';
+  const secret = getJwtSecret();
 
   try {
     const decoded = jwt.verify(token, secret) as any;

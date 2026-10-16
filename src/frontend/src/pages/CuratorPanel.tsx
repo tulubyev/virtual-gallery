@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchWithAuth } from '../services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -293,7 +294,7 @@ const CuratorPanel: React.FC = () => {
     setConfigSaving(true);
     setSaveMsg(null);
     try {
-      const res = await fetch('/api/gallery/config', {
+      const res = await fetchWithAuth('/api/gallery/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...galleryConfig, currentRoom: activeRoomId ?? galleryConfig.currentRoom }),

@@ -180,7 +180,8 @@ describe('other S3 upload endpoints', () => {
 
   it('returns the same actionable error for avatars without changing the user profile', async () => {
     s3Client.send.mockRejectedValueOnce(Object.assign(new Error('timeout'), { name: 'TimeoutError' }));
-    const token = jwt.sign({ userId: 1 }, process.env.JWT_SECRET || 'fallback_secret_key');
+    process.env.JWT_SECRET = 'storage_uploads_test_secret_0123456789abcdef';
+    const token = jwt.sign({ userId: 1 }, process.env.JWT_SECRET);
     const response = await request(app).post('/api/auth/me/avatar')
       .set('Authorization', `Bearer ${token}`)
       .attach('avatar', Buffer.from('image'), 'avatar.png');

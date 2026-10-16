@@ -299,9 +299,11 @@ router.post('/:id/lots', async (req: Request, res: Response) => {
 router.post('/bids', async (req: Request, res: Response) => {
   try {
     await ensureTables();
-    const { lot_id, user_id, amount } = req.body;
+    // Ставку делает вошедший пользователь; user_id из тела запроса не принимается
+    const { lot_id, amount } = req.body;
+    const user_id = (req as any).user?.user_id;
     if (!lot_id || !user_id || !amount) {
-      return res.status(400).json({ error: 'lot_id, user_id, and amount are required' });
+      return res.status(400).json({ error: 'lot_id and amount are required' });
     }
 
     const lotResult = await pool.query(`

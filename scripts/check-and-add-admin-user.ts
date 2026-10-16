@@ -1,6 +1,7 @@
 // scripts/check-and-add-admin-user.ts
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import 'dotenv/config';
 
 async function checkAndAddAdminUser() {
@@ -27,16 +28,18 @@ async function checkAndAddAdminUser() {
     } else {
       console.log('Администратор не найден, создаем нового...');
       
-      // Хешируем пароль 'password123'
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      // Пароль: ADMIN_PASSWORD или случайный (печатается ниже)
+      const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
       
       // Создаем нового администратора
       const insertResult = await client.query(
-        `INSERT INTO users (username, email, password_hash, role, first_name, last_name) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO users (username, email, password_hash, role)
+         VALUES ($1, $2, $3, $4)
          RETURNING user_id, username, email, role`,
-        ['admin_user', 'admin@example.com', hashedPassword, 'admin', 'Админ', 'Главный']
+        ['admin_user', 'admin@example.com', hashedPassword, 'admin']
       );
+      console.log('Пароль администратора:', adminPassword);
       
       console.log('Новый администратор создан:', insertResult.rows[0]);
     }

@@ -57,10 +57,9 @@ describe('generateToken', () => {
     expect(decoded.role).toBe('visitor');
   });
 
-  it('uses the fallback secret when JWT_SECRET is not set', () => {
+  it('throws when JWT_SECRET is not set (no fallback secret)', () => {
     delete process.env.JWT_SECRET;
-    const token = generateToken(baseUser);
-    expect(() => jwt.verify(token, 'fallback_secret_key')).not.toThrow();
+    expect(() => generateToken(baseUser)).toThrow('JWT_SECRET is not set');
   });
 });
 
