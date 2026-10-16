@@ -9,9 +9,7 @@ import 'dotenv/config';
 // Create a connection pool
 const pool = new Pool({
     connectionString: process.env.DB_STRING,
-    ssl: {
-        rejectUnauthorized: false // Required for many hosted PostgreSQL services
-    }
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined // SSL только для внешних БД
 });
 
 // Read the schema SQL file

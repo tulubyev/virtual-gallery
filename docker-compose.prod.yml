@@ -1,0 +1,54 @@
+# Virtual Gallery — virtgal.ru (VPS 90.156.168.149)
+# На сервере (/var/www/virtual-gallery):
+#   cp .env.example .env     # заполнить, chmod 600
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Traefik подхватывает контейнер по labels (сеть traefik-public, порты наружу не публикуем).
+# БД — системный PostgreSQL 16 на хосте (172.28.0.1:5432), база virtual_gallery_db уже есть.
+# ВАЖНО: `npm run init-db` удаляет все таблицы — на боевой БД не запускать.
+
+services:
+  virtual-gallery:
+    build: .
+    container_name: virtual-gallery
+    restart: always
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    expose:
+      - "5000"
+    volumes:
+      # Загруженные изображения (раньше жили в Replit). Владелец каталога — uid 1000 (node):
+      #   chown -R 1000:1000 public/uploads
+      - ./public/uploads:/app/public/uploads
+    networks:
+      - traefik-public
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      # virtgal.ru → приложение (API, SPA, Socket.IO)
+      - "traefik.http.routers.virtgal.rule=Host(`virtgal.ru`)"
+      - "traefik.http.routers.virtgal.entrypoints=websecure"
+      - "traefik.http.routers.virtgal.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.virtgal.service=virtgal"
+      - "traefik.http.services.virtgal.loadbalancer.server.port=5000"
+      # www.virtgal.ru → 301 на virtgal.ru
+      - "traefik.http.routers.virtgal-www.rule=Host(`www.virtgal.ru`)"
+      - "traefik.http.routers.virtgal-www.entrypoints=websecure"
+      - "traefik.http.routers.virtgal-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.virtgal-www.middlewares=virtgal-www-redirect"
+      - "traefik.http.routers.virtgal-www.service=noop@internal"
+      - "traefik.http.middlewares.virtgal-www-redirect.redirectregex.regex=^https://www\\.virtgal\\.ru/(.*)"
+      - "traefik.http.middlewares.virtgal-www-redirect.redirectregex.replacement=https://virtgal.ru/$${1}"
+      - "traefik.http.middlewares.virtgal-www-redirect.redirectregex.permanent=true"
+
+networks:
+  traefik-public:
+    name: traefik-public
+    external: true

@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            src/frontend/package-lock.json
+      - run: npm ci
+      - run: npm --prefix src/frontend ci
+      - name: Typecheck (backend)
+        run: npx tsc --noEmit
+      - name: Tests
+        run: npx jest
+      - name: Build (виджеты + React SPA)
+        run: npm run build && npm --prefix src/frontend run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker build (проверка образа, без push)
+        run: docker build -t virtual-gallery:ci .

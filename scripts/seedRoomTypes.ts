@@ -286,7 +286,7 @@ seedRoomTypes().catch(console.error);import * as fs from 'fs';
 import * as path from 'path';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/virtual_gallery_db'
+  connectionString: process.env.DATABASE_URL
 });
 
 const roomTypes = [
@@ -853,7 +853,7 @@ seedRoomTypes().catch(console.error);import * as fs from 'fs';
 import * as path from 'path';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/virtual_gallery_db'
+  connectionString: process.env.DATABASE_URL
 });
 
 const roomTypes = [

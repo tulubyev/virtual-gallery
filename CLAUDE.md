@@ -1,0 +1,60 @@
+# CLAUDE.md — Virtual Gallery
+
+Виртуальная арт-галерея с VR и AI-кураторством
+
+## Где что лежит
+
+| | |
+|---|---|
+| GitHub | https://github.com/tulubyev/virtual-gallery |
+| Локально | `~/Dropbox/DEV/Virtgal` |
+| VPS | 90.156.168.149, `/var/www/virtual-gallery` (Docker + Traefik, см. `vps-server-infra`) |
+| Прод | https://virtgal.ru |
+| Стек | Node/Express (`server.js` + TS-роуты через tsx), React + Vite + Tailwind/shadcn (`src/frontend`), Three.js/WebXR, PostgreSQL 16 (`virtual_gallery_db` на VPS), S3 Beget, Python AI/ML-сервис (`ai-ml-service/`, Qdrant) |
+
+## Как ведётся работа
+
+Проект подключён к общей доске **DEV Control** (реестр — `tulubyev/dev-control`).
+
+- Работа идёт по issues этого репозитория. Перед началом проверь, есть ли задача:
+  `gh issue list --label agent:claude` — задачи, назначенные Claude.
+- Каждая задача делается в отдельной ветке (`feat/<номер>-кратко`, `fix/<номер>-кратко`)
+  и завершается PR с `Closes #<номер>` в описании — тогда карточка на доске сама
+  уйдёт в Done после merge.
+- Если задача заблокирована (нужен ответ, доступ, решение) — комментарий в issue
+  с вопросом и метка `blocked`, не гадать.
+- В PR: что сделано, как проверено, что осталось.
+- Секреты только в `.env` (в git не попадают), в `.env.example` — имена переменных.
+  Пароли и ключи не писать в код, документацию и примеры (значения-«запасные» в коде запрещены).
+
+## Команды
+
+```bash
+npm ci && npm --prefix src/frontend ci   # зависимости
+cp .env.example .env                     # заполнить (в git не попадает)
+npm run dev                              # Express :3001 (nodemon + tsx) + Vite :5000 (прокси /api → :3001)
+npm run build                            # Tailwind + виджеты → dist/frontend
+npm --prefix src/frontend run build      # React SPA → src/frontend/dist (его раздаёт server.js)
+npx tsc --noEmit && npx jest             # типы и тесты (то же гоняет CI)
+node --import tsx server.js              # запуск как в проде (PORT, по умолчанию 5000)
+docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
+```
+
+## Деплой (VPS)
+
+- Проект: `/var/www/virtual-gallery`, образ собирается `Dockerfile`, маршрут Traefik — labels в
+  `docker-compose.prod.yml` (`virtgal.ru`, `www` → 301). Порты наружу не публикуются.
+- БД — системный PostgreSQL 16 на хосте, из контейнера `172.28.0.1:5432`, БД `virtual_gallery_db`.
+- Загрузки — каталог `public/uploads` (том `./public/uploads`, владелец uid 1000).
+- В production `server.js` не стартует, если `JWT_SECRET` короче 32 символов.
+- **`npm run init-db` удаляет все таблицы** (нужен `CONFIRM_DB_RESET=yes`) — на боевой БД не запускать.
+- Python AI/ML-сервис (`ai-ml-service/`) в деплой пока не включён: без него работает демо-режим
+  (`AI_CORE_URL`).
+
+## Устройство
+
+- `server.js` — Express: `/api/*` (роуты в `src/routes/*.ts`), статика, SPA-фолбэк на `src/frontend/dist`.
+- `src/frontend` — React SPA (свой `package.json`) и legacy HTML-страницы; `vite.config.ts` в корне
+  собирает отдельные виджеты.
+- `src/test`, `e2e` — Jest и Playwright.
+- Replit-файлы (`.replit`, `replit.nix`, `replit.md`) оставлены до окончательного переезда.

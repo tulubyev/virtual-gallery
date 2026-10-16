@@ -17,7 +17,7 @@ async function initBegetDatabase() {
 
   if (!process.env.DATABASE_URL) {
     console.error('❌ DATABASE_URL environment variable is not set!');
-    console.log('💡 Set it with: export DATABASE_URL="postgresql://tulubyev:CrossBaikal6times!@quoquuquosijo.beget.app:5432/aimlservice_db"');
+    console.log('💡 Set it with: export DATABASE_URL="postgresql://tulubyev:CHANGE_ME@your-db-host:5432/aimlservice_db"');
     process.exit(1);
   }
 

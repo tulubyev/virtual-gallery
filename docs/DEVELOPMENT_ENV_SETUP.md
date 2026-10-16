@@ -28,7 +28,7 @@ brew install postgresql
 2. Создайте базу данных для проекта:
 ```sql
 CREATE DATABASE virtual_gallery_db;
-CREATE USER tulubyev WITH PASSWORD 'CrossBaikal6times!';
+CREATE USER tulubyev WITH PASSWORD 'CHANGE_ME';
 GRANT ALL PRIVILEGES ON DATABASE virtual_gallery_db TO tulubyev;
 ```
 
@@ -62,8 +62,8 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=virtual_gallery_db
 DB_USER=tulubyev
-DB_PASSWORD=CrossBaikal6times!
-DB_STRING=postgres://tulubyev:CrossBaikal6times!@localhost:5432/virtual_gallery_db
+DB_PASSWORD=CHANGE_ME
+DB_STRING=postgres://tulubyev:CHANGE_ME@localhost:5432/virtual_gallery_db
 
 REDIS_HOST=localhost
 REDIS_PORT=6379

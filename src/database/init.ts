@@ -4,6 +4,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function initializeDatabase(): Promise<void> {
+  // reset.sql удаляет ВСЕ таблицы — без явного подтверждения не запускаем (боевая БД!)
+  if (process.env.CONFIRM_DB_RESET !== 'yes') {
+    console.error('Отказ: init-db удаляет все таблицы и создаёт их заново.');
+    console.error('Для пустой/тестовой БД запустите: CONFIRM_DB_RESET=yes npm run init-db');
+    process.exit(1);
+  }
+
   const resetPath = path.join(__dirname, 'reset.sql');
   const schemaPath = path.join(__dirname, '..', '..', 'src', 'database', 'schema.sql');
 
