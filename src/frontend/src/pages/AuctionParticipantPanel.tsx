@@ -36,7 +36,7 @@ const AuctionParticipantPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [stats, setStats] = useState({ activeBids: 0, wonLots: 0, totalAuctions: 0 });
+  const [stats, setStats] = useState<{ activeBids: number; wonLots: number; totalAuctions: number; leadingSum: number | null }>({ activeBids: 0, wonLots: 0, totalAuctions: 0, leadingSum: null });
   const [upcomingAuctions, setUpcomingAuctions] = useState<any[]>([]);
   const [auctionsList, setAuctionsList] = useState<any[]>([]);
   const [bidHistory, setBidHistory] = useState<any[]>([]);
@@ -47,8 +47,8 @@ const AuctionParticipantPanel: React.FC = () => {
   const [transactionsLoading, setTransactionsLoading] = useState(false);
 
   const savedUser = localStorage.getItem('currentUser');
-  const currentUser = savedUser ? JSON.parse(savedUser) : { username: 'Участник', email: 'bidder@gallery.com', id: 1 };
-  const userId = currentUser.id || 1;
+  const currentUser = savedUser ? JSON.parse(savedUser) : null;
+  const userId: string | null = currentUser?.id ? String(currentUser.id) : null;
 
   useEffect(() => {
     loadDashboard();
@@ -61,6 +61,7 @@ const AuctionParticipantPanel: React.FC = () => {
   }, [activeTab]);
 
   async function loadDashboard() {
+    if (!userId) { setDashboardLoading(false); return; }
     setDashboardLoading(true);
     try {
       const [participantRes, activeRes, scheduledRes] = await Promise.all([
@@ -76,7 +77,10 @@ const AuctionParticipantPanel: React.FC = () => {
         if (participantRes.bid_history) {
           participantRes.bid_history.forEach((b: any) => { if (b.auction_id) auctionSet.add(b.auction_id); });
         }
-        setStats({ activeBids, wonLots, totalAuctions: auctionSet.size });
+        const leadingSum = (participantRes.active_bids ?? [])
+          .filter((b: any) => b.is_winning)
+          .reduce((sum: number, b: any) => sum + (Number(b.amount) || 0), 0);
+        setStats({ activeBids, wonLots, totalAuctions: auctionSet.size, leadingSum });
       }
 
       const active: any[] = activeRes?.auctions ?? [];
@@ -101,6 +105,7 @@ const AuctionParticipantPanel: React.FC = () => {
   }
 
   async function loadBids() {
+    if (!userId) return;
     setBidsLoading(true);
     try {
       const res = await fetchWithAuth(`/api/auctions/participant/${userId}`);
@@ -200,8 +205,8 @@ const AuctionParticipantPanel: React.FC = () => {
             <User className="w-5 h-5 text-amber-600" />
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-gray-900 text-sm truncate">{currentUser.username || 'Участник'}</p>
-            <p className="text-xs text-gray-500 truncate">{currentUser.email || ''}</p>
+            <p className="font-medium text-gray-900 text-sm truncate">{currentUser?.username || 'Участник'}</p>
+            <p className="text-xs text-gray-500 truncate">{currentUser?.email || ''}</p>
           </div>
         </div>
         <button
@@ -268,13 +273,16 @@ const AuctionParticipantPanel: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Balance card */}
+              {/* Сумма ставок, которые сейчас лидируют (по данным сервера) */}
               <div className="rounded-2xl p-6 text-white" style={{ background: 'linear-gradient(135deg, #f59e0b, #eab308)' }}>
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                   <Wallet className="w-6 h-6" />
                 </div>
-                <p className="text-3xl font-bold">2&nbsp;450&nbsp;000&nbsp;₽</p>
-                <p className="text-white/80 text-sm">Баланс</p>
+                {dashboardLoading
+                  ? <div className="h-9 w-24 bg-white/30 rounded animate-pulse mb-1" />
+                  : <p className="text-3xl font-bold">{stats.leadingSum === null ? '—' : `${Math.round(stats.leadingSum).toLocaleString('ru-RU')}\u00a0₽`}</p>
+                }
+                <p className="text-white/80 text-sm">Мои лидирующие ставки</p>
               </div>
               {/* Active bids */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">

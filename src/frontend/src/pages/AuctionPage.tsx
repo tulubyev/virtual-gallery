@@ -89,6 +89,7 @@ const AuctionPage: React.FC = () => {
   const [auctionLots, setAuctionLots] = useState<Record<number, Lot[]>>({});
   const [lotsLoading, setLotsLoading] = useState<Record<number, boolean>>({});
   const [countdowns, setCountdowns] = useState<Record<number, string>>({});
+  const [bidError, setBidError] = useState<string | null>(null);
   const [bidModal, setBidModal] = useState<{ open: boolean; lot: Lot | null; auctionId?: number }>({ open: false, lot: null });
   const [bidAmount, setBidAmount] = useState('');
   const [bidLoading, setBidLoading] = useState(false);
@@ -163,7 +164,8 @@ const AuctionPage: React.FC = () => {
     if (!bidModal.lot) return;
     const amount = parseFloat(bidAmount);
     const minBid = Math.max(Number(bidModal.lot.current_bid) || 0, Number(bidModal.lot.starting_price) || 0);
-    if (isNaN(amount) || amount <= minBid) return;
+    if (isNaN(amount) || amount <= minBid) { setBidError(`Ставка должна быть больше ${minBid}`); return; }
+    setBidError(null);
     setBidLoading(true);
     try {
       const res = await fetchWithAuth(`/api/auctions/lots/${bidModal.lot.lot_id}/bid`, {
@@ -171,7 +173,13 @@ const AuctionPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        setBidError(err?.error || 'Не удалось сделать ставку. Попробуйте ещё раз.');
+        return;
+      }
       if (res.ok) {
+        setBidError(null);
         setBidModal({ open: false, lot: null });
         setBidAmount('');
         if (bidModal.auctionId) {
@@ -185,6 +193,7 @@ const AuctionPage: React.FC = () => {
         }
       }
     } catch {
+      setBidError('Нет связи с сервером. Ставка не принята.');
     } finally {
       setBidLoading(false);
     }
@@ -475,11 +484,12 @@ const AuctionPage: React.FC = () => {
                         <input
                           type="number"
                           value={bidAmount}
-                          onChange={e => setBidAmount(e.target.value)}
+                          onChange={e => { setBidAmount(e.target.value); setBidError(null); }}
                           placeholder={`Минимум ${minBid + 1}`}
                           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
                         />
                       </div>
+                      {bidError && <p role="alert" className="text-sm text-red-600">{bidError}</p>}
                       <button
                         onClick={submitBid}
                         disabled={bidLoading || !bidAmount || parseFloat(bidAmount) <= minBid}
