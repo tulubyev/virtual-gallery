@@ -123,7 +123,8 @@ temp/
 tmp/
 
 # AI/ML specific
-models/
+# веса моделей лежат в каталоге models/ в корне сервиса; src/models — это Python-код
+/models/
 checkpoints/
 embeddings/
 *.pkl
