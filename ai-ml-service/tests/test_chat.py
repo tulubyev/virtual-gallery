@@ -16,6 +16,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 
+pytest.importorskip("src.models.routes.chat", reason="routes/chat.py отсутствует в исходниках ядра")
+
 
 def _make_completion(text="Mocked reply from the assistant.", model="mock-model"):
     choice = MagicMock()

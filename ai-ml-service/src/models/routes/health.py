@@ -2,13 +2,14 @@
 Health check routes
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 import psutil
 import time
 from datetime import datetime
 
+from ..security import require_internal_token
 from ..services.database import check_db_connection
 from ..services.qdrant_client import check_qdrant_connection
 from ..services.redis_client import check_redis_connection
@@ -45,6 +46,10 @@ async def health_check():
             "redis": redis_status
         }
 
+        # Тексты ошибок (адреса, имена хостов) наружу не отдаём — они есть в логах
+        for service in services_status.values():
+            service.pop("error", None)
+
         # Determine overall status
         all_healthy = all(service.get("healthy", False) for service in services_status.values())
         status = "healthy" if all_healthy else "unhealthy"
@@ -58,9 +63,9 @@ async def health_check():
         )
 
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=503, detail="Health check failed")
 
-@router.get("/detailed", response_model=HealthDetailedResponse)
+@router.get("/detailed", response_model=HealthDetailedResponse, dependencies=[Depends(require_internal_token)])
 async def detailed_health_check():
     """Detailed health check with system information"""
     try:
@@ -69,7 +74,7 @@ async def detailed_health_check():
 
         # System information
         system_info = {
-            "cpu_percent": psutil.cpu_percent(interval=1),
+            "cpu_percent": psutil.cpu_percent(interval=None),
             "memory": {
                 "total": psutil.virtual_memory().total,
                 "available": psutil.virtual_memory().available,
@@ -92,4 +97,4 @@ async def detailed_health_check():
         )
 
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Detailed health check failed: {str(e)}")
+        raise HTTPException(status_code=503, detail="Detailed health check failed")

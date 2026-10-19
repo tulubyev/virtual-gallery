@@ -75,12 +75,15 @@ class NFTMetadataService:
                 "number": edition_number,
                 "total": edition_total
             },
-            "authenticity": {
+            # Разбор выполнен ИИ; подлинность и провенанс экспертом не проверены, пока куратор не подтвердит
+            "verification": {
                 "verification_hash": verification_hash,
                 "gallery": self.gallery_name,
                 "digitized_at": datetime.utcnow().isoformat() + "Z",
                 "certificate_type": "TAE",
-                "provenance_verified": back_analysis.get("provenance") is not None if back_analysis else False
+                "status": "ai_analysis_unverified",
+                "expert_verified": False,
+                "provenance_documented": bool(back_analysis and back_analysis.get("provenance"))
             }
         }
         
@@ -120,7 +123,7 @@ class NFTMetadataService:
         if back_analysis and back_analysis.get("provenance"):
             parts.append(f"\n\nProvenance: {back_analysis['provenance']}")
         
-        parts.append(f"\n\nDigitized and authenticated by {self.gallery_name}.")
+        parts.append(f"\n\nDigitized by {self.gallery_name}. Description is AI-assisted and not verified by an expert.")
         
         return " ".join(parts)
     
@@ -218,8 +221,8 @@ class NFTMetadataService:
         })
         
         attributes.append({
-            "trait_type": "Authentication",
-            "value": "Digitally Verified"
+            "trait_type": "Verification",
+            "value": "AI analysis, not expert-verified"
         })
         
         attributes.append({
@@ -269,7 +272,7 @@ class NFTMetadataService:
                 "verification_hash": verification_hash,
                 "digitization_method": "AI-assisted",
                 "watermark_embedded": True,
-                "authenticity_score": front_analysis.get("confidence", 0.85)
+                "expert_verified": False
             }
         }
         
@@ -283,7 +286,7 @@ class NFTMetadataService:
         if back_analysis and back_analysis.get("provenance"):
             properties["tae"]["provenance"] = {
                 "text": back_analysis["provenance"],
-                "verified": True,
+                "verified": False,
                 "source": "back_image_analysis"
             }
         

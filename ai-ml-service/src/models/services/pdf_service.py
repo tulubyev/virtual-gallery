@@ -5,8 +5,6 @@ PDF processing service for text extraction, OCR, and chunking
 import logging
 import aiohttp
 import fitz  # PyMuPDF
-from pdf2image import convert_from_bytes
-import pytesseract
 from typing import List, Dict, Any, Optional
 import re
 from ..config import settings

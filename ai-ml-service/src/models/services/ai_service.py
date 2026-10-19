@@ -8,6 +8,7 @@ from typing import Dict, Any, List, Optional
 import aiohttp
 import base64
 from ..config import settings
+from ..exceptions import ExternalAPIError
 
 logger = logging.getLogger(__name__)
 
@@ -97,52 +98,30 @@ class AIService:
             raise
 
     async def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings for text using OpenAI/OpenRouter with fallback"""
-        try:
-            # Try OpenRouter/OpenAI first
-            if not self.use_openrouter or settings.openai_api_key:
-                response = await self.client.embeddings.create(
-                    input=texts,
-                    model=settings.default_embedding_model
-                )
-                return [embedding.embedding for embedding in response.data]
-            else:
-                # OpenRouter doesn't support embeddings, use fallback
-                logger.warning("OpenRouter doesn't support embeddings, using fallback")
-                return self._generate_fallback_embeddings(texts)
+        """Эмбеддинги текста через OpenAI-совместимый API.
 
+        Запасных («хеш-») векторов нет: при ошибке вызова или несовпадении размерности
+        бросается исключение, чтобы в Qdrant не попали векторы без смысла.
+        """
+        try:
+            response = await self.client.embeddings.create(
+                input=texts,
+                model=settings.default_embedding_model
+            )
         except Exception as e:
             logger.error(f"Embedding generation failed: {e}")
-            # Use fallback embeddings
-            return self._generate_fallback_embeddings(texts)
+            raise ExternalAPIError("embeddings", "create", {"model": settings.default_embedding_model}) from e
 
-    def _generate_fallback_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate deterministic fallback embeddings based on text hash"""
-        import hashlib
-
-        embeddings = []
-        for text in texts:
-            # Create a deterministic hash-based embedding
-            hash_obj = hashlib.sha256(text.encode('utf-8'))
-            hash_bytes = hash_obj.digest()
-
-            # Convert hash to float values between -1 and 1
-            embedding = []
-            for i in range(0, len(hash_bytes), 4):
-                chunk = hash_bytes[i:i+4].ljust(4, b'\x00')
-                value = int.from_bytes(chunk, byteorder='big') / (2**32 - 1)  # 0 to 1
-                value = (value - 0.5) * 2  # -1 to 1
-                embedding.append(value)
-
-            # Pad or truncate to required dimension
-            while len(embedding) < settings.vector_dimension:
-                embedding.extend(embedding)
-            embedding = embedding[:settings.vector_dimension]
-
-            embeddings.append(embedding)
-
-        logger.info(f"Generated fallback embeddings for {len(texts)} texts")
-        return embeddings
+        vectors = [item.embedding for item in response.data]
+        if len(vectors) != len(texts):
+            raise ExternalAPIError("embeddings", "count_mismatch", {"expected": len(texts), "got": len(vectors)})
+        for vector in vectors:
+            if len(vector) != settings.vector_dimension:
+                raise ExternalAPIError(
+                    "embeddings", "dimension_mismatch",
+                    {"expected": settings.vector_dimension, "got": len(vector), "model": settings.default_embedding_model}
+                )
+        return vectors
 
     async def generate_text(self, prompt: str, context: Optional[str] = None,
                           max_tokens: Optional[int] = None) -> Dict[str, Any]:

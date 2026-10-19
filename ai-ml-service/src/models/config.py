@@ -2,9 +2,9 @@
 Configuration management using Pydantic settings
 """
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List, Optional
-import os
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     # Server
     host: str = "0.0.0.0"
     port: int = 8000
+
+    # Внутренний токен: все ручки, кроме /health, принимают только вызовы с заголовком X-Internal-Token.
+    # Обязательная переменная окружения INTERNAL_API_TOKEN (не короче 16 символов), запасного значения нет.
+    internal_api_token: str
 
     # CORS
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8000"]
@@ -72,6 +76,14 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+
+    @field_validator("internal_api_token")
+    @classmethod
+    def _token_not_weak(cls, value: str) -> str:
+        if len(value) < 16:
+            raise ValueError("INTERNAL_API_TOKEN должен быть не короче 16 символов")
+        return value
+
 
 # Create global settings instance
 settings = Settings()

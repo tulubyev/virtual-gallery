@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 
 const router = express.Router();
 const AI_CORE_URL = process.env.AI_CORE_URL || 'http://localhost:8001';
+// Внутренний токен Python-ядра (заголовок X-Internal-Token); без него ядро ответит 401
+const INTERNAL_API_TOKEN = process.env.INTERNAL_API_TOKEN || '';
 
 async function proxyToAiService(
   endpoint: string,
@@ -15,7 +17,10 @@ async function proxyToAiService(
   try {
     const response = await fetch(`${AI_CORE_URL}${endpoint}`, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(INTERNAL_API_TOKEN ? { 'X-Internal-Token': INTERNAL_API_TOKEN } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });

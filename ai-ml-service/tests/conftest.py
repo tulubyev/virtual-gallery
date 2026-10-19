@@ -16,6 +16,9 @@ from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("OPENAI_API_KEY", "sk-test-dummy-key-for-pytest")
 os.environ.setdefault("OPENROUTER_API_KEY", "")
+# Обязательные настройки ядра (запасных значений в config.py нет)
+os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
+os.environ.setdefault("INTERNAL_API_TOKEN", "test-internal-token-0123456789")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,7 +33,11 @@ def minimal_app():
     """
     with patch("openai.AsyncOpenAI", return_value=MagicMock()):
         from fastapi import FastAPI
-        from src.models.routes.chat import router as chat_router
+        try:
+            from src.models.routes.chat import router as chat_router
+        except ImportError:
+            # routes/chat.py в присланном архиве ядра нет; тесты /chat пропускаются (см. test_chat.py)
+            return None
 
     app = FastAPI()
     app.include_router(chat_router, prefix="/chat")

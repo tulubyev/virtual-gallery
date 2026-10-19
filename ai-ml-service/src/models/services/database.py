@@ -45,6 +45,12 @@ class DatabaseService:
         async with self.pool.acquire() as conn:
             return await conn.fetch(query, *args)
 
+    async def fetch_all(self, query: str, *args) -> list:
+        """Fetch multiple rows as plain dicts"""
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch(query, *args)
+            return [dict(row) for row in rows]
+
     async def fetchrow(self, query: str, *args) -> Optional[Dict[str, Any]]:
         """Fetch a single row"""
         async with self.pool.acquire() as conn:

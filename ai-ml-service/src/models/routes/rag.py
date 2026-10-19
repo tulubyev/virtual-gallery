@@ -16,6 +16,9 @@ from ..services.database import db_service
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# Поиск и статистика — только по известным коллекциям (имя из URL не идёт в Qdrant как есть)
+ALLOWED_COLLECTIONS = {"pdf_chunks", "artworks", "external_artworks"}
+
 class RAGQueryRequest(BaseModel):
     query: str
     context_limit: Optional[int] = 5
@@ -102,17 +105,22 @@ async def process_rag_query(request: RAGQueryRequest):
 
         generation_result = await ai_service.generate_text(prompt)
 
-        # Calculate confidence based on search scores
+        # Средняя косинусная близость найденных фрагментов (0..1). Это мера близости поиска,
+        # а не вероятность правильности ответа.
         avg_score = sum(result["score"] for result in search_results) / len(search_results)
-        confidence = min(avg_score * 100, 95.0)  # Cap at 95%
+        confidence = round(min(max(avg_score, 0.0), 1.0), 2)
 
         processing_time = time.time() - start_time
 
-        # Store query in database for analytics
-        await db_service.execute("""
-            INSERT INTO rag_queries (query_text, response_text, response_sources, processing_time, relevance_score)
-            VALUES ($1, $2, $3, $4, $5)
-        """, request.query, generation_result["response"], json.dumps(sources), processing_time, confidence)
+        # Аналитика запросов не должна ронять ответ пользователю
+        try:
+            await db_service.execute("""
+                INSERT INTO rag_queries (query_text, response_text, response_sources, processing_time, relevance_score)
+                VALUES ($1, $2, $3, $4, $5)
+            """, request.query, generation_result["response"], json.dumps(sources),
+                 round(processing_time, 2), confidence)
+        except Exception as db_error:
+            logger.warning(f"Failed to store RAG query analytics: {db_error}")
 
         return RAGQueryResponse(
             query=request.query,
@@ -163,7 +171,7 @@ async def list_collections():
 async def search_collection(collection_name: str, query: str, limit: int = 10):
     """Search within a specific collection"""
     try:
-        if not qdrant_service.collection_exists(collection_name):
+        if collection_name not in ALLOWED_COLLECTIONS or not qdrant_service.collection_exists(collection_name):
             raise HTTPException(status_code=404, detail=f"Collection {collection_name} not found")
 
         # Generate embedding for query

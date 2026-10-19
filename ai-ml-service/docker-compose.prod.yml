@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.api
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"  # только с самого сервера (шлюз к удалению, см. docs/AI-ML-DESIGN.md)
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://tulubyev:CHANGE_ME@your-db-host:5432/aimlservice_db
@@ -33,8 +33,6 @@ services:
   # Redis for caching and queues
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
@@ -49,10 +47,10 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.python
-    ports:
-      - "8001:8000"
+    # порты наружу не публикуются: ядро вызывает основное приложение по внутренней сети Docker
     environment:
       - ENVIRONMENT=production
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:?задайте INTERNAL_API_TOKEN в .env}
       - DATABASE_URL=postgresql://tulubyev:CHANGE_ME@your-db-host:5432/aimlservice_db
       - QDRANT_URL=https://your-cluster.cloud.qdrant.io:6333
       - QDRANT_API_KEY=your-qdrant-api-key

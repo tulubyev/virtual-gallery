@@ -3,14 +3,13 @@ Artwork digitization routes
 Handles front/back image upload, AI analysis, watermarking, and card generation
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 import logging
 import uuid
 import json
 from datetime import datetime
-import base64
 
 from ..services.ai_service import ai_service
 from ..services.database import db_service
@@ -245,27 +244,35 @@ async def get_digitized_artwork(artwork_id: int):
 
 class ApproveRequest(BaseModel):
     curator_notes: Optional[str] = None
+    curator_id: Optional[int] = None  # кто одобрил (передаёт основное приложение из сессии)
 
 @router.patch("/artworks/{artwork_id}/approve")
 async def approve_artwork(artwork_id: int, request: ApproveRequest = None):
     """Curator approves artwork and triggers RAG indexing"""
     try:
         curator_notes = request.curator_notes if request else None
-        await db_service.execute("""
+        curator_id = request.curator_id if request else None
+        updated = await db_service.fetchrow("""
             UPDATE digitized_artworks
-            SET status = 'approved', curator_notes = $2, approved_at = NOW(), updated_at = NOW()
+            SET status = 'approved', curator_notes = $2, curator_id = $3, approved_at = NOW(), updated_at = NOW()
             WHERE id = $1
-        """, artwork_id, curator_notes)
+            RETURNING id
+        """, artwork_id, curator_notes, curator_id)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Artwork not found")
 
         row = await db_service.fetchrow("""
-            SELECT id, title, artist, style, period, technique, ai_analysis
+            SELECT id, title, artist, style, period, technique, genre, ai_analysis, provenance
             FROM digitized_artworks WHERE id = $1
         """, artwork_id)
 
-        if row:
-            await index_artwork_in_qdrant(row)
+        # Одобрение не откатываем, если индекс недоступен, но результат индексации возвращаем явно
+        indexed = await index_artwork_in_qdrant(row) if row else False
 
-        return {"status": "approved", "artwork_id": artwork_id}
+        return {"status": "approved", "artwork_id": artwork_id, "indexed": indexed}
+
+    except HTTPException:
+        raise
 
     except Exception as e:
         logger.error(f"Failed to approve artwork: {e}")
@@ -316,10 +323,11 @@ async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
             "confidence": ai_analysis.get("confidence", 0.8)
         }
         
+        qdrant_service.ensure_collection("artworks")
         qdrant_service.upsert_points(
             collection_name="artworks",
             points=[{
-                "id": str(row["id"]),
+                "id": int(row["id"]),
                 "vector": embeddings[0],
                 "payload": payload
             }]
@@ -328,7 +336,7 @@ async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
         return True
         
     except Exception as e:
-        logger.warning(f"Failed to index artwork in Qdrant: {e}")
+        logger.error(f"Failed to index artwork {row.get('id')} in Qdrant: {e}", exc_info=True)
         return False
 
 
@@ -368,19 +376,25 @@ async def reindex_all_artworks():
 
 class RejectRequest(BaseModel):
     rejection_reason: str
+    curator_id: Optional[int] = None
 
 @router.patch("/artworks/{artwork_id}/reject")
 async def reject_artwork(artwork_id: int, request: RejectRequest):
     """Curator rejects artwork"""
     try:
-        await db_service.execute("""
+        updated = await db_service.fetchrow("""
             UPDATE digitized_artworks
-            SET status = 'rejected', rejection_reason = $2, rejected_at = NOW(), updated_at = NOW()
+            SET status = 'rejected', rejection_reason = $2, curator_id = $3, rejected_at = NOW(), updated_at = NOW()
             WHERE id = $1
-        """, artwork_id, request.rejection_reason)
+            RETURNING id
+        """, artwork_id, request.rejection_reason, request.curator_id)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Artwork not found")
 
         return {"status": "rejected", "artwork_id": artwork_id}
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to reject artwork: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -702,130 +716,3 @@ async def process_digitization(request: DigitizationRequest, task_id: str):
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)
-
-
-def generate_nft_metadata(
-    title: str,
-    artist: str,
-    front_analysis: Dict[str, Any],
-    back_analysis: Optional[Dict[str, Any]],
-    image_url: str = "",
-    verification_hash: str = ""
-) -> Dict[str, Any]:
-    """Generate ERC-721 compatible NFT metadata"""
-    attributes = [
-        {"trait_type": "Artist", "value": artist},
-        {"trait_type": "Style", "value": front_analysis.get("style", "Unknown")},
-        {"trait_type": "Period", "value": front_analysis.get("period", "Unknown")},
-        {"trait_type": "Technique", "value": front_analysis.get("technique", "Unknown")},
-        {"trait_type": "Genre", "value": front_analysis.get("genre", "Unknown")},
-        {"trait_type": "Authenticity", "value": "Verified"},
-        {"trait_type": "Digital Certificate", "value": "TAE"}
-    ]
-
-    if back_analysis and back_analysis.get("provenance"):
-        attributes.append({
-            "trait_type": "Provenance",
-            "value": "Documented"
-        })
-
-    if front_analysis.get("color_palette"):
-        attributes.append({
-            "trait_type": "Dominant Colors",
-            "value": ", ".join(front_analysis.get("color_palette", [])[:3])
-        })
-
-    return {
-        "name": title,
-        "description": front_analysis.get("description", f"Digital certificate for '{title}' by {artist}"),
-        "image": image_url,
-        "external_url": f"https://gallery.example.com/artworks/{verification_hash}",
-        "attributes": attributes,
-        "properties": {
-            "edition": 1,
-            "max_editions": 10,
-            "created_by": "Virtual Art Gallery",
-            "certificate_type": "TAE",
-            "verification_hash": verification_hash,
-            "created_at": datetime.utcnow().isoformat()
-        }
-    }
-
-
-@router.post("/reindex")
-async def reindex_artworks():
-    """Reindex all approved artworks from database to Qdrant"""
-    try:
-        rows = await db_service.fetch_all("""
-            SELECT id, title, artist, front_analysis, back_analysis, 
-                   front_watermarked_url, status, verification_hash, created_at
-            FROM digitized_artworks
-            WHERE status = 'approved'
-        """)
-        
-        if not rows:
-            return {"status": "completed", "message": "No approved artworks to reindex", "count": 0}
-        
-        collection_name = "artworks"
-        if not qdrant_service.collection_exists(collection_name):
-            qdrant_service.create_collection(collection_name)
-        
-        texts = []
-        valid_rows = []
-        for row in rows:
-            front_analysis = row.get("front_analysis")
-            if isinstance(front_analysis, str):
-                front_analysis = json.loads(front_analysis)
-            
-            back_analysis = row.get("back_analysis")
-            if isinstance(back_analysis, str):
-                back_analysis = json.loads(back_analysis)
-            
-            searchable_text = " ".join(filter(None, [
-                row.get("title", ""),
-                row.get("artist", ""),
-                front_analysis.get("description", "") if front_analysis else "",
-                front_analysis.get("style", "") if front_analysis else "",
-                front_analysis.get("technique", "") if front_analysis else "",
-                back_analysis.get("provenance", "") if back_analysis else ""
-            ]))
-            
-            if searchable_text.strip():
-                texts.append(searchable_text)
-                valid_rows.append((row, front_analysis, back_analysis, searchable_text))
-        
-        if not texts:
-            return {"status": "completed", "message": "No searchable text found", "count": 0}
-        
-        embeddings = await ai_service.generate_embeddings(texts)
-        
-        points = []
-        for i, (row, front_analysis, back_analysis, searchable_text) in enumerate(valid_rows):
-            points.append({
-                "id": str(row["id"]),
-                "vector": embeddings[i],
-                "payload": {
-                    "artwork_id": row["id"],
-                    "title": row.get("title"),
-                    "artist": row.get("artist"),
-                    "type": "digitized_artwork",
-                    "front_analysis": front_analysis,
-                    "back_analysis": back_analysis,
-                    "image_url": row.get("front_watermarked_url"),
-                    "verification_hash": row.get("verification_hash"),
-                    "reindexed_at": datetime.utcnow().isoformat()
-                }
-            })
-        
-        if points:
-            qdrant_service.upsert_points(collection_name, points)
-        
-        return {
-            "status": "completed",
-            "reindexed": len(points),
-            "message": f"Successfully reindexed {len(points)} artworks"
-        }
-        
-    except Exception as e:
-        logger.error(f"Reindex artworks failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
