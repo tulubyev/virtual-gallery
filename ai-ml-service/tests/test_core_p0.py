@@ -23,7 +23,9 @@ def client():
          patch.object(main, "init_qdrant", MagicMock()), \
          patch.object(main, "init_redis", AsyncMock()), \
          patch.object(main, "close_db", AsyncMock()), \
-         patch.object(main, "close_redis", AsyncMock()):
+         patch.object(main, "close_redis", AsyncMock()), \
+         patch.object(main.worker, "start", AsyncMock()), \
+         patch.object(main.worker, "stop", AsyncMock()):
         with TestClient(main.app) as test_client:
             yield test_client
 
@@ -242,39 +244,36 @@ def test_rag_search_rejects_unknown_collection(client):
 
 # ---------- анализ изображений ----------
 
-def test_image_status_unknown_task_is_404(client):
-    from src.models.routes import images
+def test_image_status_unknown_or_malformed_task_is_404(client):
+    from src.models.services import job_queue
 
-    with patch.object(images.redis_service, "get", AsyncMock(return_value=None)):
-        response = client.get("/api/v1/images/analysis/img_unknown", headers=AUTH)
-    assert response.status_code == 404
+    with patch.object(job_queue, "get", AsyncMock(return_value=None)):
+        assert client.get(f"/api/v1/images/analysis/img_{uuid.uuid4().hex}", headers=AUTH).status_code == 404
+    assert client.get("/api/v1/images/analysis/img_not-a-uuid", headers=AUTH).status_code == 404
+    assert client.get(f"/api/v1/images/analysis/pdf_{uuid.uuid4().hex}", headers=AUTH).status_code == 404  # чужой вид
+
+
+class Ctx:
+    task_id = "img_test"
+
+    async def progress(self, percent, step):
+        pass
 
 
 @pytest.mark.asyncio
 async def test_image_analysis_upserts_into_existing_table_and_survives_db_error():
     from src.models.routes import images
 
-    stored = {}
-
-    async def fake_get(key):
-        return json.dumps(stored.get(key, {}))
-
-    async def fake_set(key, value, expire=None):
-        stored[key] = json.loads(value)
-
-    request = images.ImageAnalysisRequest(image_url="https://example.org/a.jpg", artwork_id=5)
+    payload = {"image_url": "https://example.org/a.jpg", "artwork_id": 5}
     analysis = {"analysis": "текст", "model": "m", "usage": {}}
     with patch.object(images.ai_service, "analyze_image", AsyncMock(return_value=analysis)), \
-         patch.object(images.redis_service, "get", side_effect=fake_get), \
-         patch.object(images.redis_service, "set", side_effect=fake_set), \
          patch.object(images.db_service, "execute", AsyncMock(side_effect=RuntimeError("db down"))) as execute:
-        await images.process_image_analysis(request, "img_1")
+        result = await images.run_image_analysis(payload, Ctx())
 
     sql = execute.call_args.args[0]
     assert "artwork_analysis" in sql and "ON CONFLICT (artwork_id, analysis_version)" in sql
     assert "image_analyses" not in sql
-    assert stored["task:img_1"]["status"] == "completed"
-    assert stored["task:img_1"]["persisted"] is False
+    assert result["persisted"] is False and result["analysis"] == "текст"
 
 
 # ---------- оцифровка ----------
