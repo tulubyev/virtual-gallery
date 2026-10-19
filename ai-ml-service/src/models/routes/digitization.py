@@ -3,19 +3,17 @@ Artwork digitization routes
 Handles front/back image upload, AI analysis, watermarking, and card generation
 """
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, field_validator
 from typing import Dict, Any, Optional, List
 import logging
-import uuid
 import json
-from datetime import datetime
 
-from ..exceptions import public_error
+from ..exceptions import AIMLException, public_error
 from ..services.ai_service import ai_service
 from ..services.safe_fetch import check_request_url
 from ..services.database import db_service
-from ..services.redis_client import redis_service
+from ..services import job_queue
 from ..services.qdrant_client import qdrant_service
 from ..services.watermark_service import watermark_service
 from ..services.s3_service import s3_service
@@ -65,41 +63,17 @@ class DigitizedArtwork(BaseModel):
 
 
 @router.post("/digitize", response_model=DigitizationResponse)
-async def digitize_artwork(
-    request: DigitizationRequest,
-    background_tasks: BackgroundTasks
-):
-    """Start artwork digitization process"""
+async def digitize_artwork(request: DigitizationRequest):
+    """Поставить оцифровку в очередь (статус и результат — GET /digitize/{task_id})"""
     try:
-        task_id = f"dig_{uuid.uuid4().hex}"
-
-        task_data = {
-            "task_id": task_id,
-            "status": "queued",
-            "front_image_url": request.front_image_url,
-            "back_image_url": request.back_image_url,
-            "title": request.title,
-            "artist": request.artist,
-            "visible_watermark": request.visible_watermark,
-            "invisible_watermark": request.invisible_watermark,
-            "generate_nft": request.generate_nft,
-            "user_id": request.user_id,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
-            "progress": 0,
-            "current_step": "Initializing"
-        }
-
-        await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)
-
-        background_tasks.add_task(process_digitization, request, task_id)
-
+        job_id = await job_queue.enqueue("digitization", request.model_dump(), created_by=request.user_id)
         return DigitizationResponse(
-            task_id=task_id,
+            task_id=job_queue.task_id_for("digitization", job_id),
             status="queued",
             message="Digitization started"
         )
-
+    except AIMLException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
     except Exception as e:
         logger.error(f"Digitization request failed: {e}")
         raise HTTPException(status_code=500, detail=public_error(e))
@@ -107,29 +81,12 @@ async def digitize_artwork(
 
 @router.get("/digitize/{task_id}")
 async def get_digitization_status(task_id: str):
-    """Get digitization task status and results"""
-    try:
-        task_data_str = await redis_service.get(f"task:{task_id}")
-        if task_data_str:
-            task_data = json.loads(task_data_str)
-            return {
-                "task_id": task_id,
-                "status": task_data.get("status"),
-                "progress": task_data.get("progress", 0),
-                "current_step": task_data.get("current_step"),
-                "result": task_data.get("result") if task_data.get("status") == "completed" else None,
-                "error": task_data.get("error") if task_data.get("status") == "failed" else None,
-                "created_at": task_data.get("created_at"),
-                "updated_at": task_data.get("updated_at")
-            }
-
+    """Статус, прогресс и результат оцифровки"""
+    job_id = job_queue.parse_task_id(task_id, "digitization")
+    job = await job_queue.get(job_id) if job_id else None
+    if job is None:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get digitization status: {e}")
-        raise HTTPException(status_code=500, detail=public_error(e))
+    return job_queue.public_view(job, task_id)
 
 
 @router.get("/artworks", response_model=List[Dict[str, Any]])
@@ -541,185 +498,163 @@ async def get_nft_metadata(artwork_id: int):
         raise HTTPException(status_code=500, detail=public_error(e))
 
 
-async def process_digitization(request: DigitizationRequest, task_id: str):
-    """Background task for artwork digitization"""
-    try:
-        async def update_progress(progress: int, step: str):
-            task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
-            task_data.update({
-                "status": "processing",
-                "progress": progress,
-                "current_step": step,
-                "updated_at": datetime.utcnow().isoformat()
-            })
-            await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)
+async def run_digitization(payload: dict, ctx) -> dict:
+    """Обработчик очереди: разбор лица и оборота, водяные знаки, S3, запись в digitized_artworks.
 
-        logger.info(f"Processing digitization for {request.front_image_url}")
+    Ошибки не глотаются: очередь сама повторит временный сбой. Повтор безопасен — запись в БД
+    ищется по task_id (UNIQUE), поэтому одна оцифровка не создаст двух работ.
+    """
+    request = DigitizationRequest(**payload)
+    task_id = ctx.task_id
+    update_progress = ctx.progress
+    logger.info(f"Processing digitization {task_id}")
 
-        await update_progress(10, "Загрузка изображений")
+    await update_progress(10, "Загрузка изображений")
 
-        await update_progress(30, "AI-анализ лицевой стороны")
-        front_analysis = await ai_service.analyze_artwork_front(request.front_image_url)
+    await update_progress(30, "AI-анализ лицевой стороны")
+    front_analysis = await ai_service.analyze_artwork_front(request.front_image_url)
 
-        back_analysis = None
-        if request.back_image_url:
-            await update_progress(50, "OCR обратной стороны")
-            back_analysis = await ai_service.analyze_artwork_back(request.back_image_url)
+    back_analysis = None
+    if request.back_image_url:
+        await update_progress(50, "OCR обратной стороны")
+        back_analysis = await ai_service.analyze_artwork_back(request.back_image_url)
 
-        await update_progress(70, "Нанесение водяных знаков")
+    await update_progress(70, "Нанесение водяных знаков")
 
-        watermarked_front_url = request.front_image_url
-        watermarked_back_url = request.back_image_url
-        verification_hash = None
-        visible_watermark_applied = False
-        invisible_watermark_applied = False
+    watermarked_front_url = request.front_image_url
+    watermarked_back_url = request.back_image_url
+    verification_hash = None
+    visible_watermark_applied = False
+    invisible_watermark_applied = False
 
-        if request.visible_watermark or request.invisible_watermark:
-            try:
-                front_watermark_result = await watermark_service.apply_watermarks(
-                    image_url=request.front_image_url,
-                    artwork_id=task_id,
-                    owner_id=str(request.user_id) if request.user_id else None,
+    if request.visible_watermark or request.invisible_watermark:
+        try:
+            front_watermark_result = await watermark_service.apply_watermarks(
+                image_url=request.front_image_url,
+                artwork_id=task_id,
+                owner_id=str(request.user_id) if request.user_id else None,
+                visible_watermark=request.visible_watermark,
+                invisible_watermark=request.invisible_watermark,
+                watermark_text="Virtual Art Gallery"
+            )
+            verification_hash = front_watermark_result.get("verification_hash")
+            visible_watermark_applied = front_watermark_result.get("visible_watermark_applied", False)
+            invisible_watermark_applied = front_watermark_result.get("invisible_watermark_applied", False)
+
+            if front_watermark_result.get("watermarked_image_base64"):
+                s3_key = s3_service.generate_s3_key(
+                    filename="front_watermarked.jpg",
+                    prefix="digitized",
+                    artwork_id=task_id
+                )
+                upload_result = await s3_service.upload_base64(
+                    base64_data=front_watermark_result["watermarked_image_base64"],
+                    key=s3_key,
+                    content_type="image/jpeg",
+                    metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "front"}
+                )
+                if upload_result.get("success"):
+                    watermarked_front_url = upload_result["url"]
+                    logger.info(f"Watermarked front image uploaded to S3: {watermarked_front_url}")
+                else:
+                    logger.warning(f"Front watermark S3 upload failed: {upload_result.get('error')}")
+
+            if request.back_image_url:
+                back_watermark_result = await watermark_service.apply_watermarks_with_hash(
+                    image_url=request.back_image_url,
+                    verification_hash=verification_hash,
                     visible_watermark=request.visible_watermark,
                     invisible_watermark=request.invisible_watermark,
                     watermark_text="Virtual Art Gallery"
                 )
-                verification_hash = front_watermark_result.get("verification_hash")
-                visible_watermark_applied = front_watermark_result.get("visible_watermark_applied", False)
-                invisible_watermark_applied = front_watermark_result.get("invisible_watermark_applied", False)
-
-                if front_watermark_result.get("watermarked_image_base64"):
-                    s3_key = s3_service.generate_s3_key(
-                        filename="front_watermarked.jpg",
+                
+                if back_watermark_result.get("watermarked_image_base64"):
+                    back_s3_key = s3_service.generate_s3_key(
+                        filename="back_watermarked.jpg",
                         prefix="digitized",
                         artwork_id=task_id
                     )
-                    upload_result = await s3_service.upload_base64(
-                        base64_data=front_watermark_result["watermarked_image_base64"],
-                        key=s3_key,
+                    back_upload_result = await s3_service.upload_base64(
+                        base64_data=back_watermark_result["watermarked_image_base64"],
+                        key=back_s3_key,
                         content_type="image/jpeg",
-                        metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "front"}
+                        metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "back"}
                     )
-                    if upload_result.get("success"):
-                        watermarked_front_url = upload_result["url"]
-                        logger.info(f"Watermarked front image uploaded to S3: {watermarked_front_url}")
+                    if back_upload_result.get("success"):
+                        watermarked_back_url = back_upload_result["url"]
+                        logger.info(f"Watermarked back image uploaded to S3: {watermarked_back_url}")
                     else:
-                        logger.warning(f"Front watermark S3 upload failed: {upload_result.get('error')}")
+                        logger.warning(f"Back watermark S3 upload failed: {back_upload_result.get('error')}")
 
-                if request.back_image_url:
-                    back_watermark_result = await watermark_service.apply_watermarks_with_hash(
-                        image_url=request.back_image_url,
-                        verification_hash=verification_hash,
-                        visible_watermark=request.visible_watermark,
-                        invisible_watermark=request.invisible_watermark,
-                        watermark_text="Virtual Art Gallery"
-                    )
-                    
-                    if back_watermark_result.get("watermarked_image_base64"):
-                        back_s3_key = s3_service.generate_s3_key(
-                            filename="back_watermarked.jpg",
-                            prefix="digitized",
-                            artwork_id=task_id
-                        )
-                        back_upload_result = await s3_service.upload_base64(
-                            base64_data=back_watermark_result["watermarked_image_base64"],
-                            key=back_s3_key,
-                            content_type="image/jpeg",
-                            metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "back"}
-                        )
-                        if back_upload_result.get("success"):
-                            watermarked_back_url = back_upload_result["url"]
-                            logger.info(f"Watermarked back image uploaded to S3: {watermarked_back_url}")
-                        else:
-                            logger.warning(f"Back watermark S3 upload failed: {back_upload_result.get('error')}")
+        except Exception as e:
+            logger.warning(f"Watermark failed, continuing without: {e}")
 
-            except Exception as e:
-                logger.warning(f"Watermark failed, continuing without: {e}")
+    title = request.title or front_analysis.get("suggested_title", "Без названия")
+    artist = request.artist or front_analysis.get("suggested_artist", "Неизвестен")
 
-        title = request.title or front_analysis.get("suggested_title", "Без названия")
-        artist = request.artist or front_analysis.get("suggested_artist", "Неизвестен")
-
-        nft_metadata = None
-        if request.generate_nft:
-            await update_progress(85, "Генерация NFT метаданных")
-            nft_metadata = generate_nft_metadata(
-                title=title,
-                artist=artist,
-                front_analysis=front_analysis,
-                back_analysis=back_analysis,
-                image_url=watermarked_front_url,
-                verification_hash=verification_hash or task_id
-            )
-
-        await update_progress(95, "Сохранение в галерею")
-
-        combined_analysis = {
-            "front": front_analysis,
-            "back": back_analysis,
-            "contains_personal_data": bool(back_analysis and back_analysis.get("contains_personal_data"))
-        }
-
-        result = await db_service.fetchrow("""
-            INSERT INTO digitized_artworks (
-                task_id, title, artist, style, period, technique, genre,
-                front_url, back_url, front_watermarked_url, back_watermarked_url,
-                ai_analysis, provenance, status, nft_metadata,
-                verification_hash, visible_watermark_applied, invisible_watermark_applied,
-                owner_id, created_at, updated_at
-            ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW()
-            ) RETURNING id
-        """,
-            task_id,
-            title,
-            artist,
-            front_analysis.get("style"),
-            front_analysis.get("period"),
-            front_analysis.get("technique"),
-            front_analysis.get("genre"),
-            request.front_image_url,
-            request.back_image_url,
-            watermarked_front_url,
-            watermarked_back_url,
-            json.dumps(combined_analysis),
-            back_analysis.get("provenance") if back_analysis else None,
-            "pending_review",
-            json.dumps(nft_metadata) if nft_metadata else None,
-            verification_hash,
-            visible_watermark_applied,
-            invisible_watermark_applied,
-            request.user_id
+    nft_metadata = None
+    if request.generate_nft:
+        await update_progress(85, "Генерация NFT метаданных")
+        nft_metadata = generate_nft_metadata(
+            title=title,
+            artist=artist,
+            front_analysis=front_analysis,
+            back_analysis=back_analysis,
+            image_url=watermarked_front_url,
+            verification_hash=verification_hash or task_id
         )
 
-        artwork_id = result["id"]
+    await update_progress(95, "Сохранение в галерею")
 
-        task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
-        task_data.update({
-            "status": "completed",
-            "progress": 100,
-            "current_step": "Завершено",
-            "result": {
-                "artwork_id": artwork_id,
-                "title": title,
-                "artist": artist,
-                "style": front_analysis.get("style"),
-                "period": front_analysis.get("period"),
-                "technique": front_analysis.get("technique"),
-                "status": "pending_review"
-            },
-            "updated_at": datetime.utcnow().isoformat()
-        })
-        await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)
+    combined_analysis = {
+        "front": front_analysis,
+        "back": back_analysis,
+        "contains_personal_data": bool(back_analysis and back_analysis.get("contains_personal_data"))
+    }
 
-        logger.info(f"Digitization completed for artwork {artwork_id}")
+    # task_id уникален: повтор после сбоя уже после записи вернёт ту же работу, а не создаст вторую
+    result = await db_service.fetchrow("""
+        INSERT INTO digitized_artworks (
+            task_id, title, artist, style, period, technique, genre,
+            front_url, back_url, front_watermarked_url, back_watermarked_url,
+            ai_analysis, provenance, status, nft_metadata,
+            verification_hash, visible_watermark_applied, invisible_watermark_applied,
+            owner_id, created_at, updated_at
+        ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW()
+        ) ON CONFLICT (task_id) DO UPDATE SET updated_at = NOW()
+        RETURNING id
+    """,
+        task_id,
+        title,
+        artist,
+        front_analysis.get("style"),
+        front_analysis.get("period"),
+        front_analysis.get("technique"),
+        front_analysis.get("genre"),
+        request.front_image_url,
+        request.back_image_url,
+        watermarked_front_url,
+        watermarked_back_url,
+        json.dumps(combined_analysis),
+        back_analysis.get("provenance") if back_analysis else None,
+        "pending_review",
+        json.dumps(nft_metadata) if nft_metadata else None,
+        verification_hash,
+        visible_watermark_applied,
+        invisible_watermark_applied,
+        request.user_id
+    )
 
-    except Exception as e:
-        logger.error(f"Digitization failed: {e}")
+    artwork_id = result["id"]
+    logger.info(f"Digitization completed for artwork {artwork_id}")
 
-        task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
-        task_data.update({
-            "status": "failed",
-            "error": public_error(e),
-            "updated_at": datetime.utcnow().isoformat()
-        })
-        await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)
+    return {
+        "artwork_id": artwork_id,
+        "title": title,
+        "artist": artist,
+        "style": front_analysis.get("style"),
+        "period": front_analysis.get("period"),
+        "technique": front_analysis.get("technique"),
+        "status": "pending_review"
+    }

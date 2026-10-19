@@ -85,6 +85,8 @@ class Settings(BaseSettings):
 
     # Task Processing
     max_concurrent_tasks: int = 3
+    # Воркер очереди внутри процесса ядра (false — только приём задач, обработка в другом экземпляре)
+    run_job_worker: bool = True
     task_timeout: int = 300  # 5 minutes
 
     # S3 Storage (beget.com compatible)

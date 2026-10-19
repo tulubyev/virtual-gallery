@@ -16,6 +16,7 @@ from .security import require_internal_token
 from .services.database import close_db, init_db
 from .services.qdrant_client import init_qdrant
 from .services.redis_client import close_redis, init_redis
+from .services.worker import worker
 
 # Configure logging
 logging.basicConfig(
@@ -35,6 +36,11 @@ async def lifespan(app: FastAPI):
         await init_db()
         init_qdrant()  # синхронная функция
         await init_redis()
+        worker.register("image_analysis", images.run_image_analysis)
+        worker.register("pdf_processing", pdfs.run_pdf_processing)
+        worker.register("digitization", digitization.run_digitization)
+        if settings.run_job_worker:
+            await worker.start()
         logger.info("All services initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize services: {e}")
@@ -44,6 +50,8 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down AI/ML Core Service...")
+    if settings.run_job_worker:
+        await worker.stop()
     await close_redis()
     await close_db()
 
