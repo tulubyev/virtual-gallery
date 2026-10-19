@@ -2,8 +2,11 @@
 Custom exceptions for AI/ML Core Service
 """
 
+import logging
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 class AIMLException(Exception):
@@ -104,7 +107,7 @@ def handle_exceptions(func):
             raise
         except Exception as e:
             # Catch-all for unexpected errors
-            logger.error("Unexpected error", exc_info=True, error=str(e))
+            logger.error("Unexpected error: %s", e, exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail={

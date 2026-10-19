@@ -4,7 +4,7 @@ Image analysis routes
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from typing import Optional
 import logging
 import uuid
 import json
@@ -95,36 +95,8 @@ async def get_analysis_status(task_id: str):
                     "updated_at": task_data.get("updated_at")
                 }
 
-        # Check database for completed tasks
-        db_result = await db_service.fetchrow("""
-            SELECT aa.*, at.status, at.result, at.error_message, at.created_at, at.completed_at
-            FROM artwork_analysis aa
-            LEFT JOIN ai_tasks at ON aa.task_id = at.task_id
-            WHERE aa.artwork_id = $1
-            ORDER BY aa.created_at DESC
-            LIMIT 1
-        """, task_id.split('_')[-1] if '_' in task_id else task_id)  # Extract artwork_id from task_id
-
-        if db_result:
-            if db_result["status"] == "completed":
-                return {
-                    "task_id": task_id,
-                    "status": "completed",
-                    "result": json.loads(db_result["analysis_result"]) if db_result["analysis_result"] else None,
-                    "created_at": db_result["created_at"].isoformat() if db_result["created_at"] else None,
-                    "updated_at": db_result["updated_at"].isoformat() if db_result["updated_at"] else None
-                }
-            else:
-                return {
-                    "task_id": task_id,
-                    "status": db_result["status"],
-                    "error": db_result["error_message"],
-                    "created_at": db_result["created_at"].isoformat() if db_result["created_at"] else None,
-                    "updated_at": db_result["updated_at"].isoformat() if db_result["updated_at"] else None
-                }
-
         # Task not found
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404, detail="Task not found or expired (results are kept for 1 hour)")
 
     except HTTPException:
         raise
@@ -148,18 +120,29 @@ async def process_image_analysis(request: ImageAnalysisRequest, task_id: str):
         # Perform image analysis
         analysis_result = await ai_service.analyze_image(request.image_url)
 
-        # Store results in database using existing schema
-        # Store detailed analysis in artwork_analysis table
-        await db_service.execute("""
-            INSERT INTO artwork_analysis (artwork_id, model_used, processing_time, image_quality)
-            VALUES ($1, $2, $3, $4)
-        """, request.artwork_id, analysis_result.get("model", "gpt-4-vision"),
-             0.0, json.dumps({"raw_analysis": analysis_result.get("analysis", "")}))
+        # Результат пишем в artwork_analysis (схема: src/database/ai_ml_schema.sql), только если указана работа.
+        # Повторный разбор той же работы обновляет запись (UNIQUE(artwork_id, analysis_version)).
+        persisted = False
+        if request.artwork_id is not None:
+            try:
+                await db_service.execute("""
+                    INSERT INTO artwork_analysis (artwork_id, model_used, processing_time, technical_notes)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (artwork_id, analysis_version) DO UPDATE SET
+                        model_used = EXCLUDED.model_used,
+                        processing_time = EXCLUDED.processing_time,
+                        technical_notes = EXCLUDED.technical_notes
+                """, request.artwork_id, analysis_result.get("model", "unknown"),
+                     0.0, analysis_result.get("analysis", ""))
+                persisted = True
+            except Exception as db_error:
+                logger.error(f"Failed to store image analysis for artwork {request.artwork_id}: {db_error}")
 
         # Update task status to completed
         task_data.update({
             "status": "completed",
             "result": analysis_result,
+            "persisted": persisted,
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=3600)
@@ -177,10 +160,3 @@ async def process_image_analysis(request: ImageAnalysisRequest, task_id: str):
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=3600)
-
-        # Store failure in database
-        await db_service.execute("""
-            INSERT INTO image_analyses (task_id, artwork_id, user_id, image_url, status, error_message, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        """, task_id, request.artwork_id, request.user_id, request.image_url,
-             "failed", str(e), datetime.utcnow(), datetime.utcnow())
