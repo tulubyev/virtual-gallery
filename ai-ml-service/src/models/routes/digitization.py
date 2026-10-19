@@ -132,7 +132,7 @@ async def list_digitized_artworks(
                 "front_url": row["front_url"],
                 "back_url": row["back_url"],
                 "front_watermarked_url": row["front_watermarked_url"],
-                "back_watermarked_url": row["back_watermarked_url"],
+                "back_watermarked_url": s3_service.present_url(row["back_watermarked_url"]),
                 "ai_analysis": json.loads(row["ai_analysis"]) if row["ai_analysis"] else {},
                 "provenance": row["provenance"],
                 "status": row["status"],
@@ -181,7 +181,7 @@ async def get_digitized_artwork(artwork_id: int):
             "front_url": row["front_url"],
             "back_url": row["back_url"],
             "front_watermarked_url": row["front_watermarked_url"],
-            "back_watermarked_url": row["back_watermarked_url"],
+            "back_watermarked_url": s3_service.present_url(row["back_watermarked_url"]),
             "ai_analysis": json.loads(row["ai_analysis"]) if row["ai_analysis"] else {},
             "provenance": row["provenance"],
             "status": row["status"],
@@ -248,10 +248,14 @@ async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
     try:
         ai_analysis = json.loads(row["ai_analysis"]) if row["ai_analysis"] else {}
         front_analysis = ai_analysis.get("front", ai_analysis)
-        back_analysis = ai_analysis.get("back", {})
-        
+        back_analysis = ai_analysis.get("back") or {}
+        # Если на обороте обнаружены персональные данные, текст оборота и провенанс в индекс не идут
+        has_personal_data = bool(ai_analysis.get("contains_personal_data") or back_analysis.get("contains_personal_data"))
+        if has_personal_data:
+            back_analysis = {}
+
         description = front_analysis.get("description", "")
-        provenance = back_analysis.get("provenance", row.get("provenance", ""))
+        provenance = None if has_personal_data else (back_analysis.get("provenance") or row.get("provenance") or "")
         
         full_text = f"""
         Название: {row['title']}
@@ -282,6 +286,8 @@ async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
             "description": description,
             "provenance": provenance,
             "type": "digitized_artwork",
+            "access": "internal",  # индекс «artworks» внутренний; публичный индекс — отдельная коллекция
+            "contains_personal_data": has_personal_data,
             "front_analysis": front_analysis,
             "back_analysis": back_analysis if back_analysis else None,
             "uncertainties": front_analysis.get("uncertainties", [])
@@ -432,14 +438,16 @@ async def generate_artwork_nft(artwork_id: int, request: GenerateNFTRequest):
 
         ai_analysis = json.loads(row["ai_analysis"]) if row["ai_analysis"] else {}
         front_analysis = ai_analysis.get("front", {})
-        back_analysis = ai_analysis.get("back", {})
+        back_analysis = ai_analysis.get("back") or {}
+        if ai_analysis.get("contains_personal_data"):
+            back_analysis = {}   # публичные метаданные без текста оборота с ПДн
         
         front_analysis["style"] = front_analysis.get("style") or row["style"]
         front_analysis["period"] = front_analysis.get("period") or row["period"]
         front_analysis["technique"] = front_analysis.get("technique") or row["technique"]
         front_analysis["genre"] = front_analysis.get("genre") or row["genre"]
         
-        if row["provenance"] and not back_analysis.get("provenance"):
+        if row["provenance"] and not back_analysis.get("provenance") and not ai_analysis.get("contains_personal_data"):
             back_analysis["provenance"] = row["provenance"]
 
         nft_metadata = generate_nft_metadata(
@@ -551,7 +559,8 @@ async def run_digitization(payload: dict, ctx) -> dict:
                     base64_data=front_watermark_result["watermarked_image_base64"],
                     key=s3_key,
                     content_type="image/jpeg",
-                    metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "front"}
+                    metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "front"},
+                    public=True  # водяной экземпляр лица предназначен для показа в галерее
                 )
                 if upload_result.get("success"):
                     watermarked_front_url = upload_result["url"]
@@ -579,10 +588,11 @@ async def run_digitization(payload: dict, ctx) -> dict:
                         key=back_s3_key,
                         content_type="image/jpeg",
                         metadata={"verification_hash": verification_hash, "task_id": task_id, "side": "back"}
+                        # оборот приватный: на нём бывают имена и адреса владельцев
                     )
                     if back_upload_result.get("success"):
-                        watermarked_back_url = back_upload_result["url"]
-                        logger.info(f"Watermarked back image uploaded to S3: {watermarked_back_url}")
+                        watermarked_back_url = back_upload_result["uri"]  # s3://…, ссылку выдаёт present_url
+                        logger.info("Watermarked back image uploaded to S3 (private)")
                     else:
                         logger.warning(f"Back watermark S3 upload failed: {back_upload_result.get('error')}")
 
@@ -592,6 +602,10 @@ async def run_digitization(payload: dict, ctx) -> dict:
     title = request.title or front_analysis.get("suggested_title", "Без названия")
     artist = request.artist or front_analysis.get("suggested_artist", "Неизвестен")
 
+    # Метаданные NFT и провенанс публичны: при ПДн на обороте текст оборота в них не попадает
+    has_personal_data = bool(back_analysis and back_analysis.get("contains_personal_data"))
+    public_back_analysis = None if has_personal_data else back_analysis
+
     nft_metadata = None
     if request.generate_nft:
         await update_progress(85, "Генерация NFT метаданных")
@@ -599,7 +613,7 @@ async def run_digitization(payload: dict, ctx) -> dict:
             title=title,
             artist=artist,
             front_analysis=front_analysis,
-            back_analysis=back_analysis,
+            back_analysis=public_back_analysis,
             image_url=watermarked_front_url,
             verification_hash=verification_hash or task_id
         )
@@ -609,7 +623,7 @@ async def run_digitization(payload: dict, ctx) -> dict:
     combined_analysis = {
         "front": front_analysis,
         "back": back_analysis,
-        "contains_personal_data": bool(back_analysis and back_analysis.get("contains_personal_data"))
+        "contains_personal_data": has_personal_data
     }
 
     # task_id уникален: повтор после сбоя уже после записи вернёт ту же работу, а не создаст вторую
@@ -637,7 +651,7 @@ async def run_digitization(payload: dict, ctx) -> dict:
         watermarked_front_url,
         watermarked_back_url,
         json.dumps(combined_analysis),
-        back_analysis.get("provenance") if back_analysis else None,
+        public_back_analysis.get("provenance") if public_back_analysis else None,
         "pending_review",
         json.dumps(nft_metadata) if nft_metadata else None,
         verification_hash,

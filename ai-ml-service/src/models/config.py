@@ -95,6 +95,8 @@ class Settings(BaseSettings):
     s3_endpoint: str = "https://s3.beget.com"
     s3_region: str = "ru-msk"
     s3_bucket: str = "virtual-gallery-images"
+    # Срок действия подписанных ссылок на приватные объекты (оборот работ), секунды
+    s3_presign_ttl: int = 300
 
     class Config:
         env_file = ".env"
