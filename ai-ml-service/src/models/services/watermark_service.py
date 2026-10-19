@@ -9,9 +9,13 @@ import logging
 import hashlib
 import struct
 from typing import Tuple, Optional, Dict, Any
-import aiohttp
 import base64
 from datetime import datetime
+
+from .safe_fetch import fetch_image
+
+# Защита от «бомб»: слишком большие по числу пикселей изображения Pillow не открывает
+Image.MAX_IMAGE_PIXELS = 50_000_000
 
 logger = logging.getLogger(__name__)
 
@@ -98,14 +102,10 @@ class WatermarkService:
             raise
     
     async def _download_image(self, image_url: str) -> Image.Image:
-        """Download image from URL"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(image_url) as response:
-                if response.status != 200:
-                    raise Exception(f"Failed to download image: {response.status}")
-                image_data = await response.read()
-                return Image.open(io.BytesIO(image_data)).convert('RGB')
-    
+        """Download image from URL (безопасная загрузка: белый список, лимиты)"""
+        image_data, _ = await fetch_image(image_url)
+        return Image.open(io.BytesIO(image_data)).convert('RGB')
+
     def _generate_verification_hash(self, artwork_id: str, owner_id: Optional[str]) -> str:
         """Generate unique verification hash for the artwork"""
         data = f"{artwork_id}:{owner_id or 'gallery'}:{datetime.utcnow().isoformat()}"

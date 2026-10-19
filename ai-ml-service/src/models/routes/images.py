@@ -3,14 +3,16 @@ Image analysis routes
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 import logging
 import uuid
 import json
 from datetime import datetime
 
+from ..exceptions import public_error
 from ..services.ai_service import ai_service
+from ..services.safe_fetch import check_request_url
 from ..services.database import db_service
 from ..services.redis_client import redis_service
 
@@ -21,6 +23,11 @@ class ImageAnalysisRequest(BaseModel):
     image_url: str
     artwork_id: Optional[int] = None
     user_id: Optional[int] = None
+
+    @field_validator("image_url")
+    @classmethod
+    def _image_url_allowed(cls, value):
+        return check_request_url(value)
 
 class ImageAnalysisResponse(BaseModel):
     task_id: str
@@ -61,7 +68,7 @@ async def analyze_image(
 
     except Exception as e:
         logger.error(f"Image analysis request failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 @router.get("/analysis/{task_id}")
 async def get_analysis_status(task_id: str):
@@ -102,7 +109,7 @@ async def get_analysis_status(task_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to get analysis status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 async def process_image_analysis(request: ImageAnalysisRequest, task_id: str):
     """Background task for image analysis"""
@@ -156,7 +163,7 @@ async def process_image_analysis(request: ImageAnalysisRequest, task_id: str):
         task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
         task_data.update({
             "status": "failed",
-            "error": str(e),
+            "error": public_error(e),
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=3600)

@@ -4,14 +4,16 @@ Handles front/back image upload, AI analysis, watermarking, and card generation
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Dict, Any, Optional, List
 import logging
 import uuid
 import json
 from datetime import datetime
 
+from ..exceptions import public_error
 from ..services.ai_service import ai_service
+from ..services.safe_fetch import check_request_url
 from ..services.database import db_service
 from ..services.redis_client import redis_service
 from ..services.qdrant_client import qdrant_service
@@ -32,6 +34,11 @@ class DigitizationRequest(BaseModel):
     invisible_watermark: bool = True
     generate_nft: bool = False
     user_id: Optional[int] = None
+
+    @field_validator("front_image_url", "back_image_url")
+    @classmethod
+    def _image_urls_allowed(cls, value):
+        return check_request_url(value)
 
 
 class DigitizationResponse(BaseModel):
@@ -95,7 +102,7 @@ async def digitize_artwork(
 
     except Exception as e:
         logger.error(f"Digitization request failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/digitize/{task_id}")
@@ -122,7 +129,7 @@ async def get_digitization_status(task_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to get digitization status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/artworks", response_model=List[Dict[str, Any]])
@@ -184,7 +191,7 @@ async def list_digitized_artworks(
 
     except Exception as e:
         logger.error(f"Failed to list digitized artworks: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/artworks/{artwork_id}")
@@ -239,7 +246,7 @@ async def get_digitized_artwork(artwork_id: int):
         raise
     except Exception as e:
         logger.error(f"Failed to get digitized artwork: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 class ApproveRequest(BaseModel):
@@ -276,7 +283,7 @@ async def approve_artwork(artwork_id: int, request: ApproveRequest = None):
 
     except Exception as e:
         logger.error(f"Failed to approve artwork: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
@@ -369,7 +376,7 @@ async def reindex_all_artworks():
         
     except Exception as e:
         logger.error(f"Failed to reindex artworks: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 
@@ -397,7 +404,7 @@ async def reject_artwork(artwork_id: int, request: RejectRequest):
         raise
     except Exception as e:
         logger.error(f"Failed to reject artwork: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.patch("/artworks/{artwork_id}")
@@ -435,7 +442,7 @@ async def update_artwork(artwork_id: int, updates: Dict[str, Any]):
         raise
     except Exception as e:
         logger.error(f"Failed to update artwork: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 class GenerateNFTRequest(BaseModel):
@@ -505,7 +512,7 @@ async def generate_artwork_nft(artwork_id: int, request: GenerateNFTRequest):
         raise
     except Exception as e:
         logger.error(f"Failed to generate NFT metadata: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/artworks/{artwork_id}/nft-metadata")
@@ -531,7 +538,7 @@ async def get_nft_metadata(artwork_id: int):
         raise
     except Exception as e:
         logger.error(f"Failed to get NFT metadata: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 async def process_digitization(request: DigitizationRequest, task_id: str):
@@ -712,7 +719,7 @@ async def process_digitization(request: DigitizationRequest, task_id: str):
         task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
         task_data.update({
             "status": "failed",
-            "error": str(e),
+            "error": public_error(e),
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=7200)

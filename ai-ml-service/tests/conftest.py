@@ -19,6 +19,7 @@ os.environ.setdefault("OPENROUTER_API_KEY", "")
 # Обязательные настройки ядра (запасных значений в config.py нет)
 os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
 os.environ.setdefault("INTERNAL_API_TOKEN", "test-internal-token-0123456789")
+os.environ.setdefault("FETCH_ALLOWED_HOSTS", "example.org")
 
 
 @pytest.fixture(scope="session", autouse=True)

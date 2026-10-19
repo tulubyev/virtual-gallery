@@ -5,10 +5,10 @@ AI service for OpenAI API integrations
 import openai
 import logging
 from typing import Dict, Any, List, Optional
-import aiohttp
 import base64
 from ..config import settings
 from ..exceptions import ExternalAPIError
+from .safe_fetch import fetch_image
 
 logger = logging.getLogger(__name__)
 
@@ -46,18 +46,9 @@ class AIService:
                 Provide your analysis in a structured JSON format with confidence scores.
                 """
 
-            # Download image and encode as base64
-            async with aiohttp.ClientSession() as session:
-                async with session.get(image_url) as response:
-                    if response.status != 200:
-                        raise Exception(f"Failed to download image: {response.status}")
-
-                    image_data = await response.read()
-                    base64_image = base64.b64encode(image_data).decode('utf-8')
-
-                    # Get image format from content-type
-                    content_type = response.headers.get('content-type', 'image/jpeg')
-                    image_format = content_type.split('/')[-1] if '/' in content_type else 'jpeg'
+            # Скачиваем безопасно (белый список хостов, лимит размера), тип определяем по содержимому
+            image_data, image_mime = await fetch_image(image_url)
+            base64_image = base64.b64encode(image_data).decode('utf-8')
 
             # Call Vision API (via OpenRouter or OpenAI)
             vision_model = settings.vision_model if hasattr(settings, 'vision_model') else "openai/gpt-4-vision-preview"
@@ -71,7 +62,7 @@ class AIService:
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/{image_format};base64,{base64_image}"
+                                    "url": f"data:{image_mime};base64,{base64_image}"
                                 }
                             }
                         ]

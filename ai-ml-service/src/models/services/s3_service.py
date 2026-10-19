@@ -6,6 +6,7 @@ Handles uploading watermarked images to S3-compatible storage (beget.com)
 import boto3
 from botocore.config import Config
 import logging
+import asyncio
 import io
 import uuid
 from datetime import datetime
@@ -89,7 +90,9 @@ class S3Service:
             if metadata:
                 extra_args['Metadata'] = metadata
             
-            self.client.upload_fileobj(
+            # boto3 синхронный: выполняем в потоке, чтобы не блокировать цикл событий
+            await asyncio.to_thread(
+                self.client.upload_fileobj,
                 io.BytesIO(data),
                 self.bucket,
                 key,
@@ -146,7 +149,7 @@ class S3Service:
             return False
         
         try:
-            self.client.delete_object(Bucket=self.bucket, Key=key)
+            await asyncio.to_thread(self.client.delete_object, Bucket=self.bucket, Key=key)
             logger.info(f"Deleted from S3: {key}")
             return True
         except Exception as e:

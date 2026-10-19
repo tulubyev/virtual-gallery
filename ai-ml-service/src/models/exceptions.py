@@ -74,6 +74,24 @@ class ResourceNotFoundError(AIMLException):
         )
 
 
+class FetchError(AIMLException):
+    """Ошибка безопасной загрузки по URL. Текст безопасен для показа клиенту (без внутренних адресов)."""
+
+    def __init__(self, message: str):
+        super().__init__(message, "FETCH_ERROR", 400)
+
+
+def public_error(error: Exception) -> str:
+    """Текст ошибки, который можно показать клиенту.
+
+    Наши исключения несут безопасное сообщение; всё остальное (драйверы БД, SDK, пути, адреса)
+    наружу не отдаётся — подробности остаются в логах.
+    """
+    if isinstance(error, AIMLException):
+        return error.message
+    return "Internal error"
+
+
 class ConfigurationError(AIMLException):
     """Exception for configuration issues"""
 

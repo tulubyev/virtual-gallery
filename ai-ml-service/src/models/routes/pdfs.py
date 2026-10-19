@@ -3,14 +3,16 @@ PDF processing routes
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Dict, Any, Optional
 import logging
 import uuid
 import json
 from datetime import datetime
 
+from ..exceptions import public_error
 from ..services.pdf_service import pdf_service
+from ..services.safe_fetch import check_request_url
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
@@ -29,6 +31,11 @@ class PDFProcessingRequest(BaseModel):
     techniques: Optional[list] = None
     regions: Optional[list] = None
     auto_categorize: bool = True
+
+    @field_validator("pdf_url")
+    @classmethod
+    def _pdf_url_allowed(cls, value):
+        return check_request_url(value)
 
 class PDFProcessingResponse(BaseModel):
     task_id: str
@@ -69,7 +76,7 @@ async def process_pdf(
 
     except Exception as e:
         logger.error(f"PDF processing request failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 @router.get("/processing/{task_id}")
 async def get_processing_status(task_id: str):
@@ -150,7 +157,7 @@ async def get_processing_status(task_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to get processing status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 def extract_json_from_response(response: str) -> Dict[str, Any]:
     """Robust JSON extraction using balanced bracket counting"""
@@ -365,7 +372,7 @@ async def process_pdf_task(request: PDFProcessingRequest, task_id: str):
         task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
         task_data.update({
             "status": "failed",
-            "error": str(e),
+            "error": public_error(e),
             "updated_at": datetime.utcnow().isoformat()
         })
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=3600)
