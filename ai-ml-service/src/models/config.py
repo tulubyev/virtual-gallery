@@ -4,7 +4,7 @@ Configuration management using Pydantic settings
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -34,17 +34,34 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379"
 
-    # External APIs
-    openai_api_key: str = ""
-    openai_base_url: Optional[str] = None  # For OpenRouter
-    openrouter_api_key: Optional[str] = ""
-    anthropic_api_key: Optional[str] = ""
-    cohere_api_key: Optional[str] = ""
+    # LLM/VLM: любой OpenAI-совместимый API. По умолчанию — агрегатор routerai.ru (оплата в рублях,
+    # каталог моделей GET /api/v1/models). Ключ задаётся только в .env (LLM_API_KEY).
+    llm_base_url: str = "https://routerai.ru/api/v1"
+    llm_api_key: str = ""
 
-    # AI/ML Settings
-    default_embedding_model: str = "text-embedding-3-small"
-    default_generation_model: str = "anthropic/claude-3-haiku"  # Works well with OpenRouter
-    vision_model: str = "openai/gpt-4-vision-preview"  # Via OpenRouter
+    # Политика отправки: global — любые модели каталога; ru-only — только модели с серверами в РФ
+    # (provider.country=ru, без запасных провайдеров); для приватных коллекций и данных с ПДн.
+    llm_mode: Literal["global", "ru-only"] = "global"
+    # Жёстко закрепить провайдеров (через запятую, идентификаторы из /models/{id}/endpoints, поле tag),
+    # иначе балансировщик «по цене» может сменить endpoint, страну и квантование.
+    llm_provider_only: str = ""
+    # Режим обработки для фоновых задач: flex примерно вдвое дешевле (если не задан — обычный)
+    llm_background_tier: Optional[Literal["flex"]] = None
+
+    # Модели по задачам (id из каталога routerai.ru). Значения по умолчанию — предварительные,
+    # окончательный выбор делается на размеченном наборе (tools/model_bakeoff.py, docs/AI-ML-DESIGN.md).
+    model_vision_front: str = "anthropic/claude-sonnet-5.5"   # описание лицевой стороны по фото
+    model_vision_back: str = "anthropic/claude-sonnet-5.5"    # чтение оборота (OCR, подписи, штампы)
+    model_rag_answer: str = "anthropic/claude-haiku-5.5"      # ответ по найденным фрагментам
+    model_chat: str = "anthropic/claude-haiku-5.5"            # диалог с помощником
+    model_judge: str = "anthropic/claude-haiku-5.5"           # проверка/реранк/классификация
+    model_bulk: str = "anthropic/claude-haiku-5.5"            # массовые дешёвые операции
+    # Модели для режима ru-only (есть endpoint в РФ)
+    model_ru_only_text: str = "sber/gigachat-3-pro"
+    model_ru_only_vision: str = "qwen/qwen3.6-35b-a3b"
+
+    # Эмбеддинги текста (через тот же API). bge-m3: 1024 измерения, без префиксов запроса.
+    default_embedding_model: str = "baai/bge-m3"
     max_tokens: int = 2000
     temperature: float = 0.7
 
@@ -62,7 +79,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = 200
 
     # RAG Settings
-    vector_dimension: int = 1536  # OpenAI text-embedding-3-small
+    vector_dimension: int = 1024  # bge-m3; при смене модели эмбеддингов — новая коллекция Qdrant
     similarity_threshold: float = 0.7
     max_context_chunks: int = 5
 

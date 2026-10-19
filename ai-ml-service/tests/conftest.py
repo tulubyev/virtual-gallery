@@ -20,6 +20,7 @@ os.environ.setdefault("OPENROUTER_API_KEY", "")
 os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
 os.environ.setdefault("INTERNAL_API_TOKEN", "test-internal-token-0123456789")
 os.environ.setdefault("FETCH_ALLOWED_HOSTS", "example.org")
+os.environ.setdefault("LLM_API_KEY", "test-llm-key-not-real")
 
 
 @pytest.fixture(scope="session", autouse=True)

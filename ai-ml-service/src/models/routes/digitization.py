@@ -327,7 +327,7 @@ async def index_artwork_in_qdrant(row: Dict[str, Any]) -> bool:
             "type": "digitized_artwork",
             "front_analysis": front_analysis,
             "back_analysis": back_analysis if back_analysis else None,
-            "confidence": ai_analysis.get("confidence", 0.8)
+            "uncertainties": front_analysis.get("uncertainties", [])
         }
         
         qdrant_service.ensure_collection("artworks")
@@ -656,7 +656,7 @@ async def process_digitization(request: DigitizationRequest, task_id: str):
         combined_analysis = {
             "front": front_analysis,
             "back": back_analysis,
-            "confidence": front_analysis.get("confidence", 0.8)
+            "contains_personal_data": bool(back_analysis and back_analysis.get("contains_personal_data"))
         }
 
         result = await db_service.fetchrow("""

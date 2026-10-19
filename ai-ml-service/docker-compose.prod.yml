@@ -14,8 +14,8 @@ services:
       - QDRANT_URL=https://your-cluster.cloud.qdrant.io:6333
       - QDRANT_API_KEY=your-qdrant-api-key
       - REDIS_URL=redis://redis:6379
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY:?задайте LLM_API_KEY в .env}
+      - LLM_MODE=${LLM_MODE:-global}
       - JWT_SECRET=${JWT_SECRET:-default_prod_jwt_secret_change_this}
       - MAIN_APP_WEBHOOK_URL=https://your-gallery-domain.com/webhooks/ai-results
     depends_on:
@@ -56,8 +56,8 @@ services:
       - QDRANT_URL=https://your-cluster.cloud.qdrant.io:6333
       - QDRANT_API_KEY=your-qdrant-api-key
       - REDIS_URL=redis://redis:6379
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY:?задайте LLM_API_KEY в .env}
+      - LLM_MODE=${LLM_MODE:-global}
     depends_on:
       - redis
     restart: unless-stopped
