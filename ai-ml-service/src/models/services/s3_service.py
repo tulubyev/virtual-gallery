@@ -67,9 +67,15 @@ class S3Service:
         data: bytes,
         key: str,
         content_type: str = "image/jpeg",
-        metadata: Optional[Dict[str, str]] = None
+        metadata: Optional[Dict[str, str]] = None,
+        public: bool = False
     ) -> Dict[str, Any]:
-        """Upload bytes to S3 and return URL"""
+        """Загрузить байты в S3.
+
+        По умолчанию объект приватный (ACL private): ссылку на него выдаёт generate_presigned_url
+        на короткий срок. public=True только для того, что должно открываться всем (водяной экземпляр лица
+        для галереи). Для приватного объекта в ответе нет публичного `url`, есть `uri` вида s3://bucket/key.
+        """
         self._ensure_client()
         
         if not self.client:
@@ -84,7 +90,7 @@ class S3Service:
         try:
             extra_args = {
                 'ContentType': content_type,
-                'ACL': 'public-read'
+                'ACL': 'public-read' if public else 'private'
             }
             
             if metadata:
@@ -99,13 +105,14 @@ class S3Service:
                 ExtraArgs=extra_args
             )
             
-            url = f"{getattr(settings, 's3_endpoint', 'https://s3.beget.com')}/{self.bucket}/{key}"
-            
-            logger.info(f"Uploaded to S3: {key}")
-            
+            url = f"{getattr(settings, 's3_endpoint', 'https://s3.beget.com')}/{self.bucket}/{key}" if public else None
+
+            logger.info(f"Uploaded to S3: {key} ({'public' if public else 'private'})")
+
             return {
                 "success": True,
                 "url": url,
+                "uri": f"s3://{self.bucket}/{key}",
                 "key": key,
                 "bucket": self.bucket
             }
@@ -124,14 +131,15 @@ class S3Service:
         base64_data: str,
         key: str,
         content_type: str = "image/jpeg",
-        metadata: Optional[Dict[str, str]] = None
+        metadata: Optional[Dict[str, str]] = None,
+        public: bool = False
     ) -> Dict[str, Any]:
         """Upload base64 encoded data to S3"""
         import base64 as b64
         
         try:
             data = b64.b64decode(base64_data)
-            return await self.upload_bytes(data, key, content_type, metadata)
+            return await self.upload_bytes(data, key, content_type, metadata, public=public)
         except Exception as e:
             logger.error(f"Failed to decode base64 for upload: {e}")
             return {
@@ -156,6 +164,27 @@ class S3Service:
             logger.error(f"Failed to delete from S3: {e}")
             return False
     
+    def generate_presigned_url(self, key: str, expires: Optional[int] = None) -> Optional[str]:
+        """Подписанная ссылка на чтение приватного объекта (вычисляется локально, без обращения к сети)."""
+        self._ensure_client()
+        if not self.client:
+            return None
+        return self.client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.bucket, "Key": key},
+            ExpiresIn=expires or settings.s3_presign_ttl,
+        )
+
+    def present_url(self, value: Optional[str]) -> Optional[str]:
+        """Для ответов API: ссылки s3://bucket/key заменяются подписанными, обычные URL остаются как есть."""
+        if value and value.startswith("s3://"):
+            _, _, rest = value.partition("s3://")
+            bucket, _, key = rest.partition("/")
+            if bucket == getattr(self, "bucket", settings.s3_bucket) and key:
+                return self.generate_presigned_url(key)
+            return None
+        return value
+
     def get_public_url(self, key: str) -> str:
         """Get public URL for S3 object"""
         return f"{getattr(settings, 's3_endpoint', 'https://s3.beget.com')}/{self.bucket}/{key}"
