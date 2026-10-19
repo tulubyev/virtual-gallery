@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Users, Eye, Heart, TrendingUp, GalleryVerticalEnd, Image, Activity, BarChart3, Sparkles, Gavel, LayoutGrid,
 } from 'lucide-react';
+import AiModelsTable from '../components/AiModelsTable';
 import { fetchWithAuth } from '../services/api';
 import { useOverview, fmt, changeText, ago, DASH, type Trend } from '../lib/dashboardStats';
 
@@ -139,6 +140,7 @@ const AdminPanel: React.FC = () => {
         {tabBtn('users', 'Пользователи')}
         {tabBtn('artworks', 'Экспонаты')}
         {tabBtn('analytics', 'Аналитика')}
+        {tabBtn('ai-models', 'Модели ИИ')}
         <div className="flex-1" />
         <Link to="/artwiki" className="pb-3 px-1 flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
           ArtWiki
@@ -277,6 +279,8 @@ const AdminPanel: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {activeTab === 'ai-models' && <AiModelsTable />}
 
       {activeTab === 'analytics' && (
         <Card>

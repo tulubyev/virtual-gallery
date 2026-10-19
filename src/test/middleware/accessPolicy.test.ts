@@ -69,6 +69,12 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['PUT', '/api/admin/users/4/role', { anon: 401, user: 403, curator: 403, admin: 200 }],
   ['DELETE', '/api/admin/users/4', { anon: 401, user: 403, admin: 200 }],
   ['POST', '/api/admin/clear-uploads', { anon: 401, user: 403, staff: 403, curator: 403, admin: 200 }],
+  // выбор моделей ИИ: только admin
+  ['GET', '/api/admin/ai-models', { anon: 401, user: 403, staff: 403, curator: 403, admin: 200 }],
+  ['GET', '/api/admin/ai-models/history', { anon: 401, user: 403, curator: 403, admin: 200 }],
+  ['PUT', '/api/admin/ai-models/vision_front', { anon: 401, user: 403, staff: 403, curator: 403, admin: 200 }],
+  ['DELETE', '/api/admin/ai-models/vision_front', { anon: 401, user: 403, curator: 403, admin: 200 }],
+  ['POST', '/api/admin/ai-models/refresh-catalog', { anon: 401, user: 403, curator: 403, admin: 200 }],
   ['PATCH', '/api/display-settings/theme', { anon: 401, curator: 403, admin: 200 }],
   ['GET', '/api/infra/status', { anon: 401, user: 403, admin: 200 }],
   // галерея и произведения
