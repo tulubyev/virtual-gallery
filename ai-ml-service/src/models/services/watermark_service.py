@@ -1,17 +1,17 @@
 """
 Watermark service for artwork protection
-Implements visible watermarks and invisible steganographic marks
+Видимая метка и невидимая метка в частотной области (переживает JPEG)
 """
 
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+from PIL import Image, ImageDraw, ImageFont
 import io
 import logging
 import hashlib
-import struct
-from typing import Tuple, Optional, Dict, Any
+from typing import Optional, Dict, Any
 import base64
 from datetime import datetime
 
+from . import dct_watermark
 from .safe_fetch import fetch_image
 
 # Защита от «бомб»: слишком большие по числу пикселей изображения Pillow не открывает
@@ -21,13 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 class WatermarkService:
-    """Service for applying visible and invisible watermarks to artwork images"""
-    
+    """Видимая метка (текст в углу) и невидимая метка в частотной области (services/dct_watermark.py)."""
+
     def __init__(self):
         self.default_font_size = 24
         self.watermark_opacity = 0.3
-        self.steganography_bits = 2
-    
+
     async def apply_watermarks(
         self,
         image_url: str,
@@ -37,31 +36,11 @@ class WatermarkService:
         invisible_watermark: bool = True,
         watermark_text: str = "Virtual Art Gallery"
     ) -> Dict[str, Any]:
-        """Apply both visible and invisible watermarks to an image"""
+        """Нанести видимую и невидимую метки; хеш выводится из содержимого исходного файла."""
         try:
-            image = await self._download_image(image_url)
-            
-            verification_hash = self._generate_verification_hash(artwork_id, owner_id)
-            
-            if invisible_watermark:
-                image = self._apply_invisible_watermark(image, verification_hash)
-            
-            if visible_watermark:
-                image = self._apply_visible_watermark(image, watermark_text)
-            
-            image_bytes = self._image_to_bytes(image)
-            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-            
-            return {
-                "success": True,
-                "watermarked_image_base64": image_base64,
-                "verification_hash": verification_hash,
-                "visible_watermark_applied": visible_watermark,
-                "invisible_watermark_applied": invisible_watermark,
-                "image_size": image.size,
-                "timestamp": datetime.utcnow().isoformat()
-            }
-            
+            image_data, image = await self._download(image_url)
+            verification_hash = self._generate_verification_hash(artwork_id, owner_id, image_data)
+            return self._render(image, verification_hash, visible_watermark, invisible_watermark, watermark_text)
         except Exception as e:
             logger.error(f"Failed to apply watermarks: {e}")
             raise
@@ -74,43 +53,58 @@ class WatermarkService:
         invisible_watermark: bool = True,
         watermark_text: str = "Virtual Art Gallery"
     ) -> Dict[str, Any]:
-        """Apply watermarks using provided verification hash (for consistent multi-image watermarking)"""
+        """То же с готовым хешем (лицо и оборот одной работы получают одну метку)."""
         try:
-            image = await self._download_image(image_url)
-            
-            if invisible_watermark:
-                image = self._apply_invisible_watermark(image, verification_hash)
-            
-            if visible_watermark:
-                image = self._apply_visible_watermark(image, watermark_text)
-            
-            image_bytes = self._image_to_bytes(image)
-            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-            
-            return {
-                "success": True,
-                "watermarked_image_base64": image_base64,
-                "verification_hash": verification_hash,
-                "visible_watermark_applied": visible_watermark,
-                "invisible_watermark_applied": invisible_watermark,
-                "image_size": image.size,
-                "timestamp": datetime.utcnow().isoformat()
-            }
-            
+            _, image = await self._download(image_url)
+            return self._render(image, verification_hash, visible_watermark, invisible_watermark, watermark_text)
         except Exception as e:
             logger.error(f"Failed to apply watermarks with hash: {e}")
             raise
-    
-    async def _download_image(self, image_url: str) -> Image.Image:
-        """Download image from URL (безопасная загрузка: белый список, лимиты)"""
-        image_data, _ = await fetch_image(image_url)
-        return Image.open(io.BytesIO(image_data)).convert('RGB')
 
-    def _generate_verification_hash(self, artwork_id: str, owner_id: Optional[str]) -> str:
-        """Generate unique verification hash for the artwork"""
-        data = f"{artwork_id}:{owner_id or 'gallery'}:{datetime.utcnow().isoformat()}"
+    def _render(self, image: Image.Image, verification_hash: str, visible: bool, invisible: bool, text: str) -> Dict[str, Any]:
+        """Нанести метки и сохранить в JPEG; невидимая метка считается нанесённой, только если её удалось
+        прочитать из уже сохранённого файла (иначе флаг ложный — как было при LSB-метке)."""
+        if visible:
+            image = self._apply_visible_watermark(image, text)
+
+        invisible_applied = False
+        if invisible:
+            try:
+                image = dct_watermark.embed(image, verification_hash)
+            except ValueError as error:
+                logger.warning("Invisible watermark skipped: %s", error)
+
+        image_bytes = self._image_to_bytes(image)
+        if invisible:
+            saved = Image.open(io.BytesIO(image_bytes))
+            invisible_applied = dct_watermark.extract(saved) == verification_hash
+            if not invisible_applied:
+                logger.warning("Invisible watermark not readable after saving; flag set to false")
+
+        return {
+            "success": True,
+            "watermarked_image_base64": base64.b64encode(image_bytes).decode("utf-8"),
+            "verification_hash": verification_hash,
+            "visible_watermark_applied": visible,
+            "invisible_watermark_applied": invisible_applied,
+            "image_size": image.size,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+    async def _download(self, image_url: str):
+        """Безопасная загрузка (белый список, лимиты): байты исходника и изображение."""
+        image_data, _ = await fetch_image(image_url)
+        return image_data, Image.open(io.BytesIO(image_data)).convert('RGB')
+
+    async def _download_image(self, image_url: str) -> Image.Image:
+        return (await self._download(image_url))[1]
+
+    def _generate_verification_hash(self, artwork_id: str, owner_id: Optional[str], image_data: bytes) -> str:
+        """Хеш метки: воспроизводим по исходному файлу, идентификатору работы и владельцу (без времени)."""
+        content = hashlib.sha256(image_data).hexdigest()
+        data = f"{artwork_id}:{owner_id or 'gallery'}:{content}"
         return hashlib.sha256(data.encode()).hexdigest()[:32]
-    
+
     def _apply_visible_watermark(
         self,
         image: Image.Image,
@@ -159,91 +153,10 @@ class WatermarkService:
         
         return watermarked
     
-    def _apply_invisible_watermark(
-        self,
-        image: Image.Image,
-        data: str
-    ) -> Image.Image:
-        """Apply invisible steganographic watermark using LSB technique"""
-        watermarked = image.copy()
-        pixels = watermarked.load()
-        width, height = watermarked.size
-        
-        binary_data = self._string_to_binary(data) + '11111111'
-        
-        max_rows = min(height, 100)
-        max_capacity = width * max_rows * 3
-        
-        if len(binary_data) > max_capacity:
-            truncated_chars = max_capacity // 8 - 1
-            logger.warning(f"Watermark data too long ({len(data)} chars), truncating to {truncated_chars}")
-            data = data[:truncated_chars]
-            binary_data = self._string_to_binary(data) + '11111111'
-        
-        data_index = 0
-        data_length = len(binary_data)
-        
-        for y in range(0, min(height, 100)):
-            for x in range(width):
-                if data_index >= data_length:
-                    break
-                
-                r, g, b = pixels[x, y][:3]
-                
-                if data_index < data_length:
-                    r = (r & ~1) | int(binary_data[data_index])
-                    data_index += 1
-                
-                if data_index < data_length:
-                    g = (g & ~1) | int(binary_data[data_index])
-                    data_index += 1
-                
-                if data_index < data_length:
-                    b = (b & ~1) | int(binary_data[data_index])
-                    data_index += 1
-                
-                pixels[x, y] = (r, g, b)
-            
-            if data_index >= data_length:
-                break
-        
-        return watermarked
-    
     def extract_invisible_watermark(self, image: Image.Image) -> Optional[str]:
-        """Extract invisible watermark from image"""
-        try:
-            pixels = image.load()
-            width, height = image.size
-            
-            binary_data = ""
-            
-            for y in range(0, min(height, 100)):
-                for x in range(width):
-                    r, g, b = pixels[x, y][:3]
-                    
-                    binary_data += str(r & 1)
-                    binary_data += str(g & 1)
-                    binary_data += str(b & 1)
-                    
-                    if binary_data.endswith('11111111'):
-                        binary_data = binary_data[:-8]
-                        return self._binary_to_string(binary_data)
-            
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to extract watermark: {e}")
-            return None
-    
-    def _string_to_binary(self, text: str) -> str:
-        """Convert string to binary representation"""
-        return ''.join(format(ord(char), '08b') for char in text)
-    
-    def _binary_to_string(self, binary: str) -> str:
-        """Convert binary representation back to string"""
-        chars = [binary[i:i+8] for i in range(0, len(binary), 8)]
-        return ''.join(chr(int(char, 2)) for char in chars if len(char) == 8)
-    
+        """Прочитать невидимую метку (хеш) или None."""
+        return dct_watermark.extract(image)
+
     def _image_to_bytes(self, image: Image.Image, format: str = 'JPEG') -> bytes:
         """Convert PIL Image to bytes"""
         buffer = io.BytesIO()
