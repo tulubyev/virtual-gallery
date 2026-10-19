@@ -1351,6 +1351,8 @@ Qdrant Cloud: бесплатный кластер (1 ГБ RAM) — по стор
 | `qwen/qwen3.6-35b-a3b` | `yandex`, ru | 260 / 390 | да | вход: текст+изображение+видео; **дороже зарубежных endpoint той же модели: по входу в ≈10–50 раз, по выходу в ≈2–5 раз** (зарубежные 5,4–27 / 76–196) |
 | `deepseek/deepseek-v4.1-flash` | `yandex`, ru | 390 / 650 | да | вход: текст+изображение; зарубежные endpoint — 8,6–36 / 17–144 |
 
+**Уточнение 2026-10-19:** перебор endpoints по всем текстовым моделям нашёл 13 моделей с серверами в РФ (Yandex: `gpt-oss-120b/20b`, `deepseek-v4(.1)-flash`, `qwen3.6-35b-a3b`, `yandex/gpt-pro-5(.1)`, `gpt-lite-5`, `aliceai-llm(-flash)`; Cloud.ru: `sber/gigachat-3-pro`, `gigachat-2-max`, `gigachat-3.5-ultra`) — без картинок они пригодны для текстового RAG и описаний; см. `docs/AI-RAG-RESEARCH.md`, раздел 7.3. Эмбеддингов и реранкеров в РФ нет.
+
 Все остальные модели (Claude, Gemini, GPT, Gemma, Mistral, Llama, GLM, Kimi, Grok) идут через серверы США, Сингапура, КНР, Нидерландов и др.; у части endpoint страна не указана. Claude (Haiku/Sonnet/Opus 5.x): провайдеры `anthropic`, `google-vertex`, `amazon-bedrock`, `claude-on-aws`, `azure` — все `us`.
 
 **Кандидаты для VLM** (₽ за 1 млн токенов, вход/выход; каталог от 2026-10-18; все с `response_format`):
