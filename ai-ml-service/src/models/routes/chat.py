@@ -12,7 +12,7 @@ from typing import List, Literal, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..config import settings
+from ..exceptions import AIMLException
 from ..services.ai_service import ai_service
 
 router = APIRouter()
@@ -55,15 +55,9 @@ async def chat(request: ChatRequest) -> ChatResponse:
     messages.append({"role": "user", "content": request.message})
 
     try:
-        completion = await ai_service.client.chat.completions.create(
-            model=settings.default_generation_model,
-            messages=messages,
-            max_tokens=settings.max_tokens,
-            temperature=settings.temperature,
-        )
-    except Exception as error:
-        logger.error("Chat completion failed: %s", error)
+        result = await ai_service.llm.complete("chat", messages)
+    except AIMLException as error:
+        logger.error("Chat completion failed: %s", error.message)
         raise HTTPException(status_code=502, detail="AI provider error")
 
-    reply = completion.choices[0].message.content or ""
-    return ChatResponse(reply=reply, model=getattr(completion, "model", None))
+    return ChatResponse(reply=result.text, model=result.model)

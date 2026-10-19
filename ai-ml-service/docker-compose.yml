@@ -58,7 +58,8 @@ services:
       - DATABASE_URL=postgresql://ai_ml_user:ai_ml_password@postgres:5432/ai_ml_db
       - QDRANT_URL=http://qdrant:6333
       - REDIS_URL=redis://redis:6379
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODE=${LLM_MODE:-global}
       - JWT_SECRET=development_jwt_secret
     depends_on:
       postgres:
@@ -84,7 +85,8 @@ services:
       - DATABASE_URL=postgresql://ai_ml_user:ai_ml_password@postgres:5432/ai_ml_db
       - QDRANT_URL=http://qdrant:6333
       - REDIS_URL=redis://redis:6379
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODE=${LLM_MODE:-global}
       - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:?задайте INTERNAL_API_TOKEN в .env}
       - FETCH_ALLOWED_HOSTS=${FETCH_ALLOWED_HOSTS:-}
     depends_on:

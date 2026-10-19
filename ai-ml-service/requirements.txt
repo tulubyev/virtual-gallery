@@ -50,6 +50,9 @@ redis==5.0.1
 # S3 (Beget)
 boto3==1.35.99
 
+# Проверка ответов модели по JSON-схеме
+jsonschema==4.23.0
+
 # HTTP Client
 aiohttp==3.13.3
 
