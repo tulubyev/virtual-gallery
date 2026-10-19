@@ -10,6 +10,7 @@ import logging
 import json
 from datetime import datetime
 
+from ..exceptions import public_error
 from ..services.external_sources_service import external_sources_service
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
@@ -73,7 +74,7 @@ async def fetch_from_met(request: FetchRequest, background_tasks: BackgroundTask
         
     except Exception as e:
         logger.error(f"Failed to fetch from MET: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.post("/fetch/rijks")
@@ -108,7 +109,7 @@ async def fetch_from_rijks(request: FetchRequest):
         raise
     except Exception as e:
         logger.error(f"Failed to fetch from Rijksmuseum: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 class WikiArtRequest(BaseModel):
@@ -174,7 +175,7 @@ async def fetch_from_wikiart(request: WikiArtRequest, background_tasks: Backgrou
         
     except Exception as e:
         logger.error(f"Failed to fetch from WikiArt: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.post("/fetch/harvard")
@@ -209,7 +210,7 @@ async def fetch_from_harvard(request: FetchRequest):
         raise
     except Exception as e:
         logger.error(f"Failed to fetch from Harvard: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/fetch/status/{task_id}")
@@ -226,7 +227,7 @@ async def get_fetch_status(task_id: str):
         raise
     except Exception as e:
         logger.error(f"Failed to get fetch status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/sources/stats")
@@ -265,7 +266,7 @@ async def get_sources_stats():
         return {
             "total_indexed": 0,
             "sources": {},
-            "error": str(e)
+            "error": public_error(e)
         }
 
 
@@ -284,7 +285,7 @@ async def index_batch_artworks(request: IndexExternalRequest):
         
     except Exception as e:
         logger.error(f"Failed to index batch: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 async def process_met_batch(object_ids: List[int], task_id: str, index_to_qdrant: bool):
@@ -310,7 +311,7 @@ async def process_met_batch(object_ids: List[int], task_id: str, index_to_qdrant
         logger.error(f"MET batch processing failed: {e}")
         task_data = json.loads(await redis_service.get(f"task:{task_id}") or "{}")
         task_data["status"] = "failed"
-        task_data["error"] = str(e)
+        task_data["error"] = public_error(e)
         await redis_service.set(f"task:{task_id}", json.dumps(task_data), expire=3600)
 
 
@@ -452,4 +453,4 @@ async def reindex_external_artworks():
         
     except Exception as e:
         logger.error(f"Reindex external artworks failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))

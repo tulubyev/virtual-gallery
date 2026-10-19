@@ -9,6 +9,7 @@ import logging
 import json
 from datetime import datetime
 
+from ..exceptions import public_error
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
@@ -132,7 +133,7 @@ async def process_rag_query(request: RAGQueryRequest):
 
     except Exception as e:
         logger.error(f"RAG query failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 @router.get("/collections")
 async def list_collections():
@@ -165,7 +166,7 @@ async def list_collections():
 
     except Exception as e:
         logger.error(f"Failed to list collections: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 @router.post("/collections/{collection_name}/search")
 async def search_collection(collection_name: str, query: str, limit: int = 10):
@@ -209,7 +210,7 @@ async def search_collection(collection_name: str, query: str, limit: int = 10):
         raise
     except Exception as e:
         logger.error(f"Collection search failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))
 
 
 @router.get("/stats")
@@ -253,11 +254,11 @@ async def get_rag_stats():
                 stats["collections"][collection_name] = {
                     "count": 0,
                     "status": "error",
-                    "error": str(e)
+                    "error": public_error(e)
                 }
         
         return stats
         
     except Exception as e:
         logger.error(f"Failed to get RAG stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=public_error(e))

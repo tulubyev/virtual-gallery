@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     max_tokens: int = 2000
     temperature: float = 0.7
 
+    # Загрузка по URL из запросов (SSRF): через запятую домены, с которых можно скачивать (кроме хоста S3),
+    # например FETCH_ALLOWED_HOSTS=virtgal.ru,cdn.virtgal.ru
+    fetch_allowed_hosts: str = ""
+
     # Image Processing
     max_image_size: int = 10 * 1024 * 1024  # 10MB
     supported_image_formats: List[str] = [".jpg", ".jpeg", ".png", ".webp"]

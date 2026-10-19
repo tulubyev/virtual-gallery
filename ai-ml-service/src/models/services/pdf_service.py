@@ -3,11 +3,11 @@ PDF processing service for text extraction, OCR, and chunking
 """
 
 import logging
-import aiohttp
 import fitz  # PyMuPDF
 from typing import List, Dict, Any, Optional
 import re
 from ..config import settings
+from .safe_fetch import fetch_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +18,8 @@ class PDFProcessingService:
         pass
 
     async def download_pdf(self, pdf_url: str) -> bytes:
-        """Download PDF from URL"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(pdf_url) as response:
-                if response.status != 200:
-                    raise Exception(f"Failed to download PDF: {response.status}")
-                return await response.read()
+        """Download PDF from URL (безопасная загрузка: белый список, лимиты)"""
+        return await fetch_pdf(pdf_url)
 
     def extract_text_with_pymupdf(self, pdf_bytes: bytes) -> Dict[str, Any]:
         """Extract text using PyMuPDF"""
