@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8000"]
 
     # Database
-    database_url: str = "postgresql://ai_ml_user:ai_ml_password@localhost:5432/ai_ml_db"
+    database_url: str  # обязательная переменная окружения DATABASE_URL, запасного значения нет
 
     # Vector Database
     qdrant_url: str = "http://localhost:6333"
