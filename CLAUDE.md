@@ -51,6 +51,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 - **`npm run init-db` удаляет все таблицы** (нужен `CONFIRM_DB_RESET=yes`) — на боевой БД не запускать.
 - Python AI/ML-сервис (`ai-ml-service/`) в деплой пока не включён: без него работает демо-режим
   (`AI_CORE_URL`).
+  Python-ядро — `ai-ml-service/src/models` (получено от владельца, добавлено как есть); в таком виде оно не стартует —
+  список ошибок и порядок исправления в `docs/AI-ML-CORE-REVIEW.md`, проект целиком — `docs/AI-ML-DESIGN.md`.
 
 ## Безопасность
 
