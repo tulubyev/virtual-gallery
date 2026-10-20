@@ -3,6 +3,7 @@ Health check routes
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any
 import psutil
@@ -31,9 +32,8 @@ class HealthDetailedResponse(BaseModel):
     system: Dict[str, Any]
     services: Dict[str, Any]
 
-@router.get("/", response_model=HealthResponse)
-async def health_check():
-    """Basic health check"""
+async def collect_health() -> HealthResponse:
+    """Состояние БД, Qdrant и Redis (без текстов ошибок)."""
     try:
         # Check services
         db_status = await check_db_connection()
@@ -65,12 +65,21 @@ async def health_check():
     except Exception as e:
         raise HTTPException(status_code=503, detail="Health check failed")
 
+@router.get("/", response_model=HealthResponse, responses={503: {"model": HealthResponse}})
+async def health_check():
+    """Проверка живости и готовности: 200 — БД, Qdrant и Redis доступны; 503 — хотя бы одна недоступна
+    (по коду судят healthcheck контейнера и мониторинг; состав — в теле ответа)."""
+    result = await collect_health()
+    if result.status != "healthy":
+        return JSONResponse(status_code=503, content=result.model_dump())
+    return result
+
 @router.get("/detailed", response_model=HealthDetailedResponse, dependencies=[Depends(require_internal_token)])
 async def detailed_health_check():
     """Detailed health check with system information"""
     try:
         # Basic health check
-        basic_health = await health_check()
+        basic_health = await collect_health()
 
         # System information
         system_info = {

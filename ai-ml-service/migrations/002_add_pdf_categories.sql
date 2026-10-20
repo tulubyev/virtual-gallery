@@ -1,6 +1,21 @@
 -- Migration: Add categorization columns to pdf_documents
 -- This migration adds columns for AI-extracted categories from PDF content
 
+-- На чистой БД таблицы ещё нет (раньше её создавал ai_ml_schema.sql со ссылками на таблицы основного приложения).
+-- Базовые колонки — только то, что читает и пишет код ядра; на уже существующей таблице блок ничего не меняет.
+CREATE TABLE IF NOT EXISTS pdf_documents (
+    document_id             VARCHAR(100) PRIMARY KEY,
+    filename                VARCHAR(255) NOT NULL,
+    s3_url                  VARCHAR(500) NOT NULL,
+    pages_count             INTEGER,
+    ocr_performed           BOOLEAN DEFAULT false,
+    processing_status       VARCHAR(20) DEFAULT 'pending',
+    processing_started_at   TIMESTAMP,
+    processing_completed_at TIMESTAMP,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 ALTER TABLE pdf_documents 
 ADD COLUMN IF NOT EXISTS category VARCHAR(100),
 ADD COLUMN IF NOT EXISTS styles JSONB,

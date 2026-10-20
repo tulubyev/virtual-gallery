@@ -76,10 +76,99 @@ services:
       - "traefik.http.routers.virtgal-cdn.tls.certresolver=letsencrypt"
       - "traefik.http.services.virtgal-cdn.loadbalancer.server.port=8080"
 
+  # ── Python-ядро ИИ + Qdrant + Redis (профиль ai) ───────────────────────────────
+  # Без профиля эти сервисы не запускаются, сайт работает как раньше (ИИ — демо-режим).
+  # Включение (пошагово — docs/DEPLOY.md, «Python-ядро ИИ»):
+  #   docker compose -f docker-compose.prod.yml --profile ai up -d --build
+  # Настройки ядра — .env.ai (шаблон .env.ai.example); БД — отдельная virtgal_ai в системном PostgreSQL, миграции применяются при старте ядра.
+  # Qdrant и Redis — во внутренней сети ai-net (без выхода наружу); ядро — ещё и в traefik-public:
+  # оттуда оно видит PostgreSQL хоста (172.28.0.1) и внешние API, а приложение — само ядро.
+  # Порты наружу не публикуются; все ручки ядра, кроме /health, требуют INTERNAL_API_TOKEN.
+  ai-core:
+    profiles: ["ai"]
+    build:
+      context: ./ai-ml-service
+      dockerfile: docker/Dockerfile.python
+    image: virtgal-ai-core:latest
+    container_name: virtgal-ai-core
+    restart: always
+    # Секреты ядра (пароль БД, ключ LLM, S3) — в отдельном .env.ai, а не в общем .env: контейнер приложения их не получает.
+    # Общий с приложением только INTERNAL_API_TOKEN (берётся из .env).
+    env_file: .env.ai
+    environment:
+      ENVIRONMENT: production
+      QDRANT_URL: http://virtgal-qdrant:6333
+      REDIS_URL: redis://virtgal-redis:6379/0
+      # Не `:?`: иначе compose требовал бы токен и без профиля ai. Пустой/короткий токен ядро отклонит само при старте.
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-}
+    expose:
+      - "8001"
+    depends_on:
+      ai-qdrant:
+        condition: service_healthy
+      ai-redis:
+        condition: service_healthy
+    networks:
+      - traefik-public
+      - ai-net
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  ai-qdrant:
+    profiles: ["ai"]
+    # Версия подобрана под qdrant-client==1.9.0 из ai-ml-service/requirements.txt (клиент использует client.search)
+    image: qdrant/qdrant:v1.9.7
+    container_name: virtgal-qdrant
+    restart: always
+    volumes:
+      - ai-qdrant-data:/qdrant/storage
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+
+  ai-redis:
+    profiles: ["ai"]
+    image: redis:7-alpine
+    container_name: virtgal-redis
+    restart: always
+    # Только кэш: без сохранения на диск, с потолком памяти
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    networks:
+      - ai-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
 volumes:
   cdn-cache:
+  ai-qdrant-data:
 
 networks:
   traefik-public:
     name: traefik-public
     external: true
+  # Qdrant и Redis: только между собой и с ядром, без доступа в интернет
+  ai-net:
+    name: virtgal-ai-net
+    internal: true

@@ -69,6 +69,61 @@ docker compose -f docker-compose.prod.yml logs --tail=30 virtual-gallery
 ```
 Изменения в `.env` подхватываются только при пересоздании контейнера: `up -d --force-recreate virtual-gallery`.
 
+## Python-ядро ИИ (профиль `ai`)
+
+Ядро (`ai-ml-service/`), Qdrant и Redis запускаются отдельным профилем compose: без него сайт работает как раньше, ИИ — в демо-режиме.
+Ядро хранит очередь задач, выбор моделей («Админ-панель → Модели ИИ»), оцифровку и журналы RAG в **отдельной БД `virtgal_ai`** — оно не видит
+`users` и пароли основного приложения. Qdrant (`v1.9.7`, под `qdrant-client==1.9.0`) и Redis сидят во внутренней сети без выхода в интернет.
+
+Память: в покое ядро ≈170 МБ, Qdrant ≈20 МБ, Redis ≈5 МБ; потолки в compose — 768 / 384 / 128 МБ. Перед включением проверьте `free -h`.
+
+```bash
+cd /var/www/virtual-gallery && git pull
+
+# 1. БД и роль ядра в том же системном PostgreSQL 16
+AIPW=$(openssl rand -hex 24)
+sudo -u postgres psql -v ON_ERROR_STOP=1 -v pw="$AIPW" <<'SQL'
+CREATE ROLE virtgal_ai LOGIN PASSWORD :'pw';
+CREATE DATABASE virtgal_ai OWNER virtgal_ai;
+SQL
+# Проверка с адреса контейнера (как для virtgal_app выше). Если подключение отклонено правилом pg_hba —
+# добавить строку `host virtgal_ai virtgal_ai 172.28.0.0/16 scram-sha-256` в pg_hba.conf и выполнить
+# sudo -u postgres psql -c 'select pg_reload_conf()'
+docker run --rm --network traefik-public -e PGPASSWORD="$AIPW" postgres:16-alpine \
+  psql -h 172.28.0.1 -U virtgal_ai -d virtgal_ai -c 'select 1'
+
+# 2. Общий с приложением секрет и адрес ядра — в .env
+#    INTERNAL_API_TOKEN=$(openssl rand -hex 32)      # один и тот же у приложения и ядра
+#    AI_CORE_URL=http://virtgal-ai-core:8001
+
+# 3. Секреты ядра — в отдельный .env.ai (приложение их не получает)
+cp .env.ai.example .env.ai && chmod 600 .env.ai
+#    DATABASE_URL=postgresql://virtgal_ai:$AIPW@172.28.0.1:5432/virtgal_ai
+#    LLM_API_KEY (routerai.ru), S3_* (те же, что у приложения), при необходимости LLM_MODE=ru-only, LLM_PROVIDER_ONLY=anthropic
+
+# 4. Запуск (миграции БД применяются автоматически при старте ядра; приложение перезапустится с новым .env)
+docker compose -f docker-compose.prod.yml --profile ai up -d --build
+```
+
+Проверка:
+
+```bash
+docker compose -f docker-compose.prod.yml --profile ai ps                  # ai-core, ai-qdrant, ai-redis — healthy
+docker logs virtgal-ai-core 2>&1 | grep migrate                            # «применено N» при первом запуске, «новых нет» дальше
+docker exec virtual-gallery wget -qO- http://virtgal-ai-core:8001/health/  # {"status":"healthy",...}: БД, Qdrant, Redis
+```
+
+Затем «Админ-панель → Модели ИИ»: таблица загружается, если приложение достучалось до ядра по `AI_CORE_URL` с тем же `INTERNAL_API_TOKEN`.
+Ошибка «ИИ-ядро отклонило запрос: проверьте INTERNAL_API_TOKEN» — токены в `.env` и у ядра разошлись (после правки `.env` — `up -d` для обоих).
+
+- **Обновление:** `git pull && docker compose -f docker-compose.prod.yml --profile ai up -d --build`; новые миграции применятся сами.
+- **Отключить ИИ:** `docker compose -f docker-compose.prod.yml --profile ai stop ai-core ai-qdrant ai-redis` и убрать `AI_CORE_URL` из `.env` — сайт вернётся к демо-режиму.
+- **Сборка на сервере** занимает несколько минут и до ≈0,5 ГБ памяти (pip). Если памяти не хватает — собрать образ в другом месте (`docker build -f ai-ml-service/docker/Dockerfile.python -t virtgal-ai-core:latest ai-ml-service`)
+  и перенести: `docker save virtgal-ai-core:latest | ssh <сервер> docker load`, затем `up -d` без `--build`.
+- **Бэкапы:** добавить `virtgal_ai` в ежедневный `pg_dump`. Том `ai-qdrant-data` (векторы) восстанавливается повторной индексацией, но бэкап ускорит возврат.
+- **CI** (`.github/workflows/ci.yml`): задание `ai-core` гоняет тесты ядра на PostgreSQL 16, `ai-core-image` собирает образ и проверяет стек из контейнеров (`ai-ml-service/scripts/smoke.sh`).
+  Локально: `cd ai-ml-service && docker compose -f docker-compose.smoke.yml up -d --build --wait && scripts/smoke.sh`.
+
 ## CDN (cdn.virtgal.ru)
 
 DNS `A cdn.virtgal.ru → 90.156.168.149`, затем `CDN_BASE_URL=https://cdn.virtgal.ru` в `.env` и

@@ -29,3 +29,4 @@ src/frontend/dist/
 test-results/
 .env.*
 !.env.example
+!.env.ai.example

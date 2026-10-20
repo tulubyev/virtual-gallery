@@ -1,41 +1,43 @@
-# AI/ML Core Service Python Dockerfile
+# Python-ядро ИИ (FastAPI). Сборка из каталога ai-ml-service:
+#   docker build -f docker/Dockerfile.python -t virtgal-ai-core ai-ml-service
+# Python 3.12 — версия, на которой закреплены и проверены зависимости (requirements.txt, CI).
+FROM python:3.12-slim-bookworm
 
-FROM python:3.9-slim
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PORT=8001
 
-# Set working directory
-WORKDIR /app
-
-# Install minimal system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    tesseract-ocr \
-    tesseract-ocr-rus \
-    poppler-utils \
-    fonts-dejavu-core \
+# Системные пакеты: Tesseract (русский и английский) и poppler — OCR отсканированных PDF; шрифт — видимая метка на изображении
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        tesseract-ocr-rus \
+        poppler-utils \
+        fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
+WORKDIR /app
+
+# Зависимости отдельным слоем: он пересобирается только при изменении requirements.txt
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy source code
 COPY src/ ./src/
+COPY migrations/ ./migrations/
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash ai-ml && \
-    chown -R ai-ml:ai-ml /app
-USER ai-ml
+# Не root; временные файлы ядра — только в /tmp
+RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin aicore \
+    && chmod 0755 /usr/local/bin/entrypoint.sh
+USER aicore
 
-# Expose port
-EXPOSE 8000
+EXPOSE 8001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Живость и готовность: /health/ отвечает 200, только если доступны БД, Qdrant и Redis
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD ["python", "-c", "import os, sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:%s/health/' % os.environ.get('PORT', '8001'), timeout=8).status == 200 else 1)"]
 
-# Start the application
-CMD ["uvicorn", "src.models.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+ENTRYPOINT ["entrypoint.sh"]
+# Один процесс: очередь задач (JobWorker) работает внутри него; несколько процессов — несколько воркеров с общей очередью в БД
+CMD ["python", "-m", "uvicorn", "src.models.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]

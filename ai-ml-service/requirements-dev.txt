@@ -1,0 +1,7 @@
+# Для тестов и CI: pytest -q (внешние сервисы подменены; тесты PostgreSQL — при TEST_DATABASE_URL)
+-r requirements.txt
+iniconfig==2.3.1
+pluggy==1.7.0
+Pygments==2.21.0
+pytest==9.1.1
+pytest-asyncio==1.4.0

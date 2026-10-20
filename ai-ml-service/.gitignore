@@ -140,7 +140,7 @@ keys/
 *.crt
 
 # Docker
-.dockerignore
+# .dockerignore нужен: он задаёт контекст сборки образа ядра (docker/Dockerfile.python)
 
 # Testing
 test-results/

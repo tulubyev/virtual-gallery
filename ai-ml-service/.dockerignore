@@ -1,0 +1,16 @@
+# Контекст сборки образа ядра: только requirements.txt, src/, migrations/, docker/entrypoint.sh
+**/__pycache__
+**/*.pyc
+.git
+.env
+.env.*
+!.env.example
+node_modules
+tests
+tools
+docs
+scripts
+*.md
+*.txt
+!requirements.txt
+docker-compose*.yml
