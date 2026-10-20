@@ -11,9 +11,10 @@ import time
 from contextlib import asynccontextmanager
 
 from .config import settings
-from .routes import health, images, pdfs, rag, digitization, external_sources, chat
+from .routes import health, images, pdfs, rag, digitization, external_sources, chat, model_settings as model_settings_routes
 from .security import require_internal_token
 from .services.database import close_db, init_db
+from .services.model_settings import model_settings
 from .services.qdrant_client import init_qdrant
 from .services.redis_client import close_redis, init_redis
 from .services.worker import worker
@@ -36,6 +37,8 @@ async def lifespan(app: FastAPI):
         await init_db()
         init_qdrant()  # синхронная функция
         await init_redis()
+        await model_settings.load()  # выбор модели администратором (при ошибке действуют значения из окружения)
+        model_settings.start_refresh()
         worker.register("image_analysis", images.run_image_analysis)
         worker.register("pdf_processing", pdfs.run_pdf_processing)
         worker.register("digitization", digitization.run_digitization)
@@ -52,6 +55,7 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down AI/ML Core Service...")
     if settings.run_job_worker:
         await worker.stop()
+    await model_settings.stop_refresh()
     await close_redis()
     await close_db()
 
@@ -108,6 +112,7 @@ app.include_router(images.router, prefix="/api/v1/images", tags=["images"], depe
 app.include_router(pdfs.router, prefix="/api/v1/pdfs", tags=["pdfs"], dependencies=protected)
 app.include_router(rag.router, prefix="/api/v1/rag", tags=["rag"], dependencies=protected)
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"], dependencies=protected)
+app.include_router(model_settings_routes.router, prefix="/api/v1/model-settings", tags=["model-settings"], dependencies=protected)
 # маршруты оцифровки сами содержат /digitize и /artworks, поэтому префикс общий
 app.include_router(digitization.router, prefix="/api/v1", tags=["digitization"], dependencies=protected)
 app.include_router(external_sources.router, prefix="/api/v1/external", tags=["external-sources"], dependencies=protected)

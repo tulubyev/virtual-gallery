@@ -55,6 +55,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
   `ai-ml-service/tests` (`pytest`, внешние сервисы подменены); остальное (P1/P2) и состояние — `docs/AI-ML-CORE-REVIEW.md`,
   проект целиком — `docs/AI-ML-DESIGN.md`. Все ручки ядра, кроме `/health`, требуют заголовок `X-Internal-Token`
   (`INTERNAL_API_TOKEN` в `.env` и у основного приложения); порты ядра и Redis наружу не публикуются.
+  Модель по каждой задаче ИИ выбирается в админ-панели (вкладка «Модели ИИ») поверх `MODEL_*` — `docs/AI-MODEL-SELECTION.md`;
+  нужна миграция `ai-ml-service/migrations/005_create_ai_model_settings.sql`.
 
 ## Безопасность
 

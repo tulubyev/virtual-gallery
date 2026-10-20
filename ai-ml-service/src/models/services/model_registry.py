@@ -2,8 +2,8 @@
 Реестр моделей по задачам и политика отправки данных.
 
 Каждая задача (описание лица работы, чтение оборота, ответ RAG, диалог, проверка, массовые операции)
-использует свою модель из каталога API; идентификаторы задаются в окружении (MODEL_*), поэтому
-смена модели не требует правки кода. Режим `ru-only` подменяет модель на размещённую в РФ и
+использует свою модель из каталога API; идентификаторы задаются в окружении (MODEL_*) или выбираются
+администратором в панели (services/model_settings.py), поэтому смена модели не требует правки кода. Режим `ru-only` подменяет модель на размещённую в РФ и
 запрещает запасных провайдеров.
 """
 
@@ -11,6 +11,7 @@ from typing import Any, Dict, NamedTuple, Optional
 
 from ..config import settings
 from ..exceptions import ConfigurationError
+from .model_settings import model_settings
 
 TASKS = ("vision_front", "vision_back", "rag_answer", "chat", "judge", "bulk")
 VISION_TASKS = ("vision_front", "vision_back")
@@ -47,16 +48,20 @@ def _provider_policy(mode: str) -> Optional[Dict[str, Any]]:
     return provider or None
 
 
+def default_model(task: str, mode: str) -> str:
+    """Модель из окружения (MODEL_*) — действует, пока администратор не выбрал другую."""
+    if mode == "ru-only":
+        return settings.model_ru_only_vision if task in VISION_TASKS else settings.model_ru_only_text
+    return getattr(settings, f"model_{task}")
+
+
 def resolve(task: str, mode: Optional[str] = None) -> ModelChoice:
-    """Выбрать модель и политику маршрутизации для задачи."""
+    """Выбрать модель и политику маршрутизации для задачи (выбор администратора важнее окружения)."""
     if task not in TASKS:
         raise ConfigurationError(f"unknown task {task}")
     mode = mode or settings.llm_mode
     if mode not in ("global", "ru-only"):
         raise ConfigurationError(f"unknown mode {mode}")
 
-    if mode == "ru-only":
-        model = settings.model_ru_only_vision if task in VISION_TASKS else settings.model_ru_only_text
-    else:
-        model = getattr(settings, f"model_{task}")
+    model = model_settings.get(task, mode) or default_model(task, mode)
     return ModelChoice(task, model, mode, TEMPERATURE[task], _provider_policy(mode))
