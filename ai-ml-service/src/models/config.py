@@ -102,6 +102,12 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
 
+    @field_validator("llm_background_tier", mode="before")
+    @classmethod
+    def _empty_tier_means_unset(cls, value):
+        # `LLM_BACKGROUND_TIER=` в .env и `${VAR:-}` в compose дают пустую строку — это «не задано», а не ошибка
+        return None if isinstance(value, str) and not value.strip() else value
+
     @field_validator("internal_api_token")
     @classmethod
     def _token_not_weak(cls, value: str) -> str:

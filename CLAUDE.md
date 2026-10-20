@@ -49,8 +49,10 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 - Загрузки — каталог `public/uploads` (том `./public/uploads`, владелец uid 1000).
 - В production `server.js` не стартует, если `JWT_SECRET` короче 32 символов.
 - **`npm run init-db` удаляет все таблицы** (нужен `CONFIRM_DB_RESET=yes`) — на боевой БД не запускать.
-- Python AI/ML-сервис (`ai-ml-service/`) в деплой пока не включён: без него работает демо-режим
-  (`AI_CORE_URL`).
+- Python AI/ML-сервис (`ai-ml-service/`) запускается профилем `ai` в `docker-compose.prod.yml` вместе с Qdrant и Redis
+  (`docs/DEPLOY.md`, «Python-ядро ИИ»; БД — отдельная `virtgal_ai`, секреты — в `.env.ai`); без него работает демо-режим
+  (`AI_CORE_URL`). Образ — `ai-ml-service/docker/Dockerfile.python`, зависимости закреплены в `requirements.txt` (Python 3.12),
+  миграции применяются при старте (`src/models/migrate.py`), в CI — тесты ядра и дымовой тест стека (`scripts/smoke.sh`).
   Python-ядро — `ai-ml-service/src/models` (получено от владельца). Блокирующие ошибки (P0) исправлены, тесты —
   `ai-ml-service/tests` (`pytest`, внешние сервисы подменены); остальное (P1/P2) и состояние — `docs/AI-ML-CORE-REVIEW.md`,
   проект целиком — `docs/AI-ML-DESIGN.md`. Все ручки ядра, кроме `/health`, требуют заголовок `X-Internal-Token`

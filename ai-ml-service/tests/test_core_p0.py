@@ -63,11 +63,17 @@ def test_health_basic_open_without_error_details_and_detailed_protected(client):
          patch.object(health, "check_qdrant_connection", AsyncMock(return_value=ok)), \
          patch.object(health, "check_redis_connection", AsyncMock(return_value=ok)):
         response = client.get("/health/")
-        assert response.status_code == 200
+        assert response.status_code == 503                      # по коду судят healthcheck контейнера и мониторинг
         assert response.json()["status"] == "unhealthy"
         assert "db.internal" not in response.text
         assert client.get("/health/detailed").status_code == 401
-        assert client.get("/health/detailed", headers=AUTH).status_code == 200
+        detailed = client.get("/health/detailed", headers=AUTH)
+        assert detailed.status_code == 200 and detailed.json()["status"] == "unhealthy"   # подробности — всегда 200
+    with patch.object(health, "check_db_connection", AsyncMock(return_value=ok)), \
+         patch.object(health, "check_qdrant_connection", AsyncMock(return_value=ok)), \
+         patch.object(health, "check_redis_connection", AsyncMock(return_value=ok)):
+        healthy = client.get("/health/")
+        assert healthy.status_code == 200 and healthy.json()["status"] == "healthy"
 
 
 def _paths(client):
@@ -360,3 +366,15 @@ def test_chat_provider_error_is_generic_502(client):
         response = client.post("/api/v1/chat", json={"message": "привет"}, headers=AUTH)
     assert response.status_code == 502
     assert "secret provider detail" not in response.text
+
+
+def test_empty_background_tier_in_env_means_unset(monkeypatch):
+    from src.models.config import Settings
+
+    monkeypatch.setenv("LLM_BACKGROUND_TIER", "")
+    assert Settings().llm_background_tier is None
+    monkeypatch.setenv("LLM_BACKGROUND_TIER", "flex")
+    assert Settings().llm_background_tier == "flex"
+    monkeypatch.setenv("LLM_BACKGROUND_TIER", "turbo")
+    with pytest.raises(Exception):
+        Settings()

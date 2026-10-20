@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+asyncpg
+qdrant-client==1.9.0
+openai
+redis
+boto3
+Pillow
+numpy
+PyMuPDF
+pytesseract
+pdf2image
+aiohttp
+jsonschema
+psutil
