@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const { noCacheMiddleware } = require('./src/middleware/cors');
 const { xssProtection } = require('./src/middleware/security');
 const { accessControl } = require('./src/middleware/accessPolicy');
+const { createAiBudget, aiBudgetOptionsFromEnv } = require('./src/middleware/aiBudget');
 const { createMediaHandler } = require('./src/services/media');
 
 // В проде без нормального секрета токены можно подделать (в коде есть запасные значения)
@@ -38,6 +39,9 @@ app.use('/api/ai', aiLimiter);
 
 // Единая политика доступа ко всему /api (см. src/middleware/accessPolicy.ts)
 app.use('/api', accessControl);
+
+// Бюджет платных ИИ-запросов (по IP и в сутки). После accessControl: нужна роль пользователя, сотрудники не ограничиваются
+app.use('/api/ai', createAiBudget(aiBudgetOptionsFromEnv()));
 
 // API Routes — no-cache so clients always get fresh data
 app.use('/api/auth', noCacheMiddleware, require('./src/routes/auth'));
