@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "migrate": "node --import tsx src/database/runMigrations.ts",
     "bootstrap": "npm run setup && npm run setup:ai && npm run dev:all",
     "setup": "bash scripts/setup.sh",
     "setup:ai": "bash scripts/setup_ai.sh",
