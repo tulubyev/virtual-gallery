@@ -62,13 +62,14 @@ pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT`).catch((
 
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'Username, email and password are required' });
     }
 
-    const allowed = ['user', 'tour_guide', 'auction_participant'];
-    const userRole = allowed.includes(role) ? role : 'user';
+    // Роль при регистрации всегда «user»: гид и участник торгов назначаются администратором
+    // (PUT /api/users/:id/role) — иначе любой стал бы участником аукциона без проверки.
+    const userRole = 'user';
 
     const exists = await pool.query('SELECT user_id FROM users WHERE email = $1', [email]);
     if (exists.rows.length > 0) {
