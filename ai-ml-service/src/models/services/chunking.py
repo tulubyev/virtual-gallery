@@ -15,7 +15,9 @@ _SENTENCE_END = re.compile(r"(?<=[.!?…])\s+(?=[«\"(\[]?[А-ЯЁA-Z0-9])")
 
 def normalize_page_text(text: str) -> str:
     """Склеить переносы PDF: «сло-\\nво» → «слово», одиночный перевод строки → пробел; абзацы остаются."""
-    text = text.replace("\r\n", "\n").replace("\r", "\n").replace("­", "")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    # мягкий перенос на конце строки: «иконогра\u00ad\nфических» → «иконографических» (иначе строка склеится пробелом)
+    text = re.sub(r"\u00ad[ \t]*\n[ \t]*", "", text).replace("\u00ad", "")
     text = re.sub(r"(?<=[A-Za-zА-Яа-яЁё])-\n(?=[a-zа-яё])", "", text)
     paragraphs = [re.sub(r"[ \t\f\v ]+", " ", re.sub(r"\n", " ", p)).strip()
                   for p in re.split(r"\n\s*\n", text)]

@@ -30,6 +30,13 @@ def test_chunking_joins_hyphenation_and_keeps_page_numbers():
     assert "Картина написана маслом." in chunks[0]["content"] and "\n" not in chunks[0]["content"]
 
 
+def test_chunking_joins_soft_hyphen_at_line_end():
+    text = "Определение идёт по иконогра\u00ad\nфическим признакам и многооб\u00ad \nразию типов.\nНе\u00adразрывный перенос внутри строки."
+    content = chunking.normalize_page_text(text)
+    assert "иконографическим" in content and "многообразию" in content
+    assert "Неразрывный" in content and "\u00ad" not in content
+
+
 def test_chunking_respects_limits_and_overlaps_neighbours():
     sentence = "Это достаточно длинное предложение про живопись эпохи Возрождения. "
     chunks = chunking.chunk_page(sentence * 60, 1, target=400, hard_limit=600, overlap=150)
