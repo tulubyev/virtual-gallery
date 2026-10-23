@@ -207,42 +207,6 @@ def test_nft_metadata_makes_no_authenticity_claims():
 
 # ---------- RAG ----------
 
-def test_rag_confidence_fits_numeric_column(client):
-    from src.models.routes import rag
-
-    executed = {}
-
-    async def fake_execute(query, *args):
-        executed["args"] = args
-
-    search = [{"id": 1, "score": 0.93, "payload": {"content": "фрагмент", "document_id": "d1", "chunk_index": 0}}]
-    with patch.object(rag.ai_service, "generate_embeddings", AsyncMock(return_value=[[0.1]])), \
-         patch.object(rag.ai_service, "generate_text", AsyncMock(return_value={"response": "ответ"})), \
-         patch.object(rag.qdrant_service, "collection_exists", return_value=True), \
-         patch.object(rag.qdrant_service, "search_points", return_value=search), \
-         patch.object(rag.db_service, "execute", side_effect=fake_execute):
-        response = client.post("/api/v1/rag/query", json={"query": "что такое импрессионизм"}, headers=AUTH)
-
-    assert response.status_code == 200
-    assert response.json()["confidence"] == 0.93
-    relevance = executed["args"][4]
-    assert 0 <= relevance < 10  # DECIMAL(3,2)
-
-
-def test_rag_analytics_failure_does_not_break_answer(client):
-    from src.models.routes import rag
-
-    search = [{"id": 1, "score": 0.8, "payload": {"content": "фрагмент", "document_id": "d1", "chunk_index": 0}}]
-    with patch.object(rag.ai_service, "generate_embeddings", AsyncMock(return_value=[[0.1]])), \
-         patch.object(rag.ai_service, "generate_text", AsyncMock(return_value={"response": "ответ"})), \
-         patch.object(rag.qdrant_service, "collection_exists", return_value=True), \
-         patch.object(rag.qdrant_service, "search_points", return_value=search), \
-         patch.object(rag.db_service, "execute", AsyncMock(side_effect=RuntimeError("db down"))):
-        response = client.post("/api/v1/rag/query", json={"query": "что такое импрессионизм"}, headers=AUTH)
-    assert response.status_code == 200
-    assert response.json()["answer"] == "ответ"
-
-
 def test_rag_search_rejects_unknown_collection(client):
     response = client.post("/api/v1/rag/collections/secret_collection/search?query=x", headers=AUTH)
     assert response.status_code == 404

@@ -182,3 +182,25 @@ describe('POST /api/auth/login — response shape', () => {
     expect(decoded.username).toBe(sampleUser.username);
   });
 });
+
+// ─── Регистрация: роль назначает только администратор ────────────────────────
+
+describe('POST /api/auth/register — роль', () => {
+  it.each(['auction_participant', 'tour_guide', 'admin', 'curator'])('роль «%s» из тела запроса игнорируется', async (role) => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue('hash');
+    (pool.query as jest.Mock).mockImplementation(async (sql: string, params: unknown[]) => {
+      if (/SELECT user_id FROM users/.test(sql)) return { rows: [] };
+      if (/INSERT INTO users/.test(sql)) return { rows: [{ user_id: 5, username: 'u', email: 'u@example.com', role: params[3] }] };
+      return { rows: [] };
+    });
+
+    const res = await request(buildApp())
+      .post('/api/auth/register')
+      .send({ username: 'u', email: 'u@example.com', password: 'secret12', role });
+
+    expect(res.status).toBe(201);
+    expect(res.body.role).toBe('user');
+    const insert = (pool.query as jest.Mock).mock.calls.find(([sql]) => /INSERT INTO users/.test(sql));
+    expect(insert[1][3]).toBe('user');
+  });
+});

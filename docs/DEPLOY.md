@@ -140,6 +140,8 @@ docker exec virtual-gallery wget -qO- http://virtgal-ai-core:8001/health/  # {"s
   Значения меняются в `.env` (`AI_CHAT_DAILY_LIMIT`, `AI_CHAT_IP_LIMIT`, `AI_HEAVY_DAILY_LIMIT`, `AI_HEAVY_IP_LIMIT`, `0` — без лимита),
   после правки — `docker compose -f docker-compose.prod.yml up -d`. При исчерпании суточного лимита сайт отвечает 429 до 00:00 UTC
   (в журнале приложения одна строка `[ai-budget] ...`).
+- **База знаний RAG** (подробнее — `docs/AI-RAG.md`). Загруженные PDF до обработки лежат в томе `ai-spool` (`UPLOAD_SPOOL_DIR=/var/spool/vg`); после обновления
+  с версии без базы знаний ранее проиндексированные документы нужно загрузить заново. Документы по умолчанию видны только сотрудникам.
 - **Обновление:** `git pull && docker compose -f docker-compose.prod.yml --profile ai up -d --build`; новые миграции применятся сами.
 - **Отключить ИИ:** `docker compose -f docker-compose.prod.yml --profile ai stop ai-core ai-qdrant ai-redis` и убрать `AI_CORE_URL` из `.env` — сайт вернётся к демо-режиму.
 - **Сборка на сервере** занимает несколько минут и до ≈0,5 ГБ памяти (pip). Если памяти не хватает — собрать образ в другом месте (`docker build -f ai-ml-service/docker/Dockerfile.python -t virtgal-ai-core:latest ai-ml-service`)

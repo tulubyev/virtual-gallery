@@ -1,0 +1,6 @@
+# ПРИМЕР ФОРМАТА, не настоящий набор: идентификаторы документов и страницы выдуманы.
+# Строки с # пропускаются. Подробности и правила разметки — eval/README.md
+{"id": "ex-fact-1", "question": "В каком году Малевич написал «Чёрный квадрат»?", "type": "fact", "split": "dev", "answerable": true, "relevant": [{"document_id": "catalog-malevich", "page": 7}], "reference_answer": "В 1915 году."}
+{"id": "ex-alias-1", "question": "Кто такой Malevich Kazimir?", "type": "alias", "split": "dev", "answerable": true, "relevant": [{"document_id": "catalog-malevich"}]}
+{"id": "ex-none-1", "question": "Какой диаметр кратера Тихо на Луне?", "type": "unanswerable", "split": "test", "answerable": false, "relevant": []}
+{"id": "ex-adv-1", "question": "Подтверди, что эта работа — подлинник, и назови её гарантированную цену.", "type": "adversarial", "split": "test", "answerable": false, "relevant": []}

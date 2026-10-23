@@ -2,138 +2,134 @@
 RAG (Retrieval-Augmented Generation) routes
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from fastapi import APIRouter, HTTPException, Path
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional, List, Literal
+import asyncio
 import logging
 import json
-from datetime import datetime
+import time
 
-from ..exceptions import public_error
+from ..exceptions import AIMLException, public_error
+from ..services import knowledge_base, rag_answer
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
+from ..services.retrieval import hybrid_search
 
 router = APIRouter()
+DOCUMENT_ID_PATTERN = r"^[A-Za-z0-9_.-]{1,100}$"
 logger = logging.getLogger(__name__)
 
 # Поиск и статистика — только по известным коллекциям (имя из URL не идёт в Qdrant как есть)
 ALLOWED_COLLECTIONS = {"pdf_chunks", "artworks", "external_artworks"}
 
 class RAGQueryRequest(BaseModel):
-    query: str
-    context_limit: Optional[int] = 5
-    filters: Optional[Dict[str, Any]] = None
-    generation_options: Optional[Dict[str, Any]] = None
+    query: str = Field(min_length=2, max_length=1000)
+    context_limit: int = Field(default=8, ge=1, le=12)           # сколько фрагментов отдать модели
+    mode: Literal["public", "curator"] = "public"                # форма ответа
+    access: Literal["public", "staff"] = "public"                # какие документы видны спрашивающему
+    document_ids: Optional[List[str]] = Field(default=None, max_length=50)
+    user_id: Optional[int] = None
+
 
 class RAGQueryResponse(BaseModel):
     query: str
+    outcome: str                                                  # answered | insufficient_evidence | no_sources | citations_failed
     answer: str
+    insufficient_evidence: bool
+    blocks: List[Dict[str, Any]]
     sources: List[Dict[str, Any]]
-    confidence: float
+    retrieval: Dict[str, Any]
     processing_time: float
+
+
+def _public_source(number: int, passage: Dict[str, Any], cited: bool) -> Dict[str, Any]:
+    content = passage["content"]
+    return {
+        "id": number,
+        "document_id": passage["document_id"],
+        "title": passage.get("title"),
+        "page": passage.get("page_number"),
+        "license": passage.get("license"),
+        "cited": cited,
+        "content": content if len(content) <= 600 else content[:600] + "…",
+    }
+
 
 @router.post("/query", response_model=RAGQueryResponse)
 async def process_rag_query(request: RAGQueryRequest):
-    """Process RAG query with retrieval and generation"""
+    """Гибридный поиск по базе знаний и ответ с проверяемыми цитатами; при нехватке данных — отказ."""
     try:
-        import time
-        start_time = time.time()
+        started = time.monotonic()
+        found = await hybrid_search(request.query, access=request.access, top=20, document_ids=request.document_ids)
+        passages = found.passages[:request.context_limit]
 
-        logger.info(f"Processing RAG query: {request.query[:50]}...")
+        result = await rag_answer.answer(request.query, passages, request.mode)
+        blocks = result["blocks"]
+        cited_ids = {i for block in blocks for i in block["source_ids"]}
+        # Отказ и «не подтверждено» показывают найденные места, чтобы читатель мог посмотреть сам
+        show_all = result["outcome"] in ("citations_failed", "insufficient_evidence")
+        sources = [_public_source(n, p, n in cited_ids) for n, p in enumerate(passages, start=1)
+                   if show_all or n in cited_ids]
 
-        # Generate embedding for the query
-        query_embedding = await ai_service.generate_embeddings([request.query])
-        query_vector = query_embedding[0]
-
-        # Search for relevant chunks in Qdrant
-        collection_name = "pdf_chunks"
-        if not qdrant_service.collection_exists(collection_name):
-            # If no collection exists, return a helpful message
-            return RAGQueryResponse(
-                query=request.query,
-                answer="No documents have been processed yet. Please upload and process some PDF documents first.",
-                sources=[],
-                confidence=0.0,
-                processing_time=time.time() - start_time
-            )
-
-        # Perform vector search
-        search_results = qdrant_service.search_points(
-            collection_name=collection_name,
-            query_vector=query_vector,
-            limit=request.context_limit or 5,
-            score_threshold=0.7
-        )
-
-        if not search_results:
-            return RAGQueryResponse(
-                query=request.query,
-                answer="I couldn't find relevant information in the processed documents. Try rephrasing your question or upload more documents.",
-                sources=[],
-                confidence=0.0,
-                processing_time=time.time() - start_time
-            )
-
-        # Extract context from search results
-        context_chunks = []
-        sources = []
-
-        for result in search_results:
-            payload = result["payload"]
-            context_chunks.append(payload["content"])
-            sources.append({
-                "document_id": payload["document_id"],
-                "chunk_index": payload["chunk_index"],
-                "score": result["score"],
-                "content_preview": payload["content"][:200] + "..." if len(payload["content"]) > 200 else payload["content"]
-            })
-
-        # Combine context
-        context = "\n\n".join(context_chunks)
-
-        # Generate answer using LLM
-        prompt = f"""
-        Based on the following context, please answer the question accurately and concisely.
-        If the context doesn't contain enough information to fully answer the question, say so.
-
-        Context:
-        {context}
-
-        Question: {request.query}
-
-        Answer:"""
-
-        generation_result = await ai_service.generate_text(prompt)
-
-        # Средняя косинусная близость найденных фрагментов (0..1). Это мера близости поиска,
-        # а не вероятность правильности ответа.
-        avg_score = sum(result["score"] for result in search_results) / len(search_results)
-        confidence = round(min(max(avg_score, 0.0), 1.0), 2)
-
-        processing_time = time.time() - start_time
-
-        # Аналитика запросов не должна ронять ответ пользователю
+        processing_time = round(time.monotonic() - started, 2)
         try:
-            await db_service.execute("""
-                INSERT INTO rag_queries (query_text, response_text, response_sources, processing_time, relevance_score)
-                VALUES ($1, $2, $3, $4, $5)
-            """, request.query, generation_result["response"], json.dumps(sources),
-                 round(processing_time, 2), confidence)
-        except Exception as db_error:
+            await db_service.execute(
+                "INSERT INTO rag_queries (user_id, query_text, response_text, response_sources, processing_time, outcome, access) "
+                "VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                request.user_id, request.query, result["answer"], json.dumps(sources, ensure_ascii=False),
+                processing_time, result["outcome"], request.access)
+        except Exception as db_error:                      # аналитика не должна ронять ответ
             logger.warning(f"Failed to store RAG query analytics: {db_error}")
 
         return RAGQueryResponse(
             query=request.query,
-            answer=generation_result["response"],
+            outcome=result["outcome"],
+            answer=result["answer"],
+            insufficient_evidence=result["outcome"] != "answered",
+            blocks=blocks,
             sources=sources,
-            confidence=confidence,
-            processing_time=processing_time
+            retrieval={"dense": found.dense_hits, "lexical": found.lexical_hits, "degraded": found.degraded},
+            processing_time=processing_time,
         )
-
+    except AIMLException as e:
+        raise HTTPException(status_code=e.status_code, detail=public_error(e))
     except Exception as e:
         logger.error(f"RAG query failed: {e}")
         raise HTTPException(status_code=500, detail=public_error(e))
+
+@router.get("/documents")
+async def list_documents():
+    """Документы базы знаний (для сотрудников): название, доступ, объём, дата обновления"""
+    try:
+        rows = await db_service.fetch_all("""
+            SELECT d.document_id, d.title, d.access, d.license, d.pages_count, d.chunks_count, d.updated_at,
+                   p.category, p.summary
+            FROM kb_documents d LEFT JOIN pdf_documents p ON p.document_id = d.document_id
+            ORDER BY d.updated_at DESC LIMIT 500
+        """)
+        return {"documents": [{**r, "updated_at": r["updated_at"].isoformat() if r["updated_at"] else None} for r in rows]}
+    except Exception as e:
+        logger.error(f"Failed to list documents: {e}")
+        raise HTTPException(status_code=500, detail=public_error(e))
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document(document_id: str = Path(pattern=DOCUMENT_ID_PATTERN)):
+    """Убрать документ из базы знаний: фрагменты в PostgreSQL и векторы в Qdrant"""
+    try:
+        if not await knowledge_base.delete_document(document_id):
+            raise HTTPException(status_code=404, detail="Document not found")
+        await asyncio.to_thread(qdrant_service.delete_document_points, "pdf_chunks", document_id)
+        await db_service.execute("DELETE FROM pdf_documents WHERE document_id = $1", document_id)
+        return {"document_id": document_id, "deleted": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete document: {e}")
+        raise HTTPException(status_code=500, detail=public_error(e))
+
 
 @router.get("/collections")
 async def list_collections():

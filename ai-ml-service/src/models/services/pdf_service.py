@@ -2,11 +2,13 @@
 PDF processing service for text extraction, OCR, and chunking
 """
 
+import hashlib
 import logging
 import fitz  # PyMuPDF
 from typing import List, Dict, Any, Optional
 import re
 from ..config import settings
+from .chunking import chunk_pages
 from .safe_fetch import fetch_pdf
 
 logger = logging.getLogger(__name__)
@@ -137,30 +139,29 @@ class PDFProcessingService:
         return chunks
 
     async def process_pdf(self, pdf_url: str, document_id: str) -> Dict[str, Any]:
+        """Скачать PDF по адресу (безопасная загрузка) и обработать"""
+        return await self.process_pdf_bytes(await self.download_pdf(pdf_url), document_id, pdf_url)
+
+    async def process_pdf_bytes(self, pdf_bytes: bytes, document_id: str, pdf_url: Optional[str] = None) -> Dict[str, Any]:
         """Complete PDF processing pipeline"""
         try:
             logger.info(f"Starting PDF processing for {document_id}")
 
-            # Download PDF
-            pdf_bytes = await self.download_pdf(pdf_url)
-
             # Extract text
             text_extraction = self.extract_text_with_pymupdf(pdf_bytes)
-
-            # Combine all text
-            full_text = " ".join(page["text"] for page in text_extraction["pages"])
 
             # Perform OCR if text extraction yielded little content
             ocr_performed = False
             if text_extraction["total_chars"] < 1000:  # Threshold for OCR
                 logger.info("Text extraction yielded low content, performing OCR")
-                ocr_results = self.perform_ocr(pdf_bytes)
-                full_text = " ".join(page["text"] for page in ocr_results["pages"])
+                text_extraction = self.perform_ocr(pdf_bytes)
                 ocr_performed = True
-                text_extraction = ocr_results
 
-            # Chunk text
-            chunks = self.chunk_text(full_text)
+            full_text = " ".join(page["text"] for page in text_extraction["pages"])
+
+            # Фрагменты по страницам: у каждого цитаты есть номер страницы
+            chunks = chunk_pages(text_extraction["pages"], target=settings.chunk_size,
+                                 overlap=min(settings.chunk_overlap, settings.chunk_size // 4))
 
             return {
                 "document_id": document_id,
@@ -172,6 +173,7 @@ class PDFProcessingService:
                     "chunks_created": len(chunks)
                 },
                 "chunks": chunks,
+                "content_sha256": hashlib.sha256(pdf_bytes).hexdigest(),
                 "full_text": full_text[:1000] + "..." if len(full_text) > 1000 else full_text
             }
 

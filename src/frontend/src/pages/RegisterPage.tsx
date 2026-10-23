@@ -12,7 +12,6 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'user' | 'tour_guide' | 'auction_participant'>('user');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -42,7 +41,6 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
         username: username.trim(),
         email: email.trim(),
         password,
-        role
       });
 
       const { token, user_id, username: uname, email: uemail, role: urole } = response.data;
@@ -109,18 +107,6 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
             required
             autoComplete="new-password"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Account type</label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'user' | 'tour_guide' | 'auction_participant')}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          >
-            <option value="user">Visitor</option>
-            <option value="tour_guide">Tour Guide</option>
-            <option value="auction_participant">Auction Participant</option>
-          </select>
         </div>
         <button
           type="submit"

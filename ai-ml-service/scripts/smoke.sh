@@ -21,7 +21,7 @@ echo "2. доступ без токена закрыт, с токеном отк
 
 echo "3. миграции применены (таблицы есть)"
 TABLES=$("${COMPOSE[@]}" exec -T postgres psql -U smoke -d virtgal_ai -Atc "select string_agg(tablename, ',' order by tablename) from pg_tables where schemaname='public'")
-for t in ai_jobs ai_model_settings ai_model_settings_log artwork_analysis digitized_artworks external_artworks pdf_documents rag_queries schema_migrations; do
+for t in ai_jobs ai_model_settings ai_model_settings_log artwork_analysis digitized_artworks external_artworks kb_chunks kb_documents pdf_documents rag_queries schema_migrations; do
   [[ ",$TABLES," == *",$t,"* ]] || fail "нет таблицы $t (есть: $TABLES)"
 done
 
@@ -43,7 +43,17 @@ chat = next(t for t in d["tasks"] if t["task"] == "chat")
 assert chat["current_model"] == "google/gemma-4-26b-a4b-it" and chat["source"] == "admin" and chat["updated_by"] == "smoke", chat' || fail "выбор модели не пережил перезапуск"
 curl -fsS "${H[@]}" -X DELETE "$BASE/api/v1/model-settings/chat" >/dev/null || fail "DELETE model-settings"
 
-echo "6. образ: не root, нет лишних тяжёлых пакетов"
+echo "6. RAG: пустая база отвечает отказом без вызова модели; загрузка принимает только PDF; список документов открыт"
+curl -fsS "${H[@]}" -H 'Content-Type: application/json' -d '{"query":"Кто написал Чёрный квадрат?"}' "$BASE/api/v1/rag/query" | python3 -c 'import sys,json; d=json.load(sys.stdin); assert d["outcome"]=="no_sources" and d["insufficient_evidence"] and d["sources"]==[], d' || fail "RAG на пустой базе"
+curl -fsS "${H[@]}" "$BASE/api/v1/rag/documents" | python3 -c 'import sys,json; assert json.load(sys.stdin)["documents"]==[]' || fail "список документов"
+printf 'not a pdf' > /tmp/smoke-not-pdf.txt
+[ "$(code "${H[@]}" -F file=@/tmp/smoke-not-pdf.txt -F document_id=smoke-bad "$BASE/api/v1/pdfs/upload")" = "422" ] || fail "не-PDF принят"
+printf '%%PDF-1.4\n%%%%EOF\n' > /tmp/smoke.pdf
+UP=$(curl -fsS "${H[@]}" -F file=@/tmp/smoke.pdf -F document_id=smoke-doc -F access=staff "$BASE/api/v1/pdfs/upload") || fail "загрузка PDF"
+echo "$UP" | python3 -c 'import sys,json; d=json.load(sys.stdin); assert d["task_id"].startswith("pdf_") and d["status"]=="queued", d' || fail "ответ загрузки"
+[ "$(code "${H[@]}" -F file=@/tmp/smoke.pdf -F 'document_id=../etc' "$BASE/api/v1/pdfs/upload")" = "422" ] || fail "недопустимый document_id принят"
+
+echo "7. образ: не root, нет лишних тяжёлых пакетов"
 [ "$("${COMPOSE[@]}" exec -T ai-core id -u)" != "0" ] || fail "процесс работает от root"
 "${COMPOSE[@]}" exec -T ai-core python -c "import importlib.util as u, sys; sys.exit(1 if any(u.find_spec(m) for m in ('torch','cv2','celery')) else 0)" || fail "в образе остались torch/cv2/celery"
 

@@ -77,6 +77,10 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['POST', '/api/bidding/admin/participants/4/kyc', { anon: 401, user: 403, curator: 200 }],
   ['GET', '/api/bidding/admin/chains/-1/verify', { anon: 401, user: 403, curator: 200 }],
   ['POST', '/api/bidding/lots/abc/bids', { anon: 401, user: 403, admin: 200 }],       // не похоже на лот — правило по умолчанию
+  // база знаний RAG: пополняют сотрудники, удаляет куратор
+  ['POST', '/api/ai/process-pdf', { anon: 401, user: 403, bidder: 403, staff: 200, curator: 200, admin: 200 }],
+  ['GET', '/api/ai/rag/documents', { anon: 401, user: 403, staff: 200, curator: 200, admin: 200 }],
+  ['DELETE', '/api/ai/rag/documents/doc_1', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   // админка: только admin
   ['GET', '/api/admin/users', { anon: 401, user: 403, curator: 403, staff: 403, admin: 200 }],
   ['PUT', '/api/admin/users/4/role', { anon: 401, user: 403, curator: 403, admin: 200 }],
@@ -162,6 +166,20 @@ describe('политика доступа /api', () => {
     expect(guest.body.user).toBeNull();
     const signed = await request(app).get('/api/bidding/lots/5').set('Authorization', `Bearer ${TOKENS.user}`);
     expect(signed.body.user).toMatchObject({ user_id: 4 });
+  });
+
+  it('публичный RAG-вопрос: гость остаётся гостем, действительный токен определяет пользователя, плохой токен не мешает', async () => {
+    const guest = await request(app).post('/api/ai/rag-query').send({});
+    expect(guest.status).toBe(200);
+    expect(guest.body.user).toBeNull();
+    const staff = await request(app).post('/api/ai/rag-query').set('Authorization', `Bearer ${TOKENS.staff}`).send({});
+    expect(staff.body.user).toMatchObject({ user_id: 3, role: 'staff' });
+    const broken = await request(app).post('/api/ai/rag-query').set('Authorization', 'Bearer not.a.token').send({});
+    expect(broken.status).toBe(200);
+    expect(broken.body.user).toBeNull();
+    // токен читается только там, где это разрешено правилом
+    const chat = await request(app).post('/api/ai/chat').set('Authorization', `Bearer ${TOKENS.staff}`).send({});
+    expect(chat.body.user).toBeNull();
   });
 
   it('ошибка БД → 500, а не доступ', async () => {
