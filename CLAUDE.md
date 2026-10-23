@@ -76,6 +76,8 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 - Проект — `docs/AUCTION-DESIGN.md`; код: миграция `src/database/migrations/001_bidding_engine.sql` (таблицы и функции `bidding_*`, логика ставки и закрытия — в функциях БД),
   `src/services/bidding.ts`, `src/routes/bidding.ts` (`/api/bidding`, включается `BIDDING_ENABLED=true`), воркер `src/services/biddingWorker.ts`.
   Старые `auctions`/`auction_lots`/`bids` и раздел `/api/auctions` не затронуты.
+- Интерфейс: `/torgi` (список), `/torgi/:slug` (аукцион, заявка), `/torgi/lot/:id` (лот: таймер по серверным часам, ввод максимума, опрос по `version`), `/torgi/admin` (кабинет куратора);
+  код — `src/frontend/src/pages/Torgi*.tsx`, `lib/bidding.ts`, `lib/biddingAdmin.ts`, `components/torgi/`. Пункт «Торги» в шапке виден, только если `/api/public-config` отдаёт `bidding.enabled`.
 - Миграции приложения применяются вручную: `npm run migrate` (`docs/DEPLOY.md`). Тесты движка идут на настоящем PostgreSQL (`TEST_DATABASE_URL`, `src/test/database`).
 - Публичные ответы не содержат резерв, максимумы, id пользователей и продавца: участники — «№ N». Допуск: заявка → проверка личности (куратор) → решение с лимитом.
 - До запуска нужны решения владельца и юриста (раздел 8 проекта): юрлицо, режим торгов и срок извещения (`notice_days`), задаток, шкала шага.
