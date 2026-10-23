@@ -116,6 +116,12 @@ docker exec virtual-gallery wget -qO- http://virtgal-ai-core:8001/health/  # {"s
 Затем «Админ-панель → Модели ИИ»: таблица загружается, если приложение достучалось до ядра по `AI_CORE_URL` с тем же `INTERNAL_API_TOKEN`.
 Ошибка «ИИ-ядро отклонило запрос: проверьте INTERNAL_API_TOKEN» — токены в `.env` и у ядра разошлись (после правки `.env` — `up -d` для обоих).
 
+- **Расходы и лимиты.** Каждый вызов модели стоит денег, поэтому у ключа routerai.ru задайте месячный лимит. Дополнительно приложение
+  ограничивает платные запросы (`src/middleware/aiBudget.ts`): чат и RAG — 20 запросов за 10 минут с одного IP и 2000 в сутки на весь сайт,
+  анализ изображения и PDF — 10 за 10 минут и 100 в сутки (сотрудники, кураторы и администраторы тяжёлые запросы делают без ограничений).
+  Значения меняются в `.env` (`AI_CHAT_DAILY_LIMIT`, `AI_CHAT_IP_LIMIT`, `AI_HEAVY_DAILY_LIMIT`, `AI_HEAVY_IP_LIMIT`, `0` — без лимита),
+  после правки — `docker compose -f docker-compose.prod.yml up -d`. При исчерпании суточного лимита сайт отвечает 429 до 00:00 UTC
+  (в журнале приложения одна строка `[ai-budget] ...`).
 - **Обновление:** `git pull && docker compose -f docker-compose.prod.yml --profile ai up -d --build`; новые миграции применятся сами.
 - **Отключить ИИ:** `docker compose -f docker-compose.prod.yml --profile ai stop ai-core ai-qdrant ai-redis` и убрать `AI_CORE_URL` из `.env` — сайт вернётся к демо-режиму.
 - **Сборка на сервере** занимает несколько минут и до ≈0,5 ГБ памяти (pip). Если памяти не хватает — собрать образ в другом месте (`docker build -f ai-ml-service/docker/Dockerfile.python -t virtgal-ai-core:latest ai-ml-service`)
