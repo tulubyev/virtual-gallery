@@ -71,6 +71,15 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
   администраторы тяжёлые запросы делают без ограничений. Счётчики в памяти: при перезапуске приложения обнуляются.
 - Сидер (`scripts/populate-db.ts`) берёт пароль из `SEED_PASSWORD` или генерирует случайный; на боевую БД не запускать.
 
+## Торговый движок (аукцион v2)
+
+- Проект — `docs/AUCTION-DESIGN.md`; код: миграция `src/database/migrations/001_bidding_engine.sql` (таблицы и функции `bidding_*`, логика ставки и закрытия — в функциях БД),
+  `src/services/bidding.ts`, `src/routes/bidding.ts` (`/api/bidding`, включается `BIDDING_ENABLED=true`), воркер `src/services/biddingWorker.ts`.
+  Старые `auctions`/`auction_lots`/`bids` и раздел `/api/auctions` не затронуты.
+- Миграции приложения применяются вручную: `npm run migrate` (`docs/DEPLOY.md`). Тесты движка идут на настоящем PostgreSQL (`TEST_DATABASE_URL`, `src/test/database`).
+- Публичные ответы не содержат резерв, максимумы, id пользователей и продавца: участники — «№ N». Допуск: заявка → проверка личности (куратор) → решение с лимитом.
+- До запуска нужны решения владельца и юриста (раздел 8 проекта): юрлицо, режим торгов и срок извещения (`notice_days`), задаток, шкала шага.
+
 ## RAG (вопросы по документам)
 
 - Подробно — `docs/AI-RAG.md`. Гибридный поиск (Qdrant + PostgreSQL FTS `russian`, RRF), ответ по схеме с проверкой цитат и отказом при нехватке данных:

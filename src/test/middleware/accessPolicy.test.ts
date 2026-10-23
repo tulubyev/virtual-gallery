@@ -64,6 +64,19 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['GET', '/api/unknown-endpoint', { anon: 401, user: 200 }],
   ['POST', '/api/unknown-endpoint', { anon: 401, user: 403, curator: 403, admin: 200 }],
   ['POST', '/api/ai/analyze-image', { anon: 401, user: 200 }],
+  // торги (новый движок)
+  ['GET', '/api/bidding/auctions', { anon: 200 }],
+  ['GET', '/api/bidding/auctions/spring-2026', { anon: 200 }],
+  ['GET', '/api/bidding/lots/5', { anon: 200 }],
+  ['GET', '/api/bidding/lots/5/state', { anon: 200 }],
+  ['POST', '/api/bidding/lots/5/bids', { anon: 401, user: 200, bidder: 200 }],
+  ['POST', '/api/bidding/auctions/spring-2026/apply', { anon: 401, user: 200 }],
+  ['GET', '/api/bidding/me/registrations', { anon: 401, user: 200 }],
+  ['GET', '/api/bidding/admin/auctions', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
+  ['POST', '/api/bidding/admin/auctions/1/announce', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
+  ['POST', '/api/bidding/admin/participants/4/kyc', { anon: 401, user: 403, curator: 200 }],
+  ['GET', '/api/bidding/admin/chains/-1/verify', { anon: 401, user: 403, curator: 200 }],
+  ['POST', '/api/bidding/lots/abc/bids', { anon: 401, user: 403, admin: 200 }],       // не похоже на лот — правило по умолчанию
   // база знаний RAG: пополняют сотрудники, удаляет куратор
   ['POST', '/api/ai/process-pdf', { anon: 401, user: 403, bidder: 403, staff: 200, curator: 200, admin: 200 }],
   ['GET', '/api/ai/rag/documents', { anon: 401, user: 403, staff: 200, curator: 200, admin: 200 }],
@@ -146,6 +159,13 @@ describe('политика доступа /api', () => {
   it('в запрос попадает пользователь из БД', async () => {
     const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${TOKENS.staff}`);
     expect(res.body.user).toMatchObject({ user_id: 3, role: 'staff' });
+  });
+
+  it('чтение лота: токен читается (для «моего положения»), гость остаётся гостем', async () => {
+    const guest = await request(app).get('/api/bidding/lots/5');
+    expect(guest.body.user).toBeNull();
+    const signed = await request(app).get('/api/bidding/lots/5').set('Authorization', `Bearer ${TOKENS.user}`);
+    expect(signed.body.user).toMatchObject({ user_id: 4 });
   });
 
   it('публичный RAG-вопрос: гость остаётся гостем, действительный токен определяет пользователя, плохой токен не мешает', async () => {

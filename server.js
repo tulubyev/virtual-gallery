@@ -47,6 +47,11 @@ app.use('/api/ai', createAiBudget(aiBudgetOptionsFromEnv()));
 app.use('/api/auth', noCacheMiddleware, require('./src/routes/auth'));
 app.use('/api', noCacheMiddleware, require('./src/routes/health'));
 app.use('/api/ai', noCacheMiddleware, require('./src/routes/ai'));
+// Новый торговый движок: выключен, пока не применены миграции и не задан BIDDING_ENABLED=true (docs/DEPLOY.md)
+if (process.env.BIDDING_ENABLED === 'true') {
+  app.use('/api/bidding', noCacheMiddleware, require('./src/routes/bidding'));
+  require('./src/services/biddingWorker').startBiddingWorker();
+}
 app.use('/api/gallery', noCacheMiddleware, require('./src/routes/gallery'));
 app.use('/api/artworks', noCacheMiddleware, require('./src/routes/artworks'));
 app.use('/api/collections', noCacheMiddleware, require('./src/routes/collections'));
