@@ -75,6 +75,8 @@ class Settings(BaseSettings):
 
     # PDF Processing
     max_pdf_size: int = 50 * 1024 * 1024  # 50MB
+    # Каталог для загруженных PDF до обработки (в проде — том, чтобы очередь переживала перезапуск)
+    upload_spool_dir: str = "/tmp/vg-spool"
     chunk_size: int = 1000
     chunk_overlap: int = 200
 

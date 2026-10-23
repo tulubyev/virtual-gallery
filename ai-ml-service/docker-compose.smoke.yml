@@ -47,6 +47,7 @@ services:
       INTERNAL_API_TOKEN: smoke-internal-token-0123456789
       LLM_API_KEY: smoke-llm-key-not-real
       FETCH_ALLOWED_HOSTS: example.org
+      UPLOAD_SPOOL_DIR: /var/spool/vg           # каталог из образа: проверяем, что он доступен не-root пользователю
     ports:
       - "127.0.0.1:18001:8001"
     depends_on:

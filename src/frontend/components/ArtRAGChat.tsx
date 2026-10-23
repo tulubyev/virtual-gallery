@@ -17,7 +17,6 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   sources?: RAGQueryResponse['sources'];
-  confidence?: number;
   processingTime?: number;
 }
 
@@ -66,7 +65,6 @@ export const ArtRAGChat: React.FC<ArtRAGChatProps> = ({ className }) => {
         content: response.answer,
         timestamp: new Date(),
         sources: response.sources,
-        confidence: response.confidence,
         processingTime: response.processing_time
       };
 
@@ -162,21 +160,18 @@ export const ArtRAGChat: React.FC<ArtRAGChatProps> = ({ className }) => {
                           {message.sources.slice(0, 3).map((source, idx) => (
                             <div key={idx} className="flex items-center gap-1 text-xs">
                               <ExternalLink className="h-3 w-3" />
-                              <span className="truncate">{source.content_preview}</span>
-                              <Badge variant="outline" className="text-xs">
-                                {Math.round((source.score ?? 0) * 100)}%
-                              </Badge>
+                              <span className="truncate">{source.title || source.document_id}</span>
+                              {source.page != null && (
+                                <Badge variant="outline" className="text-xs">p. {source.page}</Badge>
+                              )}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {message.type === 'assistant' && message.confidence && (
-                      <div className="mt-2 text-xs opacity-75">
-                        Confidence: {Math.round(message.confidence)}%
-                        {message.processingTime && ` • ${message.processingTime.toFixed(1)}s`}
-                      </div>
+                    {message.type === 'assistant' && message.processingTime && (
+                      <div className="mt-2 text-xs opacity-75">{message.processingTime.toFixed(1)}s</div>
                     )}
 
                     <div className="text-xs opacity-50 mt-1">

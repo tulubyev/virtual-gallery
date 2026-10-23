@@ -15,7 +15,7 @@ from src.models.services.database import db_service
 DSN = os.environ.get("TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not DSN, reason="TEST_DATABASE_URL не задан")
 
-TABLES = ["schema_migrations", "digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs",
+TABLES = ["kb_chunks", "kb_documents", "schema_migrations", "digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs",
           "ai_model_settings", "ai_model_settings_log", "rag_queries", "artwork_analysis"]
 
 
@@ -43,7 +43,8 @@ async def test_clean_database_gets_every_table_the_code_writes_to(clean):
     applied = await migrate.apply_migrations(DSN)
     assert applied == [p.name for p in migrate.migration_files(migrate.DEFAULT_DIR)]
     assert {"digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs", "ai_model_settings",
-            "ai_model_settings_log", "rag_queries", "artwork_analysis", "schema_migrations"} <= await tables(clean)
+            "ai_model_settings_log", "rag_queries", "artwork_analysis", "schema_migrations", "kb_documents",
+            "kb_chunks"} <= await tables(clean)
     # категории PDF (002) на месте: именно их пишет routes/pdfs.py
     columns = {r["column_name"] for r in await clean.fetch(
         "SELECT column_name FROM information_schema.columns WHERE table_name = 'pdf_documents'")}
@@ -150,16 +151,20 @@ async def test_image_analysis_handler_upserts_into_artwork_analysis(migrated):
 async def test_pdf_handler_upserts_into_pdf_documents(migrated):
     from src.models.routes import pdfs
 
-    processed = {"chunks": [{"content": "Текст", "char_count": 5}], "processing_stats": {"total_pages": 1, "ocr_performed": False}}
+    processed = {"chunks": [{"content": "Текст документа о живописи", "char_count": 27, "chunk_index": 0, "page_number": 1}],
+                 "content_sha256": "a" * 64, "processing_stats": {"total_pages": 1, "ocr_performed": False}}
     payload = {"pdf_url": "https://example.org/a.pdf", "document_id": "doc-1", "auto_categorize": True}
     with patch.object(pdfs.pdf_service, "process_pdf", AsyncMock(return_value=processed)), \
          patch.object(pdfs.ai_service, "generate_embeddings", AsyncMock(return_value=[[0.1, 0.2]])), \
          patch.object(pdfs, "categorize_pdf_content", AsyncMock(return_value={
              "category": "art_history", "styles": ["барокко"], "artists": [], "techniques": [], "regions": [],
              "periods": [], "keywords": ["ключ"], "summary": "кратко"})), \
-         patch.object(pdfs.qdrant_service, "ensure_collection"), patch.object(pdfs.qdrant_service, "upsert_points"):
-        await pdfs.run_pdf_processing(payload, Ctx())
-        await pdfs.run_pdf_processing(payload, Ctx())                              # повтор — обновление
+         patch.object(pdfs.qdrant_service, "ensure_collection"), patch.object(pdfs.qdrant_service, "delete_document_points"), \
+         patch.object(pdfs.qdrant_service, "upsert_points"):
+        await pdfs.run_pdf_processing({**payload, "title": "Каталог", "access": "public"}, Ctx())
+        await pdfs.run_pdf_processing({**payload, "title": "Каталог", "access": "public"}, Ctx())   # повтор — обновление
+    kb = await migrated.fetch("SELECT page_number, access, content FROM kb_chunks WHERE document_id = 'doc-1'")
+    assert len(kb) == 1 and kb[0]["page_number"] == 1 and kb[0]["access"] == "public"
     rows = await migrated.fetch("SELECT category, summary, styles, keywords, processing_status FROM pdf_documents")
     assert len(rows) == 1 and rows[0]["category"] == "art_history" and rows[0]["processing_status"] == "completed"
     assert "барокко" in rows[0]["styles"] and "ключ" in rows[0]["keywords"]
@@ -172,8 +177,8 @@ async def test_rag_query_log_insert_works(migrated):
     from src.models.routes import rag
 
     source = inspect.getsource(rag)
-    assert "INSERT INTO rag_queries (query_text, response_text, response_sources, processing_time, relevance_score)" in source
-    await db_service.execute(
-        "INSERT INTO rag_queries (query_text, response_text, response_sources, processing_time, relevance_score) VALUES ($1, $2, $3, $4, $5)",
-        "вопрос", "ответ", "[]", 1234.56, 0.87)                                      # >999 с: прежний DECIMAL(5,2) переполнялся
+    insert = ("INSERT INTO rag_queries (user_id, query_text, response_text, response_sources, processing_time, outcome, access) "
+              "VALUES ($1, $2, $3, $4, $5, $6, $7)")
+    assert insert[:insert.index(" VALUES")] in source
+    await db_service.execute(insert, None, "вопрос", "ответ", "[]", 1234.56, "answered", "public")   # >999 с: прежний DECIMAL(5,2) переполнялся
     assert await migrated.fetchval("SELECT count(*) FROM rag_queries") == 1

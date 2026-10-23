@@ -40,18 +40,20 @@ export interface RAGQueryRequest {
 }
 
 export interface RAGSource {
-  title?: string;
-  url?: string;
-  relevance?: number;
-  snippet?: string;
-  content_preview?: string;
-  score?: number;
+  id: number;
+  document_id: string;
+  title: string | null;
+  page: number | null;
+  license: string | null;
+  cited: boolean;
+  content: string;
 }
 
 export interface RAGQueryResponse {
+  outcome: 'answered' | 'insufficient_evidence' | 'no_sources' | 'citations_failed';
   answer: string;
+  insufficient_evidence: boolean;
   sources: RAGSource[];
-  confidence: number;
   processing_time: number;
 }
 
@@ -100,7 +102,7 @@ class AIService {
       },
       body: JSON.stringify({
         query: request.query,
-        context_limit: request.contextLimit || 5,
+        contextLimit: request.contextLimit || 8,
       }),
     });
 

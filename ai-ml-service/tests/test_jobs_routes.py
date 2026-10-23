@@ -106,7 +106,8 @@ class Ctx:
 async def test_pdf_handler_indexes_and_returns_summary_without_chunks():
     from src.models.routes import pdfs
 
-    chunks = [{"content": "Первый фрагмент", "char_count": 15}, {"content": "Второй фрагмент", "char_count": 15}]
+    chunks = [{"content": "Первый фрагмент", "char_count": 15, "chunk_index": 0, "page_number": 1},
+              {"content": "Второй фрагмент", "char_count": 15, "chunk_index": 1, "page_number": 2}]
     processed = {"chunks": chunks, "processing_stats": {"total_pages": 2, "ocr_performed": False, "total_chars": 30, "chunks_created": 2}}
     categories = {"category": "art_history", "styles": ["реализм"], "artists": [], "techniques": [], "regions": [],
                   "periods": ["XIX век"], "keywords": ["пейзаж"], "summary": "Кратко."}
@@ -114,12 +115,18 @@ async def test_pdf_handler_indexes_and_returns_summary_without_chunks():
     with patch.object(pdfs.pdf_service, "process_pdf", AsyncMock(return_value=processed)), \
          patch.object(pdfs, "categorize_pdf_content", AsyncMock(return_value=categories)), \
          patch.object(pdfs.ai_service, "generate_embeddings", AsyncMock(return_value=[[0.1], [0.2]])), \
+         patch.object(pdfs.knowledge_base, "replace_document", AsyncMock()) as replace, \
          patch.object(pdfs.qdrant_service, "ensure_collection") as ensure, \
+         patch.object(pdfs.qdrant_service, "delete_document_points") as cleanup, \
          patch.object(pdfs.qdrant_service, "upsert_points") as upsert, \
          patch.object(pdfs.db_service, "execute", AsyncMock()) as execute:
         result = await pdfs.run_pdf_processing({"pdf_url": "https://example.org/a.pdf", "document_id": "doc1"}, ctx)
 
     ensure.assert_called_once_with("pdf_chunks")
+    cleanup.assert_called_once_with("pdf_chunks", "doc1")
+    # без явного решения документ виден только сотрудникам, а текст попадает в PostgreSQL
+    assert replace.call_args.kwargs["access"] == "staff" and replace.call_args.kwargs["chunks"] == chunks
+    assert all(p["payload"]["access"] == "staff" for p in upsert.call_args.args[1])
     assert [p["id"] for p in upsert.call_args.args[1]] == ["doc1_chunk_0", "doc1_chunk_1"]
     assert "pdf_documents" in execute.call_args.args[0]
     assert result["document_id"] == "doc1" and result["categories"]["category"] == "art_history"

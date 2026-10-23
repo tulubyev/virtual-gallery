@@ -71,6 +71,14 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
   администраторы тяжёлые запросы делают без ограничений. Счётчики в памяти: при перезапуске приложения обнуляются.
 - Сидер (`scripts/populate-db.ts`) берёт пароль из `SEED_PASSWORD` или генерирует случайный; на боевую БД не запускать.
 
+## RAG (вопросы по документам)
+
+- Подробно — `docs/AI-RAG.md`. Гибридный поиск (Qdrant + PostgreSQL FTS `russian`, RRF), ответ по схеме с проверкой цитат и отказом при нехватке данных:
+  `ai-ml-service/src/models/services/{chunking,retrieval,rag_answer,knowledge_base}.py`, таблицы `kb_documents`/`kb_chunks` (миграция 007).
+- Права: у документа `access` = `public` | `staff` (по умолчанию `staff`); уровень спрашивающего Express берёт из сессии (`/api/ai/rag-query`, правило с `identify` в `accessPolicy.ts`).
+  Загрузка PDF — сотрудники, публикация для всех и удаление — куратор/администратор.
+- Интерфейс — `/rag` (`src/frontend/src/pages/RAGPage.tsx`, `lib/rag.ts`). Оценка качества — `ai-ml-service/tools/rag_eval.py`, формат набора — `ai-ml-service/eval/README.md`.
+
 ## 3D-галерея
 
 - Подробно — `docs/ARCHITECTURE-gallery.md`. Модель зала и раскладка по размерам — `src/frontend/src/lib/gallery/roomSpec.ts`
