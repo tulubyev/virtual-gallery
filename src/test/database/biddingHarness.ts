@@ -27,7 +27,7 @@ export async function isolatedPool(max = 12): Promise<{ pool: Pool; schema: stri
 export interface Harness {
   pool: Pool;
   q: (sql: string, params?: any[]) => Promise<any[]>;
-  user: (name?: string) => Promise<number>;
+  user: (name?: string, role?: string) => Promise<number>;
   participant: (userId: number, kyc?: 'pending' | 'approved' | 'rejected') => Promise<void>;
   /** Аукцион с лотами, объявленный и открытый; возвращает идентификаторы. */
   openAuction: (opts?: AuctionOpts) => Promise<{ auctionId: number; lotIds: number[] }>;
@@ -56,12 +56,15 @@ export async function createHarness(): Promise<Harness> {
   const reset = async () => {
     await pool.query(`DROP SCHEMA "${schema}" CASCADE; CREATE SCHEMA "${schema}";`);
     await pool.query(`
-      CREATE TABLE users (user_id SERIAL PRIMARY KEY, username TEXT, role TEXT DEFAULT 'user');
+      CREATE TABLE users (user_id SERIAL PRIMARY KEY, username TEXT, email TEXT, role TEXT DEFAULT 'user');
       CREATE TABLE artworks (artwork_id SERIAL PRIMARY KEY, title TEXT);`);
     await applyMigrations(pool as any, undefined, () => undefined);
   };
 
-  const user = async (name = 'u') => (await q('INSERT INTO users (username) VALUES ($1) RETURNING user_id', [`${name}${++counter}`]))[0].user_id;
+  const user = async (name = 'u', role = 'user') => {
+    const handle = `${name}${++counter}`;
+    return (await q('INSERT INTO users (username, email, role) VALUES ($1, $2, $3) RETURNING user_id', [handle, `${handle}@test.io`, role]))[0].user_id;
+  };
 
   const participant = async (userId: number, kyc: 'pending' | 'approved' | 'rejected' = 'approved') => {
     await q(`INSERT INTO bidding_participants (user_id, kind, full_name, phone, kyc_status) VALUES ($1, 'person', 'Тест Тестов', '+70000000000', $2)`, [userId, kyc]);

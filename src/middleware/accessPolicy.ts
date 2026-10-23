@@ -22,6 +22,8 @@ export interface Rule {
   access: Access;
   /** Группа regex, содержащая id пользователя: доступ только владельцу (админ — исключение). */
   ownerGroup?: number;
+  /** Для 'public': если запрос пришёл с действительным токеном, положить пользователя в req.user (гость остаётся гостем). */
+  identify?: boolean;
 }
 
 const GET = ['GET', 'HEAD'] as const;
@@ -69,6 +71,13 @@ export const RULES: readonly Rule[] = [
   { methods: GET, path: /^\/auctions\/(transactions)$/, access: BIDDERS },
   { methods: GET, path: /^\/auctions(\/(stats|history|[^/]+(\/(lots|bids))?))?$/, access: 'public' },
 
+  // ── торги (новый движок, BIDDING_ENABLED): чтение лотов открыто, ставки и заявки — после входа, управление — куратор ──
+  // identify: вошедший пользователь видит на лоте своё положение (лидирует ли он и какой у него максимум)
+  { methods: GET, path: /^\/bidding\/(auctions(\/[^/]+)?|lots\/\d+(\/state)?)$/, access: 'public', identify: true },
+  { methods: ['POST'], path: /^\/bidding\/(lots\/\d+\/bids|auctions\/[^/]+\/apply)$/, access: 'auth' },
+  { methods: GET, path: /^\/bidding\/me\/registrations$/, access: 'auth' },
+  { methods: ALL, path: /^\/bidding\/admin(\/.*)?$/, access: CURATORS },
+
   // ── ИИ: лёгкие запросы открыты (с лимитом), тяжёлые — после входа ───
   { methods: ['POST'], path: /^\/ai\/(chat|rag-query|describe-artwork|similar-artworks|calculate-slots)$/, access: 'public' },
   { methods: GET, path: /^\/ai\/analysis\/[^/]+$/, access: 'public' },
@@ -109,7 +118,17 @@ export async function accessControl(req: Request, res: Response, next: NextFunct
 
   const rule = findRule(req.method, req.path);
   const access = rule ? rule.access : defaultAccess(req.method);
-  if (access === 'public') return next();
+  if (access === 'public') {
+    if (rule?.identify) {
+      try {
+        const session = await authenticate(req);
+        if (!('error' in session)) (req as any).user = session;
+      } catch (error) {
+        console.error('[access] optional auth failed:', (error as Error).message);   // остаёмся гостем
+      }
+    }
+    return next();
+  }
 
   try {
     const session = await authenticate(req);
