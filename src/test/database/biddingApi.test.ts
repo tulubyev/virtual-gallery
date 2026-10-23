@@ -17,6 +17,7 @@ process.env.JWT_SECRET = SECRET;
 import { accessControl } from '../../middleware/accessPolicy';
 import biddingRouter from '../../routes/bidding';
 import { tick } from '../../services/bidding';
+import { getLegalDoc } from '../../services/legalDocs';
 
 describeDb('API торгов (PostgreSQL)', () => {
   let h: Harness;
@@ -40,11 +41,16 @@ describeDb('API торгов (PostgreSQL)', () => {
     app.use('/api/bidding', biddingRouter);
     curator = await h.user('curator', 'curator');
     [alice, bob, stranger, plain] = [await h.user('alice'), await h.user('bob'), await h.user('stranger'), await h.user('plain')];
+    process.env.BIDDING_ALLOW_DRAFT_RULES = 'true';
     jest.spyOn(console, 'error').mockImplementation((...a) => { if (process.env.DEBUG_BIDDING) process.stderr.write(a.join(' ') + '\n'); });
   });
   afterAll(async () => { await h.close(); });
 
-  const profile = { kind: 'person', full_name: 'Иван Иванов', phone: '+7 900 000-00-00', rules_accepted: true, rules_version: 'черновик-1' };
+  // Заявка с актуальными версиями документов; черновики разрешены флагом (в проде без него заявки не принимаются)
+  const profile = {
+    kind: 'person', full_name: 'Иван Иванов', phone: '+7 900 000-00-00',
+    rules_accepted: true, rules_version: getLegalDoc('auction-rules')!.ref, pd_consent: true, pd_version: getLegalDoc('pd-consent')!.ref,
+  };
   const inFuture = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString();
 
   /** Аукцион, созданный через API куратора: объявлен, торги открыты (время сдвинуто напрямую в БД). */
@@ -233,6 +239,32 @@ describeDb('API торгов (PostgreSQL)', () => {
       const another = await liveAuction();
       expect((await api.post(`/auctions/${another.slug}/apply`, profile, bob)).status).toBe(403);
       await h.q(`UPDATE bidding_participants SET kyc_status = 'approved' WHERE user_id = $1`, [bob]);     // вернуть для следующих тестов
+    });
+
+    it('версии документов: заявка принимается только с актуальными версиями, утверждёнными в проде; принятые версии записываются', async () => {
+      const { slug, auctionId } = await liveAuction();
+      const stale = await api.post(`/auctions/${slug}/apply`, { ...profile, rules_version: '0.0#deadbeef' }, alice);
+      expect(stale.status).toBe(409);
+      expect(stale.body.code).toBe('rules_changed');
+      expect((await api.post(`/auctions/${slug}/apply`, { ...profile, pd_version: 'x' }, alice)).body.code).toBe('pd_changed');
+      expect((await api.post(`/auctions/${slug}/apply`, { ...profile, pd_consent: false }, alice)).body.code).toBe('pd_consent_required');
+      expect((await api.post(`/auctions/${slug}/apply`, { ...profile, pd_consent: undefined }, alice)).status).toBe(400);
+      expect((await api.post(`/auctions/${slug}/apply`, { ...profile, rules_accepted: false }, alice)).body.code).toBe('rules_required');
+
+      // без флага черновики не принимаются: запуск с каркасом вместо правил невозможен
+      delete process.env.BIDDING_ALLOW_DRAFT_RULES;
+      try {
+        const blocked = await api.post(`/auctions/${slug}/apply`, profile, alice);
+        expect(blocked.status).toBe(503);
+        expect(blocked.body.code).toBe('rules_not_approved');
+      } finally { process.env.BIDDING_ALLOW_DRAFT_RULES = 'true'; }
+
+      expect((await api.post(`/auctions/${slug}/apply`, profile, alice)).status).toBe(201);
+      await api.post('/admin/participants/' + alice + '/kyc', { status: 'approved' }, curator);
+      const row = (await api.get(`/admin/auctions/${auctionId}/registrations`, curator)).body.registrations[0];
+      expect(row.rules_version).toBe(profile.rules_version);
+      expect(row.pd_consent_version).toBe(profile.pd_version);
+      expect(row.pd_consent_at).not.toBeNull();
     });
 
     it('отклонение заявки куратором: участник не может ставить', async () => {

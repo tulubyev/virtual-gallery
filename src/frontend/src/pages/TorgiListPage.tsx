@@ -44,6 +44,12 @@ const TorgiListPage: React.FC = () => {
           </li>
         ))}
       </ul>
+      <p className="mt-10 text-sm text-gray-500">
+        Документы:{' '}
+        <Link to="/legal/auction-rules" className="underline">правила аукциона</Link>,{' '}
+        <Link to="/legal/privacy-policy" className="underline">политика обработки персональных данных</Link>,{' '}
+        <Link to="/legal/pd-consent" className="underline">согласие на обработку персональных данных</Link>.
+      </p>
     </Shell>
   );
 };

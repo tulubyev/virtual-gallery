@@ -118,11 +118,12 @@ export async function placeBid(input: {
 
 export type ApplyResult =
   | { ok: true; registration: { status: string; pseudonym_no: number | null } }
-  | { ok: false; code: 'no_such_auction' | 'registration_closed' | 'kyc_rejected' | 'rules_required' | 'standing' };
+  | { ok: false; code: 'no_such_auction' | 'registration_closed' | 'kyc_rejected' | 'rules_required' | 'pd_consent_required' | 'standing' };
 
 export async function applyForAuction(slug: string, userId: number, profile: { kind: string; full_name: string; phone: string },
-                                      rulesAccepted: boolean, rulesVersion: string): Promise<ApplyResult> {
+                                      rulesAccepted: boolean, rulesVersion: string, pdConsentVersion: string | null): Promise<ApplyResult> {
   if (!rulesAccepted) return { ok: false, code: 'rules_required' };
+  if (!pdConsentVersion) return { ok: false, code: 'pd_consent_required' };
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -142,8 +143,9 @@ export async function applyForAuction(slug: string, userId: number, profile: { k
       ON CONFLICT (user_id) DO UPDATE SET kind = EXCLUDED.kind, full_name = EXCLUDED.full_name, phone = EXCLUDED.phone
       WHERE bidding_participants.kyc_status = 'pending'`, [userId, profile.kind, profile.full_name, profile.phone]);
     await client.query(`
-      INSERT INTO bidding_registrations (auction_id, user_id, rules_accepted_at, rules_version) VALUES ($1, $2, now(), $3)
-      ON CONFLICT (auction_id, user_id) DO NOTHING`, [auction.auction_id, userId, rulesVersion]);
+      INSERT INTO bidding_registrations (auction_id, user_id, rules_accepted_at, rules_version, pd_consent_at, pd_consent_version)
+      VALUES ($1, $2, now(), $3, now(), $4)
+      ON CONFLICT (auction_id, user_id) DO NOTHING`, [auction.auction_id, userId, rulesVersion, pdConsentVersion]);
     const registration = (await client.query(
       'SELECT status, pseudonym_no FROM bidding_registrations WHERE auction_id = $1 AND user_id = $2', [auction.auction_id, userId])).rows[0];
     await client.query('COMMIT');
@@ -265,7 +267,7 @@ export async function withdrawLot(lotId: number, actorId: number, reason: string
 export async function listRegistrations(auctionId: number) {
   const { rows } = await pool.query(`
     SELECT r.user_id, u.username, u.email, p.full_name, p.phone, p.kind, p.kyc_status, p.standing,
-           r.status, r.pseudonym_no, r.limit_kop, r.deposit_kop, r.rules_accepted_at, r.rules_version, r.decided_at, r.reason
+           r.status, r.pseudonym_no, r.limit_kop, r.deposit_kop, r.rules_accepted_at, r.rules_version, r.pd_consent_at, r.pd_consent_version, r.decided_at, r.reason
     FROM bidding_registrations r
     JOIN bidding_participants p ON p.user_id = r.user_id
     JOIN users u ON u.user_id = r.user_id

@@ -71,6 +71,8 @@ export const RULES: readonly Rule[] = [
   { methods: GET, path: /^\/auctions\/(transactions)$/, access: BIDDERS },
   { methods: GET, path: /^\/auctions(\/(stats|history|[^/]+(\/(lots|bids))?))?$/, access: 'public' },
 
+  { methods: GET, path: /^\/legal(\/[a-z-]+)?$/, access: 'public' },   // правила аукциона, политика и согласие на обработку ПД
+
   // ── торги (новый движок, BIDDING_ENABLED): чтение лотов открыто, ставки и заявки — после входа, управление — куратор ──
   // identify: вошедший пользователь видит на лоте своё положение (лидирует ли он и какой у него максимум)
   { methods: GET, path: /^\/bidding\/(auctions(\/[^/]+)?|lots\/\d+(\/state)?)$/, access: 'public', identify: true },
