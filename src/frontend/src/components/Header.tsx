@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Palette, LayoutDashboard, LogOut, Menu, X, ChevronDown, Shield, Users, Gavel, User as UserIcon, Sparkles } from 'lucide-react';
 import { User } from '@/types';
+import { loadBiddingEnabled } from '@/lib/bidding';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -70,9 +71,17 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navLinks = currentUser
+  // Пункт «Торги» появляется, только когда торговый движок включён на сервере
+  const [biddingOn, setBiddingOn] = useState(false);
+  useEffect(() => { let alive = true; loadBiddingEnabled().then(on => { if (alive) setBiddingOn(on); }); return () => { alive = false; }; }, []);
+
+  const baseLinks = currentUser
     ? roleNav[currentUser.role] ?? publicNav
     : publicNav;
+  const isCurator = currentUser?.role === 'curator' || currentUser?.role === 'admin';
+  const navLinks = biddingOn
+    ? [...baseLinks, { title: 'Торги', path: '/torgi' }, ...(isCurator ? [{ title: 'Кабинет торгов', path: '/torgi/admin' }] : [])]
+    : baseLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
