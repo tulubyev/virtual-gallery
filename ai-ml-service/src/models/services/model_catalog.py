@@ -82,7 +82,9 @@ class Curated(NamedTuple):
     cautions: Optional[Dict[str, str]] = None        # предупреждения по задачам ("*" — для любой)
 
 
-_PIN = "Строгая JSON-схема есть не у всех провайдеров routerai: закрепите провайдера (LLM_PROVIDER_ONLY=anthropic) без запасных."
+_PIN = ("Строгая JSON-схема есть не у всех провайдеров routerai; без неё ядро само переходит на запасной разбор ответа. "
+        "Закреплять провайдера (LLM_PROVIDER_ONLY) стоит, только если все задачи идут на эту модель: настройка общая и "
+        "ломает запросы к моделям других вендоров.")
 
 CURATED: Tuple[Curated, ...] = (
     Curated("google/gemini-3.8-flash", "Gemini 3.8 Flash", "Google", "balanced", (81.53, 407.64), True, True, 1048576, flex=True,

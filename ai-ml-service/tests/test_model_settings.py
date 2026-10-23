@@ -190,7 +190,8 @@ async def test_warnings_for_cautions_custom_and_no_schema():
     luna = await model_catalog.validate_choice("vision_front", "global", "openai/gpt-6-luna")
     assert luna.ok and any("воздержание" in w for w in luna.warnings)
     haiku = await model_catalog.validate_choice("vision_front", "global", "anthropic/claude-haiku-5.5")
-    assert haiku.ok and any("LLM_PROVIDER_ONLY" in w for w in haiku.warnings)
+    # подсказка про закрепление провайдера обязана предупреждать, что настройка общая для всех задач
+    assert haiku.ok and any("LLM_PROVIDER_ONLY" in w and "общая" in w for w in haiku.warnings)
     custom = await model_catalog.validate_choice("bulk", "global", "acme/new-model-1")
     assert custom.ok and any("нет в нашем списке" in w for w in custom.warnings)
     schemaless = await model_catalog.validate_choice("bulk", "global", "acme/no-schema")

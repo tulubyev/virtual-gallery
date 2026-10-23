@@ -99,7 +99,9 @@ docker run --rm --network traefik-public -e PGPASSWORD="$AIPW" postgres:16-alpin
 # 3. Секреты ядра — в отдельный .env.ai (приложение их не получает)
 cp .env.ai.example .env.ai && chmod 600 .env.ai
 #    DATABASE_URL=postgresql://virtgal_ai:$AIPW@172.28.0.1:5432/virtgal_ai
-#    LLM_API_KEY (routerai.ru), S3_* (те же, что у приложения), при необходимости LLM_MODE=ru-only, LLM_PROVIDER_ONLY=anthropic
+#    LLM_API_KEY (routerai.ru), S3_* (те же, что у приложения), при необходимости LLM_MODE=ru-only.
+#    LLM_PROVIDER_ONLY оставьте пустым: настройка общая для всех задач и ломает модели других вендоров
+#    (подробнее — docs/AI-MODEL-SELECTION.md)
 
 # 4. Запуск (миграции БД применяются автоматически при старте ядра; приложение перезапустится с новым .env)
 docker compose -f docker-compose.prod.yml --profile ai up -d --build
