@@ -34,6 +34,7 @@ const TorgiListPage = lazy(() => import('./pages/TorgiListPage'));
 const TorgiAuctionPage = lazy(() => import('./pages/TorgiAuctionPage'));
 const TorgiLotPage = lazy(() => import('./pages/TorgiLotPage'));
 const TorgiAdminPage = lazy(() => import('./pages/TorgiAdminPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
 // Prefetch high-traffic route chunks after the page is interactive so
@@ -275,6 +276,7 @@ const App: React.FC = () => {
                 <Route path="/torgi/admin" element={guard(['curator', 'admin'], <TorgiAdminPage />)} />
                 <Route path="/torgi/lot/:id" element={<TorgiLotPage />} />
                 <Route path="/torgi/:slug" element={<TorgiAuctionPage />} />
+                <Route path="/legal/:slug" element={<LegalPage />} />
 
                 {/* Дашборды — только для авторизованных пользователей */}
                 <Route

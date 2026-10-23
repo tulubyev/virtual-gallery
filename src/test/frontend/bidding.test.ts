@@ -119,6 +119,8 @@ describe('запросы', () => {
     await expect(placeBid(1, 1, 'r')).rejects.toThrow('Войдите в аккаунт');
     mocked.mockResolvedValueOnce(reply(false, 500, { error: 'relation "x" does not exist' }));
     await expect(listAuctions()).rejects.toThrow('Не удалось загрузить аукционы.');
+    mocked.mockResolvedValueOnce(reply(false, 503, { error: 'Правила аукциона ещё не утверждены: приём заявок не открыт.', code: 'rules_not_approved' }));
+    await expect(listAuctions()).rejects.toMatchObject({ message: 'Правила аукциона ещё не утверждены: приём заявок не открыт.', code: 'rules_not_approved' });
     mocked.mockResolvedValueOnce({ ok: false, status: 502, json: async () => { throw new Error('нет тела'); } });
     await expect(getLot(1)).rejects.toThrow('Не удалось загрузить лот.');
   });
@@ -127,7 +129,7 @@ describe('запросы', () => {
     mocked.mockResolvedValue(reply(true, 200, { changed: false }));
     await pollLot(9, 4);
     expect(mocked.mock.calls[0][0]).toBe('/api/bidding/lots/9/state?since=4');
-    await applyForAuction('spring-2027', { kind: 'person', full_name: 'Иван', phone: '+79000000000', rules_accepted: true });
+    await applyForAuction('spring-2027', { kind: 'person', full_name: 'Иван', phone: '+79000000000', rules_accepted: true, rules_version: '0.1#abcd1234', pd_consent: true, pd_version: '0.1#ef567890' });
     expect(mocked.mock.calls[1][0]).toBe('/api/bidding/auctions/spring-2027/apply');
     await admin.decideRegistration(3, 8, true, 50000);
     expect(mocked.mock.calls[2][0]).toBe('/api/bidding/admin/auctions/3/registrations/8/decision');

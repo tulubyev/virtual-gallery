@@ -4,6 +4,7 @@
 import express, { Request, Response } from 'express';
 import { createBidLimiter } from '../middleware/bidLimiter';
 import * as bidding from '../services/bidding';
+import { checkConsents } from '../services/legalDocs';
 import {
   ADMIN_REJECTIONS, bidRejection, intInRange, isSlug, isUuid, parseId, parseInstant, parseRub, text,
 } from '../services/biddingInput';
@@ -99,9 +100,14 @@ router.post('/auctions/:slug/apply', async (req, res) => {
   const fullName = text(req.body?.full_name, 200);
   const phone = typeof req.body?.phone === 'string' && /^\+?[0-9 ()-]{10,20}$/.test(req.body.phone.trim()) ? req.body.phone.trim() : null;
   if (!kind || !fullName || !phone) return fail(res, 400, 'Укажите тип участника, ФИО (или название) и телефон.');
+  if (req.body?.rules_accepted !== true) return fail(res, 400, 'Нужно принять правила аукциона.', { code: 'rules_required' });
+  if (req.body?.pd_consent !== true) return fail(res, 400, 'Нужно дать согласие на обработку персональных данных.', { code: 'pd_consent_required' });
+  // Принять можно только актуальные и утверждённые версии документов; принятая версия записывается в заявку
+  const consents = checkConsents(req.body?.rules_version, req.body?.pd_version);
+  if (!consents.ok) return fail(res, consents.code === 'rules_not_approved' || consents.code === 'docs_missing' ? 503 : 409, consents.message!, { code: consents.code });
   try {
     const result = await bidding.applyForAuction(req.params.slug, user.user_id, { kind, full_name: fullName, phone },
-      req.body?.rules_accepted === true, text(req.body?.rules_version, 40) ?? 'draft');
+      true, req.body.rules_version, req.body.pd_version);
     if ('registration' in result) return res.status(201).json(result.registration);
     const messages: Record<string, [number, string]> = {
       no_such_auction: [404, 'Аукцион не найден'],
@@ -109,6 +115,7 @@ router.post('/auctions/:slug/apply', async (req, res) => {
       kyc_rejected: [403, 'Ваша заявка на участие ранее отклонена. Обратитесь к организатору.'],
       standing: [403, 'Участие приостановлено. Обратитесь к организатору.'],
       rules_required: [400, 'Нужно принять правила аукциона.'],
+      pd_consent_required: [400, 'Нужно дать согласие на обработку персональных данных.'],
     };
     const [status, message] = messages[result.code];
     return fail(res, status, message, { code: result.code });

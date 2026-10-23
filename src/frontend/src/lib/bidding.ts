@@ -59,7 +59,8 @@ async function problem(res: Response, fallback: string): Promise<ApiProblem> {
   try { body = await res.json(); } catch { /* тела нет */ }
   if (res.status === 401) return new ApiProblem('Войдите в аккаунт, чтобы продолжить.', 401, body?.code);
   if (res.status === 403 && !body?.error) return new ApiProblem('Недостаточно прав.', 403);
-  if (res.status >= 500) return new ApiProblem(fallback, res.status);
+  // Сбои сервера скрываем за общим текстом, а осознанные отказы с кодом (например, «правила не утверждены», 503) показываем
+  if (res.status >= 500 && !body?.code) return new ApiProblem(fallback, res.status);
   return new ApiProblem(typeof body?.error === 'string' ? body.error : fallback, res.status, body?.code, body?.min_bid_kop);
 }
 
@@ -109,7 +110,11 @@ export const placeBid = (lotId: number, maxRub: number, requestId: string, expec
   send<BidAccepted>(`/api/bidding/lots/${lotId}/bids`, 'POST',
     { max_rub: maxRub, request_id: requestId, ...(expectedVersion === undefined ? {} : { expected_version: expectedVersion }) }, 'Не удалось отправить ставку.');
 
-export interface ApplyInput { kind: 'person' | 'legal_entity' | 'sole_proprietor'; full_name: string; phone: string; rules_accepted: boolean; rules_version?: string }
+export interface ApplyInput {
+  kind: 'person' | 'legal_entity' | 'sole_proprietor'; full_name: string; phone: string;
+  /** Принятые версии документов (поле `ref` из /api/legal): сервер сверяет их с текущими. */
+  rules_accepted: boolean; rules_version: string; pd_consent: boolean; pd_version: string;
+}
 export const applyForAuction = (slug: string, input: ApplyInput) =>
   send<{ status: string; pseudonym_no: number | null }>(`/api/bidding/auctions/${encodeURIComponent(slug)}/apply`, 'POST', input, 'Не удалось отправить заявку.');
 
