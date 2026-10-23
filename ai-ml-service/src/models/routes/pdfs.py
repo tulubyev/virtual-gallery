@@ -2,27 +2,35 @@
 PDF processing routes
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, field_validator
-from typing import Dict, Any, Optional
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Dict, Any, Literal, Optional
 import logging
 import json
 from datetime import datetime
 
-from ..exceptions import AIMLException, public_error
+from ..exceptions import AIMLException, FetchError, public_error
 from ..services.pdf_service import pdf_service
 from ..services.safe_fetch import check_request_url
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
-from ..services import job_queue
+from ..config import settings
+from ..services import job_queue, knowledge_base, spool
+
+EMBEDDING_BATCH = 64     # фрагментов за один вызов API эмбеддингов
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+DOCUMENT_ID_PATTERN = r"^[A-Za-z0-9_.-]{1,100}$"
+
+
 class PDFProcessingRequest(BaseModel):
-    pdf_url: str
-    document_id: str
+    # Источник — ровно один: адрес (скачивается безопасно) либо файл, загруженный в ядро через /upload
+    pdf_url: Optional[str] = None
+    spool_file: Optional[str] = None
+    document_id: str = Field(pattern=DOCUMENT_ID_PATTERN)
     user_id: Optional[int] = None
     category: Optional[str] = None
     styles: Optional[list] = None
@@ -30,11 +38,23 @@ class PDFProcessingRequest(BaseModel):
     techniques: Optional[list] = None
     regions: Optional[list] = None
     auto_categorize: bool = True
+    title: Optional[str] = None
+    # Кто увидит документ в RAG. По умолчанию — только сотрудники: публиковать нужно сознательно.
+    access: Literal["public", "staff"] = "staff"
+    license: Optional[str] = None
 
     @field_validator("pdf_url")
     @classmethod
     def _pdf_url_allowed(cls, value):
-        return check_request_url(value)
+        return check_request_url(value) if value is not None else value
+
+    @model_validator(mode="after")
+    def _exactly_one_source(self):
+        if (self.pdf_url is None) == (self.spool_file is None):
+            raise ValueError("нужен ровно один источник: pdf_url или spool_file")
+        if self.spool_file is not None and not spool.NAME.match(self.spool_file):
+            raise ValueError("недопустимый spool_file")
+        return self
 
 class PDFProcessingResponse(BaseModel):
     task_id: str
@@ -55,6 +75,48 @@ async def process_pdf(request: PDFProcessingRequest):
         raise HTTPException(status_code=e.status_code, detail=e.message)
     except Exception as e:
         logger.error(f"PDF processing request failed: {e}")
+        raise HTTPException(status_code=500, detail=public_error(e))
+
+@router.post("/upload", response_model=PDFProcessingResponse)
+async def upload_pdf(
+    file: UploadFile = File(...),
+    document_id: str = Form(..., pattern=DOCUMENT_ID_PATTERN),
+    title: Optional[str] = Form(None, max_length=300),
+    access: Literal["public", "staff"] = Form("staff"),
+    license: Optional[str] = Form(None, max_length=300),
+    category: Optional[str] = Form(None, max_length=100),
+    auto_categorize: bool = Form(True),
+    user_id: Optional[int] = Form(None),
+):
+    """Принять PDF файлом, сохранить во временный каталог и поставить обработку в очередь"""
+    limit = settings.max_pdf_size
+    data = bytearray()
+    while True:
+        part = await file.read(1024 * 1024)
+        if not part:
+            break
+        data.extend(part)
+        if len(data) > limit:
+            raise HTTPException(status_code=413, detail="Файл слишком большой")
+    if not data.startswith(b"%PDF-"):
+        raise HTTPException(status_code=422, detail="Файл не является PDF")
+    try:
+        spool.purge_old()
+        name = spool.save(bytes(data))
+        request = PDFProcessingRequest(
+            spool_file=name, document_id=document_id, title=title, access=access, license=license,
+            category=category, auto_categorize=auto_categorize, user_id=user_id)
+        try:
+            job_id = await job_queue.enqueue("pdf_processing", request.model_dump(), created_by=user_id)
+        except Exception:
+            spool.remove(name)
+            raise
+        return PDFProcessingResponse(task_id=job_queue.task_id_for("pdf_processing", job_id), status="queued",
+                                     message="PDF processing started")
+    except AIMLException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:
+        logger.error(f"PDF upload failed: {e}")
         raise HTTPException(status_code=500, detail=public_error(e))
 
 @router.get("/processing/{task_id}")
@@ -107,9 +169,17 @@ async def run_pdf_processing(payload: dict, ctx) -> dict:
     """Обработчик очереди: текст, чанки, категории, эмбеддинги, Qdrant и запись документа."""
     request = PDFProcessingRequest(**payload)
     logger.info(f"Processing PDF {ctx.task_id}")
+    source_label = request.pdf_url or f"upload:{request.document_id}"
 
     await ctx.progress(10, "Извлечение текста")
-    processing_result = await pdf_service.process_pdf(request.pdf_url, request.document_id)
+    if request.spool_file:
+        try:
+            data = spool.read(request.spool_file)
+        except FileNotFoundError:
+            raise FetchError("Загруженный файл не найден (мог быть удалён при перезапуске). Загрузите документ заново.")
+        processing_result = await pdf_service.process_pdf_bytes(data, request.document_id)
+    else:
+        processing_result = await pdf_service.process_pdf(request.pdf_url, request.document_id)
 
     categories = {
         "category": request.category,
@@ -136,35 +206,47 @@ async def run_pdf_processing(payload: dict, ctx) -> dict:
             categories["keywords"] = ai_categories.get("keywords") or []
             categories["summary"] = ai_categories.get("summary")
 
-    chunk_texts = [chunk["content"] for chunk in processing_result["chunks"]]
-    if chunk_texts:
-        await ctx.progress(60, "Эмбеддинги и индекс")
-        embeddings = await ai_service.generate_embeddings(chunk_texts)
+    chunks = processing_result["chunks"]
+    embeddings = []
+    if chunks:
+        await ctx.progress(60, "Эмбеддинги")
+        chunk_texts = [chunk["content"] for chunk in chunks]
+        for start in range(0, len(chunk_texts), EMBEDDING_BATCH):
+            embeddings.extend(await ai_service.generate_embeddings(chunk_texts[start:start + EMBEDDING_BATCH]))
 
-        points = []
-        for i, (chunk, embedding) in enumerate(zip(processing_result["chunks"], embeddings)):
-            points.append({
-                "id": f"{request.document_id}_chunk_{i}",
-                "vector": embedding,
-                "payload": {
-                    "document_id": request.document_id,
-                    "chunk_index": i,
-                    "content": chunk["content"],
-                    "char_count": chunk["char_count"],
-                    "page_number": chunk.get("page_number"),
-                    "type": "pdf_chunk",
-                    "category": categories["category"],
-                    "styles": categories["styles"],
-                    "artists": categories["artists"],
-                    "techniques": categories["techniques"],
-                    "regions": categories["regions"],
-                    "periods": categories["periods"],
-                    "keywords": categories["keywords"]
-                }
-            })
+    await ctx.progress(80, "Индекс")
+    # Сначала PostgreSQL (текст, страницы, права), затем Qdrant (векторы); повтор задачи безопасен
+    await knowledge_base.replace_document(
+        request.document_id, title=request.title, access=request.access, license=request.license,
+        source_url=source_label, content_sha256=processing_result.get("content_sha256"),
+        pages_count=processing_result["processing_stats"]["total_pages"], chunks=chunks)
 
-        collection_name = "pdf_chunks"
-        qdrant_service.ensure_collection(collection_name)
+    collection_name = "pdf_chunks"
+    qdrant_service.ensure_collection(collection_name)
+    qdrant_service.delete_document_points(collection_name, request.document_id)
+    points = []
+    for chunk, embedding in zip(chunks, embeddings):
+        points.append({
+            "id": f"{request.document_id}_chunk_{chunk['chunk_index']}",
+            "vector": embedding,
+            "payload": {
+                "document_id": request.document_id,
+                "chunk_index": chunk["chunk_index"],
+                "content": chunk["content"],
+                "char_count": chunk["char_count"],
+                "page_number": chunk.get("page_number"),
+                "access": request.access,
+                "type": "pdf_chunk",
+                "category": categories["category"],
+                "styles": categories["styles"],
+                "artists": categories["artists"],
+                "techniques": categories["techniques"],
+                "regions": categories["regions"],
+                "periods": categories["periods"],
+                "keywords": categories["keywords"]
+            }
+        })
+    if points:
         qdrant_service.upsert_points(collection_name, points)
 
     await ctx.progress(90, "Сохранение документа")
@@ -189,7 +271,7 @@ async def run_pdf_processing(payload: dict, ctx) -> dict:
     """,
         request.document_id,
         f"document_{request.document_id}.pdf",
-        request.pdf_url,
+        source_label,
         processing_result["processing_stats"]["total_pages"],
         processing_result["processing_stats"]["ocr_performed"],
         "completed",
@@ -203,6 +285,9 @@ async def run_pdf_processing(payload: dict, ctx) -> dict:
         categories["summary"],
         json.dumps(categories["keywords"]) if categories["keywords"] else None
     )
+
+    if request.spool_file:
+        spool.remove(request.spool_file)          # при сбое файл остаётся для повтора; старые чистит spool.purge_old
 
     # В результат задачи — только сводка: сами фрагменты уже в Qdrant, а в ai_jobs большие тексты не нужны
     return {

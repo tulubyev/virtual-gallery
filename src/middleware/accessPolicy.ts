@@ -22,6 +22,8 @@ export interface Rule {
   access: Access;
   /** Группа regex, содержащая id пользователя: доступ только владельцу (админ — исключение). */
   ownerGroup?: number;
+  /** Для 'public': если запрос пришёл с действительным токеном, положить пользователя в req.user (гость остаётся гостем). */
+  identify?: boolean;
 }
 
 const GET = ['GET', 'HEAD'] as const;
@@ -70,9 +72,15 @@ export const RULES: readonly Rule[] = [
   { methods: GET, path: /^\/auctions(\/(stats|history|[^/]+(\/(lots|bids))?))?$/, access: 'public' },
 
   // ── ИИ: лёгкие запросы открыты (с лимитом), тяжёлые — после входа ───
-  { methods: ['POST'], path: /^\/ai\/(chat|rag-query|describe-artwork|similar-artworks|calculate-slots)$/, access: 'public' },
+  // RAG: вопрос задаёт кто угодно, но сотрудникам видны и закрытые документы — поэтому токен, если он есть, читается
+  { methods: ['POST'], path: /^\/ai\/rag-query$/, access: 'public', identify: true },
+  { methods: ['POST'], path: /^\/ai\/(chat|describe-artwork|similar-artworks|calculate-slots)$/, access: 'public' },
   { methods: GET, path: /^\/ai\/analysis\/[^/]+$/, access: 'public' },
-  { methods: ['POST'], path: /^\/ai\/(analyze-image|process-pdf)$/, access: 'auth' },
+  // База знаний RAG: пополняют сотрудники, убирает документы куратор или администратор
+  { methods: ['POST'], path: /^\/ai\/process-pdf$/, access: STAFF },
+  { methods: GET, path: /^\/ai\/rag\/documents$/, access: STAFF },
+  { methods: ['DELETE'], path: /^\/ai\/rag\/documents\/[^/]+$/, access: CURATORS },
+  { methods: ['POST'], path: /^\/ai\/analyze-image$/, access: 'auth' },
 ];
 
 export function findRule(method: string, path: string): Rule | undefined {
@@ -109,7 +117,17 @@ export async function accessControl(req: Request, res: Response, next: NextFunct
 
   const rule = findRule(req.method, req.path);
   const access = rule ? rule.access : defaultAccess(req.method);
-  if (access === 'public') return next();
+  if (access === 'public') {
+    if (rule?.identify) {
+      try {
+        const session = await authenticate(req);
+        if (!('error' in session)) (req as any).user = session;
+      } catch (error) {
+        console.error('[access] optional auth failed:', (error as Error).message);   // остаёмся гостем
+      }
+    }
+    return next();
+  }
 
   try {
     const session = await authenticate(req);

@@ -6,7 +6,9 @@ import logging
 import uuid
 from typing import List, Dict, Any, Optional, Union
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Distance, VectorParams, PointStruct
+from qdrant_client.http.models import (
+    Distance, FieldCondition, Filter, FilterSelector, MatchAny, MatchValue, PointStruct, VectorParams
+)
 from ..config import settings
 
 logger = logging.getLogger(__name__)
@@ -121,8 +123,18 @@ class QdrantService:
             logger.error(f"Failed to upsert points to {collection_name}: {e}")
             raise
 
+    def delete_document_points(self, collection_name: str, document_id: str):
+        """Удалить все точки документа (перед повторной индексацией, чтобы не оставались лишние фрагменты)"""
+        if not self.collection_exists(collection_name):
+            return
+        self.client.delete(
+            collection_name=collection_name,
+            points_selector=FilterSelector(filter=Filter(
+                must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]))
+        )
+
     def search_points(self, collection_name: str, query_vector: List[float],
-                     limit: int = 10, score_threshold: float = None) -> List[Dict[str, Any]]:
+                     limit: int = 10, score_threshold: float = None, query_filter: Any = None) -> List[Dict[str, Any]]:
         """Search for similar vectors"""
         try:
             search_params = {
@@ -133,6 +145,8 @@ class QdrantService:
 
             if score_threshold is not None:
                 search_params["score_threshold"] = score_threshold
+            if query_filter is not None:
+                search_params["query_filter"] = query_filter
 
             results = self.client.search(**search_params)
 

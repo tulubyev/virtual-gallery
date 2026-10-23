@@ -15,3 +15,4 @@ pdf2image
 aiohttp
 jsonschema
 psutil
+python-multipart

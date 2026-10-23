@@ -27,9 +27,10 @@ COPY src/ ./src/
 COPY migrations/ ./migrations/
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Не root; временные файлы ядра — только в /tmp
+# Не root; временные файлы ядра — в /tmp, загруженные PDF до обработки — в /var/spool/vg (в проде это том)
 RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin aicore \
-    && chmod 0755 /usr/local/bin/entrypoint.sh
+    && chmod 0755 /usr/local/bin/entrypoint.sh \
+    && mkdir -p /var/spool/vg && chown aicore /var/spool/vg
 USER aicore
 
 EXPOSE 8001
