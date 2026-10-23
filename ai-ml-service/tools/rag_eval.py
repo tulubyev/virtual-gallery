@@ -91,7 +91,17 @@ def retrieval_metrics(passages: Sequence[Dict[str, Any]], relevant: Sequence[Dic
         return found / len(relevant)
 
     first = next((i for i, f in enumerate(flags[:10], start=1) if f), None)
-    dcg = sum(1.0 / math.log2(i + 1) for i, f in enumerate(flags[:10], start=1) if f)
+    # каждое релевантное место (документ, страница) считается один раз — на первой позиции, где оно встретилось:
+    # иначе несколько фрагментов одной страницы раздувают nDCG выше 1
+    matched: set = set()
+    dcg = 0.0
+    for i, passage in enumerate(passages[:10], start=1):
+        new_places = {n for n, item in enumerate(relevant) if n not in matched
+                      and item["document_id"] == passage["document_id"]
+                      and (item.get("page") is None or item["page"] == passage.get("page_number"))}
+        if new_places:
+            matched |= new_places
+            dcg += 1.0 / math.log2(i + 1)
     ideal = sum(1.0 / math.log2(i + 1) for i in range(1, min(len(relevant), 10) + 1))
     return {"hit5": hit(5), "hit20": hit(20), "recall5": recall(5), "recall20": recall(20),
             "mrr10": 1.0 / first if first else 0.0, "ndcg10": dcg / ideal if ideal else 0.0}

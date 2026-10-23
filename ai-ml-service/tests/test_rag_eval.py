@@ -124,3 +124,10 @@ async def test_run_keeps_going_after_single_failure():
     with patch.object(ev, "run_case", fake_case):
         out = await ev.run(cases, "staff", "public", True)
     assert out[0]["id"] == "ok" and out[1]["error"] == "RuntimeError" and "secret" not in json.dumps(out)
+
+
+def test_ndcg_counts_each_relevant_place_once():
+    # три фрагмента одной релевантной страницы не должны давать nDCG > 1
+    passages = [{"document_id": "d", "page_number": 1}] * 3
+    metrics = ev.retrieval_metrics(passages, [{"document_id": "d", "page": 1}])
+    assert metrics["ndcg10"] == pytest.approx(1.0)
