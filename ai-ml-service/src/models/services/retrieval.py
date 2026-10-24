@@ -34,7 +34,8 @@ FUZZY_MIN_LEN = 6               # основы короче не сравнив�
 FUZZY_MIN_SIMILARITY = 0.38     # порог сходства по триграммам: «дзанабадзар» к «занабазар» — 0,40, случайные слова ниже
 FUZZY_PER_TERM = 2              # сколько похожих слов базы подставляем вместо неизвестного слова запроса
 CONTEXT_HITS = 8                # сколько лучших находок идёт в контекст модели
-NEIGHBOR_HITS = 3               # у скольких из них берём соседние фрагменты
+NEXT_HITS = 8                   # у скольких находок берём следующий фрагмент: ответ обычно продолжает место, где совпали слова
+PREV_HITS = 1                   # у скольких — предыдущий (на 31 вопросе набора предыдущий фрагмент ответа не добавил ни разу)
 MAX_CONTEXT_CHARS = 15000       # потолок объёма контекста (находки, потом соседи по очереди важности)
 _SAFE_TERM = re.compile(r"^[a-zа-яё0-9]+$")
 _WORD = re.compile(r"[A-Za-zА-Яа-яЁё0-9]{2,}")
@@ -200,20 +201,20 @@ async def hybrid_search(query: str, access: str = "public", top: int = 20, depth
 
 
 async def expand_context(passages: Sequence[Dict[str, Any]], access: str = "public", hits: int = CONTEXT_HITS,
-                         neighbor_hits: int = NEIGHBOR_HITS, max_chars: int = MAX_CONTEXT_CHARS) -> List[Dict[str, Any]]:
-    """Контекст для модели: лучшие находки и соседние фрагменты (следующий, затем предыдущий) у первых из них.
+                         next_hits: int = NEXT_HITS, prev_hits: int = PREV_HITS, max_chars: int = MAX_CONTEXT_CHARS) -> List[Dict[str, Any]]:
+    """Контекст для модели: лучшие находки и соседние фрагменты: следующий — у всех находок, предыдущий — у лучшей.
 
-    Находки берутся всегда; соседи — по очереди важности, пока не исчерпан объём `max_chars`. В выдаче фрагменты
+    Находки берутся всегда; соседи — по очереди важности (сначала у лучших находок), пока не исчерпан объём `max_chars`. В выдаче фрагменты
     одного документа идут подряд в порядке текста, документы — в порядке лучшей находки. Права проверяются заново."""
     best = list(passages[:hits])
     if not best:
         return []
     chosen: Dict[Key, Dict[str, Any]] = {(p["document_id"], p["chunk_index"]): {**p, "neighbor": False} for p in best}
     wanted: List[Key] = []
-    for passage in best[:neighbor_hits]:
-        for step in (1, -1):
+    for rank, passage in enumerate(best):
+        for step, limit in ((1, next_hits), (-1, prev_hits)):
             key = (passage["document_id"], passage["chunk_index"] + step)
-            if key[1] >= 0 and key not in chosen and key not in wanted:
+            if rank < limit and key[1] >= 0 and key not in chosen and key not in wanted:
                 wanted.append(key)
     rows = await hydrate(wanted, access_levels(access)) if wanted else {}
     total = sum(len(p["content"]) for p in chosen.values())

@@ -191,6 +191,10 @@ def summarize(results: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     return summary
 
 
+def _yes_no(value: Optional[float]) -> str:
+    return "—" if value is None else ("да" if value else "нет")
+
+
 def _fmt(value: Optional[float], digits: int = 3) -> str:
     return "—" if value is None else f"{value:.{digits}f}"
 
@@ -247,6 +251,16 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
     lines += ["", f"## Ответили там, где нужен был отказ, или нарушены цитаты ({len(wrong)})", ""]
     lines += [f"- `{r['id']}` ({r['type']}): {r['question']} → {r['outcome']}" +
               (f"; нарушения: {'; '.join(r['violations'])}" if r.get("violations") else "") for r in wrong] or ["—"]
+    refused = [r for r in results if r["answerable"] and r.get("outcome") in ("insufficient_evidence", "no_sources")]
+    if refused:
+        lines += ["", f"## Отказ на вопросе с ответом ({len(refused)})", ""]
+        lines += [f"- `{r['id']}` ({r['type']}): {r['question']} → {r['outcome']}; ответ в контексте: "
+                  + _yes_no((r.get("metrics") or {}).get("context_hit")) for r in refused]
+    no_context = [r for r in results if r["answerable"] and (r.get("metrics") or {}).get("context_hit") == 0.0]
+    if no_context:
+        lines += ["", f"## Ответа нет в контексте модели ({len(no_context)})", ""]
+        lines += [f"- `{r['id']}` ({r['type']}): {r['question']} → {r.get('outcome', 'без ответа модели')}; "
+                  f"в первых 20: {_yes_no((r.get('metrics') or {}).get('hit20'))}" for r in no_context]
     unconfirmed = [r for r in results if r.get("outcome") == "citations_failed"]
     if unconfirmed:
         lines += ["", f"## Ответ не прошёл проверку цитат, показан отказ ({len(unconfirmed)})", ""]

@@ -89,7 +89,7 @@ docker compose -f docker-compose.prod.yml up -d --build   # прод на VPS
 
 - Подробно — `docs/AI-RAG.md`. Гибридный поиск (Qdrant + PostgreSQL FTS `russian`, RRF), ответ по схеме с проверкой цитат и отказом при нехватке данных:
   `ai-ml-service/src/models/services/{chunking,retrieval,rag_answer,knowledge_base}.py`, таблицы `kb_documents`/`kb_chunks` (миграция 007).
-  В контекст модели идут 8 лучших находок и соседние фрагменты у первых трёх (`retrieval.expand_context`); слова вопроса, которых нет в базе, дополняются
+  В контекст модели идут 8 лучших находок и следующие фрагменты (`retrieval.expand_context`); слова вопроса, которых нет в базе, дополняются
   похожими по написанию (`kb_terms`, `pg_trgm`, миграция 008; если расширение не создалось — `docs/AI-RAG.md`, «Поиск по написанию»).
 - Права: у документа `access` = `public` | `staff` (по умолчанию `staff`); уровень спрашивающего Express берёт из сессии (`/api/ai/rag-query`, правило с `identify` в `accessPolicy.ts`).
   Загрузка PDF — сотрудники, публикация для всех и удаление — куратор/администратор.

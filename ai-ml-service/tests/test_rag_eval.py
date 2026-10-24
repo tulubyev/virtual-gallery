@@ -220,3 +220,17 @@ def test_fresh_split_is_accepted(tmp_path):
     path.write_text('{"id":"1","question":"q","answerable":false,"split":"fresh"}\n', encoding="utf-8")
     assert ev.load_cases(path)[0]["split"] == "fresh"
     assert "split=fresh" in ev.render_report([{**result("z", False, 0.0, "answered", []), "split": "fresh"}])
+
+
+def test_report_lists_refusals_and_missing_context_with_reasons():
+    refused = result("a", True, 1.0, "insufficient_evidence")
+    refused["metrics"].update({"context_hit": 0.0, "hit20": 1.0})
+    answered_elsewhere = result("b", True, 0.0, "answered", [])
+    answered_elsewhere["metrics"].update({"context_hit": 0.0, "hit20": 1.0})
+    fine = result("c", True, 1.0, "answered", [])
+    fine["metrics"].update({"context_hit": 1.0, "hit20": 1.0})
+    report = ev.render_report([refused, answered_elsewhere, fine])
+    assert "## Отказ на вопросе с ответом (1)" in report and "`a` (fact): q a → insufficient_evidence; ответ в контексте: нет" in report
+    assert "## Ответа нет в контексте модели (2)" in report and "`b` (fact): q b → answered; в первых 20: да" in report
+    assert "`c`" not in report.split("## Отказ на вопросе")[1]
+    assert "Отказ на вопросе" not in ev.render_report([fine])
