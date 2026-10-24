@@ -25,6 +25,8 @@ RUN pip install -r requirements.txt
 
 COPY src/ ./src/
 COPY migrations/ ./migrations/
+COPY tools/ ./tools/
+COPY eval/ ./eval/
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Не root; временные файлы ядра — в /tmp, загруженные PDF до обработки — в /var/spool/vg (в проде это том)
