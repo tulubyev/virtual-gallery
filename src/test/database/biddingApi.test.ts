@@ -386,6 +386,52 @@ describeDb('API торгов (PostgreSQL)', () => {
     });
   });
 
+  describe('аннулирование ставки', () => {
+    it('куратор аннулирует ставку с причиной: цена и лидер пересчитаны, публика ставку не видит, журнал цел', async () => {
+      const { slug, auctionId, lotIds } = await liveAuction();
+      await admit(slug, auctionId, alice);
+      await admit(slug, auctionId, bob);
+      const first = await bid(lotIds[0], alice, 30000);
+      const second = await bid(lotIds[0], bob, 50000);
+      expect(second.body.price_kop).toBe(3_200_000);
+
+      expect((await api.post(`/admin/bids/${second.body.bid_id}/annul`, { reason: 'опечатка в сумме' }, null)).status).toBe(401);
+      expect((await api.post(`/admin/bids/${second.body.bid_id}/annul`, { reason: 'опечатка в сумме' }, alice)).status).toBe(403);
+      expect((await api.post(`/admin/bids/${second.body.bid_id}/annul`, {}, curator)).status).toBe(400);                       // нет причины
+      expect((await api.post(`/admin/bids/abc/annul`, { reason: 'x' }, curator)).status).toBe(404);
+      expect((await api.post(`/admin/bids/999999999/annul`, { reason: 'нет такой' }, curator)).status).toBe(404);
+
+      const done = await api.post(`/admin/bids/${second.body.bid_id}/annul`, { reason: 'опечатка в сумме' }, curator);
+      expect(done.status).toBe(200);
+      expect(done.body).toMatchObject({ status: 'annulled', price_kop: 1_000_000, bid_count: 1 });
+      expect((await api.post(`/admin/bids/${second.body.bid_id}/annul`, { reason: 'ещё раз' }, curator)).status).toBe(409);
+
+      const lot = (await api.get(`/lots/${lotIds[0]}`, null)).body.lot;
+      expect(lot).toMatchObject({ bid_count: 1, current_price_kop: 1_000_000, leader_pseudonym: 1 });
+      expect(JSON.stringify(lot)).not.toContain('опечатка');                                                                      // причина — только организатору
+      expect((await api.get(`/lots/${lotIds[0]}`, bob)).body.lot.mine).toMatchObject({ leading: false, my_max_kop: null });       // его максимум не учитывается
+      const history = (await api.get(`/lots/${lotIds[0]}`, null)).body.history;
+      expect(history.map((b: any) => b.bid_id)).toEqual([first.body.bid_id]);                                                   // аннулированной ставки в истории нет
+
+      const admin = (await api.get(`/admin/lots/${lotIds[0]}/bids`, curator)).body.bids;
+      expect(admin.map((b: any) => [b.bid_id, b.annulled, b.annul_reason])).toEqual([[first.body.bid_id, false, null], [second.body.bid_id, true, 'опечатка в сумме']]);
+      expect((await api.get(`/admin/chains/${lotIds[0]}/verify`, curator)).body).toMatchObject({ ok: true });
+    });
+
+    it('после закрытия лота ставку аннулировать нельзя', async () => {
+      const { slug, auctionId, lotIds } = await liveAuction();
+      await admit(slug, auctionId, alice);
+      await admit(slug, auctionId, bob);
+      const a = await bid(lotIds[0], alice, 30000);
+      await bid(lotIds[0], bob, 20000);
+      await h.q(`UPDATE bidding_lots SET ends_at = now() - interval '1 second' WHERE lot_id = $1`, [lotIds[0]]);
+      await tick();
+      const res = await api.post(`/admin/bids/${a.body.bid_id}/annul`, { reason: 'поздно' }, curator);
+      expect(res.status).toBe(409);
+      expect(res.body.code).toBe('lot_not_open');
+    });
+  });
+
   describe('ограничение частоты', () => {
     it('слишком частые ставки одного пользователя получают 429 с Retry-After', async () => {
       const { slug, auctionId, lotIds } = await liveAuction();

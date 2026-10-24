@@ -75,6 +75,7 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['GET', '/api/bidding/admin/auctions', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   ['POST', '/api/bidding/admin/auctions/1/announce', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   ['POST', '/api/bidding/admin/participants/4/kyc', { anon: 401, user: 403, curator: 200 }],
+  ['POST', '/api/bidding/admin/bids/12/annul', { anon: 401, user: 403, bidder: 403, staff: 403, curator: 200, admin: 200 }],
   ['GET', '/api/bidding/admin/chains/-1/verify', { anon: 401, user: 403, curator: 200 }],
   ['POST', '/api/bidding/lots/abc/bids', { anon: 401, user: 403, admin: 200 }],       // не похоже на лот — правило по умолчанию
   // база знаний RAG: пополняют сотрудники, удаляет куратор

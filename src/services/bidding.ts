@@ -83,13 +83,14 @@ export async function getLot(lotId: number, userId?: number) {
   if (userId) {
     const mine = (await pool.query(`
       SELECT (SELECT leader_user_id = $2 FROM bidding_lots WHERE lot_id = $1) AS leading,
-             (SELECT max(max_kop) FROM bidding_bids WHERE lot_id = $1 AND user_id = $2 AND accepted) AS my_max`, [lotId, userId])).rows[0];
+             (SELECT max(max_kop) FROM bidding_bids b WHERE b.lot_id = $1 AND b.user_id = $2 AND b.accepted
+                AND NOT EXISTS (SELECT 1 FROM bidding_bid_annulments n WHERE n.bid_id = b.bid_id)) AS my_max`, [lotId, userId])).rows[0];
     lot.mine = { leading: !!mine.leading, my_max_kop: n(mine.my_max) };
   }
   return lot;
 }
 
-/** Принятые ставки лота по номерам участников. Повышения собственного максимума не показываются: цена от них не меняется. */
+/** Принятые ставки лота по номерам участников. Повышения собственного максимума и аннулированные ставки не показываются. */
 export async function getLotHistory(lotId: number, limit = 100) {
   const { rows } = await pool.query(`
     SELECT b.bid_id, b.created_at, b.price_after_kop, b.became_leader, r.pseudonym_no
@@ -97,6 +98,7 @@ export async function getLotHistory(lotId: number, limit = 100) {
     JOIN bidding_lots l ON l.lot_id = b.lot_id
     JOIN bidding_registrations r ON r.auction_id = l.auction_id AND r.user_id = b.user_id
     WHERE b.lot_id = $1 AND b.accepted AND b.kind <> 'raise_max'
+      AND NOT EXISTS (SELECT 1 FROM bidding_bid_annulments n WHERE n.bid_id = b.bid_id)
     ORDER BY b.bid_id DESC LIMIT $2`, [lotId, limit]);
   return rows.map((r: any) => ({
     bid_id: Number(r.bid_id), at: new Date(r.created_at).toISOString(), price_kop: Number(r.price_after_kop),
@@ -264,6 +266,11 @@ export async function withdrawLot(lotId: number, actorId: number, reason: string
   return (await pool.query('SELECT bidding_withdraw_lot($1, $2, $3) AS r', [lotId, actorId, reason])).rows[0].r;
 }
 
+/** Аннулировать принятую ставку в лоте, где идут торги: состояние лота пересчитывается, запись остаётся в журнале с причиной. */
+export async function annulBid(bidId: number, actorId: number, reason: string) {
+  return (await pool.query('SELECT bidding_annul_bid($1, $2, $3) AS r', [bidId, actorId, reason])).rows[0].r;
+}
+
 export async function listRegistrations(auctionId: number) {
   const { rows } = await pool.query(`
     SELECT r.user_id, u.username, u.email, p.full_name, p.phone, p.kind, p.kyc_status, p.standing,
@@ -303,8 +310,11 @@ export async function verifyChain(chainKey: number) {
 export async function adminLotBids(lotId: number) {
   const { rows } = await pool.query(`
     SELECT b.bid_id, b.created_at, b.user_id, u.username, b.kind, b.max_kop, b.price_after_kop, b.accepted, b.reject_reason,
-           b.became_leader, b.extended_to, host(b.ip) AS ip
-    FROM bidding_bids b JOIN users u ON u.user_id = b.user_id WHERE b.lot_id = $1 ORDER BY b.bid_id`, [lotId]);
+           b.became_leader, b.extended_to, host(b.ip) AS ip,
+           (n.bid_id IS NOT NULL) AS annulled, n.reason AS annul_reason, n.created_at AS annulled_at
+    FROM bidding_bids b JOIN users u ON u.user_id = b.user_id
+    LEFT JOIN bidding_bid_annulments n ON n.bid_id = b.bid_id
+    WHERE b.lot_id = $1 ORDER BY b.bid_id`, [lotId]);
   return rows.map((r: any) => ({ ...r, bid_id: Number(r.bid_id), max_kop: Number(r.max_kop), price_after_kop: n(r.price_after_kop) }));
 }
 

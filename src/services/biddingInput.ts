@@ -77,4 +77,8 @@ export const ADMIN_REJECTIONS: Record<string, string> = {
   reason_required: 'Укажите причину.',
   no_such_lot: 'Лот не найден.',
   wrong_state: 'В этом состоянии лот снять нельзя.',
+  no_such_bid: 'Ставка не найдена.',
+  already_annulled: 'Эта ставка уже аннулирована.',
+  bid_not_accepted: 'Отклонённую ставку аннулировать нельзя: она ни на что не повлияла.',
+  lot_not_open: 'Ставку можно аннулировать только пока в лоте идут торги.',
 };
