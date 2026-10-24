@@ -8,16 +8,18 @@
 
 Файл вопросов — по одному в строке (формат и правила разметки — eval/README.md):
     {"id": "q1", "question": "...", "type": "fact", "split": "dev",
-     "answerable": true, "relevant": [{"document_id": "catalog-1", "page": 7}]}
+     "answerable": true, "relevant": [{"document_id": "catalog-1", "page": 7, "phrase": "родился в 1879 году"}]}
     {"id": "q2", "question": "Сколько стоит картина X?", "type": "adversarial", "split": "dev",
      "answerable": false, "relevant": []}
 
 Релевантность проверяется по паре (документ, страница), а не по номеру фрагмента: набор переживает смену нарезки.
-Если в записи нет `page`, подходит любая страница документа.
+Если в записи нет `page`, подходит любая страница документа. Необязательное `phrase` — дословный кусок текста, где лежит ответ:
+по нему считаются «Ответ в тексте@5» и «Ответ в контексте» (есть ли ответ в самих фрагментах, а не только на нужной странице).
 
 Метрики:
 * поиск: Hit@5 / Hit@20 (есть ли в первых k хоть один релевантный), Recall@5 / Recall@20 (доля найденных релевантных мест),
-  MRR@10, nDCG@10 — только по отвечаемым вопросам;
+  MRR@10, nDCG@10 — только по отвечаемым вопросам; «Ответ в тексте@5» — есть ли фраза-ответ в первых 5 фрагментах,
+  «Ответ в контексте» — в том, что реально получила модель (находки и соседние фрагменты);
 * ответ: доля отказов на неотвечаемых (цель ≥ 0,9), доля ложных отказов на отвечаемых, нарушения цитат
   (ответ перепроверяется тем же кодом, что в продакшене; цель — 0), задержка P50/P95.
 Разницу меньше 2–3 п. на 150 вопросах считайте шумом: `compare` даёт парный бутстрэп по вопросам.
@@ -36,7 +38,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 QUESTION_TYPES = ("fact", "bio", "topic", "alias", "catalog", "unanswerable", "adversarial")
-SPLITS = ("dev", "test")
+SPLITS = ("dev", "test", "fresh")           # fresh — вопросы, написанные после того, как test использовали для разбора ошибок
 
 
 # ---------- набор вопросов ----------
@@ -62,7 +64,7 @@ def load_cases(path: Path) -> List[Dict[str, Any]]:
         case.setdefault("split", "dev")
         case.setdefault("type", "fact")
         if case["split"] not in SPLITS:
-            raise ValueError(f"строка {number}: split должен быть dev или test")
+            raise ValueError(f"строка {number}: split должен быть один из: " + ", ".join(SPLITS))
         if case["answerable"] and not case["relevant"]:
             raise ValueError(f"строка {number}: у отвечаемого вопроса нет релевантных мест")
         if not case["answerable"] and case["relevant"]:
@@ -78,6 +80,26 @@ def is_relevant(passage: Dict[str, Any], relevant: Sequence[Dict[str, Any]]) -> 
 
 
 # ---------- метрики поиска ----------
+
+def holds_answer(passages: Sequence[Dict[str, Any]], relevant: Sequence[Dict[str, Any]]) -> float:
+    """1.0, если в этих фрагментах есть ответ. Место с `phrase` засчитывается, когда фраза встречается в тексте фрагмента
+    того же документа (после той же нормализации, что у проверки цитат; страница не важна: ответ бывает в соседнем
+    фрагменте на стыке страниц). Место без `phrase` — по документу и странице, как в остальных метриках."""
+    from src.models.services.rag_answer import normalize
+    texts: Dict[int, str] = {}
+    for item in relevant:
+        phrase = item.get("phrase")
+        for number, passage in enumerate(passages):
+            if passage["document_id"] != item["document_id"]:
+                continue
+            if phrase:
+                texts.setdefault(number, normalize(passage.get("content") or ""))
+                if normalize(phrase) in texts[number]:
+                    return 1.0
+            elif item.get("page") is None or item["page"] == passage.get("page_number"):
+                return 1.0
+    return 0.0
+
 
 def retrieval_metrics(passages: Sequence[Dict[str, Any]], relevant: Sequence[Dict[str, Any]]) -> Dict[str, float]:
     flags = [is_relevant(p, relevant) for p in passages]
@@ -153,8 +175,8 @@ def summarize(results: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     answerable = [r for r in results if r["answerable"]]
     unanswerable = [r for r in results if not r["answerable"]]
     summary: Dict[str, Any] = {"questions": len(results), "answerable": len(answerable), "unanswerable": len(unanswerable)}
-    for key in ("hit5", "hit20", "recall5", "recall20", "mrr10", "ndcg10"):
-        values = [r["metrics"][key] for r in answerable if r.get("metrics")]
+    for key in ("hit5", "hit20", "recall5", "recall20", "mrr10", "ndcg10", "text_hit5", "context_hit"):
+        values = [r["metrics"][key] for r in answerable if r.get("metrics") and key in r["metrics"]]
         summary[key] = mean(values)
         summary[key + "_ci"] = bootstrap_ci(values)
     answered = [r for r in results if r.get("outcome")]
@@ -206,14 +228,15 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
         if part:
             groups.append((f"тип={qtype}", part))
 
-    lines += ["| Группа | N | Hit@5 | Recall@5 | Recall@20 | MRR@10 | nDCG@10 | Отказ на неотв. | Ложный отказ | Нарушения цитат | P95, с |",
-              "|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines += ["| Группа | N | Hit@5 | Recall@5 | Recall@20 | MRR@10 | nDCG@10 | Ответ в тексте@5 | Ответ в контексте "
+              "| Отказ на неотв. | Ложный отказ | Нарушения цитат | P95, с |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for name, part in groups:
         s = summarize(part)
         ci = s["hit5_ci"]
         hit5 = _fmt(s["hit5"]) + (f" ({ci[0]:.2f}–{ci[1]:.2f})" if ci else "")
         lines.append(f"| {name} | {s['questions']} | {hit5} | {_fmt(s['recall5'])} | {_fmt(s['recall20'])} | {_fmt(s['mrr10'])} "
-                     f"| {_fmt(s['ndcg10'])} | {_fmt(s.get('refusal_precision'))} | {_fmt(s.get('false_refusal_rate'))} "
+                     f"| {_fmt(s['ndcg10'])} | {_fmt(s['text_hit5'])} | {_fmt(s['context_hit'])} | {_fmt(s.get('refusal_precision'))} | {_fmt(s.get('false_refusal_rate'))} "
                      f"| {s.get('citation_violations', '—')} | {_fmt(s['latency_p95'], 1)} |")
 
     misses = [r for r in results if r["answerable"] and r.get("metrics") and r["metrics"]["hit20"] == 0.0]
@@ -237,7 +260,7 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
 async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only: bool,
                    model: Optional[str] = None) -> Dict[str, Any]:
     from src.models.services import rag_answer
-    from src.models.services.retrieval import hybrid_search
+    from src.models.services.retrieval import expand_context, hybrid_search
 
     started = time.monotonic()
     record: Dict[str, Any] = {k: case[k] for k in ("id", "question", "type", "split", "answerable")}
@@ -245,10 +268,15 @@ async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only:
     record["degraded"] = found.degraded
     record["retrieved"] = [{"document_id": p["document_id"], "page": p["page_number"], "chunk": p["chunk_index"]}
                            for p in found.passages]
+    # Контекст собирается тем же кодом, что в продакшене: находки и соседние фрагменты
+    sources = await expand_context(found.passages, access=access)
+    record["context"] = [{"document_id": p["document_id"], "page": p["page_number"], "chunk": p["chunk_index"],
+                          "neighbor": p.get("neighbor", False)} for p in sources]
     if case["answerable"]:
-        record["metrics"] = retrieval_metrics(found.passages, case["relevant"])
+        record["metrics"] = {**retrieval_metrics(found.passages, case["relevant"]),
+                             "text_hit5": holds_answer(found.passages[:5], case["relevant"]),
+                             "context_hit": holds_answer(sources, case["relevant"])}
     if not retrieval_only:
-        sources = found.passages[:8]
         result = await rag_answer.answer(case["question"], sources, mode, model=model)
         record["model"] = result.get("model")
         record["outcome"] = result["outcome"]
@@ -301,7 +329,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     cmp_parser = sub.add_parser("compare")
     cmp_parser.add_argument("before", type=Path)
     cmp_parser.add_argument("after", type=Path)
-    cmp_parser.add_argument("--metric", default="hit5", choices=("hit5", "hit20", "recall5", "recall20", "mrr10", "ndcg10"))
+    cmp_parser.add_argument("--metric", default="hit5", choices=("hit5", "hit20", "recall5", "recall20", "mrr10", "ndcg10", "text_hit5", "context_hit"))
     args = parser.parse_args(argv)
 
     if args.command == "compare":

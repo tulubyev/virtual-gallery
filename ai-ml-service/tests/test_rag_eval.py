@@ -142,11 +142,13 @@ def test_bundled_golden_set_matches_corpus_manifest():
     cases = ev.load_cases(root / "siberia-art.golden.jsonl")
     manifest_ids = {line.split("\t")[0] for line in (root / "corpus" / "manifest.tsv").read_text(encoding="utf-8").splitlines()
                     if line and not line.startswith("#")}
-    assert len(cases) == 30 and len(manifest_ids) == 10
+    assert len(cases) == 42 and len(manifest_ids) == 10
     used = {item["document_id"] for case in cases for item in case["relevant"]}
     assert used <= manifest_ids
     assert all(case["relevant"] for case in cases if case["answerable"])
     assert not any(case["relevant"] for case in cases if not case["answerable"])
+    # у каждого релевантного места есть дословная фраза-ответ: по ней считается «Ответ в контексте»
+    assert all(item.get("phrase") for case in cases for item in case["relevant"])
 
 
 def test_failures_are_listed_in_report_with_message():
@@ -182,3 +184,39 @@ def test_report_lists_citation_check_failures_with_reasons():
                 "seconds": 1.0}]
     report = ev.render_report(results)
     assert "не прошёл проверку цитат" in report and "q-9" in report and "основами" in report
+
+
+def text_passage(doc, page, text, chunk=0):
+    return {"document_id": doc, "page_number": page, "chunk_index": chunk, "content": text}
+
+
+def test_holds_answer_looks_for_the_phrase_in_text_not_just_on_the_page():
+    relevant = [{"document_id": "a", "page": 2, "phrase": "четырёхкомпонентная латунь"}]
+    right_page_wrong_chunk = text_passage("a", 2, "Школа Дзанабадзара, изображение Будды.")
+    next_chunk = text_passage("a", 2, "Сплав — четырехкомпонентная латунь, характерная для Китая.", chunk=1)
+    assert ev.retrieval_metrics([right_page_wrong_chunk], relevant)["hit5"] == 1.0         # по странице «нашли»
+    assert ev.holds_answer([right_page_wrong_chunk], relevant) == 0.0                      # а ответа в тексте нет
+    assert ev.holds_answer([right_page_wrong_chunk, next_chunk], relevant) == 1.0         # е/ё не мешает
+    assert ev.holds_answer([text_passage("b", 2, next_chunk["content"])], relevant) == 0.0   # чужой документ
+    page_only = [{"document_id": "a", "page": 2}]
+    assert ev.holds_answer([right_page_wrong_chunk], page_only) == 1.0                    # без phrase — по странице
+    assert ev.holds_answer([text_passage("a", 3, "x")], page_only) == 0.0
+    assert ev.holds_answer([], relevant) == 0.0
+
+
+def test_new_text_metrics_reach_summary_and_report_and_old_runs_still_render():
+    new = result("a", True, 1.0, "answered", [])
+    new["metrics"].update({"text_hit5": 0.0, "context_hit": 1.0})
+    old = result("b", True, 1.0, "answered", [])                 # прогон до появления метрик
+    summary = ev.summarize([new])
+    assert summary["text_hit5"] == 0.0 and summary["context_hit"] == 1.0
+    assert ev.summarize([old])["context_hit"] is None
+    report = ev.render_report([new, old])
+    assert "Ответ в тексте@5" in report and "Ответ в контексте" in report
+
+
+def test_fresh_split_is_accepted(tmp_path):
+    path = tmp_path / "f.jsonl"
+    path.write_text('{"id":"1","question":"q","answerable":false,"split":"fresh"}\n', encoding="utf-8")
+    assert ev.load_cases(path)[0]["split"] == "fresh"
+    assert "split=fresh" in ev.render_report([{**result("z", False, 0.0, "answered", []), "split": "fresh"}])
