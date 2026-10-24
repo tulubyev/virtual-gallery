@@ -55,12 +55,13 @@ TASK_INFO: Dict[str, Dict[str, Any]] = {
 
 # Метки рекомендаций: best — «Рекомендуем», cheap — «Дёшево», top — «Максимум качества». Это гипотезы для проверки.
 RECOMMENDED: Dict[str, Dict[str, List[str]]] = {
-    "vision_front": {"best": ["google/gemini-3.8-flash"], "cheap": ["anthropic/claude-haiku-5.5", "google/gemini-3.5-flash-lite", "z-ai/glm-5.3-flash"], "top": ["google/gemini-4-argon", "anthropic/claude-opus-5.5"]},
+    # Модели Anthropic из рекомендаций убраны: с серверов в РФ они недоступны (см. cautions у Curated)
+    "vision_front": {"best": ["google/gemini-3.8-flash"], "cheap": ["google/gemini-3.5-flash-lite", "z-ai/glm-5.3-flash"], "top": ["google/gemini-4-argon"]},
     "vision_back": {"best": ["google/gemini-3.8-flash"], "cheap": ["google/gemini-3.5-flash-lite", "qwen/qwen3.6-35b-a3b"], "top": ["google/gemini-4-argon"]},
-    "rag_answer": {"best": ["anthropic/claude-haiku-5.5"], "cheap": ["google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": ["anthropic/claude-sonnet-5.5", "google/gemini-4-argon"]},
-    "chat": {"best": ["anthropic/claude-haiku-5.5"], "cheap": ["google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": ["anthropic/claude-sonnet-5.5"]},
-    "judge": {"best": ["google/gemini-3.5-flash-lite"], "cheap": ["z-ai/glm-5.3-flash", "anthropic/claude-haiku-5.5"], "top": ["google/gemini-4-argon"]},
-    "bulk": {"best": ["anthropic/claude-haiku-5.5"], "cheap": ["deepseek/deepseek-v4.1-flash", "google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": []},
+    "rag_answer": {"best": ["google/gemini-3.5-flash-lite"], "cheap": ["google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": ["google/gemini-4-argon"]},
+    "chat": {"best": ["google/gemini-3.5-flash-lite"], "cheap": ["google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": ["google/gemini-4-argon"]},
+    "judge": {"best": ["google/gemini-3.5-flash-lite"], "cheap": ["z-ai/glm-5.3-flash"], "top": ["google/gemini-4-argon"]},
+    "bulk": {"best": ["google/gemini-3.5-flash-lite"], "cheap": ["deepseek/deepseek-v4.1-flash", "google/gemma-4-26b-a4b-it", "z-ai/glm-5.3-flash"], "top": []},
 }
 RU_ONLY_RECOMMENDED = {"vision": "qwen/qwen3.6-35b-a3b", "text": "sber/gigachat-3-pro"}
 
@@ -82,6 +83,8 @@ class Curated(NamedTuple):
     cautions: Optional[Dict[str, str]] = None        # предупреждения по задачам ("*" — для любой)
 
 
+_RU = ("Недоступна с серверов в РФ: routerai отвечает 403 «нарушение условий провайдера» (проверено на VPS 2026-10-24). "
+       "Годится только при запуске за пределами РФ. ")
 _PIN = ("Строгая JSON-схема есть не у всех провайдеров routerai; без неё ядро само переходит на запасной разбор ответа. "
         "Закреплять провайдера (LLM_PROVIDER_ONLY) стоит, только если все задачи идут на эту модель: настройка общая и "
         "ломает запросы к моделям других вендоров.")
@@ -98,13 +101,13 @@ CURATED: Tuple[Curated, ...] = (
             note="Лучшее воздержание в независимых замерах (не выдумывает при незнании); потолок качества по цене."),
     Curated("anthropic/claude-haiku-5.5", "Claude Haiku 5.5", "Anthropic", "economy", (10.87, 54.35), True, True, 1000000,
             note="Дёшево и быстро; срок поддержки не ранее 2027-10. Независимых данных по зрению и OCR нет.",
-            cautions={"*": _PIN + " Схема не должна содержать minimum/maxLength/minItems."}),
+            cautions={"*": _RU + _PIN + " Схема не должна содержать minimum/maxLength/minItems."}),
     Curated("anthropic/claude-sonnet-5.5", "Claude Sonnet 5.5", "Anthropic", "top", (217.41, 1087.03), True, True, 1000000,
             note="Сильная модель второго вендора; дорогая для массовых задач.",
-            cautions={"*": _PIN}),
+            cautions={"*": _RU + _PIN}),
     Curated("anthropic/claude-opus-5.5", "Claude Opus 5.5", "Anthropic", "top", (434.81, 2174.06), True, True, 1000000,
             note="Для спорных случаев; на тысячи работ дорого.",
-            cautions={"*": _PIN}),
+            cautions={"*": _RU + _PIN}),
     Curated("openai/gpt-6-luna", "GPT-6 Luna", "OpenAI", "economy", (10.87, 54.35), True, True, 1050000, flex=True,
             note="Дёшево, но склонна додумывать (низкое воздержание).",
             cautions={"vision_front": "Низкое воздержание (15–23 %): может назвать автора без оснований.",
