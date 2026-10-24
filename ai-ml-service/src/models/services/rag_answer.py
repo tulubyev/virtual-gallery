@@ -172,7 +172,8 @@ def render(blocks: List[Dict[str, Any]]) -> str:
     return "\n\n".join(parts)
 
 
-async def answer(query: str, sources: List[Dict[str, Any]], mode: str = "public") -> Dict[str, Any]:
+async def answer(query: str, sources: List[Dict[str, Any]], mode: str = "public",
+                 model: Optional[str] = None) -> Dict[str, Any]:
     """Ответ по источникам. outcome: answered | insufficient_evidence | no_sources | citations_failed."""
     if not sources:
         return {"outcome": "no_sources", "answer": NO_DATA_TEXT, "blocks": [], "model": None, "usage": {}}
@@ -181,7 +182,7 @@ async def answer(query: str, sources: List[Dict[str, Any]], mode: str = "public"
     problems: List[str] = []
     for attempt in (1, 2):
         result = await ai_service.llm.complete("rag_answer", messages, schema=RAG_SCHEMA, schema_name="rag_answer",
-                                               max_tokens=1500)
+                                               max_tokens=1500, model=model)
         parsed = result.parsed or {}
         if parsed.get("insufficient_evidence"):
             return {"outcome": "insufficient_evidence", "answer": NO_DATA_TEXT, "blocks": [],

@@ -229,7 +229,8 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
 
 # ---------- прогон ----------
 
-async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only: bool) -> Dict[str, Any]:
+async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only: bool,
+                   model: Optional[str] = None) -> Dict[str, Any]:
     from src.models.services import rag_answer
     from src.models.services.retrieval import hybrid_search
 
@@ -243,7 +244,8 @@ async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only:
         record["metrics"] = retrieval_metrics(found.passages, case["relevant"])
     if not retrieval_only:
         sources = found.passages[:8]
-        result = await rag_answer.answer(case["question"], sources, mode)
+        result = await rag_answer.answer(case["question"], sources, mode, model=model)
+        record["model"] = result.get("model")
         record["outcome"] = result["outcome"]
         record["answer"] = result["answer"]
         # Повторная проверка тем же кодом, что в продакшене: ловит расхождение между проверкой и показом
@@ -255,13 +257,13 @@ async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only:
 
 
 async def run(cases: List[Dict[str, Any]], access: str, mode: str, retrieval_only: bool,
-              concurrency: int = 3) -> List[Dict[str, Any]]:
+              concurrency: int = 3, model: Optional[str] = None) -> List[Dict[str, Any]]:
     semaphore = asyncio.Semaphore(concurrency)
 
     async def one(case: Dict[str, Any]) -> Dict[str, Any]:
         async with semaphore:
             try:
-                return await run_case(case, access, mode, retrieval_only)
+                return await run_case(case, access, mode, retrieval_only, model)
             except Exception as error:               # один сбой не должен терять весь прогон
                 return {**{k: case[k] for k in ("id", "question", "type", "split", "answerable")},
                         "error": type(error).__name__, "error_detail": safe_message(error), "seconds": None}
@@ -287,6 +289,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     run_parser.add_argument("--split", choices=SPLITS)
     run_parser.add_argument("--access", choices=("public", "staff"), default="staff")
     run_parser.add_argument("--mode", choices=("public", "curator"), default="public")
+    run_parser.add_argument("--model", help="модель для ответа вместо выбранной в админ-панели (например, z-ai/glm-5.3-flash)")
     run_parser.add_argument("--retrieval-only", action="store_true", help="только поиск, без вызова модели (бесплатно)")
     cmp_parser = sub.add_parser("compare")
     cmp_parser.add_argument("before", type=Path)
@@ -317,13 +320,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         except Exception:
             pass
         try:
-            return await run(cases, args.access, args.mode, args.retrieval_only)
+            return await run(cases, args.access, args.mode, args.retrieval_only, model=args.model)
         finally:
             await db_service.disconnect()
 
     results = asyncio.run(go())
     args.out.write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
-    report = render_report([r for r in results if "error" not in r]) + render_failures(results)
+    title = f"Оценка RAG, модель {args.model}" if args.model else "Оценка RAG"
+    report = render_report([r for r in results if "error" not in r], title) + render_failures(results)
     args.out.with_suffix(".md").write_text(report, encoding="utf-8")
     failed = [r for r in results if "error" in r]
     print(report)
