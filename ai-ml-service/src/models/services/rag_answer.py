@@ -14,6 +14,7 @@
 
 import logging
 import re
+from difflib import SequenceMatcher
 from typing import Any, Dict, List, Optional, Tuple
 
 from .ai_service import ai_service
@@ -117,6 +118,23 @@ def _proper_name_stems(text: str) -> List[str]:
     return stems
 
 
+def mismatch_hint(segment: str, cited: str) -> str:
+    """Где цитата расходится с ближайшим местом источника: первый несовпавший знак с кодом и само место.
+
+    Нужно и модели при повторной попытке (она не видит, что «і» украинская, а не «и»), и человеку при разборе отказа.
+    Ничего похожего в источнике — пустая строка."""
+    match = SequenceMatcher(None, segment, cited, autojunk=False).find_longest_match(0, len(segment), 0, len(cited))
+    if match.size < max(8, len(segment) // 3):
+        return ""
+    start = max(match.b - match.a, 0)
+    near = cited[start:start + len(segment)]
+    for position, (mine, theirs) in enumerate(zip(segment, near), start=1):
+        if mine != theirs:
+            return (f"; первое расхождение на знаке {position}: в цитате «{mine}» (U+{ord(mine):04X}), "
+                    f"в источнике «{theirs}» (U+{ord(theirs):04X}); ближайшее место источника: «{near[:80]}»")
+    return f"; ближайшее место источника: «{near[:80]}» (цитата выходит за его конец)"
+
+
 def violations(parsed: Dict[str, Any], sources: List[Dict[str, Any]], mode: str) -> List[str]:
     """Нарушения ответа модели; пусто — ответ можно показывать. `sources` нумеруются с 1 в порядке списка."""
     if parsed.get("insufficient_evidence"):
@@ -158,7 +176,8 @@ def violations(parsed: Dict[str, Any], sources: List[Dict[str, Any]], mode: str)
             else:
                 for segment in _quote_segments(quote):
                     if segment not in cited:
-                        problems.append(f"{label}: цитата не найдена дословно в источниках {ids}: «{segment[:80]}»")
+                        problems.append(f"{label}: цитата не найдена дословно в источниках {ids}: «{segment[:80]}»"
+                                        + mismatch_hint(segment, cited))
                         break
         cited_digits = set(_digits(cited_raw))
         missing_numbers = sorted({d for d in _digits(text + " " + (block.get("quote") or "")) if d not in cited_digits})
