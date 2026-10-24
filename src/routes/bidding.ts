@@ -245,6 +245,19 @@ router.post('/admin/lots/:id/withdraw', async (req, res) => {
   } catch (e) { serverError(res, 'withdraw', e); }
 });
 
+/** Аннулировать принятую ставку (причина обязательна и попадает в журнал). Пока в лоте идут торги. */
+router.post('/admin/bids/:id/annul', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return fail(res, 404, ADMIN_REJECTIONS.no_such_bid);
+  const reason = text(req.body?.reason, 500);
+  if (!reason) return fail(res, 400, ADMIN_REJECTIONS.reason_required);
+  try {
+    const result = await bidding.annulBid(id, userOf(req)!.user_id, reason);
+    if (result.status === 'annulled') return res.json(result);
+    return fail(res, result.reason === 'no_such_bid' ? 404 : 409, ADMIN_REJECTIONS[result.reason] ?? 'Аннулировать ставку не удалось.', { code: result.reason });
+  } catch (e) { serverError(res, 'annul', e); }
+});
+
 router.get('/admin/auctions/:id/registrations', async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) return fail(res, 404, 'Аукцион не найден');

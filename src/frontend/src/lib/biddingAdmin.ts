@@ -28,6 +28,7 @@ export interface PendingParticipant { user_id: number; username: string; email: 
 export interface AdminBid {
   bid_id: number; created_at: string; user_id: number; username: string; kind: string; max_kop: number; price_after_kop: number | null;
   accepted: boolean; reject_reason: string | null; became_leader: boolean | null; extended_to: string | null; ip: string | null;
+  annulled: boolean; annul_reason: string | null; annulled_at: string | null;
 }
 
 async function call<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
@@ -54,6 +55,7 @@ export const pendingParticipants = () => call<{ participants: PendingParticipant
 export const setKyc = (userId: number, status: 'approved' | 'rejected', note?: string) => call<{ ok: boolean }>(`${base}/participants/${userId}/kyc`, 'POST', { status, note });
 export const decideRegistration = (auctionId: number, userId: number, approve: boolean, limitRub?: number, reason?: string) =>
   call<{ status: string }>(`${base}/auctions/${auctionId}/registrations/${userId}/decision`, 'POST', { approve, limit_rub: limitRub, reason });
+export const annulBid = (bidId: number, reason: string) => call<{ status: string }>(`${base}/bids/${bidId}/annul`, 'POST', { reason });
 export const lotBids = (lotId: number) => call<{ bids: AdminBid[] }>(`${base}/lots/${lotId}/bids`);
 export const verifyChain = (key: number) => call<{ ok: boolean; checked: number; first_bad_event: number | null }>(`${base}/chains/${key}/verify`);
 
