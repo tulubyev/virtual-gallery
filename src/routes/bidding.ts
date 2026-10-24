@@ -4,6 +4,7 @@
 import express, { Request, Response } from 'express';
 import { createBidLimiter } from '../middleware/bidLimiter';
 import * as bidding from '../services/bidding';
+import * as notifications from '../services/biddingNotifications';
 import { checkConsents } from '../services/legalDocs';
 import {
   ADMIN_REJECTIONS, bidRejection, intInRange, isSlug, isUuid, parseId, parseInstant, parseRub, text,
@@ -126,6 +127,27 @@ router.get('/me/registrations', async (req, res) => {
   const user = userOf(req);
   if (!user) return fail(res, 401, 'Требуется вход');
   try { res.json({ registrations: await bidding.myRegistrations(user.user_id) }); } catch (e) { serverError(res, 'me', e); }
+});
+
+/** Лента уведомлений участника (ставку перебили, лот закрыт, решение по заявке…). `?unread=1` — только непрочитанные. */
+router.get('/me/notifications', async (req, res) => {
+  const user = userOf(req);
+  if (!user) return fail(res, 401, 'Требуется вход');
+  const limit = intInRange(req.query.limit, 1, 100) ?? 30;
+  try { res.json(await notifications.listMine(user.user_id, { unreadOnly: req.query.unread === '1', limit })); } catch (e) { serverError(res, 'notifications', e); }
+});
+
+/** Отметить прочитанными: `{ids: [..]}` или без ids — все свои. */
+router.post('/me/notifications/read', async (req, res) => {
+  const user = userOf(req);
+  if (!user) return fail(res, 401, 'Требуется вход');
+  let ids: number[] | null = null;
+  if (req.body?.ids !== undefined) {
+    const list = Array.isArray(req.body.ids) ? req.body.ids.map(parseId) : null;
+    if (!list || list.length === 0 || list.length > 200 || list.some((v: number | null) => v === null)) return fail(res, 400, 'ids: список от 1 до 200 номеров уведомлений');
+    ids = list as number[];
+  }
+  try { res.json({ marked: await notifications.markRead(user.user_id, ids) }); } catch (e) { serverError(res, 'notifications read', e); }
 });
 
 // ── Куратор ────────────────────────────────────────────────────────────────────────────────────

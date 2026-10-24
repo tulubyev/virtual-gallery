@@ -92,6 +92,9 @@ export const getAuction = (slug: string) => getJson<AuctionView>(`/api/bidding/a
 export const getLot = (id: number) => getJson<{ server_time: string; lot: PublicLot; history: HistoryItem[] }>(`/api/bidding/lots/${id}`, 'Не удалось загрузить лот.');
 export const pollLot = (id: number, since: number) =>
   getJson<{ changed: boolean; version?: number; server_time: string; lot?: PublicLot }>(`/api/bidding/lots/${id}/state?since=${since}`, 'Не удалось обновить лот.');
+export interface NotificationItem { notification_id: number; kind: string; title: string; text: string; path: string | null; created_at: string; read: boolean }
+export const myNotifications = () => getJson<{ unread: number; notifications: NotificationItem[] }>('/api/bidding/me/notifications', 'Не удалось загрузить уведомления.');
+export const markNotificationsRead = (ids?: number[]) => send<{ marked: number }>('/api/bidding/me/notifications/read', 'POST', ids ? { ids } : {}, 'Не удалось отметить уведомления.');
 export const myRegistrations = () => getJson<{ registrations: Registration[] }>('/api/bidding/me/registrations', 'Не удалось загрузить ваши заявки.');
 
 // ── Ставка и заявка ────────────────────────────────────────────────────────────────────────────

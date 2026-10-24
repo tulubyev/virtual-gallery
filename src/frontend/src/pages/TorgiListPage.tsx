@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AUCTION_STATUS, formatMoment, listAuctions, loadBiddingEnabled, type AuctionSummary } from '../lib/bidding';
+import NotificationsPanel from '../components/torgi/NotificationsPanel';
 import { Badge, Notice, Shell } from '../components/torgi/Shell';
 
 const TONE: Record<string, 'green' | 'indigo' | 'gray'> = { bidding: 'green', announced: 'indigo', registration: 'indigo', preview: 'indigo' };
@@ -24,6 +25,7 @@ const TorgiListPage: React.FC = () => {
     <Shell title="Торги" subtitle="Онлайн-аукционы: объявленные, идущие и завершённые.">
       {enabled === false && <Notice tone="info">Онлайн-торги пока не запущены. Следите за объявлениями.</Notice>}
       {error && <Notice tone="error">{error}</Notice>}
+      {enabled && <NotificationsPanel />}
       {enabled && auctions === null && !error && <p className="text-sm text-gray-500">Загрузка…</p>}
       {auctions && auctions.length === 0 && <Notice tone="info">Объявленных аукционов пока нет.</Notice>}
       <ul className="grid gap-4 sm:grid-cols-2">
