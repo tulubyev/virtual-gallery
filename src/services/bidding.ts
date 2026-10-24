@@ -189,8 +189,12 @@ export async function adminGetAuction(id: number) {
   if (!a) return null;
   const lots = (await pool.query(`
     SELECT l.lot_id, l.lot_no, l.artwork_id, l.seller_user_id, l.snapshot, l.start_price_kop, l.reserve_kop, l.estimate_low_kop, l.estimate_high_kop,
-           l.state, l.ends_at, l.current_price_kop, l.bid_count, l.version, l.close_outcome, l.hammer_kop, l.leader_user_id, l.winner_user_id
-    FROM bidding_lots l WHERE l.auction_id = $1 ORDER BY l.lot_no`, [id])).rows;
+           l.state, l.ends_at, l.current_price_kop, l.bid_count, l.version, l.close_outcome, l.hammer_kop, l.leader_user_id, l.winner_user_id,
+           wp.full_name AS winner_name, wp.phone AS winner_phone, wr.pseudonym_no AS winner_pseudonym
+    FROM bidding_lots l
+    LEFT JOIN bidding_participants wp ON wp.user_id = l.winner_user_id
+    LEFT JOIN bidding_registrations wr ON wr.auction_id = l.auction_id AND wr.user_id = l.winner_user_id
+    WHERE l.auction_id = $1 ORDER BY l.lot_no`, [id])).rows;
   const num = (v: unknown) => n(v);
   return {
     auction: { ...a, auction_id: Number(a.auction_id), deposit_kop: Number(a.deposit_kop) },
@@ -269,6 +273,16 @@ export async function withdrawLot(lotId: number, actorId: number, reason: string
 /** Аннулировать принятую ставку в лоте, где идут торги: состояние лота пересчитывается, запись остаётся в журнале с причиной. */
 export async function annulBid(bidId: number, actorId: number, reason: string) {
   return (await pool.query('SELECT bidding_annul_bid($1, $2, $3) AS r', [bidId, actorId, reason])).rows[0].r;
+}
+
+/** Отметка куратора о расчётах по проданному лоту: paid, defaulted (нужна причина), handed_over, settled. */
+export async function setLotSettlement(lotId: number, actorId: number, to: string, note: string | null) {
+  return (await pool.query('SELECT bidding_set_lot_settlement($1, $2, $3, $4) AS r', [lotId, actorId, to, note])).rows[0].r;
+}
+
+/** Завершение аукциона вручную: closed → settled → archived. */
+export async function setAuctionStatus(auctionId: number, actorId: number, to: string, note: string | null) {
+  return (await pool.query('SELECT bidding_set_auction_status($1, $2, $3, $4) AS r', [auctionId, actorId, to, note])).rows[0].r;
 }
 
 export async function listRegistrations(auctionId: number) {
