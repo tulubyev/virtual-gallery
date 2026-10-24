@@ -28,6 +28,7 @@ import asyncio
 import json
 import math
 import random
+import re
 import statistics
 import sys
 import time
@@ -172,6 +173,27 @@ def _fmt(value: Optional[float], digits: int = 3) -> str:
     return "—" if value is None else f"{value:.{digits}f}"
 
 
+_SECRET_LIKE = re.compile(r"(?i)(bearer\s+\S+|sk-[\w-]{8,}|[A-Za-z0-9_\-]{32,}|://[^\s/]*@|\?\S+)")
+
+
+def safe_message(error: BaseException, limit: int = 240) -> str:
+    """Текст ошибки для отчёта без ключей, токенов, паролей в адресах и строк запроса: файл прогона не должен их хранить."""
+    return _SECRET_LIKE.sub("[скрыто]", " ".join(str(error).split()))[:limit]
+
+
+def render_failures(results: Sequence[Dict[str, Any]]) -> str:
+    """Вопросы, на которых прогон упал: без них отчёт молча считался бы по меньшему числу вопросов."""
+    failed = [r for r in results if "error" in r]
+    if not failed:
+        return ""
+    lines = ["", f"## Сбои при прогоне ({len(failed)} из {len(results)}) — в таблицу не вошли", ""]
+    lines += [f"- `{r['id']}`: {r['error']}" + (f" — {r['error_detail']}" if r.get("error_detail") else "")
+              for r in failed[:20]]
+    if len(failed) > 20:
+        lines.append(f"- … и ещё {len(failed) - 20}")
+    return "\n".join(lines) + "\n"
+
+
 def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка RAG") -> str:
     lines = [f"# {title}", ""]
     groups = [("все", list(results))]
@@ -242,7 +264,7 @@ async def run(cases: List[Dict[str, Any]], access: str, mode: str, retrieval_onl
                 return await run_case(case, access, mode, retrieval_only)
             except Exception as error:               # один сбой не должен терять весь прогон
                 return {**{k: case[k] for k in ("id", "question", "type", "split", "answerable")},
-                        "error": type(error).__name__, "seconds": None}
+                        "error": type(error).__name__, "error_detail": safe_message(error), "seconds": None}
 
     return await asyncio.gather(*(one(c) for c in cases))
 
@@ -285,10 +307,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         cases = [c for c in cases if c["split"] == args.split]
     from src.models.services.database import db_service
     from src.models.services.qdrant_client import init_qdrant
+    from src.models.services.model_settings import model_settings
 
     async def go() -> List[Dict[str, Any]]:
         await db_service.connect()
         init_qdrant()
+        try:
+            await model_settings.load()     # как в ядре: модель, выбранная администратором, иначе значения из окружения
+        except Exception:
+            pass
         try:
             return await run(cases, args.access, args.mode, args.retrieval_only)
         finally:
@@ -296,12 +323,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     results = asyncio.run(go())
     args.out.write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
-    report = render_report([r for r in results if "error" not in r])
+    report = render_report([r for r in results if "error" not in r]) + render_failures(results)
     args.out.with_suffix(".md").write_text(report, encoding="utf-8")
     failed = [r for r in results if "error" in r]
     print(report)
-    if failed:
-        print(f"Сбоев при прогоне: {len(failed)} ({', '.join(r['id'] for r in failed[:10])})", file=sys.stderr)
     return 1 if failed else 0
 
 
