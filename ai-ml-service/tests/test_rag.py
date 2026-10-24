@@ -169,6 +169,21 @@ def test_quote_ignores_footnote_markers_glued_to_words():
     assert rag_answer.normalize("ст.4 рис. 2 Ж-1842 1795 тайшой3") == "ст 4 рис 2 ж-1842 1795 тайшой"
 
 
+def test_failed_quote_names_the_first_differing_character_and_nearest_source_text():
+    sources = [{"document_id": "d", "content": "Их хүрээ, Урга, Нийслэл хүрээ, УланБатор — город менял названия чаще, чем Санкт-Петербург."}]
+    wrong = {"insufficient_evidence": False, "blocks": [{
+        "kind": "quote", "text": "Столица меняла названия.", "source_ids": [1],
+        "quote": "\u0456х хүрээ, Урга, Нийслэл хүрээ, УланБатор — город менял названия чаще, чем Санкт-Петербург."}]}
+    (problem,) = rag_answer.violations(wrong, sources, "public")
+    assert "знаке 1" in problem and "U+0456" in problem and "U+0438" in problem                 # украинская і вместо и
+    assert "ближайшее место источника: «их хүрээ урга нийслэл хүрээ" in problem
+    unrelated = {"insufficient_evidence": False, "blocks": [{
+        "kind": "quote", "text": "Что-то.", "source_ids": [1], "quote": "совсем другой текст про живопись маслом"}]}
+    (problem,) = rag_answer.violations(unrelated, sources, "public")
+    assert "расхождение" not in problem and "ближайшее" not in problem                         # ничего похожего — подсказки нет
+    assert rag_answer.mismatch_hint("абвгдежзик", "") == ""
+
+
 def test_names_must_come_from_cited_sources():
     problems = check(block("Картину написал Кандинский."))
     assert problems and "канд" in problems[0]
