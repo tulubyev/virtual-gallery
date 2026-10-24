@@ -592,15 +592,27 @@ FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 
 def make_pdf(pages):
-    import fitz
+    """PDF с текстовым слоем и кириллицей (reportlab, BSD; шрифт DejaVu)"""
+    import io
 
-    document = fitz.open()
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.utils import simpleSplit
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfgen import canvas
+
+    pdfmetrics.registerFont(TTFont("dv", FONT))
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
     for text in pages:
-        page = document.new_page()
-        page.insert_textbox(fitz.Rect(50, 50, 545, 790), text, fontsize=11, fontname="dv", fontfile=FONT)
-    data = document.tobytes()
-    document.close()
-    return data
+        pdf.setFont("dv", 10)
+        y = 800
+        for line in simpleSplit(text, "dv", 10, 495):
+            pdf.drawString(50, y, line)
+            y -= 12
+        pdf.showPage()
+    pdf.save()
+    return buffer.getvalue()
 
 
 @needs_db

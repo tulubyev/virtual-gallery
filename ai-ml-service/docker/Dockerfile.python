@@ -9,11 +9,10 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PORT=8001
 
-# Системные пакеты: Tesseract (русский и английский) и poppler — OCR отсканированных PDF; шрифт — видимая метка на изображении
+# Системные пакеты: Tesseract (русский и английский) — OCR отсканированных PDF (страницы в изображения рисует pypdfium2, poppler не нужен); шрифт — видимая метка на изображении
 RUN apt-get update && apt-get install -y --no-install-recommends \
         tesseract-ocr \
         tesseract-ocr-rus \
-        poppler-utils \
         fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 

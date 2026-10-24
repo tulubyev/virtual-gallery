@@ -9,9 +9,8 @@ redis
 boto3
 Pillow
 numpy
-PyMuPDF
+pypdfium2
 pytesseract
-pdf2image
 aiohttp
 jsonschema
 psutil
