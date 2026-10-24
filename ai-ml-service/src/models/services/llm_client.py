@@ -147,19 +147,37 @@ class LLMClient:
             if schema is None or not self._is_format_rejection(error):
                 logger.error("LLM request failed: %s", error)
                 raise ExternalAPIError("llm", "request", {"model": kwargs["model"]}) from error
-            # Endpoint не поддерживает json_schema — просим json_object и описываем схему в промпте
-            fallback_kwargs = dict(kwargs)
-            fallback_kwargs["response_format"] = {"type": "json_object"}
-            fallback_kwargs["messages"] = list(kwargs["messages"]) + [
-                {"role": "user", "content": "Верни только JSON-объект, соответствующий схеме:\n" + json.dumps(schema, ensure_ascii=False)}
-            ]
-            try:
-                completion = await client.chat.completions.create(**fallback_kwargs)
-            except Exception as second_error:
-                logger.error("LLM request failed (json_object): %s", second_error)
-                raise ExternalAPIError("llm", "request", {"model": kwargs["model"]}) from second_error
+            completion = await self._json_object_call(client, kwargs, schema)
+        if schema is not None and not getattr(completion, "choices", None):
+            # Шлюз может ответить 200 с ошибкой в теле (choices пуст), и SDK не бросает исключение:
+            # пробуем тот же запасной режим json_object, что и при явном отказе от схемы
+            logger.warning("LLM: пустой ответ на json_schema (model=%s): %s; пробую json_object",
+                           kwargs["model"], self._error_text(completion))
+            completion = await self._json_object_call(client, kwargs, schema)
+        if not getattr(completion, "choices", None):
+            logger.error("LLM: ответ без choices (model=%s): %s", kwargs["model"], self._error_text(completion))
+            raise ExternalAPIError("llm", "empty_response", {"model": kwargs["model"]})
         content = completion.choices[0].message.content or ""
         return content, completion
+
+    async def _json_object_call(self, client, kwargs: Dict[str, Any], schema: Dict[str, Any]):
+        """Endpoint не поддерживает json_schema — просим json_object и описываем схему в промпте."""
+        fallback_kwargs = dict(kwargs)
+        fallback_kwargs["response_format"] = {"type": "json_object"}
+        fallback_kwargs["messages"] = list(kwargs["messages"]) + [
+            {"role": "user", "content": "Верни только JSON-объект, соответствующий схеме:\n" + json.dumps(schema, ensure_ascii=False)}
+        ]
+        try:
+            return await client.chat.completions.create(**fallback_kwargs)
+        except Exception as second_error:
+            logger.error("LLM request failed (json_object): %s", second_error)
+            raise ExternalAPIError("llm", "request", {"model": kwargs["model"]}) from second_error
+
+    @staticmethod
+    def _error_text(completion) -> str:
+        """Описание ошибки из тела ответа шлюза (для журнала); сам ответ модели сюда не попадает."""
+        error = getattr(completion, "error", None) or (getattr(completion, "model_extra", None) or {}).get("error")
+        return " ".join(str(error).split())[:300] if error else "без описания"
 
     @staticmethod
     def _is_format_rejection(error: Exception) -> bool:
