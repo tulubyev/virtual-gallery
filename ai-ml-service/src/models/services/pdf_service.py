@@ -13,6 +13,16 @@ from .safe_fetch import fetch_pdf
 
 logger = logging.getLogger(__name__)
 
+_LINE_BREAK_HYPHEN = re.compile("\ufffe[ \t]*(?:\r?\n)?")     # pdfium пишет перенос слова на конце строки как U+FFFE
+
+
+def clean_pdfium_text(text: str) -> str:
+    """Убрать служебные символы pdfium: перенос слова склеивается («со\ufffeоружением» → «сооружением»),
+    пробел нулевой ширины пропадает, неразрывный дефис становится обычным; NUL не принимает PostgreSQL."""
+    text = _LINE_BREAK_HYPHEN.sub("", text)
+    return text.replace("\u200b", "").replace("\u2011", "-").replace("\x00", "")
+
+
 class PDFProcessingService:
     """Service for processing PDF documents"""
 
@@ -32,7 +42,7 @@ class PDFProcessingService:
                 page = pdf[page_num]
                 textpage = page.get_textpage()
                 try:
-                    text = textpage.get_text_range().replace("\x00", "")     # NUL не принимает PostgreSQL
+                    text = clean_pdfium_text(textpage.get_text_range())
                 finally:
                     textpage.close()
                     page.close()

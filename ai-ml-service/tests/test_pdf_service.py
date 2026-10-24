@@ -49,3 +49,11 @@ async def test_pdf_with_little_text_falls_back_to_ocr(monkeypatch):
 def test_broken_pdf_raises():
     with pytest.raises(Exception):
         pdf_service.extract_text(b"%PDF-1.4 not really a pdf")
+
+
+def test_clean_pdfium_text_joins_line_break_hyphenation_and_drops_zero_width_space():
+    from src.models.services.pdf_service import clean_pdfium_text
+
+    raw = "культовым со\ufffeоружением Бурятии, ра\ufffe\r\nботы\u200b и\u2011и \x00конец"
+    assert clean_pdfium_text(raw) == "культовым сооружением Бурятии, работы и-и конец"
+    assert clean_pdfium_text("Дамба-Дугар") == "Дамба-Дугар"                      # настоящий дефис остаётся
