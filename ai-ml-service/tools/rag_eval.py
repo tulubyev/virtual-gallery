@@ -272,15 +272,21 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
 # ---------- прогон ----------
 
 async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only: bool,
-                   model: Optional[str] = None) -> Dict[str, Any]:
+                   model: Optional[str] = None, rerank_mode: Optional[str] = None,
+                   rerank_model: Optional[str] = None) -> Dict[str, Any]:
     from src.models.services import rag_answer
+    from src.models.services.rerank import configured_mode, rerank
     from src.models.services.retrieval import expand_context, hybrid_search
 
     started = time.monotonic()
     record: Dict[str, Any] = {k: case[k] for k in ("id", "question", "type", "split", "answerable")}
     found = await hybrid_search(case["question"], access=access, top=20)
     record["degraded"] = found.degraded
-    record["retrieved"] = [{"document_id": p["document_id"], "page": p["page_number"], "chunk": p["chunk_index"]}
+    # Тот же порядок, что в продакшене: после поиска — реранк (если включён), затем сбор контекста
+    record["rerank"] = rerank_mode or configured_mode()
+    found.passages = await rerank(case["question"], found.passages, mode=record["rerank"], model=rerank_model)
+    record["retrieved"] = [{"document_id": p["document_id"], "page": p["page_number"], "chunk": p["chunk_index"],
+                            **({"rerank_score": p["rerank_score"]} if "rerank_score" in p else {})}
                            for p in found.passages]
     # Контекст собирается тем же кодом, что в продакшене: находки и соседние фрагменты
     sources = await expand_context(found.passages, access=access)
@@ -306,13 +312,14 @@ async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only:
 
 
 async def run(cases: List[Dict[str, Any]], access: str, mode: str, retrieval_only: bool,
-              concurrency: int = 3, model: Optional[str] = None) -> List[Dict[str, Any]]:
+              concurrency: int = 3, model: Optional[str] = None, rerank_mode: Optional[str] = None,
+              rerank_model: Optional[str] = None) -> List[Dict[str, Any]]:
     semaphore = asyncio.Semaphore(concurrency)
 
     async def one(case: Dict[str, Any]) -> Dict[str, Any]:
         async with semaphore:
             try:
-                return await run_case(case, access, mode, retrieval_only, model)
+                return await run_case(case, access, mode, retrieval_only, model, rerank_mode, rerank_model)
             except Exception as error:               # один сбой не должен терять весь прогон
                 return {**{k: case[k] for k in ("id", "question", "type", "split", "answerable")},
                         "error": type(error).__name__, "error_detail": safe_message(error), "seconds": None}
@@ -340,6 +347,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     run_parser.add_argument("--mode", choices=("public", "curator"), default="public")
     run_parser.add_argument("--model", help="модель для ответа вместо выбранной в админ-панели (например, z-ai/glm-5.3-flash)")
     run_parser.add_argument("--retrieval-only", action="store_true", help="только поиск, без вызова модели (бесплатно)")
+    run_parser.add_argument("--rerank", choices=("off", "llm"), help="переранжирование: off | llm (по умолчанию как RAG_RERANK в окружении)")
+    run_parser.add_argument("--rerank-model", help="модель реранкера вместо выбранной для задачи judge в админ-панели")
     cmp_parser = sub.add_parser("compare")
     cmp_parser.add_argument("before", type=Path)
     cmp_parser.add_argument("after", type=Path)
@@ -369,13 +378,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         except Exception:
             pass
         try:
-            return await run(cases, args.access, args.mode, args.retrieval_only, model=args.model)
+            return await run(cases, args.access, args.mode, args.retrieval_only, model=args.model,
+                             rerank_mode=args.rerank, rerank_model=args.rerank_model)
         finally:
             await db_service.disconnect()
 
     results = asyncio.run(go())
     args.out.write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
     title = f"Оценка RAG, модель {args.model}" if args.model else "Оценка RAG"
+    if results and results[0].get("rerank") == "llm":
+        title += ", реранк llm"
     report = render_report([r for r in results if "error" not in r], title) + render_failures(results)
     args.out.with_suffix(".md").write_text(report, encoding="utf-8")
     failed = [r for r in results if "error" in r]
