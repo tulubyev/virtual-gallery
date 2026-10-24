@@ -1,6 +1,7 @@
 """Метрики и свод оценки RAG (tools/rag_eval.py) — без сети и БД."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -131,3 +132,15 @@ def test_ndcg_counts_each_relevant_place_once():
     passages = [{"document_id": "d", "page_number": 1}] * 3
     metrics = ev.retrieval_metrics(passages, [{"document_id": "d", "page": 1}])
     assert metrics["ndcg10"] == pytest.approx(1.0)
+
+
+def test_bundled_golden_set_matches_corpus_manifest():
+    root = Path(ev.__file__).resolve().parent.parent / "eval"
+    cases = ev.load_cases(root / "siberia-art.golden.jsonl")
+    manifest_ids = {line.split("\t")[0] for line in (root / "corpus" / "manifest.tsv").read_text(encoding="utf-8").splitlines()
+                    if line and not line.startswith("#")}
+    assert len(cases) == 30 and len(manifest_ids) == 10
+    used = {item["document_id"] for case in cases for item in case["relevant"]}
+    assert used <= manifest_ids
+    assert all(case["relevant"] for case in cases if case["answerable"])
+    assert not any(case["relevant"] for case in cases if not case["answerable"])

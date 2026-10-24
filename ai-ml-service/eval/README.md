@@ -53,3 +53,16 @@ python -m tools.rag_eval compare eval/run-A.json eval/run-B.json --metric recall
 | P95 задержки | ≤ 6 с |
 
 Разницу меньше 2–3 п. на 150 вопросах считайте шумом (интервал Hit@5 печатается в отчёте).
+
+
+## Набор на открытом корпусе (Сибирь, Бурятия, Монголия)
+
+`siberia-art.golden.jsonl` — 30 вопросов к 10 открытым PDF из `corpus/manifest.tsv` (id документов `doc-01` … `doc-10`, страницы — номера страниц PDF с 1).
+Состав: факты 9, неотвечаемые 6, биография 4, тематические 4, алиасы 4, состязательные 3; `dev` 19 / `test` 11.
+**Это стартовый набор, а не эталон:** вопросы написал агент, а не куратор, неотвечаемость проверена поиском по ключевым словам. Куратору нужно перечитать вопросы и отметки страниц.
+Корпус загружается на сервер скриптом `scripts/rag-load-corpus.sh`; оценка запускается внутри контейнера ядра (в образе есть `tools/` и `eval/`):
+
+```bash
+docker exec virtgal-ai-core python -m tools.rag_eval run --cases eval/siberia-art.golden.jsonl --out /tmp/run.json --retrieval-only
+docker exec virtgal-ai-core python -m tools.rag_eval run --cases eval/siberia-art.golden.jsonl --out /tmp/run.json --split dev   # с ответом модели (платно)
+```
