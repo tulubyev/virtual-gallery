@@ -117,14 +117,17 @@ async def test_run_keeps_going_after_single_failure():
 
     async def fake_case(case, access, mode, retrieval_only):
         if case["id"] == "bad":
-            raise RuntimeError("boom secret")
+            raise RuntimeError("model_not_found, key sk-abcdef1234567890abcdef at https://user:pw@host/x?token=abc")
         return {"id": case["id"], "seconds": 0.1}
 
     cases = [{"id": "ok", "question": "q", "type": "fact", "split": "dev", "answerable": True},
              {"id": "bad", "question": "q", "type": "fact", "split": "dev", "answerable": True}]
     with patch.object(ev, "run_case", fake_case):
         out = await ev.run(cases, "staff", "public", True)
-    assert out[0]["id"] == "ok" and out[1]["error"] == "RuntimeError" and "secret" not in json.dumps(out)
+    dumped = json.dumps(out)
+    assert out[0]["id"] == "ok" and out[1]["error"] == "RuntimeError"
+    assert "model_not_found" in out[1]["error_detail"]
+    assert "sk-abcdef" not in dumped and "user:pw" not in dumped and "token=abc" not in dumped
 
 
 def test_ndcg_counts_each_relevant_place_once():
@@ -144,3 +147,12 @@ def test_bundled_golden_set_matches_corpus_manifest():
     assert used <= manifest_ids
     assert all(case["relevant"] for case in cases if case["answerable"])
     assert not any(case["relevant"] for case in cases if not case["answerable"])
+
+
+def test_failures_are_listed_in_report_with_message():
+    results = [{"id": "q-1", "question": "?", "type": "fact", "split": "dev", "answerable": True,
+                "error": "ExternalAPIError", "error_detail": "model_not_found"},
+               {"id": "q-2", "question": "?", "type": "fact", "split": "dev", "answerable": True, "metrics": {}}]
+    text = ev.render_failures(results)
+    assert "1 из 2" in text and "`q-1`: ExternalAPIError — model_not_found" in text
+    assert ev.render_failures([results[1]]) == ""
