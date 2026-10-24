@@ -212,3 +212,41 @@ async def test_embeddings_unavailable_in_ru_only(monkeypatch):
     monkeypatch.setattr(settings, "llm_mode", "ru-only")
     with pytest.raises(ConfigurationError):
         await ai_service.generate_embeddings(["текст"])
+
+
+def empty_completion(error=None):
+    result = MagicMock(spec=["choices", "model", "usage", "error", "model_extra"])
+    result.choices = None
+    result.error = error
+    result.model_extra = None
+    return result
+
+
+@pytest.mark.asyncio
+async def test_empty_choices_on_json_schema_falls_back_to_json_object(caplog):
+    gateway_error = {"message": "provider does not support response_format json_schema", "code": 400}
+    client = make_client([empty_completion(gateway_error), completion(json.dumps(FRONT_OK, ensure_ascii=False))])
+    with caplog.at_level(logging.WARNING):
+        result = await LLMClient(lambda: client).complete(
+            "vision_front", [{"role": "user", "content": "x"}], schema=artwork_schemas.FRONT_SCHEMA)
+    assert result.parsed == FRONT_OK
+    assert client.chat.completions.create.call_args_list[1].kwargs["response_format"] == {"type": "json_object"}
+    assert "response_format json_schema" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_empty_choices_everywhere_raises_clear_error(caplog):
+    client = make_client([empty_completion({"message": "model not available"}), empty_completion({"message": "model not available"})])
+    with caplog.at_level(logging.ERROR), pytest.raises(ExternalAPIError) as info:
+        await LLMClient(lambda: client).complete(
+            "vision_front", [{"role": "user", "content": "x"}], schema=artwork_schemas.FRONT_SCHEMA)
+    assert "empty_response" in str(info.value)
+    assert "model not available" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_empty_choices_without_schema_raises_without_retry():
+    client = make_client([empty_completion()])
+    with pytest.raises(ExternalAPIError):
+        await LLMClient(lambda: client).complete("chat", [{"role": "user", "content": "x"}])
+    assert client.chat.completions.create.await_count == 1
