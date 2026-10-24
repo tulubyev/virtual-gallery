@@ -199,5 +199,6 @@ async def answer(query: str, sources: List[Dict[str, Any]], mode: str = "public"
              "\nИсправь ответ: опирайся только на источники и цитируй дословно. "
              "Если данных нет — insufficient_evidence=true."},
         ]
-    return {"outcome": "citations_failed", "answer": UNVERIFIED_TEXT, "blocks": [],
+    # problems — причины отказа проверки (номера блоков, числа и основы имён, без текста ответа): для оценки и разбора
+    return {"outcome": "citations_failed", "answer": UNVERIFIED_TEXT, "blocks": [], "problems": problems[:8],
             "model": result.model, "usage": result.usage}
