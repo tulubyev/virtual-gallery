@@ -690,7 +690,7 @@ async def test_context_adds_neighbours_after_the_hit_in_text_order(book):
 async def test_context_keeps_hits_first_and_orders_documents_by_best_hit(book):
     other = await chunk_of(book, "pub", 1)
     far = await chunk_of(book, "book", 4)
-    context = await retrieval.expand_context([other, far], access="staff", hits=2, neighbor_hits=2)
+    context = await retrieval.expand_context([other, far], access="staff", hits=2, next_hits=2, prev_hits=2)
     assert [(p["document_id"], p["chunk_index"]) for p in context] == [("pub", 0), ("pub", 1), ("pub", 2), ("book", 3), ("book", 4)]
     assert [p["neighbor"] for p in context] == [True, False, True, True, False]
 
@@ -702,7 +702,7 @@ async def test_context_respects_budget_hit_count_and_never_drops_hits(book):
     tiny = await retrieval.expand_context([hit], access="staff", max_chars=1)
     assert [p["chunk_index"] for p in tiny] == [2]                          # находка остаётся, соседей не хватило места
     several = [await chunk_of(book, "book", i) for i in range(5)]
-    assert len(await retrieval.expand_context(several, access="staff", hits=2, neighbor_hits=0)) == 2
+    assert len(await retrieval.expand_context(several, access="staff", hits=2, next_hits=0, prev_hits=0)) == 2
     assert await retrieval.expand_context([], access="staff") == []
 
 
@@ -752,3 +752,17 @@ async def test_search_still_works_when_terms_table_is_missing(kb):
             chunks=[{"chunk_index": 0, "page_number": 1, "content": "Текст."}])
     finally:
         await kb.execute("CREATE TABLE IF NOT EXISTS kb_terms (term TEXT PRIMARY KEY)")
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_next_fragment_is_taken_for_lower_ranked_hits_but_previous_only_for_the_best(book):
+    ranked = [await chunk_of(book, "book", 4), await chunk_of(book, "pub", 0), await chunk_of(book, "pub", 2),
+              await chunk_of(book, "book", 0), await chunk_of(book, "book", 1)]
+    context = await retrieval.expand_context(ranked, access="staff")
+    got = {(p["document_id"], p["chunk_index"]): p["neighbor"] for p in context}
+    assert got[("book", 3)] is True and got[("pub", 1)] is True      # предыдущий у лучшей и следующий у третьей находки
+    assert got[("book", 2)] is True                                   # следующий у пятой находки (book 1)
+    assert ("pub", 3) not in got and len(context) == len(got)
+    # предыдущий фрагмент у третьей находки (pub 2 → pub 1) не нужен сам по себе: pub 1 попал как следующий у pub 0, а не как предыдущий
+    assert [k for k in got if k[0] == "book"] == [("book", 0), ("book", 1), ("book", 2), ("book", 3), ("book", 4)]
