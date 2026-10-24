@@ -5,3 +5,6 @@ pluggy==1.7.0
 Pygments==2.21.0
 pytest==9.1.1
 pytest-asyncio==1.4.0
+# Генерация тестового PDF с кириллицей (BSD): в боевой образ не попадает
+reportlab==5.0.1
+charset-normalizer==3.5.2

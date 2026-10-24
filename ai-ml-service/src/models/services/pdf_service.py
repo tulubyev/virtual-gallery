@@ -4,7 +4,7 @@ PDF processing service for text extraction, OCR, and chunking
 
 import hashlib
 import logging
-import fitz  # PyMuPDF
+import pypdfium2 as pdfium  # PDFium: Apache-2.0/BSD (вместо PyMuPDF под AGPL-3.0)
 from typing import List, Dict, Any, Optional
 import re
 from ..config import settings
@@ -23,33 +23,51 @@ class PDFProcessingService:
         """Download PDF from URL (безопасная загрузка: белый список, лимиты)"""
         return await fetch_pdf(pdf_url)
 
-    def extract_text_with_pymupdf(self, pdf_bytes: bytes) -> Dict[str, Any]:
-        """Extract text using PyMuPDF"""
-        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    def extract_text(self, pdf_bytes: bytes) -> Dict[str, Any]:
+        """Текст по страницам из текстового слоя PDF (pypdfium2)"""
+        pdf = pdfium.PdfDocument(pdf_bytes)
         pages_text = []
-
-        for page_num in range(len(doc)):
-            page = doc.load_page(page_num)
-            text = page.get_text()
-            pages_text.append({
-                "page_number": page_num + 1,
-                "text": text,
-                "char_count": len(text)
-            })
-
-        doc.close()
+        try:
+            for page_num in range(len(pdf)):
+                page = pdf[page_num]
+                textpage = page.get_textpage()
+                try:
+                    text = textpage.get_text_range().replace("\x00", "")     # NUL не принимает PostgreSQL
+                finally:
+                    textpage.close()
+                    page.close()
+                pages_text.append({
+                    "page_number": page_num + 1,
+                    "text": text,
+                    "char_count": len(text)
+                })
+        finally:
+            pdf.close()
         return {
             "total_pages": len(pages_text),
             "pages": pages_text,
             "total_chars": sum(page["char_count"] for page in pages_text)
         }
 
+    @staticmethod
+    def render_pages(pdf_bytes: bytes, dpi: int = 200):
+        """Страницы как изображения для OCR (pypdfium2, без poppler); по одной, чтобы не держать весь документ в памяти"""
+        pdf = pdfium.PdfDocument(pdf_bytes)
+        try:
+            for page_num in range(len(pdf)):
+                page = pdf[page_num]
+                try:
+                    yield page.render(scale=dpi / 72).to_pil()
+                finally:
+                    page.close()
+        finally:
+            pdf.close()
+
     def perform_ocr(self, pdf_bytes: bytes) -> Dict[str, Any]:
         """Perform OCR on PDF pages"""
         try:
             # Try to import required modules
             try:
-                from pdf2image import convert_from_bytes
                 import pytesseract
             except ImportError as e:
                 logger.warning(f"OCR dependencies not available: {e}. Skipping OCR.")
@@ -60,11 +78,8 @@ class PDFProcessingService:
                     "error": "OCR dependencies not installed"
                 }
 
-            # Convert PDF to images
-            images = convert_from_bytes(pdf_bytes)
-
             ocr_results = []
-            for i, image in enumerate(images):
+            for i, image in enumerate(self.render_pages(pdf_bytes)):
                 try:
                     # Perform OCR
                     text = pytesseract.image_to_string(image, lang='rus+eng')
@@ -148,7 +163,7 @@ class PDFProcessingService:
             logger.info(f"Starting PDF processing for {document_id}")
 
             # Extract text
-            text_extraction = self.extract_text_with_pymupdf(pdf_bytes)
+            text_extraction = self.extract_text(pdf_bytes)
 
             # Perform OCR if text extraction yielded little content
             ocr_performed = False
