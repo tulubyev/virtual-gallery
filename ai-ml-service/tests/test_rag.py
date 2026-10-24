@@ -178,6 +178,7 @@ async def test_answer_refuses_after_second_violation():
         result = await rag_answer.answer("Кто автор?", SOURCES)
     assert result["outcome"] == "citations_failed" and result["blocks"] == [] and call.await_count == 2
     assert "1920" not in result["answer"]
+    assert result["problems"] and any("1920" in p for p in result["problems"])      # причина отказа сохранена для разбора
 
 
 @pytest.mark.asyncio

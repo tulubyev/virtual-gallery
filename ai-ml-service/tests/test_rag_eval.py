@@ -173,3 +173,12 @@ async def test_run_passes_model_override_to_each_case():
         await ev.run(cases, "staff", "public", False, model="z-ai/glm-5.3-flash")
         await ev.run(cases, "staff", "public", False)
     assert seen == ["z-ai/glm-5.3-flash", None]
+
+
+def test_report_lists_citation_check_failures_with_reasons():
+    results = [{"id": "q-9", "question": "Что значит Урга?", "type": "alias", "split": "dev", "answerable": True,
+                "metrics": {"hit5": 1.0, "hit20": 1.0, "recall5": 1.0, "recall20": 1.0, "mrr10": 1.0, "ndcg10": 1.0},
+                "outcome": "citations_failed", "problems": ["блок 1: имён с основами ['урга'] нет в источниках [2]"],
+                "seconds": 1.0}]
+    report = ev.render_report(results)
+    assert "не прошёл проверку цитат" in report and "q-9" in report and "основами" in report

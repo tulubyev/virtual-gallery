@@ -224,6 +224,11 @@ def render_report(results: Sequence[Dict[str, Any]], title: str = "Оценка 
     lines += ["", f"## Ответили там, где нужен был отказ, или нарушены цитаты ({len(wrong)})", ""]
     lines += [f"- `{r['id']}` ({r['type']}): {r['question']} → {r['outcome']}" +
               (f"; нарушения: {'; '.join(r['violations'])}" if r.get("violations") else "") for r in wrong] or ["—"]
+    unconfirmed = [r for r in results if r.get("outcome") == "citations_failed"]
+    if unconfirmed:
+        lines += ["", f"## Ответ не прошёл проверку цитат, показан отказ ({len(unconfirmed)})", ""]
+        lines += [f"- `{r['id']}` ({r['type']}, {'ответ есть' if r['answerable'] else 'ответа нет'}): {r['question']}"
+                  + (f"; причины: {'; '.join(r['problems'])}" if r.get("problems") else "") for r in unconfirmed]
     return "\n".join(lines) + "\n"
 
 
@@ -249,6 +254,8 @@ async def run_case(case: Dict[str, Any], access: str, mode: str, retrieval_only:
         record["outcome"] = result["outcome"]
         record["answer"] = result["answer"]
         # Повторная проверка тем же кодом, что в продакшене: ловит расхождение между проверкой и показом
+        if result.get("problems"):
+            record["problems"] = result["problems"]
         if result["outcome"] == "answered":
             record["violations"] = rag_answer.violations(
                 {"insufficient_evidence": False, "blocks": result["blocks"]}, sources, mode)
