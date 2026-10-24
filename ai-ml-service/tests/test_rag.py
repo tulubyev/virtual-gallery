@@ -157,6 +157,18 @@ def test_long_quote_reason_names_actual_length():
     assert problems and "у вас 480" in problems[0]
 
 
+def test_quote_ignores_footnote_markers_glued_to_words():
+    sources = [{"document_id": "d", "title": "t", "page_number": 3,
+                "content": "в 1795 г. возведен каменный дацан хоринским2 тайшой3 Дамба-Дугаром Иренцеевым. В 1775 г. ст.4 рис. 2 XVIII"}]
+    ok = {"insufficient_evidence": False, "blocks": [{"text": "Дацан возвёл тайша.", "kind": "quote", "source_ids": [1],
+          "quote": "возведен каменный дацан хоринским тайшой Дамба-Дугаром Иренцеевым"}]}
+    assert rag_answer.violations(ok, sources, "public") == []
+    wrong = {"insufficient_evidence": False, "blocks": [{"text": "Дацан.", "kind": "quote", "source_ids": [1],
+             "quote": "возведен каменный дацан хоринским тайшой Дамба-Дугаром Петровым"}]}
+    assert rag_answer.violations(wrong, sources, "public")                          # подмена слова по-прежнему не проходит
+    assert rag_answer.normalize("ст.4 рис. 2 Ж-1842 1795 тайшой3") == "ст 4 рис 2 ж-1842 1795 тайшой"
+
+
 def test_names_must_come_from_cited_sources():
     problems = check(block("Картину написал Кандинский."))
     assert problems and "канд" in problems[0]
