@@ -15,6 +15,7 @@ from ..services import knowledge_base, rag_answer
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
+from ..services.rerank import rerank
 from ..services.retrieval import CONTEXT_HITS, expand_context, hybrid_search
 
 router = APIRouter()
@@ -63,7 +64,8 @@ async def process_rag_query(request: RAGQueryRequest):
     try:
         started = time.monotonic()
         found = await hybrid_search(request.query, access=request.access, top=20, document_ids=request.document_ids)
-        passages = await expand_context(found.passages, access=request.access, hits=request.context_limit)
+        ranked = await rerank(request.query, found.passages)           # выключен (RAG_RERANK=off) или сбой — порядок поиска
+        passages = await expand_context(ranked, access=request.access, hits=request.context_limit)
 
         result = await rag_answer.answer(request.query, passages, request.mode)
         blocks = result["blocks"]

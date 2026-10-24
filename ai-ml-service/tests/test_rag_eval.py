@@ -115,7 +115,7 @@ def test_compare_pairs_by_question_id():
 async def test_run_keeps_going_after_single_failure():
     from unittest.mock import AsyncMock, patch
 
-    async def fake_case(case, access, mode, retrieval_only, model=None):
+    async def fake_case(case, access, mode, retrieval_only, model=None, rerank_mode=None, rerank_model=None):
         if case["id"] == "bad":
             raise RuntimeError("model_not_found, key sk-abcdef1234567890abcdef at https://user:pw@host/x?token=abc")
         return {"id": case["id"], "seconds": 0.1}
@@ -166,15 +166,15 @@ async def test_run_passes_model_override_to_each_case():
 
     seen = []
 
-    async def fake_case(case, access, mode, retrieval_only, model=None):
-        seen.append(model)
+    async def fake_case(case, access, mode, retrieval_only, model=None, rerank_mode=None, rerank_model=None):
+        seen.append((model, rerank_mode, rerank_model))
         return {"id": case["id"], "seconds": 0.1}
 
     cases = [{"id": "a", "question": "q", "type": "fact", "split": "dev", "answerable": True}]
     with patch.object(ev, "run_case", fake_case):
         await ev.run(cases, "staff", "public", False, model="z-ai/glm-5.3-flash")
-        await ev.run(cases, "staff", "public", False)
-    assert seen == ["z-ai/glm-5.3-flash", None]
+        await ev.run(cases, "staff", "public", False, rerank_mode="llm", rerank_model="google/gemini-3.5-flash-lite")
+    assert seen == [("z-ai/glm-5.3-flash", None, None), (None, "llm", "google/gemini-3.5-flash-lite")]
 
 
 def test_report_lists_citation_check_failures_with_reasons():

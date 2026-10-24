@@ -299,6 +299,23 @@ def test_route_returns_cited_sources_only_and_defaults_to_public_access(client):
     assert log.call_args.args[-2:] == ("answered", "public")
 
 
+def test_route_builds_context_from_reranked_passages_and_survives_rerank_failure(client):
+    from src.models.routes import rag
+
+    found = retrieval.Retrieval(passages=PASSAGES)
+    reordered = [PASSAGES[1], PASSAGES[0]]
+    answer = AsyncMock(return_value={"outcome": "answered", "answer": "Малевич [1]", "blocks": [block("Малевич.")],
+                                     "model": "m", "usage": {}})
+    with patch.object(rag, "hybrid_search", AsyncMock(return_value=found)), \
+         patch.object(rag, "rerank", AsyncMock(return_value=reordered)) as ranker, \
+         patch.object(rag, "expand_context", AsyncMock(return_value=reordered)) as expand, \
+         patch.object(rag.rag_answer, "answer", answer), patch.object(rag.db_service, "execute", AsyncMock()):
+        assert client.post("/api/v1/rag/query", json={"query": "кто автор квадрата"}, headers=AUTH).status_code == 200
+    assert ranker.call_args.args == ("кто автор квадрата", PASSAGES)
+    assert expand.call_args.args[0] == reordered                       # контекст строится по новому порядку
+    assert answer.call_args.args[1] == reordered
+
+
 def test_route_shows_found_passages_when_answer_is_not_confirmed(client):
     from src.models.routes import rag
 

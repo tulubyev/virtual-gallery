@@ -111,6 +111,18 @@ describeDb('уведомления участникам торгов (PostgreSQL
       expect(JSON.stringify(await notices(bob, lotId))).not.toContain('подлинности');
     });
 
+    it('аннулирование ставки: владелец ставки получает «аннулирована» без причины; возврат лидерства прежнему лидеру — не «перебили»', async () => {
+      const { lotId } = await market();
+      await h.bid(lotId, alice, 30000);
+      const high = await h.bid(lotId, bob, 50000);                            // alice перебита
+      expect(await kinds(alice, lotId)).toEqual(['outbid']);
+      const curator = await h.user('curator', 'curator');
+      await h.q(`SELECT bidding_annul_bid($1, $2, 'ошибочная ставка')`, [high.bid_id, curator]);   // лидером снова стала alice
+      expect(await kinds(bob, lotId)).toEqual(['bid_annulled']);
+      expect(await kinds(alice, lotId)).toEqual(['outbid']);                  // нового «перебили» нет
+      expect(JSON.stringify(await notices(bob, lotId))).not.toContain('ошибочная');
+    });
+
     it('повторная запись того же события не создаёт второго уведомления', async () => {
       const { lotId } = await market();
       await h.bid(lotId, alice, 30000);

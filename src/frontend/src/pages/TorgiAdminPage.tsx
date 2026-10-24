@@ -101,11 +101,17 @@ const AddLotForm: React.FC<{ auctionId: number; onAdded: () => void; setFlash: (
   );
 };
 
-const LotBids: React.FC<{ lotId: number }> = ({ lotId }) => {
+const LotBids: React.FC<{ lotId: number; lotOpen: boolean; onChanged: () => void; setFlash: (f: Flash) => void }> = ({ lotId, lotOpen, onChanged, setFlash }) => {
   const [bids, setBids] = useState<admin.AdminBid[] | null>(null);
   const [chain, setChain] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { admin.lotBids(lotId).then(d => setBids(d.bids)).catch(e => setError(e.message)); }, [lotId]);
+  const run = useAction(setFlash);
+  const load = useCallback(() => admin.lotBids(lotId).then(d => setBids(d.bids)).catch(e => setError(e.message)), [lotId]);
+  useEffect(() => { void load(); }, [load]);
+  const annul = (bid: admin.AdminBid) => {
+    const reason = window.prompt(`Причина аннулирования ставки № ${bid.bid_id} (${bid.username}, ${formatKop(bid.max_kop)}). Её увидит журнал, участник — нет:`);
+    if (reason && reason.trim()) void run(() => admin.annulBid(bid.bid_id, reason.trim()), 'Ставка аннулирована, цена и лидер пересчитаны.', async () => { await load(); onChanged(); });
+  };
   async function verify() {
     try {
       const r = await admin.verifyChain(lotId);
@@ -119,12 +125,13 @@ const LotBids: React.FC<{ lotId: number }> = ({ lotId }) => {
       <div className="flex items-center gap-3"><button type="button" onClick={verify} className={ghost}>Проверить журнал</button>{chain && <span className="text-sm">{chain}</span>}</div>
       {bids.length === 0 ? <p className="text-sm text-gray-500">Ставок не было.</p> : (
         <div className="overflow-x-auto"><table className="w-full text-xs">
-          <thead><tr className="text-left text-gray-500"><th className="py-1 pr-3">Время (МСК)</th><th className="pr-3">Участник</th><th className="pr-3">Максимум</th><th className="pr-3">Цена после</th><th className="pr-3">Итог</th><th>IP</th></tr></thead>
+          <thead><tr className="text-left text-gray-500"><th className="py-1 pr-3">Время (МСК)</th><th className="pr-3">Участник</th><th className="pr-3">Максимум</th><th className="pr-3">Цена после</th><th className="pr-3">Итог</th><th className="pr-3">IP</th><th></th></tr></thead>
           <tbody>{bids.map(b => (
-            <tr key={b.bid_id} className={`border-t border-gray-100 ${b.accepted ? '' : 'text-gray-400'}`}>
+            <tr key={b.bid_id} className={`border-t border-gray-100 ${b.accepted && !b.annulled ? '' : 'text-gray-400'} ${b.annulled ? 'line-through' : ''}`}>
               <td className="py-1 pr-3">{new Date(b.created_at).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}</td>
               <td className="pr-3">№{b.user_id} {b.username}</td><td className="pr-3">{formatKop(b.max_kop)}</td><td className="pr-3">{formatKop(b.price_after_kop)}</td>
-              <td className="pr-3">{b.accepted ? (b.became_leader ? 'принята, лидер' : 'принята') : `отказ: ${REJECT_REASON[b.reject_reason ?? ''] ?? b.reject_reason}`}{b.extended_to ? ', продление' : ''}</td><td>{b.ip}</td>
+              <td className="pr-3">{b.accepted ? (b.became_leader ? 'принята, лидер' : 'принята') : `отказ: ${REJECT_REASON[b.reject_reason ?? ''] ?? b.reject_reason}`}{b.extended_to ? ', продление' : ''}{b.annulled ? ` · аннулирована: ${b.annul_reason}` : ''}</td><td className="pr-3">{b.ip}</td>
+              <td>{lotOpen && b.accepted && !b.annulled && <button type="button" className={`${ghost} text-red-700 no-underline`} onClick={() => annul(b)}>Аннулировать</button>}</td>
             </tr>))}</tbody>
         </table></div>
       )}
@@ -156,7 +163,7 @@ const LotsTable: React.FC<{ lots: admin.AdminLot[]; draft: boolean; onChanged: (
             <button type="button" onClick={() => setOpen(open === l.lot_id ? null : l.lot_id)} className={ghost}>Ставки</button>
             {['approved', 'open'].includes(l.state) && <button type="button" onClick={() => withdraw(l)} className={`${ghost} text-red-700`}>Снять</button>}
           </div>
-          {open === l.lot_id && <LotBids lotId={l.lot_id} />}
+          {open === l.lot_id && <LotBids lotId={l.lot_id} lotOpen={l.state === 'open'} onChanged={onChanged} setFlash={setFlash} />}
         </li>
       ))}
     </ul>
