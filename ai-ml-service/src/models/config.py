@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Жёстко закрепить провайдеров (через запятую, идентификаторы из /models/{id}/endpoints, поле tag),
     # иначе балансировщик «по цене» может сменить endpoint, страну и квантование.
     llm_provider_only: str = ""
+    # Переранжирование найденных фрагментов моделью (services/rerank.py): off | llm. Включать после прогона tools/rag_eval.py --rerank llm
+    rag_rerank: Literal["off", "llm"] = "off"
+    rag_rerank_timeout: float = 15.0
     # Режим обработки для фоновых задач: flex примерно вдвое дешевле (если не задан — обычный)
     llm_background_tier: Optional[Literal["flex"]] = None
 
