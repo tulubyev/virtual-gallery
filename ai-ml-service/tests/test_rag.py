@@ -124,6 +124,27 @@ def test_numbers_must_come_from_cited_sources():
     assert check(block("Супрематизм появился в 1915 году.", ids=(2,)))     # год есть только в источнике 1
 
 
+def test_quote_check_ignores_punctuation_but_not_words():
+    exact = "Размер холста — 79,5 × 79,5 см"
+    assert check(block("Размер.", kind="quote", quote=exact)) == []
+    assert check(block("Размер.", kind="quote", quote="Размер холста 79,5 × 79,5 см.")) == []       # без тире, с точкой
+    assert check(block("Год.", kind="quote", quote="написан Казимиром Малевичем в 1915 году")) == []
+    assert check(block("Год.", kind="quote", quote="написан Казимиром Малевичем в 1916 году"))        # слово подменено
+
+
+def test_quote_may_skip_words_with_ellipsis_but_each_part_must_be_verbatim():
+    ok = "«Чёрный квадрат» написан … в 1915 году"
+    assert check(block("Год.", kind="quote", quote=ok)) == []
+    assert check(block("Год.", kind="quote", quote="«Чёрный квадрат» [...] в 1915 году")) == []
+    bad = check(block("Год.", kind="quote", quote="«Чёрный квадрат» написан … в 1920 году"))
+    assert bad and "1920" in bad[0]                                                                 # причина названа
+
+
+def test_long_quote_reason_names_actual_length():
+    problems = check(block("Текст.", kind="quote", quote="слово " * 80))
+    assert problems and "у вас 480" in problems[0]
+
+
 def test_names_must_come_from_cited_sources():
     problems = check(block("Картину написал Кандинский."))
     assert problems and "канд" in problems[0]

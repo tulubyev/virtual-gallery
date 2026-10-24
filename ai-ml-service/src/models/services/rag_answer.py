@@ -57,7 +57,9 @@ _RULES = (
     "Не делай выводов о подлинности произведений и не называй цену.\n"
     "Ответ — список блоков. У каждого блока: text — твоя формулировка; kind: "
     "quote (приводишь дословную цитату в поле quote), paraphrase (пересказ источника), inference (твой вывод из источников); "
-    "source_ids — номера источников, на которые опираешься; quote — дословный фрагмент источника или null.\n"
+    "source_ids — номера источников, на которые опираешься; quote — дословный фрагмент источника или null. "
+    "Цитата не длиннее 300 символов: выбери самое важное предложение; пропуски внутри цитаты обозначай многоточием, "
+    "слова от себя в цитату не добавляй.\n"
     "Числа, годы и имена в text бери только из процитированных источников."
 )
 _PUBLIC = ("Режим: публичный. Ответ не длиннее 150 слов, не более 3 цитат, каждая не длиннее 300 символов. "
@@ -72,11 +74,22 @@ _CAPITALIZED = re.compile(r"^[А-ЯЁA-Z][а-яёa-z]{3,}$")
 
 
 def normalize(text: str) -> str:
-    """Для сравнения цитат: регистр, ё=е, единые дефисы, без кавычек, схлопнутые пробелы."""
-    text = text.lower().replace("ё", "е").replace("­", "")
+    """Для сравнения цитат: регистр, ё=е, единые дефисы; знаки препинания, кавычки и лишние пробелы не учитываются.
+    Остаются слова и числа в том же порядке: подменить слово или число так нельзя, а запятая, точка или кавычка,
+    которую модель потеряла или добавила, цитату не портит. Дефис внутри слова («Дамба-Дугар») сохраняется."""
+    text = text.lower().replace("ё", "е").replace("\u00ad", "")
     text = re.sub(r"[‐‑‒–—−]", "-", text)
-    text = re.sub(r"[«»“”„‟\"'`]", " ", text)
+    text = re.sub(r"[^\w\s-]|_", " ", text)                 # всё, кроме букв, цифр, пробелов и дефиса
+    text = re.sub(r"(?<!\w)-|-(?!\w)", " ", text)           # дефис вне слова (бывшее тире) убираем
     return re.sub(r"\s+", " ", text).strip()
+
+
+_ELLIPSIS = re.compile(r"\[?\s*(?:\.{3}|…)\s*\]?")
+
+
+def _quote_segments(quote: str) -> List[str]:
+    """Части цитаты, разделённые многоточием: модель вправе пропускать слова внутри цитаты («начало … конец»)."""
+    return [segment for segment in (normalize(part) for part in _ELLIPSIS.split(quote)) if segment]
 
 
 def _digits(text: str) -> List[str]:
@@ -122,16 +135,21 @@ def violations(parsed: Dict[str, Any], sources: List[Dict[str, Any]], mode: str)
             problems.append(f"{label}: не указан источник")
             continue
         cited = " ".join(texts[i] for i in ids)
+        cited_raw = " ".join(sources[i - 1]["content"] for i in ids)          # числа ищем в исходном тексте: «79,5» не должно терять запятую
         if kind == "quote":
             quotes += 1
             quote = block.get("quote") or ""
             if not quote.strip():
                 problems.append(f"{label}: kind=quote без поля quote")
             elif len(quote) > MAX_QUOTE_CHARS:
-                problems.append(f"{label}: цитата длиннее {MAX_QUOTE_CHARS} символов")
-            elif normalize(quote) not in cited:
-                problems.append(f"{label}: цитата не найдена дословно в источниках {ids}")
-        cited_digits = set(_digits(cited))
+                problems.append(f"{label}: цитата длиннее {MAX_QUOTE_CHARS} символов (у вас {len(quote)}): "
+                                "оставь самое важное предложение, пропуски обозначай многоточием")
+            else:
+                for segment in _quote_segments(quote):
+                    if segment not in cited:
+                        problems.append(f"{label}: цитата не найдена дословно в источниках {ids}: «{segment[:80]}»")
+                        break
+        cited_digits = set(_digits(cited_raw))
         missing_numbers = sorted({d for d in _digits(text + " " + (block.get("quote") or "")) if d not in cited_digits})
         if missing_numbers:
             problems.append(f"{label}: чисел {missing_numbers} нет в источниках {ids}")
