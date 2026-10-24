@@ -140,6 +140,18 @@ def test_quote_may_skip_words_with_ellipsis_but_each_part_must_be_verbatim():
     assert bad and "1920" in bad[0]                                                                 # причина названа
 
 
+def test_overlong_quote_is_clipped_to_whole_words_and_still_verified():
+    long_text = " ".join(f"слово{n}" for n in range(60))                        # 400+ символов
+    sources = [{"document_id": "d", "title": "t", "page_number": 1, "content": long_text}]
+    clipped = rag_answer.clip_quote(long_text)
+    assert len(clipped) <= rag_answer.MAX_QUOTE_CHARS + 2 and clipped.endswith(" …")
+    assert not clipped.removesuffix(" …").endswith("слов")                        # обрезано по границе слова
+    parsed = {"insufficient_evidence": False,
+              "blocks": [{"text": "Слова.", "kind": "quote", "source_ids": [1], "quote": clipped}]}
+    assert rag_answer.violations(parsed, sources, "public") == []
+    assert rag_answer.clip_quote("коротко") == "коротко"
+
+
 def test_long_quote_reason_names_actual_length():
     problems = check(block("Текст.", kind="quote", quote="слово " * 80))
     assert problems and "у вас 480" in problems[0]

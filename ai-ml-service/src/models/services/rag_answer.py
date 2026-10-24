@@ -92,6 +92,15 @@ def _quote_segments(quote: str) -> List[str]:
     return [segment for segment in (normalize(part) for part in _ELLIPSIS.split(quote)) if segment]
 
 
+def clip_quote(quote: str, limit: int = MAX_QUOTE_CHARS) -> str:
+    """Цитату длиннее лимита обрезаем по слову и ставим многоточие: обрезок остаётся дословным куском источника,
+    а лимит (короткие цитаты) соблюдён; отказывать в ответе из-за лишних нескольких слов незачем."""
+    if len(quote) <= limit:
+        return quote
+    cut = quote[:limit].rsplit(None, 1)[0].rstrip(" ,;:—–-")
+    return cut + " …"
+
+
 def _digits(text: str) -> List[str]:
     return [re.sub(r"[\s.,]", "", m.group(0)) for m in _NUMBER.finditer(text)]
 
@@ -141,7 +150,7 @@ def violations(parsed: Dict[str, Any], sources: List[Dict[str, Any]], mode: str)
             quote = block.get("quote") or ""
             if not quote.strip():
                 problems.append(f"{label}: kind=quote без поля quote")
-            elif len(quote) > MAX_QUOTE_CHARS:
+            elif len(quote) > MAX_QUOTE_CHARS + 2:
                 problems.append(f"{label}: цитата длиннее {MAX_QUOTE_CHARS} символов (у вас {len(quote)}): "
                                 "оставь самое важное предложение, пропуски обозначай многоточием")
             else:
@@ -202,6 +211,9 @@ async def answer(query: str, sources: List[Dict[str, Any]], mode: str = "public"
         result = await ai_service.llm.complete("rag_answer", messages, schema=RAG_SCHEMA, schema_name="rag_answer",
                                                max_tokens=1500, model=model)
         parsed = result.parsed or {}
+        for block in parsed.get("blocks") or []:
+            if isinstance(block.get("quote"), str):
+                block["quote"] = clip_quote(block["quote"])
         if parsed.get("insufficient_evidence"):
             return {"outcome": "insufficient_evidence", "answer": NO_DATA_TEXT, "blocks": [],
                     "model": result.model, "usage": result.usage}
