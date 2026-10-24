@@ -113,7 +113,8 @@ router.post('/rag-query', async (req: Request, res: Response) => {
   const documentIds = Array.isArray(filters?.documentIds)
     ? filters.documentIds.filter((id: unknown) => typeof id === 'string' && DOCUMENT_ID.test(id)).slice(0, 50)
     : undefined;
-  const limit = Number.isInteger(contextLimit) ? Math.min(Math.max(contextLimit, 1), 12) : 8;
+  // Без явного значения число находок выбирает ядро (с соседними фрагментами контекст шире, чем число находок)
+  const limit = Number.isInteger(contextLimit) ? Math.min(Math.max(contextLimit, 1), 12) : undefined;
   await proxyToAiService('/api/v1/rag/query', 'POST', {
     query: query.trim(),
     context_limit: limit,

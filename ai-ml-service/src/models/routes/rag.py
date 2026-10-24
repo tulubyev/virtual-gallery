@@ -15,7 +15,7 @@ from ..services import knowledge_base, rag_answer
 from ..services.ai_service import ai_service
 from ..services.qdrant_client import qdrant_service
 from ..services.database import db_service
-from ..services.retrieval import hybrid_search
+from ..services.retrieval import CONTEXT_HITS, expand_context, hybrid_search
 
 router = APIRouter()
 DOCUMENT_ID_PATTERN = r"^[A-Za-z0-9_.-]{1,100}$"
@@ -26,7 +26,7 @@ ALLOWED_COLLECTIONS = {"pdf_chunks", "artworks", "external_artworks"}
 
 class RAGQueryRequest(BaseModel):
     query: str = Field(min_length=2, max_length=1000)
-    context_limit: int = Field(default=8, ge=1, le=12)           # сколько фрагментов отдать модели
+    context_limit: int = Field(default=CONTEXT_HITS, ge=1, le=12)  # сколько лучших находок брать; к первым добавляются соседние фрагменты
     mode: Literal["public", "curator"] = "public"                # форма ответа
     access: Literal["public", "staff"] = "public"                # какие документы видны спрашивающему
     document_ids: Optional[List[str]] = Field(default=None, max_length=50)
@@ -63,7 +63,7 @@ async def process_rag_query(request: RAGQueryRequest):
     try:
         started = time.monotonic()
         found = await hybrid_search(request.query, access=request.access, top=20, document_ids=request.document_ids)
-        passages = found.passages[:request.context_limit]
+        passages = await expand_context(found.passages, access=request.access, hits=request.context_limit)
 
         result = await rag_answer.answer(request.query, passages, request.mode)
         blocks = result["blocks"]

@@ -15,7 +15,7 @@ from src.models.services.database import db_service
 DSN = os.environ.get("TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not DSN, reason="TEST_DATABASE_URL не задан")
 
-TABLES = ["kb_chunks", "kb_documents", "schema_migrations", "digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs",
+TABLES = ["kb_chunks", "kb_documents", "kb_terms", "schema_migrations", "digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs",
           "ai_model_settings", "ai_model_settings_log", "rag_queries", "artwork_analysis"]
 
 
@@ -44,7 +44,7 @@ async def test_clean_database_gets_every_table_the_code_writes_to(clean):
     assert applied == [p.name for p in migrate.migration_files(migrate.DEFAULT_DIR)]
     assert {"digitized_artworks", "pdf_documents", "external_artworks", "ai_jobs", "ai_model_settings",
             "ai_model_settings_log", "rag_queries", "artwork_analysis", "schema_migrations", "kb_documents",
-            "kb_chunks"} <= await tables(clean)
+            "kb_chunks", "kb_terms"} <= await tables(clean)
     # категории PDF (002) на месте: именно их пишет routes/pdfs.py
     columns = {r["column_name"] for r in await clean.fetch(
         "SELECT column_name FROM information_schema.columns WHERE table_name = 'pdf_documents'")}
@@ -182,3 +182,10 @@ async def test_rag_query_log_insert_works(migrated):
     assert insert[:insert.index(" VALUES")] in source
     await db_service.execute(insert, None, "вопрос", "ответ", "[]", 1234.56, "answered", "public")   # >999 с: прежний DECIMAL(5,2) переполнялся
     assert await migrated.fetchval("SELECT count(*) FROM rag_queries") == 1
+
+
+@pytest.mark.asyncio
+async def test_trigram_index_on_terms_is_created_when_extension_is_available(migrated):
+    if not await migrated.fetchval("SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'"):
+        pytest.skip("pg_trgm недоступно в тестовой БД")
+    assert await migrated.fetchval("SELECT 1 FROM pg_indexes WHERE indexname = 'idx_kb_terms_trgm'") == 1

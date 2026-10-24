@@ -31,6 +31,16 @@ async def replace_document(document_id: str, *, title: Optional[str], access: st
                     "INSERT INTO kb_chunks (document_id, chunk_index, page_number, content, access) "
                     "VALUES ($1, $2, $3, $4, $5)",
                     [(document_id, c["chunk_index"], c.get("page_number"), c["content"], access) for c in chunks])
+                # Слова для поиска по написанию; нет таблицы (миграция 008 не применена) — загрузка не должна падать
+                if await conn.fetchval("SELECT to_regclass('kb_terms')") is not None:
+                    await conn.execute(
+                        """
+                        INSERT INTO kb_terms (term)
+                        SELECT DISTINCT u.lexeme FROM kb_chunks c, LATERAL unnest(c.search_text) AS u
+                        WHERE c.document_id = $1 AND length(u.lexeme) BETWEEN 1 AND 40
+                        ON CONFLICT (term) DO NOTHING
+                        """,
+                        document_id)
 
 
 async def delete_document(document_id: str) -> bool:

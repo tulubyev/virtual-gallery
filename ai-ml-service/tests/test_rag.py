@@ -269,6 +269,7 @@ def test_route_returns_cited_sources_only_and_defaults_to_public_access(client):
 
     found = retrieval.Retrieval(passages=PASSAGES, dense_hits=2, lexical_hits=1)
     with patch.object(rag, "hybrid_search", AsyncMock(return_value=found)) as search, \
+         patch.object(rag, "expand_context", AsyncMock(return_value=PASSAGES)) as expand, \
          patch.object(rag.rag_answer, "answer", AsyncMock(return_value={
              "outcome": "answered", "answer": "Малевич [1]", "blocks": [block("Малевич.")], "model": "m", "usage": {}})), \
          patch.object(rag.db_service, "execute", AsyncMock()) as log:
@@ -279,6 +280,7 @@ def test_route_returns_cited_sources_only_and_defaults_to_public_access(client):
     assert [s["id"] for s in body["sources"]] == [1] and body["sources"][0]["page"] == 7
     assert body["retrieval"] == {"dense": 2, "lexical": 1, "degraded": []}
     assert search.call_args.kwargs["access"] == "public"             # сотрудником себя запрос не объявит
+    assert expand.call_args.kwargs == {"access": "public", "hits": retrieval.CONTEXT_HITS}   # соседние фрагменты — по тем же правам
     assert log.call_args.args[-2:] == ("answered", "public")
 
 
@@ -286,6 +288,7 @@ def test_route_shows_found_passages_when_answer_is_not_confirmed(client):
     from src.models.routes import rag
 
     with patch.object(rag, "hybrid_search", AsyncMock(return_value=retrieval.Retrieval(passages=PASSAGES))), \
+         patch.object(rag, "expand_context", AsyncMock(return_value=PASSAGES)), \
          patch.object(rag.rag_answer, "answer", AsyncMock(return_value={
              "outcome": "citations_failed", "answer": rag_answer.UNVERIFIED_TEXT, "blocks": [], "model": "m", "usage": {}})), \
          patch.object(rag.db_service, "execute", AsyncMock(side_effect=RuntimeError("db down"))):   # журнал не ломает ответ
@@ -647,3 +650,105 @@ async def test_real_pdf_is_indexed_per_page_and_found_by_morphology(kb):
     with dense_returning([]):
         found = await retrieval.hybrid_search("Кто основал супрематизм?", access="public")
     assert found.passages and found.passages[0]["page_number"] == 2 and found.passages[0]["title"] == "Учебник"
+
+
+# ---------- соседние фрагменты и поиск по написанию (настоящий PostgreSQL) ----------
+
+def passage_of(row):
+    return {"document_id": row["document_id"], "chunk_index": row["chunk_index"], "page_number": row["page_number"],
+            "title": None, "license": None, "content": row["content"], "access": row["access"], "score": 0.01}
+
+
+@pytest_asyncio.fixture
+async def book(kb):
+    """Один документ из пяти фрагментов; ответ лежит в четвёртом, а слова вопроса совпали в третьем."""
+    texts = ["Введение о сибирских мастерах.", "Описание зала и витрин.", "Статуэтка Будды Шакьямуни школы Дзанабадзара.",
+             "Сплав — четырехкомпонентная латунь, характерная для китайских скульптур.", "Литература и примечания."]
+    await knowledge_base.replace_document(
+        "book", title="Каталог", access="staff", license=None, source_url=None, content_sha256=None, pages_count=2,
+        chunks=[{"chunk_index": i, "page_number": 1 + i // 3, "content": t} for i, t in enumerate(texts)])
+    return kb
+
+
+async def chunk_of(pool, document_id, index):
+    return passage_of(dict(await pool.fetchrow(
+        "SELECT document_id, chunk_index, page_number, content, access FROM kb_chunks WHERE document_id = $1 AND chunk_index = $2",
+        document_id, index)))
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_context_adds_neighbours_after_the_hit_in_text_order(book):
+    hit = await chunk_of(book, "book", 2)
+    context = await retrieval.expand_context([hit], access="staff")
+    assert [(p["chunk_index"], p["neighbor"]) for p in context] == [(1, True), (2, False), (3, True)]
+    assert "четырехкомпонентная латунь" in context[2]["content"]          # ответ, который лежал рядом с найденным
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_context_keeps_hits_first_and_orders_documents_by_best_hit(book):
+    other = await chunk_of(book, "pub", 1)
+    far = await chunk_of(book, "book", 4)
+    context = await retrieval.expand_context([other, far], access="staff", hits=2, neighbor_hits=2)
+    assert [(p["document_id"], p["chunk_index"]) for p in context] == [("pub", 0), ("pub", 1), ("pub", 2), ("book", 3), ("book", 4)]
+    assert [p["neighbor"] for p in context] == [True, False, True, True, False]
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_context_respects_budget_hit_count_and_never_drops_hits(book):
+    hit = await chunk_of(book, "book", 2)
+    tiny = await retrieval.expand_context([hit], access="staff", max_chars=1)
+    assert [p["chunk_index"] for p in tiny] == [2]                          # находка остаётся, соседей не хватило места
+    several = [await chunk_of(book, "book", i) for i in range(5)]
+    assert len(await retrieval.expand_context(several, access="staff", hits=2, neighbor_hits=0)) == 2
+    assert await retrieval.expand_context([], access="staff") == []
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_context_never_pulls_staff_neighbours_into_public_answers(kb):
+    await knowledge_base.replace_document(
+        "mixed", title="Смесь", access="public", license=None, source_url=None, content_sha256=None, pages_count=1,
+        chunks=[{"chunk_index": 0, "page_number": 1, "content": "Публичный фрагмент."}])
+    await kb.execute("INSERT INTO kb_chunks (document_id, chunk_index, page_number, content, access) "
+                     "VALUES ('mixed', 1, 1, 'Служебная приписка.', 'staff')")
+    hit = await chunk_of(kb, "mixed", 0)
+    public = await retrieval.expand_context([hit], access="public")
+    staff = await retrieval.expand_context([hit], access="staff")
+    assert [p["chunk_index"] for p in public] == [0]
+    assert [p["chunk_index"] for p in staff] == [0, 1]
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_other_spelling_of_a_name_finds_the_document(book):
+    with dense_returning([]):
+        found = await retrieval.hybrid_search("Кто такой Занабазар", access="staff")
+    assert [(p["document_id"], p["chunk_index"]) for p in found.passages] == [("book", 2)]
+    assert await retrieval.similar_terms(["занабазар"]) == ["дзанабадзар"]
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_known_words_and_other_forms_of_known_words_are_not_expanded(book):
+    assert await retrieval.similar_terms(["латунь", "скульптур", "статуэтка"]) == []     # слова базы
+    assert await retrieval.similar_terms(["скульптурами"]) == []                          # другая форма — дело морфологии
+    assert await retrieval.similar_terms(["кто", "такой"]) == []                          # короткие и служебные слова
+    assert await retrieval.similar_terms([]) == []
+
+
+@needs_db
+@pytest.mark.asyncio
+async def test_search_still_works_when_terms_table_is_missing(kb):
+    await kb.execute("DROP TABLE kb_terms")
+    try:
+        with dense_returning([]):
+            found = await retrieval.hybrid_search("Малевич квадрат", access="public")
+        assert found.passages and found.passages[0]["chunk_index"] == 2
+        await knowledge_base.replace_document(                   # загрузка документа без таблицы тоже не падает
+            "late", title=None, access="public", license=None, source_url=None, content_sha256=None, pages_count=1,
+            chunks=[{"chunk_index": 0, "page_number": 1, "content": "Текст."}])
+    finally:
+        await kb.execute("CREATE TABLE IF NOT EXISTS kb_terms (term TEXT PRIMARY KEY)")
