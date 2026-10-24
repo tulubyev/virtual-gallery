@@ -48,6 +48,8 @@ echo "Вход выполнен (роль: $role)"
 wanted=("$@")
 failed=0
 uploaded=()
+# Состояние базы знаний до загрузки: при повторной загрузке документ уже есть, и «появился с фрагментами» ещё не значит «обработан заново»
+curl -sS --max-time 30 -H @"$WORK/auth" "$BASE_URL/api/ai/rag/documents" > "$WORK/before.json" || echo '{}' > "$WORK/before.json"
 while IFS=$'\t' read -r id sha url title; do
   [[ -z "$id" || "$id" == \#* ]] && continue
   if ((${#wanted[@]})) && [[ ! " ${wanted[*]} " == *" $id "* ]]; then continue; fi
@@ -73,19 +75,27 @@ while IFS=$'\t' read -r id sha url title; do
   rm -f "$file"
 done < "$MANIFEST"
 
-# Обработка идёт в очереди ядра (страницы → фрагменты → эмбеддинги): ждём, пока документы появятся в базе знаний
+# Обработка идёт в очереди ядра (страницы → фрагменты → эмбеддинги): ждём, пока документы появятся в базе знаний или обновятся там
 if ((${#uploaded[@]})); then
   echo "Жду обработки (до 20 минут)…"
   deadline=$((SECONDS + 1200))
   while :; do
     curl -sS --max-time 30 -H @"$WORK/auth" "$BASE_URL/api/ai/rag/documents" > "$WORK/docs.json" || true
-    missing="$(python3 - "$WORK/docs.json" "${uploaded[@]}" <<'PY'
+    missing="$(python3 - "$WORK/before.json" "$WORK/docs.json" "${uploaded[@]}" <<'PY'
 import json, sys
-try:
-    docs = {d["document_id"]: d for d in json.load(open(sys.argv[1])).get("documents", [])}
-except Exception:
-    docs = {}
-print(" ".join(i for i in sys.argv[2:] if not docs.get(i) or not docs[i].get("chunks_count")))
+def load(path):
+    try:
+        return {d["document_id"]: d for d in json.load(open(path)).get("documents", [])}
+    except Exception:
+        return {}
+before, docs = load(sys.argv[1]), load(sys.argv[2])
+def ready(i):
+    d = docs.get(i)
+    if not d or not d.get("chunks_count"):
+        return False
+    # документ, который уже был в базе, считается обработанным заново, когда у него сменилась дата обновления
+    return i not in before or d.get("updated_at") != before[i].get("updated_at")
+print(" ".join(i for i in sys.argv[3:] if not ready(i)))
 PY
 )"
     [[ -z "$missing" ]] && break
