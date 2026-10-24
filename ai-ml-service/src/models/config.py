@@ -50,12 +50,14 @@ class Settings(BaseSettings):
 
     # Модели по задачам (id из каталога routerai.ru). Значения по умолчанию — предварительные,
     # окончательный выбор делается на размеченном наборе (tools/model_bakeoff.py, docs/AI-ML-DESIGN.md).
-    model_vision_front: str = "anthropic/claude-sonnet-5.5"   # описание лицевой стороны по фото
-    model_vision_back: str = "anthropic/claude-sonnet-5.5"    # чтение оборота (OCR, подписи, штампы)
-    model_rag_answer: str = "anthropic/claude-haiku-5.5"      # ответ по найденным фрагментам
-    model_chat: str = "anthropic/claude-haiku-5.5"            # диалог с помощником
-    model_judge: str = "anthropic/claude-haiku-5.5"           # проверка/реранк/классификация
-    model_bulk: str = "anthropic/claude-haiku-5.5"            # массовые дешёвые операции
+    # Модели Anthropic с серверов в РФ недоступны (routerai: 403 «нарушение условий провайдера»), поэтому по умолчанию
+    # стоит модель, проверенная на VPS: ответы RAG на размеченном наборе — docs/AI-MODEL-SELECTION.md.
+    model_vision_front: str = "google/gemini-3.5-flash-lite"   # описание лицевой стороны по фото
+    model_vision_back: str = "google/gemini-3.5-flash-lite"    # чтение оборота (OCR, подписи, штампы)
+    model_rag_answer: str = "google/gemini-3.5-flash-lite"      # ответ по найденным фрагментам
+    model_chat: str = "google/gemini-3.5-flash-lite"            # диалог с помощником
+    model_judge: str = "google/gemini-3.5-flash-lite"           # проверка/реранк/классификация
+    model_bulk: str = "google/gemini-3.5-flash-lite"            # массовые дешёвые операции
     # Модели для режима ru-only (есть endpoint в РФ)
     model_ru_only_text: str = "sber/gigachat-3-pro"
     model_ru_only_vision: str = "qwen/qwen3.6-35b-a3b"
