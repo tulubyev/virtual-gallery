@@ -14,7 +14,7 @@ export interface AdminLot {
   lot_id: number; lot_no: number; artwork_id: number | null; seller_user_id: number | null; snapshot: { title?: string; artist_name?: string };
   start_price_kop: number; reserve_kop: number | null; estimate_low_kop: number | null; estimate_high_kop: number | null; state: string;
   ends_at: string | null; current_price_kop: number; bid_count: number; version: number; close_outcome: string | null; hammer_kop: number | null;
-  leader_user_id: number | null; winner_user_id: number | null;
+  leader_user_id: number | null; winner_user_id: number | null; winner_name: string | null; winner_phone: string | null; winner_pseudonym: number | null;
 }
 
 export interface AdminRegistration {
@@ -50,6 +50,10 @@ export const updateAuction = (id: number, fields: Record<string, unknown>) => ca
 export const addLot = (auctionId: number, fields: Record<string, unknown>) => call<{ lot_id: number }>(`${base}/auctions/${auctionId}/lots`, 'POST', fields);
 export const announceAuction = (id: number) => call<{ status: string; lots: number }>(`${base}/auctions/${id}/announce`, 'POST', {});
 export const withdrawLot = (lotId: number, reason: string) => call<{ status: string }>(`${base}/lots/${lotId}/withdraw`, 'POST', { reason });
+export const setLotSettlement = (lotId: number, to: 'paid' | 'defaulted' | 'handed_over' | 'settled', note?: string) =>
+  call<{ status: string; state: string }>(`${base}/lots/${lotId}/settlement`, 'POST', { to, note });
+export const setAuctionStatus = (id: number, to: 'settled' | 'archived', note?: string) =>
+  call<{ status: string; auction_status: string }>(`${base}/auctions/${id}/status`, 'POST', { to, note });
 export const registrations = (auctionId: number) => call<{ registrations: AdminRegistration[] }>(`${base}/auctions/${auctionId}/registrations`);
 export const pendingParticipants = () => call<{ participants: PendingParticipant[] }>(`${base}/participants/pending`);
 export const setKyc = (userId: number, status: 'approved' | 'rejected', note?: string) => call<{ ok: boolean }>(`${base}/participants/${userId}/kyc`, 'POST', { status, note });
@@ -64,6 +68,10 @@ export function moscowToIso(local: string): string | null {
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(local) ? `${local}:00+03:00` : null;
 }
 
+/** Состояние лота для куратора: после продажи различаются стадии расчётов (публично все они — «Продан»). */
+export const SETTLEMENT_LABEL: Record<string, string> = {
+  sold_awaiting_payment: 'Продан, ждёт оплаты', paid: 'Оплачен', handed_over: 'Передан покупателю', settled: 'Расчёты завершены', defaulted: 'Не оплачен',
+};
 export const KIND_LABEL: Record<string, string> = { person: 'Физическое лицо', legal_entity: 'Юридическое лицо', sole_proprietor: 'ИП' };
 export const REGISTRATION_STATUS: Record<string, string> = {
   applied: 'Заявка подана', docs_pending: 'Ждём документы', under_review: 'На рассмотрении', approved: 'Одобрена', deposit_pending: 'Ждём задаток',

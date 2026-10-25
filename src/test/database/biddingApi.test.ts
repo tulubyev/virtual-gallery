@@ -461,6 +461,51 @@ describeDb('API торгов (PostgreSQL)', () => {
     });
   });
 
+  describe('расчёты после торгов', () => {
+    it('куратор видит победителя, отмечает оплату и передачу, закрывает расчёты и убирает аукцион в архив; остальные — нет', async () => {
+      const [buyer, rival] = [await h.user('buyer'), await h.user('rival')];
+      const { slug, auctionId, lotIds } = await liveAuction();
+      await admit(slug, auctionId, buyer);
+      await admit(slug, auctionId, rival);
+      await bid(lotIds[0], buyer, 40000);
+      await bid(lotIds[0], rival, 20000);
+      await h.q(`UPDATE bidding_lots SET ends_at = now() - interval '1 second' WHERE lot_id = $1`, [lotIds[0]]);
+      await tick();
+
+      const lot = (await api.get(`/admin/auctions/${auctionId}`, curator)).body.lots[0];
+      expect(lot).toMatchObject({ state: 'sold_awaiting_payment', winner_user_id: buyer, winner_name: 'Иван Иванов', winner_pseudonym: 1, hammer_kop: 2_200_000 });
+      expect(lot.winner_phone).toMatch(/^\+7/);
+      const publicLot = (await api.get(`/lots/${lotIds[0]}`, null)).body.lot;
+      expect(JSON.stringify(publicLot)).not.toContain('Иван');                                          // контакты победителя — только куратору
+
+      const path = `/admin/lots/${lotIds[0]}/settlement`;
+      expect((await api.post(path, { to: 'paid' }, null)).status).toBe(401);
+      expect((await api.post(path, { to: 'paid' }, alice)).status).toBe(403);
+      expect((await api.post(path, { to: 'продан' }, curator)).status).toBe(400);
+      expect((await api.post(path, {}, curator)).status).toBe(400);
+      expect((await api.post(path, { to: 'defaulted' }, curator)).status).toBe(409);                    // нужна причина
+      expect((await api.post(path, { to: 'settled' }, curator)).body.code).toBe('wrong_transition');
+      expect((await api.post('/admin/lots/999999999/settlement', { to: 'paid' }, curator)).status).toBe(404);
+      expect((await api.post('/admin/lots/abc/settlement', { to: 'paid' }, curator)).status).toBe(404);
+      expect((await api.post(path, { to: 'paid', note: 'платёж получен' }, curator)).body).toMatchObject({ status: 'updated', state: 'paid' });
+      expect((await api.post(path, { to: 'handed_over' }, curator)).status).toBe(200);
+
+      const statusPath = `/admin/auctions/${auctionId}/status`;
+      expect((await api.post(statusPath, { to: 'settled' }, alice)).status).toBe(403);
+      expect((await api.post(statusPath, { to: 'closed' }, curator)).status).toBe(400);
+      const early = await api.post(statusPath, { to: 'settled' }, curator);
+      expect(early.status).toBe(409);
+      expect(early.body).toMatchObject({ code: 'lots_unsettled', lots: 1 });
+      expect((await api.post(path, { to: 'settled' }, curator)).status).toBe(200);
+      expect((await api.post(statusPath, { to: 'archived' }, curator)).body.code).toBe('wrong_transition');   // сначала расчёты
+      expect((await api.post(statusPath, { to: 'settled', note: 'возвраты выполнены' }, curator)).status).toBe(200);
+      expect((await api.post(statusPath, { to: 'archived' }, curator)).status).toBe(200);
+      expect((await api.get(`/auctions/${slug}`, null)).body.auction.status).toBe('archived');
+      expect((await api.post('/admin/auctions/999999999/status', { to: 'settled' }, curator)).status).toBe(404);
+      expect((await api.get(`/admin/chains/${lotIds[0]}/verify`, curator)).body).toMatchObject({ ok: true });
+    });
+  });
+
   describe('ограничение частоты', () => {
     it('слишком частые ставки одного пользователя получают 429 с Retry-After', async () => {
       const { slug, auctionId, lotIds } = await liveAuction();

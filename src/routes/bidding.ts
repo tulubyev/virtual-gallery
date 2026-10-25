@@ -280,6 +280,32 @@ router.post('/admin/bids/:id/annul', async (req, res) => {
   } catch (e) { serverError(res, 'annul', e); }
 });
 
+const SETTLEMENT_STATES = ['paid', 'defaulted', 'handed_over', 'settled'];
+
+/** Расчёты по проданному лоту: оплачен / не оплачен (причина обязательна) / передан покупателю / расчёты завершены. */
+router.post('/admin/lots/:id/settlement', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return fail(res, 404, ADMIN_REJECTIONS.no_such_lot);
+  if (!SETTLEMENT_STATES.includes(req.body?.to)) return fail(res, 400, `Поле to: одно из ${SETTLEMENT_STATES.join(', ')}.`);
+  try {
+    const result = await bidding.setLotSettlement(id, userOf(req)!.user_id, req.body.to, req.body?.note === undefined ? null : text(req.body.note, 500));
+    if (result.status === 'updated') return res.json(result);
+    return fail(res, result.reason === 'no_such_lot' ? 404 : 409, ADMIN_REJECTIONS[result.reason] ?? 'Отметить не удалось.', { code: result.reason, from: result.from });
+  } catch (e) { serverError(res, 'settlement', e); }
+});
+
+/** Завершение аукциона вручную: settled (расчёты завершены) или archived. */
+router.post('/admin/auctions/:id/status', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return fail(res, 404, ADMIN_REJECTIONS.no_such_auction);
+  if (!['settled', 'archived'].includes(req.body?.to)) return fail(res, 400, 'Поле to: settled или archived.');
+  try {
+    const result = await bidding.setAuctionStatus(id, userOf(req)!.user_id, req.body.to, req.body?.note === undefined ? null : text(req.body.note, 500));
+    if (result.status === 'updated') return res.json(result);
+    return fail(res, result.reason === 'no_such_auction' ? 404 : 409, ADMIN_REJECTIONS[result.reason] ?? 'Сменить статус не удалось.', { code: result.reason, from: result.from, lots: result.lots });
+  } catch (e) { serverError(res, 'auction status', e); }
+});
+
 router.get('/admin/auctions/:id/registrations', async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) return fail(res, 404, 'Аукцион не найден');
