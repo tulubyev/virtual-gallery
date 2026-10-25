@@ -142,6 +142,15 @@ const LotBids: React.FC<{ lotId: number; lotOpen: boolean; onChanged: () => void
 const LotsTable: React.FC<{ lots: admin.AdminLot[]; draft: boolean; onChanged: () => void; setFlash: (f: Flash) => void }> = ({ lots, onChanged, setFlash }) => {
   const [open, setOpen] = useState<number | null>(null);
   const run = useAction(setFlash);
+  const settle = (lot: admin.AdminLot, to: 'paid' | 'defaulted' | 'handed_over' | 'settled') => {
+    if (to === 'defaulted') {
+      const reason = window.prompt(`Лот ${lot.lot_no} не оплачен. Причина (обязательно, попадёт в журнал):`);
+      if (reason && reason.trim()) void run(() => admin.setLotSettlement(lot.lot_id, to, reason.trim()), 'Лот отмечен как неоплаченный.', onChanged);
+      return;
+    }
+    const text = { paid: 'оплачен', handed_over: 'передан покупателю', settled: 'расчёты по нему завершены' }[to];
+    if (window.confirm(`Отметить: лот ${lot.lot_no} — ${text}? Отметку нельзя отменить.`)) void run(() => admin.setLotSettlement(lot.lot_id, to), 'Отметка сохранена.', onChanged);
+  };
   const withdraw = (lot: admin.AdminLot) => {
     const reason = window.prompt(`Причина снятия лота ${lot.lot_no} (обязательно):`);
     if (reason && reason.trim()) void run(() => admin.withdrawLot(lot.lot_id, reason.trim()), 'Лот снят с торгов.', onChanged);
@@ -159,10 +168,19 @@ const LotsTable: React.FC<{ lots: admin.AdminLot[]; draft: boolean; onChanged: (
                 {l.bid_count > 0 && <> · цена {formatKop(l.current_price_kop)}</>}{l.ends_at && <> · конец {formatMoment(l.ends_at)}</>}
               </p>
             </div>
-            <Badge tone={l.state === 'open' ? 'green' : l.state === 'withdrawn' ? 'red' : 'gray'}>{l.close_outcome ? OUTCOME_TEXT[l.close_outcome] : LOT_STATE[l.state] ?? l.state}</Badge>
+            <Badge tone={l.state === 'open' ? 'green' : ['withdrawn', 'defaulted'].includes(l.state) ? 'red' : 'gray'}>{admin.SETTLEMENT_LABEL[l.state] ?? (l.close_outcome ? OUTCOME_TEXT[l.close_outcome] : LOT_STATE[l.state] ?? l.state)}</Badge>
             <button type="button" onClick={() => setOpen(open === l.lot_id ? null : l.lot_id)} className={ghost}>Ставки</button>
             {['approved', 'open'].includes(l.state) && <button type="button" onClick={() => withdraw(l)} className={`${ghost} text-red-700`}>Снять</button>}
+            {l.state === 'sold_awaiting_payment' && <>
+              <button type="button" onClick={() => settle(l, 'paid')} className={ghost}>Оплачен</button>
+              <button type="button" onClick={() => settle(l, 'defaulted')} className={`${ghost} text-red-700`}>Не оплачен</button>
+            </>}
+            {l.state === 'paid' && <button type="button" onClick={() => settle(l, 'handed_over')} className={ghost}>Передан покупателю</button>}
+            {l.state === 'handed_over' && <button type="button" onClick={() => settle(l, 'settled')} className={ghost}>Расчёты завершены</button>}
           </div>
+          {l.winner_user_id !== null && ['sold_awaiting_payment', 'paid', 'handed_over', 'settled', 'defaulted'].includes(l.state) && (
+            <p className="mt-1 text-xs text-gray-600">Победитель: участник № {l.winner_pseudonym ?? '—'}, {l.winner_name ?? `пользователь ${l.winner_user_id}`}{l.winner_phone ? `, ${l.winner_phone}` : ''} · молоток {formatKop(l.hammer_kop)}</p>
+          )}
           {open === l.lot_id && <LotBids lotId={l.lot_id} lotOpen={l.state === 'open'} onChanged={onChanged} setFlash={setFlash} />}
         </li>
       ))}
@@ -237,6 +255,22 @@ const AuctionDetail: React.FC<{ id: number; setFlash: (f: Flash) => void; onChan
           <div className="flex justify-between gap-3"><dt className="text-gray-500">Минимум участников по лоту</dt><dd>{a.min_bidders}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-gray-500">Адрес</dt><dd>/torgi/{a.slug}</dd></div>
         </dl>
+        {['closed', 'settled'].includes(a.status) && (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {a.status === 'closed' && (
+              <button type="button" className={primary}
+                onClick={() => { if (window.confirm('Завершить расчёты по аукциону? Это можно сделать, когда по всем проданным лотам стоит отметка «расчёты завершены» (возвраты задатков проверьте сами).')) void run(() => admin.setAuctionStatus(id, 'settled'), 'Расчёты по аукциону завершены.', async () => { await load(); onChanged(); }); }}>
+                Расчёты завершены
+              </button>
+            )}
+            {a.status === 'settled' && (
+              <button type="button" className={ghost}
+                onClick={() => { if (window.confirm('Перенести аукцион в архив?')) void run(() => admin.setAuctionStatus(id, 'archived'), 'Аукцион в архиве.', async () => { await load(); onChanged(); }); }}>
+                В архив
+              </button>
+            )}
+          </div>
+        )}
         {draft && (
           <div className="mt-4">
             <button type="button" className={primary} disabled={data.lots.length === 0}
