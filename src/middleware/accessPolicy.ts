@@ -76,8 +76,8 @@ export const RULES: readonly Rule[] = [
   // ── торги (новый движок, BIDDING_ENABLED): чтение лотов открыто, ставки и заявки — после входа, управление — куратор ──
   // identify: вошедший пользователь видит на лоте своё положение (лидирует ли он и какой у него максимум)
   { methods: GET, path: /^\/bidding\/(auctions(\/[^/]+)?|lots\/\d+(\/state)?)$/, access: 'public', identify: true },
-  { methods: ['POST'], path: /^\/bidding\/(lots\/\d+\/bids|auctions\/[^/]+\/apply)$/, access: 'auth' },
-  { methods: GET, path: /^\/bidding\/me\/registrations$/, access: 'auth' },
+  { methods: ['POST'], path: /^\/bidding\/(lots\/\d+\/bids|auctions\/[^/]+\/apply|me\/notifications\/read)$/, access: 'auth' },
+  { methods: GET, path: /^\/bidding\/me\/(registrations|notifications)$/, access: 'auth' },
   { methods: ALL, path: /^\/bidding\/admin(\/.*)?$/, access: CURATORS },
 
   // ── ИИ: лёгкие запросы открыты (с лимитом), тяжёлые — после входа ───

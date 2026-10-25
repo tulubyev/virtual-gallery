@@ -52,6 +52,9 @@ app.use('/api/legal', noCacheMiddleware, require('./src/routes/legal'));
 if (process.env.BIDDING_ENABLED === 'true') {
   app.use('/api/bidding', noCacheMiddleware, require('./src/routes/bidding'));
   require('./src/services/biddingWorker').startBiddingWorker();
+  // Отправка уведомлений вовне включается NOTIFY_TRANSPORT (пока только «log» для стенда); без неё уведомления видны в кабинете участника
+  const notifyTransport = require('./src/services/notificationTransports').transportFromEnv();
+  if (notifyTransport) require('./src/services/biddingNotifications').startNotificationDispatcher(notifyTransport);
 }
 app.use('/api/gallery', noCacheMiddleware, require('./src/routes/gallery'));
 app.use('/api/artworks', noCacheMiddleware, require('./src/routes/artworks'));

@@ -72,6 +72,8 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['POST', '/api/bidding/lots/5/bids', { anon: 401, user: 200, bidder: 200 }],
   ['POST', '/api/bidding/auctions/spring-2026/apply', { anon: 401, user: 200 }],
   ['GET', '/api/bidding/me/registrations', { anon: 401, user: 200 }],
+  ['GET', '/api/bidding/me/notifications', { anon: 401, user: 200 }],
+  ['POST', '/api/bidding/me/notifications/read', { anon: 401, user: 200 }],
   ['GET', '/api/bidding/admin/auctions', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   ['POST', '/api/bidding/admin/auctions/1/announce', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   ['POST', '/api/bidding/admin/participants/4/kyc', { anon: 401, user: 403, curator: 200 }],

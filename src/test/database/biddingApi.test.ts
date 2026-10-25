@@ -386,6 +386,35 @@ describeDb('API торгов (PostgreSQL)', () => {
     });
   });
 
+  describe('уведомления', () => {
+    it('лента только для вошедшего и только своя; «перебили» приходит прежнему лидеру; отметка прочитанным', async () => {
+      const [alice, bob] = [await h.user('na'), await h.user('nb')];                                 // свежие пользователи: лента общая на весь набор
+      const { slug, auctionId, lotIds } = await liveAuction();
+      await admit(slug, auctionId, alice);
+      await admit(slug, auctionId, bob);
+      expect((await api.get('/me/notifications', null)).status).toBe(401);
+      expect((await api.post('/me/notifications/read', {}, null)).status).toBe(401);
+
+      const own = (await api.get('/me/notifications', alice)).body;
+      expect(own.notifications.map((n: any) => n.kind)).toEqual(['registration_approved']);           // допуск
+      await bid(lotIds[0], alice, 30000);
+      await bid(lotIds[0], bob, 50000);
+      const aliceFeed = (await api.get('/me/notifications', alice)).body;
+      expect(aliceFeed.notifications[0]).toMatchObject({ kind: 'outbid', read: false, path: `/torgi/lot/${lotIds[0]}` });
+      expect(aliceFeed.unread).toBe(2);
+      expect(JSON.stringify(aliceFeed)).not.toMatch(/max_kop|reserve|user_id/);
+      expect((await api.get('/me/notifications', bob)).body.notifications.map((n: any) => n.kind)).toEqual(['registration_approved']);
+      expect((await api.get('/me/notifications?unread=1&limit=1', alice)).body.notifications).toHaveLength(1);
+
+      expect((await api.post('/me/notifications/read', { ids: 'все' }, alice)).status).toBe(400);
+      expect((await api.post('/me/notifications/read', { ids: [] }, alice)).status).toBe(400);
+      expect((await api.post('/me/notifications/read', { ids: [aliceFeed.notifications[0].notification_id] }, bob)).body).toEqual({ marked: 0 });   // чужое
+      expect((await api.post('/me/notifications/read', { ids: [aliceFeed.notifications[0].notification_id] }, alice)).body).toEqual({ marked: 1 });
+      expect((await api.post('/me/notifications/read', {}, alice)).body).toEqual({ marked: 1 });
+      expect((await api.get('/me/notifications', alice)).body.unread).toBe(0);
+    });
+  });
+
   describe('аннулирование ставки', () => {
     it('куратор аннулирует ставку с причиной: цена и лидер пересчитаны, публика ставку не видит, журнал цел', async () => {
       const { slug, auctionId, lotIds } = await liveAuction();
