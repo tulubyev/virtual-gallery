@@ -1,0 +1,4966 @@
+{
+ "tool": "check-art-sources",
+ "user_agent": "VirtualGalleryResearchBot/1.0 (+https://virtgal.ru; research of public art sources)",
+ "created_at": "2026-10-26T15:22:57.307Z",
+ "rows": [
+  {
+   "id": "new-001",
+   "domain": "kamartmuseum.ru",
+   "url": "https://kamartmuseum.ru/",
+   "error": "robots.txt: ERR_TLS_CERT_ALTNAME_INVALID",
+   "robots": {
+    "status": "ERR_TLS_CERT_ALTNAME_INVALID"
+   }
+  },
+  {
+   "id": "new-002",
+   "domain": "magadanmuseum.ru",
+   "url": "https://magadanmuseum.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://magadanmuseum.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /engine/go.php",
+     "Disallow: /engine/download.php",
+     "Disallow: /user/",
+     "Disallow: /newposts/",
+     "Disallow: /statistics.html",
+     "Disallow: /*subaction=userinfo",
+     "Disallow: /*subaction=newposts",
+     "Disallow: /*do=lastcomments",
+     "Disallow: /*do=feedback",
+     "Disallow: /*do=register",
+     "Disallow: /*do=lostpassword",
+     "Disallow: /*do=addnews",
+     "Disallow: /*do=stats",
+     "Disallow: /*do=pm",
+     "Disallow: /*do=search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Магаданский областной краеведческий музей",
+    "description": "Магаданский областной краеведческий музей",
+    "lang": "",
+    "generator": "DataLife Engine (http://dle-news.ru)",
+    "text_chars": 7148,
+    "js_heavy": false,
+    "feeds": [
+     "https://magadanmuseum.ru/engine/rss.php"
+    ],
+    "search_forms": [
+     {
+      "action": "https://magadanmuseum.ru/",
+      "method": "post",
+      "field": ""
+     },
+     {
+      "action": "https://magadanmuseum.ru/",
+      "method": "post",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://magadanmuseum.ru/index.php?do=static&page=pravila",
+      "text": "Правила поведения в музее",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://magadanmuseum.ru/index.php?do=static&page=privacy-policy",
+      "text": "Политика конфиденциальности персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://magadanmuseum.ru/index.php?do=static&page=privacy-consent",
+      "text": "Согласие на обработку персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://magadanmuseum.ru/index.php?do=static&page=privacy-policy",
+      "text": "Политикой обработки персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://magadanmuseum.ru/index.php?do=static&page=privacy-consent",
+      "text": "Согласием на обработку персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://magadanmuseum.ru/index.php?do=static&page=pravila",
+     "status": 200,
+     "error": "",
+     "title": "Правила поведения в Магаданском областном краеведческом музее &raquo; Магаданский областной краеведческий музей",
+     "snippets": [
+      "В нашем музее разрешена любительская фото-, видеосъемка.",
+      "Запрещается проносить в выставочные и экспозиционные залы еду и напитки.",
+      "Не прикасайтесь к экспонатам, если это не разрешено специально."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-003",
+   "domain": "museumamur.org",
+   "url": "https://museumamur.org/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://museumamur.org/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Амурский областной краеведческий музей им. Г.С. Новикова-Даурского",
+    "description": "Амурский областной краеведческий музей им. Г.С. Новикова-Даурского",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 10819,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://museumamur.org/search/index.php",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://museumamur.org/posetitelyam/pravila-poseshcheniya",
+      "text": "Правила посещения",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://museumamur.org/politika-konfidentsialnosti",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "&copy; 2019 Все права защищены &times; Заказать билет Мероприятие: Выберете мероприятие Выставка «Репортаж из сорок пятого» Му",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://museumamur.org/posetitelyam/pravila-poseshcheniya",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения",
+     "snippets": [
+      "Посетителям запрещается: 1.",
+      "Находиться на территории музея, запрещенной для доступа посетителей.",
+      "2019 Все права защищены &times;"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-004",
+   "domain": "komo45.ru",
+   "url": "https://komo45.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://komo45.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://komo45.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /admin/",
+     "Disallow: /login/",
+     "Disallow: /register/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Курганское областное музейное объединение",
+    "description": "ГАУК «Курганское областное музейное объединение» - создано 30 декабря 2019 года на базе двух учреждений Курганского областного художественного музея имени Г.А. Травникова и Курганского областного краеведческого музея и его филиалов.",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 7042,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://komo45.ru/search",
+      "method": "get",
+      "field": "search"
+     },
+     {
+      "action": "https://komo45.ru/search",
+      "method": "get",
+      "field": "search"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://komo45.ru/terms-of-service",
+      "text": "Пользовательское соглашение",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://yandex.ru/legal/metrica_termsofuse/ru/",
+      "text": "условия Метрики",
+      "same_host": false,
+      "kind": "terms"
+     },
+     {
+      "href": "https://yandex.ru/legal/maps_termsofuse/ru/",
+      "text": "условия Яндекс Карт",
+      "same_host": false,
+      "kind": "terms"
+     },
+     {
+      "href": "https://komo45.ru/privacy-policy",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://komo45.ru/privacy-policy",
+      "text": "политика обработки данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© 2026 Разработанно студией i Настройки приватности Необходимые cookies обеспечивают работу сайта",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://komo45.ru/terms-of-service",
+     "status": 200,
+     "error": "",
+     "title": "Пользовательское соглашение",
+     "snippets": [
+      "Запрещается направлять специальные категории персональных данных, данные третьих лиц, вредоносный код, незаконные материалы или заведомо ложные сообщения, если это не требуется официальной формой и не имеет надлежащего …",
+      "До соответствующего разрешения сайт не загружает счётчик Метрики, JavaScript API Карт и саму интерактивную карту.",
+      "После разрешения поставщик может получить IP-адрес, cookies и идентификаторы браузера, URL страницы, дату и время, сведения о браузере, операционной системе и устройстве, а для Карт — координаты, масштаб и действия на к…",
+      "Допустимое использование Запрещаются попытки несанкционированного доступа, обхода ограничений, нарушения работы сайта, массового автоматизированного сбора, внедрения кода, распространения вредоносных материалов, выдачи …",
+      "Изменение соглашения не заменяет получение отдельного согласия на обработку персональных данных и не включает необязательные сервисы автоматически.",
+      "С вашего разрешения мы подключим Яндекс.Метрику интерактивные Яндекс Карты и разрешённые внешние медиа."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-005",
+   "domain": "www.ghm-hmao.ru",
+   "url": "https://www.ghm-hmao.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.ghm-hmao.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Главная | Государственный художественный музей",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 9885,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://www.ghm-hmao.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://www.ghm-hmao.ru/static/pravila-poseshcheniya",
+      "text": "Правила посещения",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://www.ghm-hmao.ru/static/pravila-poseshcheniya/",
+      "text": "ПРАВИЛА ПОСЕЩЕНИЯ",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://www.ghm-hmao.ru/politika-konfidentsialnosti",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://www.ghm-hmao.ru/static/politika-konfidentsialnosti",
+      "text": "ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://www.ghm-hmao.ru/static/pravila-poseshcheniya",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения",
+     "snippets": [
+      "При проведении на территории Музея мероприятия с категорией информационной продукции «18+», (содержащего информацию, запрещенную для распространения среди детей в соответствии с требованиями Федерального закона от 29.12…",
+      "Посещение Музея в нерабочее время не допускается.",
+      "Допуск в нерабочее время возможен только для специальных групп по письменному разрешению директора Музея или лица, его заменяющего.",
+      "Предоставлять сотрудникам Музея в кассе при покупке билетов на мероприятия с категорией информационной продукции «18+», (содержащего информацию, запрещенную для распространения среди детей в соответствии с требованиями …",
+      "Производить видео-, кино- и фотосъемку любительской камерой в пределах границ, разрешенных для прохода экскурсантов, в личных (некоммерческих) целях.",
+      "Посетителям на территории Музея запрещается: 7.1."
+     ]
+    },
+    {
+     "url": "https://www.ghm-hmao.ru/static/pravila-poseshcheniya/",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения",
+     "snippets": [
+      "При проведении на территории Музея мероприятия с категорией информационной продукции «18+», (содержащего информацию, запрещенную для распространения среди детей в соответствии с требованиями Федерального закона от 29.12…",
+      "Посещение Музея в нерабочее время не допускается.",
+      "Допуск в нерабочее время возможен только для специальных групп по письменному разрешению директора Музея или лица, его заменяющего.",
+      "Предоставлять сотрудникам Музея в кассе при покупке билетов на мероприятия с категорией информационной продукции «18+», (содержащего информацию, запрещенную для распространения среди детей в соответствии с требованиями …",
+      "Производить видео-, кино- и фотосъемку любительской камерой в пределах границ, разрешенных для прохода экскурсантов, в личных (некоммерческих) целях.",
+      "Посетителям на территории Музея запрещается: 7.1."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-006",
+   "domain": "shm-surgut.ru",
+   "url": "https://shm-surgut.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shm-surgut.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shm-surgut.ru/sitemap-xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /administrator/",
+     "Disallow: /cache/",
+     "Disallow: /cli/",
+     "Disallow: /components/",
+     "Disallow: /component/",
+     "Disallow: /includes/",
+     "Disallow: /installation/",
+     "Disallow: /language/",
+     "Disallow: /libraries/",
+     "Disallow: /logs/",
+     "Disallow: /media/",
+     "Disallow: /modules/",
+     "Disallow: /plugins/",
+     "Disallow: /templates/",
+     "Disallow: /tmp/",
+     "Disallow: /*user",
+     "Disallow: /*cart",
+     "Disallow: /*cartajax",
+     "Disallow: /*search",
+     "Disallow: /*wishlist",
+     "Disallow: /*compare",
+     "Disallow: /*checkout",
+     "Disallow: /*qcheckout",
+     "Disallow: /*?tmpl",
+     "Disallow: /*.html.html",
+     "Disallow: /*.html/",
+     "Disallow: /*?start=",
+     "Disallow: /404.html",
+     "Disallow: /*,",
+     "Disallow: /*admin",
+     "Disallow: /*_adminer",
+     "Disallow: /*_cms",
+     "Disallow: /*_old",
+     "Disallow: /*.git",
+     "Disallow: /*.ssh",
+     "Disallow: /*.well-know",
+     "Disallow: /*hgpid",
+     "Disallow: /*hlpid",
+     "Allow: /components/com_jshopping/files/img_categories/",
+     "Allow: /components/com_jshopping/files/img_products/",
+     "Allow: /images/",
+     "Allow: /media/com_acym/",
+     "Allow: /media/plg_jchoptimize/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Главная страница - Сургутский Художественный Музей",
+    "description": "",
+    "lang": "ru-ru",
+    "generator": "Joomla! - Open Source Content Management",
+    "text_chars": 1370,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shm-surgut.ru/",
+      "method": "post",
+      "field": "searchword"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "&copy; 2015—2026 \"Сургутский художественный музей\"",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-007",
+   "domain": "www.hmao-museums.ru",
+   "url": "http://www.hmao-museums.ru/",
+   "error": "robots.txt: UND_ERR_CONNECT_TIMEOUT",
+   "robots": {
+    "status": "UND_ERR_CONNECT_TIMEOUT"
+   }
+  },
+  {
+   "id": "new-008",
+   "domain": "nkmus.ru",
+   "url": "http://nkmus.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "http://nkmus.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://nkmus.ru/sitemap.xml",
+     "http://nkmus.ru/sitemap-feeds.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /page20793732.html",
+     "Disallow: /header",
+     "Disallow: /page20793894.html",
+     "Disallow: /podval",
+     "Disallow: /tilda/form*",
+     "Disallow: /tilda/rec*",
+     "Disallow: /tilda/click*",
+     "Disallow: /tilda/scroll*",
+     "Disallow: /tilda/popup*",
+     "Disallow: /tilda/cart*",
+     "Disallow: /tilda/product*",
+     "Disallow: /tilda/event*",
+     "Disallow: /members/login*",
+     "Disallow: /members/signup*",
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Музей",
+    "description": "Информация для посетителей, выставки, коллекции, о музее, экскурсии и контакты",
+    "lang": "",
+    "generator": "",
+    "text_chars": 2317,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "http://nkmus.ru/pravila",
+      "text": "Правила посещения музея",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "http://nkmus.ru/polisy",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "© 2022 Все права защищены",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "http://nkmus.ru/pravila",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения музея",
+     "snippets": [
+      "В целях защиты и сохранения объектов исторического и культурного наследия, обеспечения правопорядка и безопасности посетителей на территории Музея ЗАПРЕЩАЕТСЯ: – посещение экспозиционных и выставочных залов в верхней од…",
+      "– въезжать на территорию Музея без разрешения дирекции Музея на любых видах транспорта, включая велосипеды, самокаты, ролики, скейтборды, самодвижущиеся средства с электроприводом;",
+      "– организовывать и проводить без согласования и разрешения Дирекции Музея: · массовые зрелищные, развлекательные, игровые, спортивные, оздоровительные и иные публичные мероприятия;",
+      "Разрешена съемка только общих планов.",
+      "Запрещается разговаривать по мобильному телефону в экспозиции.",
+      "– запрещено перебивать экскурсовода, пользоваться диктофонами/записывающими устройствами, снимать экскурсию на видеоаппаратуру, фотографировать отдельные экспонаты и экскурсовода без его согласия, задавать вопросы до ок…",
+      "Информация по Цифровому ID Инструкция по формированию цифрового удостоверения многодетной семьи в MAX Найти Дополнительная информация Часто задаваемые вопросы Муниципальное бюджетное учреждение \"Нижневартовский краеведч…"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-009",
+   "domain": "shr-hmao.ru",
+   "url": "https://shr-hmao.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr-hmao.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr-hmao.ru/wp-sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /wp-admin/",
+     "Allow: /wp-admin/admin-ajax.php"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Ханты-Мансийское отделение Союза художников России — Ханты-Мансийское отделение Союза художников России",
+    "description": "",
+    "lang": "ru-RU",
+    "generator": "",
+    "text_chars": 2622,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr-hmao.ru/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-010",
+   "domain": "mvk.yanao.ru",
+   "url": "https://mvk.yanao.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://mvk.yanao.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /rezhim-raboty/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Музей имени И. С. Шемановского",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 5724,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://mvk.yanao.ru/search/",
+      "method": "get",
+      "field": "q"
+     },
+     {
+      "action": "https://mvk.yanao.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-011",
+   "domain": "artistsbur.ru",
+   "url": "https://artistsbur.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artistsbur.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Союз Художников Бурятии",
+    "description": "Официальный сайт Бурятского республиканского отделения Всероссийской творческой общественной организации «Союз художников России»",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 13914,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© БРО ВТОО \"Союз художников России\"",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-012",
+   "domain": "collection.museum72.ru",
+   "url": "https://collection.museum72.ru/",
+   "error": "robots.txt: ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR",
+   "robots": {
+    "status": "ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR"
+   }
+  },
+  {
+   "id": "new-013",
+   "domain": "igmii.ru",
+   "url": "https://igmii.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://igmii.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Ирбитский Государственный музей Изобразительных Искусств",
+    "description": "ВИРТУАЛЬНЫЙ МУЗЕЙ - виртуальный просмотр залов и выставок музеев. Здесь Вы можете посмотреть самые интересные и уникальные коллекции музеев Ирбитского ГМИИ. ",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 229,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-014",
+   "domain": "primgallerypart.ru",
+   "url": "https://primgallerypart.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 404,
+   "final_url": "https://primgallerypart.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": null,
+   "terms": []
+  },
+  {
+   "id": "new-015",
+   "domain": "www.arseniev.org",
+   "url": "http://www.arseniev.org/",
+   "error": "robots.txt: ERR_TLS_CERT_ALTNAME_INVALID",
+   "robots": {
+    "status": "ERR_TLS_CERT_ALTNAME_INVALID"
+   }
+  },
+  {
+   "id": "new-016",
+   "domain": "www.dvfu.ru",
+   "url": "https://www.dvfu.ru/museum/art_museum/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.dvfu.ru/museum/art_museum/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://www.dvfu.ru/sitemap_index.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /bitrix/",
+     "Disallow: /upload/",
+     "Disallow: /search/",
+     "Disallow: /club/search/",
+     "Disallow: /club/group/search/",
+     "Disallow: /club/forum/search/",
+     "Disallow: /communication/forum/search/",
+     "Disallow: /communication/blog/search.php",
+     "Disallow: /club/gallery/tags/",
+     "Disallow: /examples/my-components/",
+     "Disallow: /examples/download/download_private/",
+     "Disallow: /auth/",
+     "Disallow: /auth.php",
+     "Disallow: /personal/",
+     "Disallow: /communication/forum/user/",
+     "Disallow: /e-store/paid/detail.php",
+     "Disallow: /e-store/affiliates/",
+     "Disallow: /club/$",
+     "Disallow: /club/messages/",
+     "Disallow: /club/log/",
+     "Disallow: /content/board/my/",
+     "Disallow: /content/links/my/",
+     "Disallow: /*/search/",
+     "Disallow: /*PAGE_NAME=search",
+     "Disallow: /*PAGE_NAME=user_post",
+     "Disallow: /*PAGE_NAME=detail_slide_show",
+     "Disallow: /*/slide_show/",
+     "Disallow: /*/gallery/*order=*",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*register=yes",
+     "Disallow: /*forgot_password=yes",
+     "Disallow: /*change_password=yes",
+     "Disallow: /*login=yes",
+     "Disallow: /*logout=yes",
+     "Disallow: /*auth=yes",
+     "Disallow: /*action=ADD_TO_COMPARE_LIST",
+     "Disallow: /*action=DELETE_FROM_COMPARE_LIST",
+     "Disallow: /*action=ADD2BASKET",
+     "Disallow: /*action=BUY",
+     "Disallow: /*print_course=Y",
+     "Disallow: /*bitrix_*=",
+     "Disallow: /*backurl=*",
+     "Disallow: /*BACKURL=*",
+     "Disallow: /*back_url=*",
+     "Disallow: /*BACK_URL=*",
+     "Disallow: /*back_url_admin=*",
+     "Disallow: /*index.php$",
+     "Disallow: /endowment/giving/online/",
+     "Disallow: /endowment/giving/email/",
+     "Disallow: /local/",
+     "Disallow: /special",
+     "Disallow: /_test13331",
+     "Disallow: /schools/school_of_natural_sciences/",
+     "Disallow: /admission/map/",
+     "Disallow: /html/",
+     "Disallow: /html-additional/",
+     "Disallow: /html-additional.b/",
+     "Disallow: /editable_content/",
+     "Disallow: /images/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Художественный музей",
+    "description": "Художественный музей",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 6560,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://www.dvfu.ru/search/index.php",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://www.dvfu.ru/upload/medialibrary/3f6/%D0%9F%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0%20%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B8%20%D0%BF%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D1%85%20%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85%20%D0%B2%20%D0%94%D0%92%D0%A4%D0%A3.pdf",
+      "text": "Политика обработки персональных данных в ДВФУ",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "копирование материалов сайта без разрешения владельца запрещено"
+    ],
+    "copyright_line": "© Дальневосточный федеральный университет, 2012-2026 Информация, размещенная на данном сайте, является собственностью ДВФ",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-017",
+   "domain": "sakhalinmuseum.ru",
+   "url": "https://sakhalinmuseum.ru/",
+   "error": "robots.txt: UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+   "robots": {
+    "status": "UNABLE_TO_VERIFY_LEAF_SIGNATURE"
+   }
+  },
+  {
+   "id": "new-018",
+   "domain": "sibmuseum.ru",
+   "url": "https://sibmuseum.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://sibmuseum.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://sibmuseum.ru/wp-sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /wp-admin/",
+     "Allow: /wp-admin/admin-ajax.php"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "ОГИК музей | Главная",
+    "description": "",
+    "lang": "ru-RU",
+    "generator": "WordPress 7.1.3",
+    "text_chars": 9156,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://sibmuseum.ru/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://sibmuseum.ru/pravila-poseshheniya-muzeya-gruppami/",
+      "text": "Правила посещения музея группами",
+      "same_host": true,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://sibmuseum.ru/pravila-poseshheniya-muzeya-gruppami/",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения музея группами &#8212; ОГИК музей | Главная",
+     "snippets": [
+      "Ленина, 23А ogik@mincult.omskportal.ru 31-22-86 О музее Новости История Администрация Документы Ученый и Общественный советы Партнеры СМИ о музее Пресс-служба КОНТАКТЫ Вакансии Посетителю Контакты и график работы Правил…"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-019",
+   "domain": "myagkm.ru",
+   "url": "https://myagkm.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 0,
+   "final_url": "",
+   "content_type": "",
+   "error": "AbortError",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://myagkm.ru/sitemap.xml",
+     "https://myagkm.ru/sitemap-store.xml",
+     "https://myagkm.ru/sitemap-feeds.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /page29656202.html",
+     "Disallow: /page29658833.html",
+     "Disallow: /tilda/form*",
+     "Disallow: /tilda/rec*",
+     "Disallow: /tilda/click*",
+     "Disallow: /tilda/scroll*",
+     "Disallow: /tilda/popup*",
+     "Disallow: /tilda/cart*",
+     "Disallow: /tilda/product*",
+     "Disallow: /tilda/event*",
+     "Disallow: /members/login*",
+     "Disallow: /members/signup*",
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": null,
+   "terms": []
+  },
+  {
+   "id": "new-020",
+   "domain": "artkuznetsk.ru",
+   "url": "https://artkuznetsk.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artkuznetsk.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Главная - Новокузнецкий художественный музей",
+    "description": "Первый художественный музей Кузбасса ✓ Крупнейшее собрание изобразительного искусства в регионе ✓ Интересные выставки ✓ Творческие занятия",
+    "lang": "ru-RU",
+    "generator": "WordPress 5.8.18",
+    "text_chars": 8452,
+    "js_heavy": false,
+    "feeds": [
+     "https://artkuznetsk.ru/feed/",
+     "https://artkuznetsk.ru/comments/feed/"
+    ],
+    "search_forms": [
+     {
+      "action": "https://artkuznetsk.ru/",
+      "method": "get",
+      "field": "s"
+     },
+     {
+      "action": "https://artkuznetsk.ru/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://artkuznetsk.ru/pravila-materialy-sajta/",
+      "text": "Условия использования материалов сайта",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://artkuznetsk.ru/for-visitors/socialnaya-sfera/nacionalnaya-politika/",
+      "text": "Национальная политика",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://artkuznetsk.ru/politika-konfidencialnosti/",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://artkuznetsk.ru/about/politika-konfidencialnosti/",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "© МАУК НХМ",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://artkuznetsk.ru/pravila-materialy-sajta/",
+     "status": 200,
+     "error": "",
+     "title": "Условия использования материалов сайта - Новокузнецкий художественный музей",
+     "snippets": [
+      "Содержание настоящего сайта используется в некоммерческих целях при соблюдении общих условий: Использование текстовой информации и мультимедийных продуктов – с указанием ссылки на страницу.",
+      "Для коммерческого использования материалов сайта необходимо получить на это письменное разрешение, направив запрос в свободной форме на имя директора Новокузнецкого художественного музея на электронную почту art-nkz@yan…",
+      "Все права защищены Политика конфиденциальности / Условия использования материалов сайта Мы используем cookie."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-021",
+   "domain": "kuzbasskray.ru",
+   "url": "https://kuzbasskray.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://kuzbasskray.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://kuzbasskray.ru/css/buy.php?sitemap.xml",
+     "https://kuzbasskray.ru/css/buy.php?sitemap_1.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Главная - ГАУК «Кузбасский государственный краеведческий музей»",
+    "description": "ГАУК «Кузбасский государственный краеведческий музей» Официальный сайт г.Кемерово",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 7607,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://kuzbasskray.ru/search/index.php",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://kuzbasskray.ru/posetitelyam/pravila-poseshcheniya-muzeya.php",
+      "text": "Правила посещения музея",
+      "same_host": true,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://kuzbasskray.ru/posetitelyam/pravila-poseshcheniya-muzeya.php",
+     "status": 200,
+     "error": "",
+     "title": "Правила посещения музея - ГАУК «Кузбасский государственный краеведческий музей»",
+     "snippets": [
+      "Правила посещения музея ПОСЕТИТЕЛЯМ Адреса и часы работы Стоимость билетов Пушкинская карта Правила возврата билетов Правила посещения музея Доступная среда Виртуальная приемная Памятки для граждан Часто задаваемые вопр…"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-022",
+   "domain": "youmuseum.ru",
+   "url": "https://youmuseum.ru/",
+   "robots": {
+    "status": "200",
+    "allows_page": false,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /",
+     "Disallow: /loyalty-program"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   }
+  },
+  {
+   "id": "new-023",
+   "domain": "artcentresibir.ru",
+   "url": "https://artcentresibir.ru/",
+   "error": "robots.txt: 403",
+   "robots": {
+    "status": "403"
+   }
+  },
+  {
+   "id": "new-024",
+   "domain": "mira1.ru",
+   "url": "https://mira1.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://mira1.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 0,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-025",
+   "domain": "biennale.ru",
+   "url": "https://biennale.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://biennale.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 0,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-026",
+   "domain": "iokm.ru",
+   "url": "https://iokm.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://iokm.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://iokm.ru/wp-sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /wp-admin/",
+     "Allow: /wp-admin/admin-ajax.php"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Иркутский областной краеведческий музей им. Муравьева-Амурского – Сайт музея г.Иркутска",
+    "description": "",
+    "lang": "ru-RU",
+    "generator": "WordPress 7.1.3",
+    "text_chars": 16433,
+    "js_heavy": false,
+    "feeds": [
+     "https://iokm.ru/feed/"
+    ],
+    "search_forms": [
+     {
+      "action": "https://iokm.ru/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "При использовании материалов ссылка обязательна 8 (3952) 33-59-16 335916@iokm"
+    ],
+    "copyright_line": "© 2026 Иркутский областной краеведческий музей имени Н",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-027",
+   "domain": "irkmuseum.ru",
+   "url": "http://irkmuseum.ru/",
+   "error": "robots.txt: ERR_TLS_CERT_ALTNAME_INVALID",
+   "robots": {
+    "status": "ERR_TLS_CERT_ALTNAME_INVALID"
+   }
+  },
+  {
+   "id": "new-028",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Региональные отделения Союза художников России",
+    "description": "Отделения Союза художников России в регионах по всей территории Российской федерации",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 4342,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-029",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/134/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/134/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Приморская краевая организация ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 6972,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-030",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/140/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/140/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Региональное отделение \"Союз художников Якутии\" ВТОО \"Союз художников России\"",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 6042,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-031",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/75/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/75/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Бурятское республиканское отделение ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 5424,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-032",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/86/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/86/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Иркутское региональное отделение ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 4941,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-033",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/164/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/164/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Тюменское региональное отделение ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 6096,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-034",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/70/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/70/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Амурская областная организация ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 5189,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-035",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/167/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/167/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Хабаровская краевая организация ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 6274,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-036",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/izdatelskie-proekty/arkhiv-zhurnala-khudozhnik/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/izdatelskie-proekty/arkhiv-zhurnala-khudozhnik/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Историческая справка СХР11",
+    "description": "История создания и становления Союза Художников России",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 2928,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-037",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/izdatelskie-proekty/gazeta-khudozhnik-rossii/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/izdatelskie-proekty/gazeta-khudozhnik-rossii/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Историческая справка СХР11",
+    "description": "История создания и становления Союза Художников России",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 3704,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-038",
+   "domain": "shr.su",
+   "url": "https://shr.su/about/regions/regionaltie-otdeleniya/161/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/161/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://shr.su/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /search"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Томское региональное отделение ВТОО «СХ России»",
+    "description": "Всероссийская творческая общественная организация объединяющая российских художников и искусствоведов. Союз художников России стал одним из правопреемников Союза художников СССР, входит в Международную конфедерацию Союзов художников",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 3374,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://shr.su/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены",
+     "Использование материалов сайта разрешено только с предварительного согласия правообладателей"
+    ],
+    "copyright_line": "© 2026 Союз Художников России",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-039",
+   "domain": "journals.tsu.ru",
+   "url": "https://journals.tsu.ru/culture/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://journals.tsu.ru/culture/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /engine/go.php",
+     "Disallow: /user/",
+     "Disallow: /newposts/",
+     "Disallow: /statistics.html",
+     "Disallow: /*subaction=userinfo",
+     "Disallow: /*subaction=newposts",
+     "Disallow: /*do=lastcomments",
+     "Disallow: /*do=feedback",
+     "Disallow: /*do=register",
+     "Disallow: /*do=lostpassword",
+     "Disallow: /*do=addnews",
+     "Disallow: /*do=stats",
+     "Disallow: /*do=pm",
+     "Disallow: /engine/download.php?id=*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Вестник Томского государственного университета. Культурология и искусствоведение / Вестник Томского государственного университета. Культурология и искусствоведе",
+    "description": "",
+    "lang": "ru",
+    "generator": "Sirius CMS",
+    "text_chars": 4201,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://journals.tsu.ru/culture/",
+      "method": "post",
+      "field": "search"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://tsu.ru/legacy-cookies-agreement.php",
+      "text": "согласие на обработку этих данных",
+      "same_host": false,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; 2011 - 2026 Вестник Томского государственного университета",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-040",
+   "domain": "www.sgiiart.ru",
+   "url": "https://www.sgiiart.ru/jour/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.sgiiart.ru/jour/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://www.sgiiart.ru/sitemap"
+    ],
+    "rules_for_us": [
+     "Disallow: /cache/*",
+     "Disallow: */search/search*",
+     "Disallow: */index.php/*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Электронный научно-исследовательский журнал Сибирского государственного института искусств имени Дмитрия Хворостовского \"ARTE\"",
+    "description": "Электронный научно-исследовательский журнал Сибирского государственного института искусств имени Дмитрия Хворостовского \"ARTE\"",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 13837,
+    "js_heavy": false,
+    "feeds": [
+     "https://www.sgiiart.ru/jour/gateway/plugin/WebFeedGatewayPlugin/atom",
+     "https://www.sgiiart.ru/jour/gateway/plugin/WebFeedGatewayPlugin/rss",
+     "https://www.sgiiart.ru/jour/gateway/plugin/WebFeedGatewayPlugin/rss2"
+    ],
+    "search_forms": [
+     {
+      "action": "https://www.sgiiart.ru/jour/",
+      "method": "get",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "http://creativecommons.org/licenses/by/4.0/",
+      "text": "",
+      "same_host": false,
+      "kind": "terms"
+     },
+     {
+      "href": "http://creativecommons.org/licenses/by/4.0/",
+      "text": "Creative Commons Attribution 4.0 License",
+      "same_host": false,
+      "kind": "terms"
+     },
+     {
+      "href": "https://www.sgiiart.ru/jour/about/privacyPolicyCommon",
+      "text": "Обработка персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Creative Commons"
+    ],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-041",
+   "domain": "www.ais-art.ru",
+   "url": "https://www.ais-art.ru/",
+   "error": "robots.txt: ENOTFOUND",
+   "robots": {
+    "status": "ENOTFOUND"
+   }
+  },
+  {
+   "id": "new-042",
+   "domain": "kgallery.ru",
+   "url": "http://kgallery.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "http://kgallery.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://kgallery.ru/sitemap.xml",
+     "http://kgallery.ru/sitemap-store.xml",
+     "http://kgallery.ru/sitemap-feeds.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /tilda/form*",
+     "Disallow: /tilda/rec*",
+     "Disallow: /tilda/click*",
+     "Disallow: /tilda/scroll*",
+     "Disallow: /tilda/popup*",
+     "Disallow: /tilda/cart*",
+     "Disallow: /tilda/product*",
+     "Disallow: /tilda/event*",
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "KGallery — Официальный сайт",
+    "description": "Крупнейшая петербургская частная коллекция изобразительного искусства | Выставки | Графика | Книги | Кофе | Винил",
+    "lang": "",
+    "generator": "",
+    "text_chars": 3615,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© 2026 KGallery / Санкт-Петербург © 2026 KGallery / Санкт-Петербург Возврат к началу страницы Серов и Коровин Текущая выс",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-043",
+   "domain": "konstantinart.ru",
+   "url": "https://konstantinart.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://konstantinart.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://konstantinart.ru/sitemap_index.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /wp-content/uploads/wc-logs/",
+     "Disallow: /wp-content/uploads/woocommerce_transient_files/",
+     "Disallow: /wp-content/uploads/woocommerce_uploads/",
+     "Disallow: /wp-admin/",
+     "Allow: /wp-admin/admin-ajax.php"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "«BK&KB Gallery — частная галерея живописи XIX–XX века»",
+    "description": "«BK&KB Gallery — частная галерея Константина Ещеркина. Продажа и коллекционирование русской и европейской живописи XIX–XX веков: музейное качество, экспертиза, гарантии подлинности.»",
+    "lang": "ru-RU",
+    "generator": "WordPress 7.1.3",
+    "text_chars": 1797,
+    "js_heavy": false,
+    "feeds": [
+     "https://konstantinart.ru/feed/",
+     "https://konstantinart.ru/comments/feed/"
+    ],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "&copy; 2026 BK&KB Gallery - частная коллекция произведений искусства Все права защищены",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-044",
+   "domain": "rusart-gallery.ru",
+   "url": "https://rusart-gallery.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://rusart-gallery.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://rusart-gallery.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /page11408709.html",
+     "Disallow: /gallery",
+     "Disallow: /page11750276.html",
+     "Disallow: /12",
+     "Disallow: /tilda/form*",
+     "Disallow: /tilda/rec*",
+     "Disallow: /tilda/click*",
+     "Disallow: /tilda/scroll*",
+     "Disallow: /tilda/popup*",
+     "Disallow: /tilda/cart*",
+     "Disallow: /tilda/product*",
+     "Disallow: /tilda/event*",
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Галерея «Русское Искусство»",
+    "description": "Мы предлагаем своим клиентам уникальную услугу Artbanking - инвестиционное сопровождение сделок, независимую консультационную оценку подлинности, стоимости и ликвидности произведений русской живописи.",
+    "lang": "",
+    "generator": "",
+    "text_chars": 4571,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© 2019 Галерея «Русское искусство» © 2019 Галерея «Русское искусство» НАВЕРХ",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-045",
+   "domain": "artcentre.moscow",
+   "url": "https://artcentre.moscow/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artcentre.moscow/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://artcentre.moscow/sitemap_index.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Центр Искусств. Москва: шедевры частных собраний - ЦЕНТР ИСКУССТВ. МОСКВА",
+    "description": "",
+    "lang": "ru-RU",
+    "generator": "Powered by LayerSlider 6.7.1 - Multi-Purpose, Responsive, Parallax, Mobile-Friendly Slider Plugin for WordPress.",
+    "text_chars": 4964,
+    "js_heavy": false,
+    "feeds": [
+     "https://artcentre.moscow/feed/",
+     "https://artcentre.moscow/comments/feed/"
+    ],
+    "search_forms": [
+     {
+      "action": "https://artcentre.moscow/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "ВСЕ ПРАВА ЗАЩИЩЕНЫ"
+    ],
+    "copyright_line": "©2015 – 2027",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-046",
+   "domain": "culture.gov.ru",
+   "url": "https://culture.gov.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://culture.gov.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://culture.gov.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /bitrix/",
+     "Disallow: /upload/",
+     "Disallow: /desk/council/",
+     "Disallow: /*sphrase_id=",
+     "Disallow: /*q=",
+     "Disallow: /*DOCS[AUTHORITY]=",
+     "Disallow: /*DOCS[DATE_1]=",
+     "Disallow: /*DOCS[DATE_2]=",
+     "Disallow: /*DOCS[KEYWORDS]=",
+     "Disallow: /*PAGEN_",
+     "Disallow: /*print=Y",
+     "Disallow: /*t=",
+     "Disallow: /__tools/",
+     "Disallow: /search/"
+    ],
+    "ai_agents": {
+     "anthropic-ai": "disallow_all",
+     "bytespider": "disallow_all",
+     "ccbot": "disallow_all",
+     "chatgpt-user": "disallow_all",
+     "cohere-ai": "disallow_all",
+     "facebookbot": "disallow_all",
+     "gptbot": "disallow_all"
+    },
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Министерство культуры Российской Федерации",
+    "description": "Министерство культуры Российской Федерации",
+    "lang": "",
+    "generator": "",
+    "text_chars": 7718,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "https://culture.gov.ru/about/departments/departament_nauki_i_obrazovaniya/",
+      "text": "Департамент региональной политики, образования и проектного управления",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://culture.gov.ru/about/advisory_authorities/koordinatsionnyy_sovet_po_realizatsii_gosudarstvennoy_natsionalnoy_politiki_pri_ministerstve_kultury/",
+      "text": "Координационный совет по реализации государственной национальной политики при Ми",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://culture.gov.ru/about/government_service/youth-policy/",
+      "text": "Молодежная политика",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-047",
+   "domain": "givc.ru",
+   "url": "https://givc.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://givc.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /bitrix/",
+     "Disallow: /upload/",
+     "Disallow: /*sphrase_id=",
+     "Disallow: /*q=",
+     "Disallow: /*DOCS[AUTHORITY]=",
+     "Disallow: /*DOCS[DATE_1]=",
+     "Disallow: /*DOCS[DATE_2]=",
+     "Disallow: /*DOCS[KEYWORDS]=",
+     "Disallow: /*PAGEN_",
+     "Disallow: /*print=Y",
+     "Disallow: /*t=",
+     "Disallow: /ostafevo",
+     "Disallow: /minkult",
+     "Disallow: /troya",
+     "Disallow: /news",
+     "Disallow: /new",
+     "Disallow: new.php",
+     "Disallow: museum.php",
+     "Disallow: museum2.php",
+     "Disallow: /calculator/index.php"
+    ],
+    "ai_agents": {
+     "anthropic-ai": "disallow_all",
+     "bytespider": "disallow_all",
+     "ccbot": "disallow_all",
+     "chatgpt-user": "disallow_all",
+     "cohere-ai": "disallow_all",
+     "facebookbot": "disallow_all",
+     "gptbot": "disallow_all"
+    },
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "ГИВЦ Минкультуры России",
+    "description": "Технологии будущего начинаются здесь",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 23035,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://givc.ru/search/",
+      "method": "get",
+      "field": "q"
+     },
+     {
+      "action": "https://givc.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://givc.ru/licenses/",
+      "text": "обработку персональных данных",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://givc.ru/licenses/",
+      "text": "условия пользования.",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://givc.ru/licenses/",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://givc.ru/licenses/",
+      "text": "условия",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://givc.ru/upload/docs/%D0%90%D0%BD%D1%82%D0%B8%D0%BA%D0%BE%D1%80%D1%80%D1%83%D0%BF%D1%86%D0%B8%D0%BE%D0%BD%D0%BD%D0%B0%D1%8F%20%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0.docx",
+      "text": "Антикоррупционная политика ФГБУ «ГИВЦ Минкультуры России» (MS Word, 34 Кб)",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://givc.ru/upload/docs/%D0%9E%D1%82%D1%87%D0%B5%D1%82%20%D0%BF%D0%BE%20%D0%BF%D0%BB%D0%B0%D0%BD%D1%83%202016%20%D0%B3..docx",
+      "text": "Отчет по антикоррупционной политике за 2016 год (MS Word, 18 Кб)",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://givc.ru/privacy/",
+      "text": "обработку персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "© 2026 ФГБУ «ГИВЦ Минкультуры России»",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://givc.ru/licenses/",
+     "status": 200,
+     "error": "",
+     "title": "О персональной информации пользователей",
+     "snippets": [
+      "При использовании информации, размещаемой на сайте ГИВЦ Министерства культуры России (далее — сайт), ГИВЦ может использовать общеотраслевую технологию, называемую «куки» (cookie), которая позволяет сохранить определённу…",
+      "автоматически накапливаемые сведения о том, к каким интернет-страницам сайта обращались пользователи;",
+      "Cookie позволяют выполнить автоматический вход на сайт: зарегистрированные пользователи будут идентифицированы автоматически.",
+      "Все права защищены +7 (495) 748-60-70 — приемная givc@givc.ru — приемная 105066, Москва, ул.",
+      "Все права защищены Во время посещения сайта, ГИВЦ Минкультуры России может использовать общеотраслевую технологию cookie."
+     ]
+    },
+    {
+     "url": "https://givc.ru/licenses/",
+     "status": 200,
+     "error": "",
+     "title": "О персональной информации пользователей",
+     "snippets": [
+      "При использовании информации, размещаемой на сайте ГИВЦ Министерства культуры России (далее — сайт), ГИВЦ может использовать общеотраслевую технологию, называемую «куки» (cookie), которая позволяет сохранить определённу…",
+      "автоматически накапливаемые сведения о том, к каким интернет-страницам сайта обращались пользователи;",
+      "Cookie позволяют выполнить автоматический вход на сайт: зарегистрированные пользователи будут идентифицированы автоматически.",
+      "Все права защищены +7 (495) 748-60-70 — приемная givc@givc.ru — приемная 105066, Москва, ул.",
+      "Все права защищены Во время посещения сайта, ГИВЦ Минкультуры России может использовать общеотраслевую технологию cookie."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-048",
+   "domain": "artsurikov.ru",
+   "url": "http://artsurikov.ru/",
+   "error": "robots.txt: CERT_HAS_EXPIRED",
+   "robots": {
+    "status": "CERT_HAS_EXPIRED"
+   }
+  },
+  {
+   "id": "new-049",
+   "domain": "vital.lib.tsu.ru",
+   "url": "https://vital.lib.tsu.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://vital.lib.tsu.ru/vital/access/manager/Index",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 10,
+    "sitemaps": [
+     "https://vital.lib.tsu.ru/sitemap_1.xml",
+     "https://vital.lib.tsu.ru/sitemap_2.xml",
+     "https://vital.lib.tsu.ru/sitemap_3.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /cgi-bin/",
+     "Disallow: /assets/",
+     "Disallow: /solr/",
+     "Disallow: /fedora/",
+     "Disallow: /manager/Repository*query=*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Home | Tomsk state university Research library",
+    "description": "Home",
+    "lang": "",
+    "generator": "",
+    "text_chars": 923,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://vital.lib.tsu.ru/vital/access/manager/Repository",
+      "method": "get",
+      "field": "query"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://vital.lib.tsu.ru/vital/access/manager/Copyright",
+      "text": "Copyright",
+      "same_host": true,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "Copyright | Contact | Описание Электронной библиотеки ТГУ | Back To Top ^",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://vital.lib.tsu.ru/vital/access/manager/Copyright",
+     "status": 200,
+     "error": "",
+     "title": "Copyright | Tomsk state university Research library",
+     "snippets": [
+      "Access from the Internet to the full text of documents is open in following cases, if publication is in the public domain as a result of the expiration of the term of the exclusive rights, or there is an agreement with …",
+      "Users of open access resources can reproduce them for your personal non-commercial use."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-050",
+   "domain": "journal.sfu-kras.ru",
+   "url": "https://journal.sfu-kras.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://journal.sfu-kras.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 10,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /database/",
+     "Disallow: /includes/",
+     "Disallow: /misc/",
+     "Disallow: /modules/",
+     "Disallow: /themes/",
+     "Disallow: /scripts/",
+     "Disallow: /updates/",
+     "Disallow: /profiles/",
+     "Disallow: /xmlrpc.php",
+     "Disallow: /cron.php",
+     "Disallow: /update.php",
+     "Disallow: /install.php",
+     "Disallow: /INSTALL.txt",
+     "Disallow: /INSTALL.mysql.txt",
+     "Disallow: /INSTALL.pgsql.txt",
+     "Disallow: /CHANGELOG.txt",
+     "Disallow: /MAINTAINERS.txt",
+     "Disallow: /LICENSE.txt",
+     "Disallow: /UPGRADE.txt",
+     "Disallow: /admin/",
+     "Disallow: /aggregator/",
+     "Disallow: /comment/reply/",
+     "Disallow: /contact/",
+     "Disallow: /logout/",
+     "Disallow: /node/add/",
+     "Disallow: /search/",
+     "Disallow: /user/register/",
+     "Disallow: /user/password/",
+     "Disallow: /user/login/",
+     "Disallow: /?q=admin/",
+     "Disallow: /?q=aggregator/",
+     "Disallow: /?q=comment/reply/",
+     "Disallow: /?q=contact/",
+     "Disallow: /?q=logout/",
+     "Disallow: /?q=node/add/",
+     "Disallow: /?q=search/",
+     "Disallow: /?q=user/password/",
+     "Disallow: /?q=user/register/",
+     "Disallow: /?q=user/login/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Журнал Сибирского федерального университета",
+    "description": "Сибирский федеральный университет (СФУ) входит в топ-15 вузов России. Ведущие научные школы Красноярска. Лучший в России кампус. Мировые индустриальные партнёры",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 14114,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "http://search.sfu-kras.ru/",
+      "method": "get",
+      "field": "q"
+     },
+     {
+      "action": "http://search.sfu-kras.ru/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "http://structure.sfu-kras.ru/node/1476",
+      "text": "Департамент информационной политики",
+      "same_host": false,
+      "kind": "other"
+     },
+     {
+      "href": "http://structure.sfu-kras.ru/node/528",
+      "text": "Департамент кадровой политики",
+      "same_host": false,
+      "kind": "other"
+     },
+     {
+      "href": "http://structure.sfu-kras.ru/node/277",
+      "text": "Управление молодёжной политики",
+      "same_host": false,
+      "kind": "other"
+     },
+     {
+      "href": "http://structure.sfu-kras.ru/node/1477",
+      "text": "Офис проректора по информационной политике",
+      "same_host": false,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; Сибирский федеральный университет, 2006-2026 При использовании текстовых и графических материалов ссылка на сайт обязат",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-051",
+   "domain": "www.loc.gov",
+   "url": "https://www.loc.gov/item/2018686255",
+   "checked_at": "2026-10-26",
+   "http_status": 403,
+   "final_url": "https://www.loc.gov/item/2018686255",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 5,
+    "sitemaps": [
+     "https://www.loc.gov/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /cgi-bin/",
+     "Disallow: /web_arch/",
+     "Disallow: /rr/mopic/staff",
+     "Disallow: /loc/volunteers",
+     "Disallow: /ficmanagers",
+     "Disallow: /preserv/extranet/",
+     "Disallow: /myloc",
+     "Disallow: /nationalfilmregistry",
+     "Disallow: /fedsearch",
+     "Disallow: /search",
+     "Disallow: /pictures/search",
+     "Disallow: /pictures/related"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": null,
+   "terms": []
+  },
+  {
+   "id": "new-052",
+   "domain": "www.abdn.ac.uk",
+   "url": "https://www.abdn.ac.uk/polarcensus/list_21a/7930-1-21-14/7930_1_21_14.htm",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.abdn.ac.uk/polarcensus/list_21a/7930-1-21-14/7930_1_21_14.htm",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /testing/",
+     "Disallow: /search/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "��� 7930-1/21-14",
+    "description": "",
+    "lang": "",
+    "generator": "",
+    "text_chars": 785,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-053",
+   "domain": "virtualrm.spb.ru",
+   "url": "https://virtualrm.spb.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://virtualrm.spb.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 10,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /includes/",
+     "Disallow: /misc/",
+     "Disallow: /modules/",
+     "Disallow: /profiles/",
+     "Disallow: /scripts/",
+     "Disallow: /sites/",
+     "Disallow: /themes/",
+     "Disallow: /CHANGELOG.txt",
+     "Disallow: /cron.php",
+     "Disallow: /INSTALL.mysql.txt",
+     "Disallow: /INSTALL.pgsql.txt",
+     "Disallow: /install.php",
+     "Disallow: /INSTALL.txt",
+     "Disallow: /LICENSE.txt",
+     "Disallow: /MAINTAINERS.txt",
+     "Disallow: /update.php",
+     "Disallow: /UPGRADE.txt",
+     "Disallow: /xmlrpc.php",
+     "Disallow: /admin/",
+     "Disallow: /comment/reply/",
+     "Disallow: /contact/",
+     "Disallow: /logout/",
+     "Disallow: /node/add/",
+     "Disallow: /search/",
+     "Disallow: /user/register/",
+     "Disallow: /user/password/",
+     "Disallow: /user/login/",
+     "Disallow: /?q=admin/",
+     "Disallow: /?q=comment/reply/",
+     "Disallow: /?q=contact/",
+     "Disallow: /?q=logout/",
+     "Disallow: /?q=node/add/",
+     "Disallow: /?q=search/",
+     "Disallow: /?q=user/password/",
+     "Disallow: /?q=user/register/",
+     "Disallow: /?q=user/login/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Проект \"Русский музей: виртуальный филиал\"",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 1823,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://virtualrm.spb.ru/",
+      "method": "post",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "http://virtualrm.spb.ru/ru/node/13311",
+      "text": "Условия использования материалов портала",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://virtualrm.spb.ru/ru/about",
+      "text": "О проекте",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© 2008-2015 Русский музей Условия использования материалов портала Вход в систему Имя пользователя: * Пароль: * Запросить",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "http://virtualrm.spb.ru/ru/node/13311",
+     "status": 200,
+     "error": "",
+     "title": "Условия использования материалов портала | Проект \"Русский музей: виртуальный филиал\"",
+     "snippets": [
+      "Содержание настоящего портала, включая все изображения и текстовую информацию, предназначено только для персонального некоммерческого использования, а также в образовательных целях."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-054",
+   "domain": "artsacademymuseum.org",
+   "url": "https://artsacademymuseum.org/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artsacademymuseum.org/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /wp-admin/",
+     "Allow: /wp-admin/admin-ajax.php",
+     "Disallow: /wp-content/uploads/wpo-plugins-tables-list.json"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Музей Академии Художеств - МАХ",
+    "description": "Музей Академии художеств - один из старейших музеев России, хранит уникальную коллекцию произведений западноевропейского и русского искусства",
+    "lang": "ru-RU",
+    "generator": "WordPress 7.1.3",
+    "text_chars": 8427,
+    "js_heavy": false,
+    "feeds": [
+     "https://artsacademymuseum.org/feed/",
+     "https://artsacademymuseum.org/comments/feed/",
+     "https://artsacademymuseum.org/muzei-akademi-khudozhestv/feed/"
+    ],
+    "search_forms": [
+     {
+      "action": "https://artsacademymuseum.org/",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "© 2008-2026 Все права защищены ФГБУК НИМ РАХ Музей О музее Волонтерам Официальная информация Контакты Стоимость билетов П",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-055",
+   "domain": "elib.altlib.ru",
+   "url": "http://elib.altlib.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://elib.altlib.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /administrator/",
+     "Disallow: /bin/",
+     "Disallow: /cache/",
+     "Disallow: /cli/",
+     "Disallow: /components/",
+     "Disallow: /includes/",
+     "Disallow: /installation/",
+     "Disallow: /language/",
+     "Disallow: /layouts/",
+     "Disallow: /libraries/",
+     "Disallow: /logs/",
+     "Disallow: /modules/",
+     "Disallow: /plugins/",
+     "Disallow: /tmp/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Главная",
+    "description": "",
+    "lang": "ru-ru",
+    "generator": "Joomla! - Open Source Content Management",
+    "text_chars": 6109,
+    "js_heavy": false,
+    "feeds": [
+     "https://elib.altlib.ru/?format=feed&type=rss",
+     "https://elib.altlib.ru/?format=feed&type=atom"
+    ],
+    "search_forms": [
+     {
+      "action": "https://elib.altlib.ru/component/search/",
+      "method": "post",
+      "field": "searchword"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://elib.altlib.ru/o-proekte",
+      "text": "О проекте",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© 2006 - 2026 Алтайская краевая универсальная научная библиотека им",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-056",
+   "domain": "www.spsl.nsc.ru",
+   "url": "http://www.spsl.nsc.ru/download/Literatura-2-2021-min.pdf",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "http://www.spsl.nsc.ru/download/Literatura-2-2021-min.pdf",
+   "content_type": "application/pdf",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://www.spsl.nsc.ru/sitemap_index.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": null,
+   "terms": []
+  },
+  {
+   "id": "new-057",
+   "domain": "journals.tsu.ru",
+   "url": "https://journals.tsu.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://journals.tsu.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /engine/go.php",
+     "Disallow: /user/",
+     "Disallow: /newposts/",
+     "Disallow: /statistics.html",
+     "Disallow: /*subaction=userinfo",
+     "Disallow: /*subaction=newposts",
+     "Disallow: /*do=lastcomments",
+     "Disallow: /*do=feedback",
+     "Disallow: /*do=register",
+     "Disallow: /*do=lostpassword",
+     "Disallow: /*do=addnews",
+     "Disallow: /*do=stats",
+     "Disallow: /*do=pm",
+     "Disallow: /engine/download.php?id=*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Вестник ТГУ",
+    "description": "",
+    "lang": "ru",
+    "generator": "Sirius CMS",
+    "text_chars": 3368,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "https://tsu.ru/legacy-cookies-agreement.php",
+      "text": "согласие на обработку этих данных",
+      "same_host": false,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; 2026 Журналы Томского государственного университета ru en Создание сайта &mdash; Primosoft Этот сайт использует файлы c",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-058",
+   "domain": "dspace.spbu.ru",
+   "url": "https://dspace.spbu.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://dspace.spbu.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://dspace.spbu.ru/sitemap_index.xml",
+     "https://dspace.spbu.ru/sitemap_index.html"
+    ],
+    "rules_for_us": [
+     "Disallow: /search",
+     "Disallow: /admin/*",
+     "Disallow: /processes",
+     "Disallow: /submit",
+     "Disallow: /workspaceitems",
+     "Disallow: /profile",
+     "Disallow: /workflowitems",
+     "Disallow: /entities/*?f",
+     "Disallow: /collections/*?f",
+     "Disallow: /communities/*?spc.page"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "DSpace",
+    "description": "",
+    "lang": "",
+    "generator": "",
+    "text_chars": 6,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-059",
+   "domain": "www.artiststudiomuseum.org",
+   "url": "https://www.artiststudiomuseum.org/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.artiststudiomuseum.org/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Allow: /"
+    ],
+    "ai_agents": {
+     "amazonbot": "disallow_all",
+     "applebot-extended": "disallow_all",
+     "bytespider": "disallow_all",
+     "ccbot": "disallow_all",
+     "claudebot": "disallow_all",
+     "google-extended": "disallow_all",
+     "gptbot": "disallow_all",
+     "anthropic-ai": "disallow_all",
+     "claude-web": "disallow_all",
+     "cohere-ai": "disallow_all",
+     "meta-externalagent": "disallow_all"
+    },
+    "llms_txt_hint": "",
+    "ai_comment": "AI-generated search summaries."
+   },
+   "page": {
+    "title": "Artist's Studio Museum Network - Artist's Studio Museum Network",
+    "description": "The Artist's Studio Museum Network celebrates the studio museums of Europe - small museums based in the former homes or studios of visual artists.",
+    "lang": "",
+    "generator": "",
+    "text_chars": 1519,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-060",
+   "domain": "omsklib.ru",
+   "url": "https://omsklib.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://omsklib.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://omsklib.ru/site/sitemap"
+    ],
+    "rules_for_us": [
+     "Allow: /",
+     "Disallow: /link/"
+    ],
+    "ai_agents": {
+     "gptbot": "disallow_all"
+    },
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "ОГОНБ имени А.С. Пушкина",
+    "description": "Омская государственная областная научная библиотека имени А. С. Пушкина. Официальный сайт",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 27627,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://omsklib.ru/site/search",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://omsklib.ru/Pravila_polzovaniya",
+      "text": "Правила пользования",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://omsklib.ru/usloviya-raboty-cookies",
+      "text": "cookie-файлов",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://omsklib.ru/files/news/official_doc/Polzovatel-soglashenie-2025.pdf",
+      "text": "Пользовательским соглашением",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://omsklib.ru/files/news/official_doc/Politika-konfidence-2025.pdf",
+      "text": "Политикой конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://omsklib.ru/Pravila_polzovaniya",
+     "status": 200,
+     "error": "",
+     "title": "Правила пользования",
+     "snippets": [
+      "В случае отказа от прохождения входного контроля пользователь в Библиотеку не допускается.",
+      "При пользовании Библиотекой не допускается : 3.2.1.",
+      "Вносить в зону обслуживания технику и оборудование для индивидуальной работы или проведения мероприятий без разрешения администрации (за исключением ноутбука или аналогичного индивидуального электронного устройства для …",
+      "Разрешены для вноса в зону обслуживания : папки, женские и мужские сумки размером не более 30х20х15 см;",
+      "Без разрешения администрации Библиотеки вносить в зону обслуживания собственные документы на различных видах носителей.",
+      "Самовольно выносить фондовые документы из зоны обслуживания без соответствующего разрешения сотрудника Библиотеки;",
+      "Подключать к компьютерам Библиотеки периферийные и другие устройства, устанавливать сетевое подключение, производить самостоятельно включение и выключение персональных компьютеров, осуществлять несанкционированное копир…",
+      "Устанавливать ограничения на выдачу, копирование и экспонирование книжных памятников и иных документов, имеющих особую ценность или плохую степень сохранности (в соответствии с Федеральным законом &laquo;О библиотечном …",
+      "запрещённые предметы и вещества;",
+      "При копировании материалов обязательно размещайте активную ссылку на omsklib.ru 2026 644099, г."
+     ]
+    },
+    {
+     "url": "https://omsklib.ru/usloviya-raboty-cookies",
+     "status": 200,
+     "error": "",
+     "title": "О персональной информации пользователей",
+     "snippets": [
+      "(cookie), которая позволяет сохранить определённую информацию на вашем устройстве, а также технические средства Сайта могут автоматически распознавать сетевые (IP) адреса и доменные имена каждого пользователя (посетител…",
+      "автоматически накапливаемые сведения о том, к каким интернет-страницам Сайта обращались пользователи;",
+      "Cookie позволяют выполнить автоматический вход на сайт: зарегистрированные пользователи будут идентифицированы автоматически.",
+      "При копировании материалов обязательно размещайте активную ссылку на omsklib.ru 2026 644099, г."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-061",
+   "domain": "elibrary.ngonb.ru",
+   "url": "https://elibrary.ngonb.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://elibrary.ngonb.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://elibrary.ngonb.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /bitrix/components/",
+     "Allow: /bitrix/cache/",
+     "Allow: /bitrix/js/",
+     "Allow: /bitrix/templates/",
+     "Allow: /bitrix/panel/",
+     "Disallow: */index.php",
+     "Disallow: /bitrix/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /*bitrix_include_areas=",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*PAGEN",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*print_course=",
+     "Disallow: /*?action=",
+     "Disallow: /*&action=",
+     "Disallow: /*register=",
+     "Disallow: /*forgot_password=",
+     "Disallow: /*change_password=",
+     "Disallow: /*login=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: /*?bxajaxid=",
+     "Disallow: /*&bxajaxid=",
+     "Disallow: /*?view_result=",
+     "Disallow: /*&view_result=",
+     "Disallow: /admin"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Электронные коллекции НГОНБ",
+    "description": "",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 9141,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://elibrary.ngonb.ru/search/index.php",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://ngonb.ru/docs/%D0%97%D0%9F%D0%94%D0%9D/%D0%9F%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0%20%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B8%20%D0%BF%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D1%85%20%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85%20%D0%93%D0%90%D0%A3%D0%9A%20%D0%9D%D0%A1%D0%9E%20%D0%9D%D0%93%D0%9E%D0%9D%D0%91.pdf",
+      "text": "Политике обработки данных",
+      "same_host": false,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; 2016-2026 НГОНБ Статистика и аналитика сайта НГОНБ использует отраслевой счётчик «Цифровая культура» / PRO",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-062",
+   "domain": "artistic-auction.ru",
+   "url": "https://artistic-auction.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artistic-auction.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 20,
+    "sitemaps": [
+     "https://artistic-auction.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /auth*",
+     "Disallow: /basket*",
+     "Disallow: /order*",
+     "Disallow: /personal/",
+     "Disallow: /search/",
+     "Disallow: /test/",
+     "Disallow: /ajax/",
+     "Disallow: /*show_include_exec_time=",
+     "Disallow: /*show_page_exec_time=",
+     "Disallow: /*show_sql_stat=",
+     "Disallow: /bitrix/admin/",
+     "Disallow: /*clear_cache=",
+     "Disallow: /*clear_cache_session=",
+     "Disallow: /*ADD_TO_COMPARE_LIST",
+     "Disallow: /*ORDER_BY",
+     "Disallow: /*print*",
+     "Disallow: /*action*",
+     "Disallow: /*register=",
+     "Disallow: /*password*",
+     "Disallow: /*login=",
+     "Disallow: /*type=",
+     "Disallow: /*sort=",
+     "Disallow: /*order=",
+     "Disallow: /*logout=",
+     "Disallow: /*auth=",
+     "Disallow: /*backurl=",
+     "Disallow: /*back_url=",
+     "Disallow: /*BACKURL=",
+     "Disallow: /*BACK_URL=",
+     "Disallow: /*back_url_admin=",
+     "Disallow: /*?utm_source=",
+     "Disallow: *?arrFilter*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом \"Художественный\" в Москве | Аукцион антиквариата, картин и предметов старины",
+    "description": "Аукцион произведений искусства и антиквариата. Бесплатная оценка картин, икон, предметов старины.",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 7078,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://artistic-auction.ru/search/",
+      "method": "get",
+      "field": "q"
+     },
+     {
+      "action": "https://artistic-auction.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://artistic-auction.ru/kp/pravila-provedeniya-auktsiona/",
+      "text": "Правила проведения аукциона",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://artistic-auction.ru/policy/",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://artistic-auction.ru/policypd/",
+      "text": "Политика обработки персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://artistic-auction.ru/cookies/",
+      "text": "Политике cookie",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "&copy; 2026 Все права защищены",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://artistic-auction.ru/kp/pravila-provedeniya-auktsiona/",
+     "status": 200,
+     "error": "",
+     "title": "Купить/продать - Аукционный дом \"Художественный\"",
+     "snippets": [
+      "Во время торгов запрещена фото- и видеосъемка без разрешения Устроителя аукциона.",
+      "Подтвердите, что вы не робот: * Поменять картинку Я согласен на обработку персональных данных Отправить * &mdash;",
+      "Публикация допускается только с письменного разрешения Аукционного дома «Художественный» Политика конфиденциальности Политика обработки персональных данных Версия для печати Найти 0 Ваша корзина пуста Исправить это прос…"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-063",
+   "domain": "aucti-on.art",
+   "url": "https://aucti-on.art/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://aucti-on.art/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": 4.5,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Allow: /",
+     "Disallow: /lk/",
+     "Disallow: /search/",
+     "Disallow: /tg/",
+     "Disallow: /auction-page/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "АукциON",
+    "description": "Аукционный дом ON: оценка и продажа предметов искусства современного искусства 20-21 веков. Музейный уровень, экспертный отбор. Торги онлайн, оффлайн и по телефону",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 6166,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://aucti-on.art/search/",
+      "method": "get",
+      "field": "q"
+     },
+     {
+      "action": "https://aucti-on.art/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://aucti-on.art/upload/doc/user_agreement.pdf",
+      "text": "Пользовательское соглашение",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://aucti-on.art/upload/doc/personal_data_policy.pdf",
+      "text": "Политики в отношении обработки и защиты персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://aucti-on.art/",
+      "text": "Политики в отношении обработки и защиты персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© 2026 aucti-on",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://aucti-on.art/upload/doc/user_agreement.pdf",
+     "status": 200,
+     "error": "",
+     "title": "",
+     "snippets": []
+    }
+   ]
+  },
+  {
+   "id": "new-064",
+   "domain": "ru.bidspirit.com",
+   "url": "https://ru.bidspirit.com/ui/home?lang=ru",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://ru.bidspirit.com/ui/home?lang=ru",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://bidspirit-portal-static.global.ssl.fastly.net/prod/sitemaps/ru.bidspirit.com/2026-10-26_01-49-58_updated_sitemap_index.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "llms.txt",
+    "ai_comment": "AI agents / crawlers: see https://tools-bots.bidspirit.com/llms.txt"
+   },
+   "page": {
+    "title": "Bidspirit – Аукционный Онлайн-Портал",
+    "description": "Ваши ворота в  мир аукционных домов  Израиль, предлагающих предметы искусства, антиквариата, нумизматики, букинистики, фалеристики и многое другое",
+    "lang": "",
+    "generator": "",
+    "text_chars": 222,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-065",
+   "domain": "adalex.ru",
+   "url": "https://adalex.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://adalex.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://adalex.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /print",
+     "Disallow: /password",
+     "Disallow: /registration",
+     "Disallow: /auction/translation",
+     "Disallow: */gurt/",
+     "Disallow: /realtime",
+     "Disallow: /profile",
+     "Disallow: /profile/*",
+     "Disallow: /ajax/*",
+     "Disallow: /api/*",
+     "Disallow: /online_auction/*",
+     "Disallow: /live_auction/*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукцион коллекционных предметов искусства | Аукционный Дом Александр",
+    "description": "Официальный сайт Аукционного Дома Александр в Москве: безопасная покупка и продажа коллекционных предметов искусства, скульптур, монет, банкнот, медалей, наград. Дважды в год проводим торги в особняке Спиридонова. Гарантия конфиденциальност",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 6093,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© 2005–2026, Аукционный Дом «Александр» Сайт использует файлы cookie и технологии аналитики",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-066",
+   "domain": "vladey.net",
+   "url": "https://vladey.net/ru/auctions/russia",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://vladey.net/ru/auctions/russia",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://vladey.net/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /ru/sale2022",
+     "Disallow: /en/sale2022",
+     "Disallow: /ru/contactform",
+     "Disallow: /en/contactform",
+     "Disallow: /ru/artmoscow2021",
+     "Disallow: /en/artmoscow2021",
+     "Disallow: /ru/neboley2021",
+     "Disallow: /en/neboley2021",
+     "Disallow: /ru/sunnyprice",
+     "Disallow: /en/sunnyprice",
+     "Disallow: /ru/test-page",
+     "Disallow: /en/test-page",
+     "Disallow: /ru/valerychtak",
+     "Disallow: /en/valerychtak",
+     "Disallow: /ru/podarok2019",
+     "Disallow: /en/podarok2019",
+     "Disallow: /ru/vstrechay2021",
+     "Disallow: /en/vstrechay2021",
+     "Disallow: /ru/hny2024",
+     "Disallow: /en/hny2024",
+     "Disallow: /ru/moscow",
+     "Disallow: /en/moscow",
+     "Disallow: /ru/8marta",
+     "Disallow: /en/8marta",
+     "Disallow: /ru/walls",
+     "Disallow: /en/walls",
+     "Disallow: /ru/vladeycatalogfair",
+     "Disallow: /en/vladeycatalogfair",
+     "Disallow: /ru/cosmoscow2026",
+     "Disallow: /en/cosmoscow2026",
+     "Disallow: /ru/artmoscowfair2026",
+     "Disallow: /en/artmoscowfair2026",
+     "Disallow: /ru/tprivate",
+     "Disallow: /en/tprivate"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "VLADEY RUSSIA",
+    "description": "Вечерние торги, 4 июля в 20:00",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 32896,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "https://vladey.net/ru/terms",
+      "text": "Правила аукциона",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://vladey.net/ru/privacy-policy",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://vladey.net/ru/contract-offer",
+      "text": "Договор-оферта",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://vladey.net/ru/privacy-policy",
+      "text": "Ознакомьтесь с нашей политикой использования cookies.",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://vladey.net/ru/terms",
+     "status": 200,
+     "error": "",
+     "title": "Правила проведения аукциона VLADEY",
+     "snippets": []
+    }
+   ]
+  },
+  {
+   "id": "new-067",
+   "domain": "sovcom.ru",
+   "url": "https://sovcom.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://sovcom.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://sovcom.ru/sitemap.xml",
+     "https://sovcom.ru/en/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /bitrix/",
+     "Disallow: /search/",
+     "Allow: /search/map.php",
+     "Disallow: /auth/",
+     "Disallow: /auth.php",
+     "Disallow: /*?print=",
+     "Disallow: /*&print=",
+     "Disallow: /*register=yes",
+     "Disallow: /*forgot_password=yes",
+     "Disallow: /*change_password=yes",
+     "Disallow: /*login=yes",
+     "Disallow: /*logout=yes",
+     "Disallow: /*auth=yes",
+     "Disallow: /*backurl=*",
+     "Disallow: /*BACKURL=*",
+     "Disallow: /*back_url=*",
+     "Disallow: /*BACK_URL=*",
+     "Disallow: /*back_url_admin=*",
+     "Disallow: /*index.php$"
+    ],
+    "ai_agents": {
+     "bytespider": "disallow_all"
+    },
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом СОВКОМ - Москва",
+    "description": "",
+    "lang": "",
+    "generator": "",
+    "text_chars": 2574,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://sovcom.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://sovcom.ru/auktsiony/pravila_provedeniya/",
+      "text": "Правила проведения аукциона",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://sovcom.ru/galereya/yuridicheskaya_informatsiya/",
+      "text": "Политика в отношении обработки персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [
+     "Все права защищены"
+    ],
+    "copyright_line": "&copy; 2000-2026 Все права защищены Политика в отношении обработки персональных данных Продолжая использование сайта, вы согла",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://sovcom.ru/auktsiony/pravila_provedeniya/",
+     "status": 200,
+     "error": "",
+     "title": "Правила проведения аукциона",
+     "snippets": [
+      "В зале, где проводятся торги, проведение любого рода рекламных акций, фото- и киносъёмка, аудио- и видеозапись проводятся только с предварительного разрешения Устроителя аукциона.",
+      "2000-2026 Все права защищены Политика в отношении обработки персональных данных Продолжая использование сайта, вы соглашаетесь с нашей Политикой конфиденциальности и условиями обработки персональных данных."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-068",
+   "domain": "www.antiqueauction.ru",
+   "url": "https://www.antiqueauction.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.antiqueauction.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://www.antiqueauction.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /admin",
+     "Disallow: /wp-admin",
+     "Disallow: *.smart-dev.ru",
+     "Disallow: *?print=",
+     "Disallow: *?print",
+     "Allow: *"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом №1 - антикварный аукцион онлайн",
+    "description": "Крупнейший антикварный аукционный дом в Москве проводит регулярные антикварные аукционы коллекционных предметов искусства. Календарь торгов.",
+    "lang": "ru-RU",
+    "generator": "WordPress 6.7.1",
+    "text_chars": 12981,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://www.antiqueauction.ru/#",
+      "method": "post",
+      "field": ""
+     },
+     {
+      "action": "https://www.antiqueauction.ru/#",
+      "method": "post",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://www.antiqueauction.ru/pravila",
+      "text": "Правила аукциона",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://www.antiqueauction.ru/pravila",
+      "text": "Читать правила аукционов",
+      "same_host": true,
+      "kind": "terms"
+     },
+     {
+      "href": "https://www.antiqueauction.ru/privacy",
+      "text": "Политика конфиденциальности",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://www.antiqueauction.ru/privacy/politika-v-otnoshenii-obrabotki-personalnyh-dannyh",
+      "text": "Политика в отношении персональных данных",
+      "same_host": true,
+      "kind": "other"
+     },
+     {
+      "href": "https://www.antiqueauction.ru/privacy/soglasie-na-obrabotku-personalnyh-dannyh-polzovatelej-fizicheskih-licz",
+      "text": "Согласие на обработку персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© 2017-2026",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://www.antiqueauction.ru/pravila",
+     "status": 200,
+     "error": "",
+     "title": "Правила аукциона - Аукционный дом №1",
+     "snippets": [
+      "Во время проведения торгов фото и видеосъемка без разрешения Устроителя аукциона запрещены 4.",
+      "Аукционный дом не занимается оформлением разрешений на вывоз предметов за пределы РФ и не может гарантировать получение таких документов, выдаваемых Министерством культуры РФ."
+     ]
+    },
+    {
+     "url": "https://www.antiqueauction.ru/pravila",
+     "status": 200,
+     "error": "",
+     "title": "Правила аукциона - Аукционный дом №1",
+     "snippets": [
+      "Во время проведения торгов фото и видеосъемка без разрешения Устроителя аукциона запрещены 4.",
+      "Аукционный дом не занимается оформлением разрешений на вывоз предметов за пределы РФ и не может гарантировать получение таких документов, выдаваемых Министерством культуры РФ."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-069",
+   "domain": "egorovs.art",
+   "url": "https://egorovs.art/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://egorovs.art/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Disallow: /admin/",
+     "Disallow: */request/*",
+     "Disallow: */bs-check-update/*",
+     "Disallow: /site/thumbs/*",
+     "Disallow: /auctionn*",
+     "Disallow: /shopp*",
+     "Disallow: /user*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом Егоровых, Москва - покупка и продажа живописи, графики, антикварных книг.",
+    "description": "Аукционный дом Егоровых. Главная. Покупка и продажа живописи, графики, антикварных книг, антиквариат, гравюры, плакаты, швейцарские часы, редкие автомобили.",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 1341,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© 2017-2026 ООО «Аукционный дом Егоровых» — аукционы антиквариата, продажа и покупка живописи, графики, старинных книг, а",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-070",
+   "domain": "northauction.ru",
+   "url": "https://northauction.ru/calendar",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://northauction.ru/calendar",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://northauction.ru/sitemap.xml",
+     "https://northauction.ru/sitemap-store.xml",
+     "https://northauction.ru/sitemap-feeds.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /page25964987.html",
+     "Disallow: /header",
+     "Disallow: /page25965100.html",
+     "Disallow: /footer",
+     "Disallow: /page27246798.html",
+     "Disallow: /fail",
+     "Disallow: /tilda/form*",
+     "Disallow: /tilda/rec*",
+     "Disallow: /tilda/click*",
+     "Disallow: /tilda/scroll*",
+     "Disallow: /tilda/popup*",
+     "Disallow: /tilda/cart*",
+     "Disallow: /tilda/product*",
+     "Disallow: /tilda/event*",
+     "Disallow: /members/login*",
+     "Disallow: /members/signup*",
+     "Disallow: "
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционы",
+    "description": "Будущие аукционы и архив наших торгов",
+    "lang": "",
+    "generator": "",
+    "text_chars": 5528,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-071",
+   "domain": "peterburg-auction.ru",
+   "url": "https://peterburg-auction.ru/galereya/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://peterburg-auction.ru/galereya/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://peterburg-auction.ru/sitemap.xml",
+     "https://peterburg-auckland.ru/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: */page/",
+     "Disallow: /cgi-bin",
+     "Disallow: /bitrix/",
+     "Disallow: *bitrix_*=",
+     "Disallow: /local/",
+     "Disallow: /*index.php$",
+     "Disallow: /auth/",
+     "Disallow: *auth=",
+     "Disallow: /personal/",
+     "Disallow: *register=",
+     "Disallow: *forgot_password=",
+     "Disallow: *change_password=",
+     "Disallow: *login=",
+     "Disallow: *logout=",
+     "Disallow: */search/",
+     "Disallow: *action=",
+     "Disallow: *print=",
+     "Disallow: *?edit=",
+     "Disallow: *?preview=",
+     "Disallow: *backurl=",
+     "Disallow: *back_url=",
+     "Disallow: *back_url_admin=",
+     "Disallow: *captcha",
+     "Disallow: */feed",
+     "Disallow: */rss",
+     "Disallow: *?FILTER*=",
+     "Disallow: *?ei=",
+     "Disallow: *?p=",
+     "Disallow: *?q=",
+     "Disallow: *?tags=",
+     "Disallow: *B_ORDER=",
+     "Disallow: *BRAND=",
+     "Disallow: *CLEAR_CACHE=",
+     "Disallow: *ELEMENT_ID=",
+     "Disallow: *price_from=",
+     "Disallow: *price_to=",
+     "Disallow: *PROPERTY_TYPE=",
+     "Disallow: *PROPERTY_WIDTH=",
+     "Disallow: *PROPERTY_HEIGHT=",
+     "Disallow: *PROPERTY_DIA=",
+     "Disallow: *PROPERTY_OPENING_COUNT=",
+     "Disallow: *PROPERTY_SELL_TYPE=",
+     "Disallow: *PROPERTY_MAIN_TYPE=",
+     "Disallow: *PROPERTY_PRICE[*]=",
+     "Disallow: *S_LAST=",
+     "Disallow: *SECTION_ID=",
+     "Disallow: *SECTION[*]=",
+     "Disallow: *SHOWALL=",
+     "Disallow: *SHOW_ALL=",
+     "Disallow: *SHOWBY=",
+     "Disallow: *SORT=",
+     "Disallow: *SPHRASE_ID=",
+     "Disallow: *TYPE=",
+     "Disallow: *utm*=",
+     "Disallow: *openstat=",
+     "Disallow: *from=",
+     "Disallow: /cabinet/",
+     "Disallow: /cart/",
+     "Disallow: */*?region=*",
+     "Disallow: */?IBLOCK_ID=*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Галерея картин, антиквариата и предметов искусства — Петербургский аукционный дом - Петербургский аукционный дом",
+    "description": "Картина Ефима Волкова «Туман», этюд 1877 года. Познакомьтесь с произведением русского пейзажиста, изучите описание картины и узнайте о возможности приобретения на аукционе.",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 14337,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://peterburg-auction.ru/search/",
+      "method": "get",
+      "field": "q"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-072",
+   "domain": "www.kabinet-auktion.com",
+   "url": "https://www.kabinet-auktion.com/auctionresults/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.kabinet-auktion.com/auctionresults/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "404",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Антикварные галереи - Кабинет. Аукционный дом.",
+    "description": "",
+    "lang": "",
+    "generator": "",
+    "text_chars": 29234,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "https://www.kabinet-auktion.com/auction/pravila-priema/",
+      "text": "Правила приема предметов",
+      "same_host": true,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; 2006 &mdash; 2026 &laquo;Кабинетъ&raquo;",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://www.kabinet-auktion.com/auction/pravila-priema/",
+     "status": 200,
+     "error": "",
+     "title": "Антикварные галереи - Кабинет. Аукционный дом.",
+     "snippets": []
+    }
+   ]
+  },
+  {
+   "id": "new-073",
+   "domain": "anticvarium.ru",
+   "url": "https://anticvarium.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://anticvarium.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://anticvarium.ru/sitemap"
+    ],
+    "rules_for_us": [
+     "Allow: /",
+     "Disallow: /auth/login",
+     "Disallow: /auth/register",
+     "Disallow: /password/email",
+     "Disallow: /news/show/357",
+     "Disallow: /news/show/367",
+     "Disallow: /news/show/366",
+     "Disallow: /news/show/356",
+     "Disallow: /news/show/369",
+     "Disallow: /favorite",
+     "Disallow: /favorite_product",
+     "Disallow: /sendMessage",
+     "Disallow: /аукцион-№16/item/моцарт-л-основате%D"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом Антиквариум – покупка и продажа коллекционных предметов: редкие книги, фарфор, серебро, бронза, часы, картины, иконы, гравюры, карты.",
+    "description": "Антиквариум - один из ведущих аукционных домов в Москве. Антикварный аукцион старинных и редких книг. Продажа антикварных книг на аукционе антиквариата в Москве. ",
+    "lang": "ru",
+    "generator": "",
+    "text_chars": 4084,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://anticvarium.ru/search",
+      "method": "get",
+      "field": "text"
+     }
+    ],
+    "terms_candidates": [
+     {
+      "href": "https://anticvarium.ru/policy",
+      "text": "Политика обработки персональных данных",
+      "same_host": true,
+      "kind": "other"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "© Политика обработки персональных данных Согласие на обработку персональных данных Наверх Следите за новостями",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-074",
+   "domain": "artsale.info",
+   "url": "https://artsale.info/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://artsale.info/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [
+     "Allow: /core/*.css$",
+     "Allow: /core/*.css?",
+     "Allow: /core/*.js$",
+     "Allow: /core/*.js?",
+     "Allow: /core/*.gif",
+     "Allow: /core/*.jpg",
+     "Allow: /core/*.jpeg",
+     "Allow: /core/*.png",
+     "Allow: /core/*.svg",
+     "Allow: /profiles/*.css$",
+     "Allow: /profiles/*.css?",
+     "Allow: /profiles/*.js$",
+     "Allow: /profiles/*.js?",
+     "Allow: /profiles/*.gif",
+     "Allow: /profiles/*.jpg",
+     "Allow: /profiles/*.jpeg",
+     "Allow: /profiles/*.png",
+     "Allow: /profiles/*.svg",
+     "Disallow: /core/",
+     "Disallow: /profiles/",
+     "Disallow: /README.txt",
+     "Disallow: /web.config",
+     "Disallow: /admin/",
+     "Disallow: /comment/reply/",
+     "Disallow: /filter/tips",
+     "Disallow: /node/add/",
+     "Disallow: /search/",
+     "Disallow: /user/register/",
+     "Disallow: /user/password/",
+     "Disallow: /user/login/",
+     "Disallow: /user/logout/",
+     "Disallow: /index.php/admin/",
+     "Disallow: /index.php/comment/reply/",
+     "Disallow: /index.php/filter/tips",
+     "Disallow: /index.php/node/add/",
+     "Disallow: /index.php/search/",
+     "Disallow: /index.php/user/password/",
+     "Disallow: /index.php/user/register/",
+     "Disallow: /index.php/user/login/",
+     "Disallow: /index.php/user/logout/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "ArtSale.info: аукцион, продажа картин онлайн",
+    "description": "Аукцион Константина Бабулина. Продажа картин и графики в Москве. Еженедельные онлайн-торги со среды по вторник. Комиссионный сбор с покупателей 15%. Проверка подлинности, экспертиза, оценка картин. Консультации по арт-инвестициям",
+    "lang": "ru",
+    "generator": "Drupal 8 (https://www.drupal.org)",
+    "text_chars": 9888,
+    "js_heavy": false,
+    "feeds": [
+     "https://artsale.info/ru/rss.xml"
+    ],
+    "search_forms": [
+     {
+      "action": "https://artsale.info/ru/search/node",
+      "method": "get",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "© 2019–2026 ArtSale",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-075",
+   "domain": "auction-rusenamel.ru",
+   "url": "https://auction-rusenamel.ru/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://auction-rusenamel.ru/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "http://auction-rusenamel.ru/sitemap.1555729.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /gallery?folder_id=",
+     "Disallow: /*sort*",
+     "Disallow: /*bid-form?*",
+     "Disallow: /*buy-form?*",
+     "Disallow: /*info-form?*",
+     "Disallow: /*user*",
+     "Disallow: /*search*",
+     "Disallow: /about?",
+     "Allow: /gallery?p=1",
+     "Disallow: /items-list?*",
+     "Disallow: */gallery?mode",
+     "Disallow: */auctions?view",
+     "Disallow: *.pdf",
+     "Disallow: *.xls",
+     "Allow: */auctions?id",
+     "Disallow: */?_openstat",
+     "Disallow: *?mode",
+     "Disallow: */items?id=50200",
+     "Allow: /items$",
+     "Disallow: */cmsmagazine"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Аукционный дом «Русская эмаль» в Москве | Интернет магазин по продаже антиквариата",
+    "description": "Официальный сайт аукционного дома. Покупка и продажа антиквариата. Оценка антиквариата по фото онлайн. Живопись, иконы, монеты, фарфор, серебро и другие антикварные предметы. Звоните  8 (495) 788-86-16",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 11061,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [
+     {
+      "href": "https://auction-rusenamel.ru/pravila",
+      "text": "Правила",
+      "same_host": true,
+      "kind": "terms"
+     }
+    ],
+    "license_hints": [],
+    "copyright_line": "&copy; 2011 - 2026 Русская эмаль Данный интернет-сайт носит исключительно информационный характер, и ни при каких условиях не ",
+    "ai_directed_text": []
+   },
+   "terms": [
+    {
+     "url": "https://auction-rusenamel.ru/pravila",
+     "status": 200,
+     "error": "",
+     "title": "Правила",
+     "snippets": [
+      "Публикация допускается только с письменного разрешения \"Русская Эмаль\"."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "new-076",
+   "domain": "www.millon.com",
+   "url": "https://www.millon.com/en/our-specialities/russian-art",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.millon.com/en/our-specialities/russian-art",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://www.millon.com/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Allow: /core/*.css$",
+     "Allow: /core/*.css?",
+     "Allow: /core/*.js$",
+     "Allow: /core/*.js?",
+     "Allow: /core/*.gif",
+     "Allow: /core/*.jpg",
+     "Allow: /core/*.jpeg",
+     "Allow: /core/*.png",
+     "Allow: /core/*.svg",
+     "Allow: /profiles/*.css$",
+     "Allow: /profiles/*.css?",
+     "Allow: /profiles/*.js$",
+     "Allow: /profiles/*.js?",
+     "Allow: /profiles/*.gif",
+     "Allow: /profiles/*.jpg",
+     "Allow: /profiles/*.jpeg",
+     "Allow: /profiles/*.png",
+     "Allow: /profiles/*.svg",
+     "Disallow: /core/",
+     "Disallow: /themes/",
+     "Disallow: /libraries/",
+     "Disallow: /modules/",
+     "Allow: /modules/contrib/cookies/js/cookiesjsr.conf.js",
+     "Allow: /themes/custom/millon_theme/logo.svg",
+     "Allow: /themes/custom/millon_theme/integration/dist/images/svg/expertise.svg",
+     "Allow: /themes/custom/millon_theme/*",
+     "Disallow: /README.txt",
+     "Disallow: /web.config",
+     "Disallow: /admin/",
+     "Disallow: /comment/reply/",
+     "Disallow: /filter/tips",
+     "Disallow: /node/add/",
+     "Disallow: /search/",
+     "Disallow: /user/register",
+     "Disallow: /user/password",
+     "Disallow: /user/login",
+     "Disallow: /user/logout",
+     "Disallow: /media/oembed",
+     "Disallow: /*/media/oembed",
+     "Disallow: /index.php/admin/",
+     "Disallow: /index.php/comment/reply/",
+     "Disallow: /index.php/filter/tips",
+     "Disallow: /index.php/node/add/",
+     "Disallow: /index.php/search/",
+     "Disallow: /index.php/user/password",
+     "Disallow: /index.php/user/register",
+     "Disallow: /index.php/user/login",
+     "Disallow: /index.php/user/logout",
+     "Disallow: /index.php/media/oembed",
+     "Disallow: /index.php/*/media/oembed",
+     "Disallow: /auction/*/items/sale-request/dialog/open",
+     "Disallow: /user/dialog/log-in/open*",
+     "Disallow: /acheter/recherche/*?",
+     "Disallow: /en/buy/search/*?",
+     "Disallow: /*?f[",
+     "Disallow: /*&f[",
+     "Disallow: /*?f%5B",
+     "Disallow: /*&f%5B",
+     "Disallow: /*?page_ak=",
+     "Disallow: /*&page_ak="
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Auctions RUSSIAN ART | Millon",
+    "description": "Putting Russian Art in the spotlight, MILLON auction house has set up a specialised department as of 2018, offering 4 sales a year.The department specialises in the auction of old and contemporary Russian works of art. Russia's wide-ranging",
+    "lang": "en",
+    "generator": "Fidesio",
+    "text_chars": 10565,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://www.millon.com/en/search/auction-items",
+      "method": "get",
+      "field": "s"
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [
+     "All rights reserved"
+    ],
+    "copyright_line": "© MILLON & Associés - All rights reserved - Approval n°2002-379 CGU Confidentialité Mentions légales Préférences de cooki",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-077",
+   "domain": "doyle.com",
+   "url": "https://doyle.com/departments/russian-works-art/",
+   "checked_at": "2026-10-26",
+   "http_status": 202,
+   "final_url": "https://doyle.com/departments/russian-works-art/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "202",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [],
+    "rules_for_us": [],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": null,
+   "terms": []
+  },
+  {
+   "id": "new-078",
+   "domain": "hermitagefineart.com",
+   "url": "https://hermitagefineart.com/en/auctions-results/",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://hermitagefineart.com/en/auctions-results/",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://hermitagefineart.com/sitemap.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /api/",
+     "Disallow: /*/search/"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Results of auctions",
+    "description": "Auctions and Private sales in Monaco, Monte Carlo",
+    "lang": "en",
+    "generator": "",
+    "text_chars": 14608,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-079",
+   "domain": "www.lempertz.com",
+   "url": "https://www.lempertz.com/en/auctions/sale-results.html",
+   "checked_at": "2026-10-26",
+   "http_status": 200,
+   "final_url": "https://www.lempertz.com/en/auctions/sale-results.html",
+   "content_type": "text/html",
+   "error": "",
+   "robots": {
+    "status": "200",
+    "allows_page": true,
+    "crawl_delay": null,
+    "sitemaps": [
+     "https://www.lempertz.com/sitemapindex.xml"
+    ],
+    "rules_for_us": [
+     "Disallow: /typo3/",
+     "Disallow: /typo3_src/",
+     "Allow: /typo3/sysext/frontend/Resources/Public/*"
+    ],
+    "ai_agents": {},
+    "llms_txt_hint": "",
+    "ai_comment": ""
+   },
+   "page": {
+    "title": "Sale Results",
+    "description": "Sale Results ➤ Browse and view results of past Lempertz auctions and sales.",
+    "lang": "en-US",
+    "generator": "TYPO3 CMS",
+    "text_chars": 13507,
+    "js_heavy": false,
+    "feeds": [],
+    "search_forms": [
+     {
+      "action": "https://www.lempertz.com/en/search.html",
+      "method": "get",
+      "field": ""
+     }
+    ],
+    "terms_candidates": [],
+    "license_hints": [],
+    "copyright_line": "",
+    "ai_directed_text": []
+   },
+   "terms": []
+  },
+  {
+   "id": "new-080",
+   "domain": "bruun-rasmussen.dk",
+   "url": "https://bruun-rasmussen.dk/m/news/Newsletter2208-Russia-Weapons-and-Artwork-from-Tsarist-Russia",
+   "error": "robots.txt: UND_ERR_CONNECT_TIMEOUT",
+   "robots": {
+    "status": "UND_ERR_CONNECT_TIMEOUT"
+   }
+  },
+  {
+   "id": "new-081",
+   "domain": "www.gazette-drouot.com",
+   "url": "https://www.gazette-drouot.com/en/auctions/177422--russian-art",
+   "error": "robots.txt: 403",
+   "robots": {
+    "status": "403"
+   }
+  }
+ ]
+}
