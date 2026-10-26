@@ -219,7 +219,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const rows = parseTsv(readFileSync(REGISTRY, 'utf8')).filter((r) => r.url);
   let pick = rows;
-  if (args.mode === 'unreachable') pick = rows.filter((r) => /недоступно из облачной среды/.test(r.notes));
+  if (args.mode === 'unreachable') pick = rows.filter((r) => /недоступно из облачной среды|\[повтор на VPS\]/.test(r.notes));
   if (args.mode === 'ids') pick = rows.filter((r) => args.ids.has(r.id));
   if (!pick.length) { console.error('нет строк для проверки'); process.exit(1); }
 

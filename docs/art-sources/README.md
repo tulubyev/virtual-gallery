@@ -86,3 +86,12 @@ node scripts/check-art-sources.mjs --all           # весь реестр
 ```
 
 Для каждого домена читает `robots.txt`, открывает только страницу из колонки `url` и только если `robots.txt` её не запрещает; пауза ≥ 3 с (или `Crawl-delay`), не больше трёх доменов одновременно, на 403/429/5xx домен останавливается; капчи и защиту не обходит. `sources.tsv` не меняет: результат пишет в `art-sources-check-<дата>.tsv` (статус, итоговый адрес, редирект, заголовок, признак защиты, `verdict`: `ok`, `protected`, `empty`, `robots_disallow`, `blocked_*`, `error_*`, `unreachable`, `stopped`). Полученный файл можно прислать в сессию, строки реестра обновятся по нему.
+
+**Сертификаты Минцифры.** Многие российские сайты (в первом прогоне: `hermitagemuseum.org`, `my.krskstate.ru`, `sakhartmuseum.ru`) используют сертификаты российского удостоверяющего центра, которого нет в хранилище Node: скрипт пишет `UNABLE_TO_VERIFY_LEAF_SIGNATURE` или `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`. Проверку отключать нельзя. Скачайте корневой и выпускающий сертификаты со страницы https://www.gosuslugi.ru/crt (формат PEM), положите в один файл и запустите так:
+
+```bash
+NODE_EXTRA_CA_CERTS=/путь/russian-ca.pem node scripts/check-art-sources.mjs --unreachable
+```
+
+Строки с пометкой `[повтор на VPS]` в `notes` (ошибки сертификата, таймауты, сброс соединения) подбираются режимом `--unreachable` повторно.
+
