@@ -1,0 +1,42 @@
+{
+  "id": "auc-009",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.bukowskis.com/",
+  "robots_summary": "robots.txt (открыт): User-agent * закрыты только /admin/, /cms/ и PDF (/*/pdf$); указан sitemap (sitemaps/sitemap.xml.gz). Crawl-delay нет.",
+  "terms_summary": "Страница «Terms and price list» (/en/legal) открывается, но в доступном тексте положений о роботах и сборе данных не обнаружено (основной текст условий, вероятно, подгружается отдельно); общих условий использования сайта не найдено. Нужна ручная проверка.",
+  "terms_url": "https://www.bukowskis.com/en/legal",
+  "license": "не найдена",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en/lots?q=<запрос>",
+      "/<язык>/auctions/<id>/lots/<id>-<slug>",
+      "/en/results_fineart",
+      "/<язык>/news/<slug>"
+    ],
+    "rendering": "static_html",
+    "pagination": "список лотов с параметрами запроса (не изучалась глубоко)",
+    "fields": [
+      "название лота",
+      "аукцион",
+      "категория",
+      "результат торгов (по разделу results_fineart)"
+    ]
+  },
+  "freshness": "Сайт живой, на главной актуальные аукционы (copyright 1870–2026).",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Робот не запрещён в robots.txt, но условия не проверены полностью и это коммерческие данные торгов; брать только ссылку на каталог, афишу — после согласования.",
+  "annotation_ru": "Bukowskis — шведский аукционный дом (в подвале сайта есть ссылка «Bonhams — All auctions»). Для сибирской живописи пользы мало, по русскому искусству возможны отдельные лоты по поиску ?q=russian. Использовать только как ссылку; цены и оценки нельзя выдавать как стоимость.",
+  "risks": [
+    "Условия использования не прочитаны полностью",
+    "Цены торгов не оценка стоимости"
+  ],
+  "suspicious_pages": []
+}

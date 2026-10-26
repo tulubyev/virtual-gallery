@@ -1,0 +1,39 @@
+{
+  "id": "odt-019",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://github.com/NationalGalleryOfArt/opendata",
+  "robots_summary": "github.com/robots.txt: 403 от прокси окружения (не прочитан). README открыт через raw.githubusercontent.com.",
+  "terms_summary": "README: музей отказывается от прав на набор данных (CC0), скачивание без разрешения; изображения не входят; данные «как есть», возможны неточности; просьба ссылаться на источник и не использовать логотип музея.",
+  "terms_url": "https://raw.githubusercontent.com/NationalGalleryOfArt/opendata/main/README.md",
+  "license": "CC0 (подтверждено текстом README)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "CSV-файлы в репозитории (произведения, художники) и словарь данных в каталоге documentation"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "произведения",
+      "художники",
+      "идентификаторы Wikidata (Q-коды)",
+      "ссылки на изображения (файлов нет)"
+    ]
+  },
+  "freshness": "По README данные обновляются примерно раз в сутки; заявление последний раз обновлено в апреле 2021.",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Коллекция американского музея: для русской/сибирской живописи не нужна. Полезна лишь как образец публикации Wikidata ID.",
+  "annotation_ru": "Открытый CSV-набор Национальной галереи искусств США (130 тысяч произведений, CC0). Для нашей темы данных нет; пригоден лишь как пример связывания музейных записей с Wikidata.",
+  "risks": [
+    "github.com из облака даёт 403; прочитан только README",
+    "Данные могут быть неточными (по заявлению музея)"
+  ],
+  "suspicious_pages": []
+}

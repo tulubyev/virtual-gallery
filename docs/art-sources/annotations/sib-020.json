@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-26",
+  "suspicious_pages": [],
+  "id": "sib-020",
+  "available": true,
+  "final_url": "https://primgallery.com/",
+  "robots_summary": "robots.txt: «User-Agent: * / Disallow: /» — запрещён весь обход; указаны sitemap.xml, sitemap-store.xml, sitemap-feeds.xml (по http). Страницы сайта по правилам не открывались.",
+  "terms_summary": "Не читал: robots.txt запрещает обход. Принадлежность адреса подтверждена поиском: на primgallery.com ссылаются Культура.РФ, Artefact и Telegram-канал галереи; в карточке 2ГИС указан другой сайт (primgallerypart.ru), его не проверял.",
+  "terms_url": null,
+  "license": "не найдено",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": []
+  },
+  "freshness": "Не проверена (страницы не открывались).",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "robots.txt запрещает обход всего сайта. Сбор не допускается; для данных о коллекции Приморской картинной галереи есть карточка на Artefact (ar.culture.ru) и Культура.РФ. Нужно согласование с галереей, если понадобятся данные с её сайта.",
+  "annotation_ru": "Предположительно официальный сайт Приморской государственной картинной галереи (Владивосток), коллекция русского искусства XVI – начала XX века и искусства Дальнего Востока. Сайт закрыт для роботов целиком, поэтому проверена только принадлежность адреса. Использовать как ссылку, данные искать на Artefact и в Госкаталоге.",
+  "risks": [
+    "robots.txt: Disallow для всех роботов",
+    "Содержимое сайта не проверялось",
+    "В 2ГИС указан другой адрес (primgallerypart.ru)"
+  ]
+}

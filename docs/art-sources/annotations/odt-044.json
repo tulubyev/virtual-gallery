@@ -1,0 +1,38 @@
+{
+  "id": "odt-044",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://en.wikipedia.org/wiki/GOST_7.79-2000",
+  "robots_summary": "Как у всей en.wikipedia.org: /wiki/… разрешены, закрыты /w/, /api/ и Special: (кроме отдельных исключений).",
+  "terms_summary": "Правила: текст под CC BY-SA 4.0 (и GFDL), требуется указание авторства (ссылка на страницу) и ShareAlike для производных; у файлов своя лицензия.",
+  "terms_url": "https://en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content",
+  "license": "CC BY-SA 4.0 (текст статьи).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/wiki/GOST_7.79-2000"
+    ],
+    "rendering": "static_html",
+    "pagination": "одна страница",
+    "fields": [
+      "описание стандарта",
+      "две системы транслитерации (A и B)",
+      "принятия в разных странах"
+    ]
+  },
+  "freshness": "Статья вступила в силу 2002-07-01; сам стандарт старый, актуальность не менялась.",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Статья о стандарте транслитерации кириллицы (ГОСТ 7.79-2000, системы A и B) — справка для единого написания имён художников латиницей. Хранить ссылку, правила брать из самого стандарта.",
+  "annotation_ru": "Статья Википедии о ГОСТ 7.79-2000 — правилах транслитерации кириллицы латиницей (системы A и B). Нужна как справка при нормализации написания имён художников в карточках. Это краткий обзор, а не сам стандарт.",
+  "risks": [
+    "Не заменяет текст стандарта",
+    "Лицензия CC BY-SA"
+  ],
+  "suspicious_pages": []
+}

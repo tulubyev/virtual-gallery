@@ -1,0 +1,37 @@
+{
+  "id": "odt-049",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://linked.art/",
+  "robots_summary": "robots.txt отсутствует (запрос /robots.txt отдаёт страницу HTML с кодом 404); sitemap.xml есть: 218 адресов, lastmod 2026-09-01.",
+  "terms_summary": "Документация опубликована Editorial Board под лицензией CC BY 4.0.",
+  "terms_url": "https://linked.art/model/",
+  "license": "CC BY 4.0",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/model/…",
+      "/api/…",
+      "/cookbook/…"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "описание классов и паттернов JSON-LD (CIDOC CRM)"
+    ]
+  },
+  "freshness": "Версия 1.0 модели и API выпущена 19 февраля 2025; в предыдущей записи указывалась версия около 0.9 — это устарело.",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Стандарт описания музейных объектов; нужен только если понадобится экспорт данных галереи в JSON-LD.",
+  "annotation_ru": "Linked Art — открытая модель описания музейных объектов и API на основе CIDOC CRM, версия 1.0 вышла в феврале 2025 года. Для карточек сейчас не нужна; ориентир для будущего экспорта данных.",
+  "risks": [
+    "robots.txt не существует (политика краулинга не заявлена)"
+  ],
+  "suspicious_pages": []
+}

@@ -1,0 +1,46 @@
+{
+  "id": "odt-025",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://openalex.org/",
+  "robots_summary": "robots.txt (26.10.2026): закрыты списки с параметрами (/works?, /authors? и др.), /admin, /settings, /oauth; записи открыты, ИИ-ассистенты по запросу человека допускаются; sitemap.xml. В комментарии: данные OpenAlex свободны и под CC0, использовать API или снимок.",
+  "terms_summary": "Первоисточник условий (developers.openalex.org, help.openalex.org, api.openalex.org) недоступен из среды (403 прокси); про ключ и бюджет — только из прежнего поиска, не подтверждено.",
+  "terms_url": "https://openalex.org/robots.txt",
+  "license": "CC0 (по комментарию в первоисточнике robots.txt)",
+  "api": {
+    "exists": true,
+    "url": "https://api.openalex.org/",
+    "key_required": null,
+    "limits": "не проверено (хост недоступен из среды)"
+  },
+  "structure": {
+    "url_patterns": [
+      "/works/<id>",
+      "/authors/<id>",
+      "api.openalex.org/works?search=…"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "курсорная постраничность (по знанию, не проверено)",
+    "fields": [
+      "работа",
+      "автор",
+      "организация",
+      "цитирование"
+    ]
+  },
+  "freshness": "Сайт действует; сведения о ценах и ключе API расходятся между источниками.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Каталог науки: поможет находить статьи по искусствоведению, но покрытие русскоязычных журналов не проверено, API из облака недоступен.",
+  "annotation_ru": "Открытый каталог научных работ с API и снимком под CC0. Может пригодиться для библиографических справок; условия ключа и лимиты не подтверждены, так как документация из облака недоступна.",
+  "risks": [
+    "Требования к ключу API не подтверждены",
+    "Покрытие русскоязычных искусствоведческих журналов неизвестно"
+  ],
+  "suspicious_pages": [
+    {
+      "url": "https://openalex.org/",
+      "reason": "noscript-текст рекомендует агенту использовать API и llms.txt; по существу безобидно, указание не выполнялось"
+    }
+  ]
+}

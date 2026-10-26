@@ -1,0 +1,43 @@
+{
+  "id": "rus-048",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://fondpotanin.ru/activity/museum-without-borders/",
+  "robots_summary": "robots.txt (открыт): User-agent * — закрыты служебные страницы Bitrix, параметры (PAGEN, print, auth и т.п.), /edition/, /upload/documents/noindex/; указаны sitemap.xml и /en/sitemap.xml.",
+  "terms_summary": "Условий использования материалов не найдено; на странице есть только политика конфиденциальности (PDF). Права на тексты и изображения не уточнены.",
+  "terms_url": "https://fondpotanin.ru/about/documents/",
+  "license": "не найдена",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/activity/museum-without-borders/",
+      "/press/news/<slug>/",
+      "/press/events/<slug>/",
+      "/activity/museum-without-borders/history/<slug>/",
+      "/sitemap.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "списки новостей и событий («Все новости»); постраничность не изучена",
+    "fields": [
+      "новости",
+      "события",
+      "конкурсы программы",
+      "документы (PDF)"
+    ]
+  },
+  "freshness": "Свежая: новость от 21.10.2026 (конкурсы «Музей без границ» 2026/27 стартовали); sitemap обновлён 2026-10-23.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Страница программы грантов для музеев, а не каталог произведений; новости могут быть интересны для афиши, но условия использования не найдены.",
+  "annotation_ru": "Страница программы «Музей без границ» Фонда Потанина: конкурсы, новости, события и документы. Это источник новостей о музейной грантовой поддержке, по живописи данных нет; использовать как ссылку.",
+  "risks": [
+    "Лицензия на тексты не указана",
+    "Страница не о живописи"
+  ],
+  "suspicious_pages": []
+}

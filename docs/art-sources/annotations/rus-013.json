@@ -1,0 +1,32 @@
+{
+  "id": "rus-013",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://app.rusmuseum.ru/editions/catalog/catalogi/",
+  "robots_summary": "Не прочитан: https://app.rusmuseum.ru/robots.txt отвечает 403 (заглушка DDoS-Guard: «владелец ограничил доступ с вашего IP»). Остановился на домене, обход не пробовал.",
+  "terms_summary": "Не проверено из-за 403.",
+  "terms_url": "",
+  "license": "",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": "",
+    "pagination": "",
+    "fields": []
+  },
+  "freshness": "Не проверено. На главной rusmuseum.ru есть раздел /editions/ (издания) и /available-museum-editions/ — возможная замена (не открывал).",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Источник недоступен с адреса облачной среды; проверить вручную. Разделы изданий есть и на основном домене rusmuseum.ru.",
+  "annotation_ru": "Поддомен каталога изданий Русского музея (каталоги, альбомы). Из облака закрыт защитой DDoS-Guard, содержимое не проверено; пока использовать только как ссылку и сверить вручную с rusmuseum.ru/editions/.",
+  "risks": [
+    "403 DDoS-Guard с адреса облака",
+    "Содержимое и права не проверены"
+  ],
+  "suspicious_pages": []
+}

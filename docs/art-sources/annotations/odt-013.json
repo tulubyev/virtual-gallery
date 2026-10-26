@@ -1,0 +1,38 @@
+{
+  "id": "odt-013",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://github.com/metmuseum/openaccess",
+  "robots_summary": "robots.txt github.com получить не удалось: прокси сессии отвечает 403 на github.com (не ответ GitHub). README открыт через raw.githubusercontent.com.",
+  "terms_summary": "README: наборы данных The Met (более 470 000 произведений) переданы под Creative Commons Zero, без ограничений для коммерческого и некоммерческого использования; изображения в набор не входят и определяются по значку CC0 на сайте музея; данные «как есть», pull request не принимаются.",
+  "terms_url": "https://github.com/metmuseum/openaccess",
+  "license": "CC0 (метаданные)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "https://github.com/metmuseum/openaccess/blob/master/MetObjects.csv",
+      "LICENSE"
+    ],
+    "rendering": "static_html",
+    "pagination": "один большой CSV (UTF-8)",
+    "fields": [
+      "метаданные объектов (CSV)",
+      "идентификаторы авторов"
+    ]
+  },
+  "freshness": "Данные обновляются музеем регулярно (по README); дату последнего коммита не проверял.",
+  "relevance": "none",
+  "ingest_mode": "facts",
+  "ingest_reason": "Метаданные по CC0 без условий; музей американский, русской живописи мало; пригодно как справочник структуры и эталон открытых данных.",
+  "annotation_ru": "Открытый набор метаданных Метрополитен-музея (CSV, CC0). К сибирской живописи отношения почти нет; полезен как образец формата и для общих справочных фактов. Изображения в набор не входят, права на них проверять отдельно.",
+  "risks": [
+    "Изображения не входят и имеют свои права",
+    "Данные неполные («как есть»)"
+  ],
+  "suspicious_pages": []
+}

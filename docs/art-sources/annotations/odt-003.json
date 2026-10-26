@@ -1,0 +1,38 @@
+{
+  "id": "odt-003",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://commons.wikimedia.org/wiki/Commons:Copyright_rules_by_territory/Russia",
+  "robots_summary": "robots.txt открыт 2026-10-26 (общий для проектов Wikimedia): для * закрыты /w/ (кроме w/load.php, mobileview и sitemap), /api/ (кроме документации), /wiki/Special: и служебные страницы; Crawl-delay 5 задан отдельным ботам (SemrushBot), для * не задан; Sitemap: /w/rest.php/site/v1/sitemap/0. Страница /wiki/Commons:… под Disallow не попадает.",
+  "terms_summary": "Страница-справка Commons о сроках охраны в РФ: общий срок — жизнь автора + 70 лет; Бернская конвенция с 13.03.1995; дата восстановления в США (URAA) 1 января 1996; произведение должно быть в общественном достоянии и в РФ, и в США, чтобы попасть на Commons. Текст страницы — CC BY-SA.",
+  "terms_url": "https://commons.wikimedia.org/wiki/Commons:Copyright_rules_by_territory/Russia",
+  "license": "CC BY-SA (текст справки); сама страница не даёт юридической консультации.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/wiki/Commons:Copyright_rules_by_territory/{страна}"
+    ],
+    "rendering": "static_html",
+    "pagination": "одна страница",
+    "fields": [
+      "сроки охраны",
+      "шаблоны PD-Russia",
+      "особые случаи"
+    ]
+  },
+  "freshness": "Живая вики-страница; в тексте ссылки до 2024–2025.",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Это справка для юриста и кураторов о сроках охраны изображений, а не данные об искусстве. Ссылаться, не индексировать (CC BY-SA, ShareAlike) и не считать юридическим заключением.",
+  "annotation_ru": "Справочная страница Commons о правилах авторского права в России: сроки охраны, особенности, шаблоны общественного достояния. Нужна, чтобы проверять, можно ли показывать репродукции в галерее. Это не юридическая консультация, итог должен подтвердить юрист.",
+  "risks": [
+    "Вики-страница может устареть или быть неточной",
+    "CC BY-SA с ShareAlike при цитировании больших кусков"
+  ],
+  "suspicious_pages": []
+}

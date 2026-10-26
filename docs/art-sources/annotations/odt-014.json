@@ -1,0 +1,43 @@
+{
+  "id": "odt-014",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://data.rijksmuseum.nl/",
+  "robots_summary": "robots.txt отсутствует (404).",
+  "terms_summary": "Политика данных (/policy): сведения и данные могут свободно использоваться, в том числе в коммерческих целях, без запроса; для большинства — Public Domain или CC0, в отдельных случаях CC BY 4.0 (нужно указать Rijksmuseum), встречаются объекты с ограничениями (авторское право); просят указывать источник.",
+  "terms_url": "https://data.rijksmuseum.nl/policy/",
+  "license": "Public Domain / CC0, местами CC BY 4.0; отдельные объекты под авторским правом",
+  "api": {
+    "exists": true,
+    "url": "https://data.rijksmuseum.nl/search/collection",
+    "key_required": false,
+    "limits": "Ключ не нужен; поиск возвращает до 100 записей на странице (Linked Art); лимитов в проверенных разделах не найдено"
+  },
+  "structure": {
+    "url_patterns": [
+      "/search/collection?type=<тип>&…",
+      "/docs/data-dumps",
+      "/docs/oai-pmh",
+      "/docs/ldes",
+      "/docs/iiif",
+      "/docs/sru"
+    ],
+    "rendering": "static_html",
+    "pagination": "через API (страницы с next)",
+    "fields": [
+      "метаданные объектов (Linked Art)",
+      "словари авторов, мест, понятий",
+      "изображения (IIIF)"
+    ]
+  },
+  "freshness": "Документация актуальная, данные ежедневно пополняются (по заявлению политики).",
+  "relevance": "none",
+  "ingest_mode": "facts",
+  "ingest_reason": "Открытая лицензия, API без ключа и дампы; коллекция нидерландская, поэтому для сибирской живописи пригодна только как справочник словарей и эталон формата.",
+  "annotation_ru": "Rijksmuseum Data Services — открытые данные коллекции Рейксмюзеума (Linked Art, OAI-PMH, дампы, IIIF) без ключа и по большей части под CC0. К сибирской живописи прямого отношения нет, но источник полезен как образец структуры и словарей.",
+  "risks": [
+    "Часть объектов под авторским правом",
+    "Для CC BY 4.0 нужна атрибуция"
+  ],
+  "suspicious_pages": []
+}

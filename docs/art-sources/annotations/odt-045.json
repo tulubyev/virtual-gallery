@@ -1,0 +1,50 @@
+{
+  "id": "odt-045",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://schema.org/VisualArtwork",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыт только /docs/search_results.html; Sitemap https://schema.org/docs/sitemap.xml.",
+  "terms_summary": "Условия: авторские права спонсоров в схеме лицензированы по Creative Commons Attribution-ShareAlike 3.0; применена патентная политика W3C (royalty-free).",
+  "terms_url": "https://schema.org/docs/terms.html",
+  "license": "CC BY-SA 3.0 (схема); патентная политика W3C",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/VisualArtwork",
+      "/CreativeWork",
+      "/Person"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "artEdition",
+      "artMedium",
+      "artform",
+      "artist",
+      "artworkSurface",
+      "colorist",
+      "depth",
+      "height",
+      "inker",
+      "letterer",
+      "penciler",
+      "width",
+      "(унаследованные от CreativeWork: license, и др.)"
+    ]
+  },
+  "freshness": "Страница помечена как «development version»; использование типа — 1K–10K доменов (Google, август 2026).",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Словарь для разметки JSON-LD карточек произведений, а не источник данных об искусстве; ссылка и использование терминов без копирования текста документации.",
+  "annotation_ru": "Описание типа VisualArtwork в Schema.org: свойства для картины (художник, техника, основа, размеры, тираж). Пригодится при выдаче карточек произведений галереи в формате JSON-LD. Сама документация под CC BY-SA, поэтому тексты описаний не копировать, а ссылаться.",
+  "risks": [
+    "документация под CC BY-SA 3.0",
+    "версия «development»; свойств для провенанса нет"
+  ],
+  "suspicious_pages": []
+}

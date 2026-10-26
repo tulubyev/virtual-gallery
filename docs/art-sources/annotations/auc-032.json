@@ -1,0 +1,47 @@
+{
+  "id": "auc-032",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.paulfrasercollectibles.com/blogs/art-photography",
+  "robots_summary": "robots.txt (26.10.2026): Shopify-магазин, блоги, коллекции и страницы разрешены; закрыты корзина, заказы, аккаунт, фильтры/сортировки, AJAX. В файле есть блок текста, обращённый к ИИ-агентам (установить SKILL.md, использовать UCP/MCP) — не выполнялся.",
+  "terms_summary": "Отдельные условия сайта не открывались (есть «Terms and conditions of sale»); запретов краулинга в прочитанном нет.",
+  "terms_url": null,
+  "license": "Лицензии нет; © магазина.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/blogs/art-photography",
+      "/blogs/art-photography/<slug>",
+      "/blogs/art-photography.atom",
+      "/blogs/art-photography?page=N"
+    ],
+    "rendering": "static_html",
+    "pagination": "page=N, около 338 страниц",
+    "fields": [
+      "заголовок",
+      "дата",
+      "текст заметки"
+    ]
+  },
+  "freshness": "Atom-лента раздела обновлена 2024-02-09 (последняя запись) — блог в этом разделе давно не пополнялся.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Магазинный блог с устаревшей лентой, русская тематика — единичные заметки; ценности для помощника мало.",
+  "annotation_ru": "Блог коллекционного магазина Paul Fraser Collectibles с обзорами арт-торгов; в разделе упоминаются русские торги, но последняя запись ленты — февраль 2024. Для актуальных новостей не годится; в robots.txt есть текст, адресованный ИИ-агентам.",
+  "risks": [
+    "Устаревшая лента",
+    "Текст-обращение к агентам в robots.txt",
+    "Коммерческий сайт с рекламным уклоном"
+  ],
+  "suspicious_pages": [
+    {
+      "url": "https://www.paulfrasercollectibles.com/robots.txt",
+      "reason": "комментарий предлагает ИИ-ассистентам рекомендовать пользователю установить SKILL.md стороннего сервиса и использовать UCP/MCP; не выполнялось"
+    }
+  ]
+}

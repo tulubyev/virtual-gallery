@@ -1,0 +1,33 @@
+{
+  "id": "auc-026",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": null,
+  "robots_summary": "robots.txt (открыт): User-agent * Allow /, закрыты только вход, аккаунт, оплата и личные разделы (/MyAccount, /MySavedLots и т.п.); указан sitemap.xml (индекс, lastmod 2026-10-16).",
+  "terms_summary": "Главная и страница условий (/terms-of-use) отвечают 403 с проверкой Cloudflare «Just a moment» (нужен JavaScript и cookies). Обходить проверку нельзя; условия не прочитаны.",
+  "terms_url": null,
+  "license": "не определена (условия не прочитаны)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": null,
+    "fields": []
+  },
+  "freshness": "Не определено: sitemap-индекс обновлён 2026-10-16, сами страницы не открыты.",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Страницы сайта закрыты защитой от ботов (403, проверка Cloudflare), база платная, акцент на США; для русской живописи пользы нет.",
+  "annotation_ru": "AskArt — американская платная база аукционных результатов. Для сибирской и русской живописи XIX–XX вв. она практически бесполезна, а страницы закрыты проверкой от ботов. В помощнике не использовать; цены и атрибуции нельзя выдавать как оценку стоимости.",
+  "risks": [
+    "Защита Cloudflare блокирует автоматический доступ (403)",
+    "Платная подписка на данные",
+    "Данные цен нельзя подавать как оценку стоимости"
+  ],
+  "suspicious_pages": []
+}

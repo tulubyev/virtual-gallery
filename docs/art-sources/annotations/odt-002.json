@@ -1,0 +1,45 @@
+{
+  "id": "odt-002",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://commons.wikimedia.org/wiki/Main_Page",
+  "robots_summary": "robots.txt открыт 2026-10-26 (общий для проектов Wikimedia): для * закрыты /w/ (кроме w/load.php, mobileview и sitemap), /api/ (кроме документации), /wiki/Special: и служебные страницы; Crawl-delay 5 задан отдельным ботам (SemrushBot), для * не задан; Sitemap: /w/rest.php/site/v1/sitemap/0.",
+  "terms_summary": "Главная: «149 934 120» файлов; каждый файл имеет лицензию на своей странице описания; структурированные данные файлов под CC0, текстовые описания под CC BY-SA. Страницу условий использования (foundation.wikimedia.org) из облачной среды открыть не удалось.",
+  "terms_url": "https://commons.wikimedia.org/wiki/Commons:Reuse_of_content_outside_Wikimedia",
+  "license": "Файлы: у каждого своя (CC, PD и др.); структурированные данные CC0; текст CC BY-SA.",
+  "api": {
+    "exists": true,
+    "url": "https://commons.wikimedia.org/w/api.php",
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/wiki/File:{имя}",
+      "/wiki/Category:{название}",
+      "/wiki/Main_Page"
+    ],
+    "rendering": "static_html",
+    "pagination": "категории постраничные",
+    "fields": [
+      "файл",
+      "описание",
+      "автор",
+      "дата",
+      "лицензия",
+      "категории",
+      "структурированные данные (Wikidata)"
+    ]
+  },
+  "freshness": "Живой проект, число файлов на главной на 2026-10-26: 149 934 120.",
+  "relevance": "medium",
+  "ingest_mode": "facts",
+  "ingest_reason": "Брать структурированные данные и метаданные (автор, дата, лицензия, категории) через API с идентифицирующим User-Agent; сами изображения — только после проверки лицензии конкретного файла и срока охраны в РФ и США. /w/api.php попадает под Disallow: /w/ для общих ботов, правила API-этикета из облака открыть не удалось: нужен юридический/технический ответ.",
+  "annotation_ru": "Хранилище свободных медиафайлов Wikimedia: репродукции картин, категории по художникам и музеям. Помощнику полезно для метаданных и ссылок на свободные репродукции. Осторожно: лицензия у каждого файла своя, а для работ из РФ нужна свободность и в РФ, и в США.",
+  "risks": [
+    "Disallow: /w/ в robots.txt затрагивает /w/api.php, правила API не проверены",
+    "Лицензия у каждого файла своя, ShareAlike у текстов",
+    "Репродукции работ, охраняемых авторским правом, загружаются с нарушениями — проверять статус"
+  ],
+  "suspicious_pages": []
+}

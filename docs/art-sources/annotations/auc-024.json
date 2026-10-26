@@ -1,0 +1,33 @@
+{
+  "id": "auc-024",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://www.artnet.com/price-database/",
+  "robots_summary": "Не получен: запрос robots.txt вернул 403 со страницей Cloudflare «Sorry, you have been blocked». Остановились на домене.",
+  "terms_summary": "Не прочитаны (доступ закрыт). Платная база по общим знаниям, не подтверждено.",
+  "terms_url": null,
+  "license": "не проверено",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": "не проверялась",
+    "fields": []
+  },
+  "freshness": "не проверено",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Платный сервис за paywall, сайт блокирует облачную среду; автоматический сбор не рекомендуется, без согласования использовать нельзя.",
+  "annotation_ru": "Artnet Price Database — платная база результатов аукционов. Не подходит помощнику: доступ платный, автоматический сбор закрыт, из облачной среды домен блокируется. Исключить из списка.",
+  "risks": [
+    "Cloudflare 403",
+    "paywall",
+    "автоматический сбор не допускается"
+  ],
+  "suspicious_pages": []
+}

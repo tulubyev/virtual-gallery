@@ -1,0 +1,43 @@
+{
+  "id": "odt-020",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://artsandculture.google.com/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: Allow /, закрыты /api/* и /incognito/*; Sitemap https://artsandculture.google.com/sitemaps/artsandculture_google_com/sitemap-index.xml.",
+  "terms_summary": "В подвале есть «Privacy & Terms» и «Generative AI Terms» (ссылки на policies.google.com; хост недоступен из среды — CONNECT 403, условия не прочитаны). Права на изображения принадлежат музеям-партнёрам.",
+  "terms_url": "https://www.google.com/policies/terms/",
+  "license": "открытой лицензии нет; права у музеев и правообладателей (по входным данным)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/asset/<название>/<id>",
+      "/story/<название>/<id>",
+      "/project/<название>",
+      "/partner/<название>"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "прокрутка/подгрузка",
+    "fields": [
+      "название",
+      "автор",
+      "партнёр-музей",
+      "описание"
+    ]
+  },
+  "freshness": "Актуален: главная с акцией «Celebrating 15!»; ведётся постоянно.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Тяжёлый JS-сайт без открытой лицензии и без API; допустимы внешние ссылки на конкретные произведения и онлайн-выставки музеев-партнёров.",
+  "annotation_ru": "Google Arts & Culture — витрина экспонатов и виртуальных выставок музеев-партнёров, среди которых есть российские. Помощнику пригодится только как ссылка на конкретную страницу произведения. Лицензии на изображения и тексты нет, собирать данные не нужно.",
+  "risks": [
+    "нет открытой лицензии",
+    "JS-страницы, API закрыт robots",
+    "условия Google не прочитаны (хост недоступен)"
+  ],
+  "suspicious_pages": []
+}

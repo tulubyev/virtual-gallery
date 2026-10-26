@@ -1,0 +1,37 @@
+{
+  "id": "odt-005",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content",
+  "robots_summary": "robots.txt открыт 2026-10-26 (общий для en.wikipedia.org): для * закрыты /w/ (кроме w/load.php, mobileview и sitemap), /api/ (кроме документации), /wiki/Special: и служебные страницы; Crawl-delay 5 задан отдельным ботам (SemrushBot), для * не задан; Sitemap: /w/rest.php/site/v1/sitemap/0.",
+  "terms_summary": "Правила: текст под CC BY-SA 4.0 (и GFDL), требуется указание авторства (ссылка на страницу) и ShareAlike для производных; у файлов своя лицензия. Страница описывает порядок указания авторства и лицензионное уведомление; юридической консультации не даёт.",
+  "terms_url": "https://en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content",
+  "license": "CC BY-SA 4.0; GFDL (двойное лицензирование для старых текстов); медиа — по лицензии файла.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/wiki/Wikipedia:Reusing_Wikipedia_content"
+    ],
+    "rendering": "static_html",
+    "pagination": "одна страница",
+    "fields": [
+      "условия лицензий",
+      "примеры указания авторства"
+    ]
+  },
+  "freshness": "Живая страница правил; дату версии не фиксировал.",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Правовая справка по условиям повторного использования Википедии. Для проекта нужна как основание для решений юриста (CC BY-SA, ShareAlike), а не как данные.",
+  "annotation_ru": "Официальная справка Википедии о повторном использовании её текстов: требования указания авторства и ShareAlike. Помощнику нужна как правовая основа при использовании статей Википедии. Окончательный вывод для коммерческого продукта должен сделать юрист.",
+  "risks": [
+    "Требование ShareAlike к производным текстам",
+    "Это не юридическая консультация"
+  ],
+  "suspicious_pages": []
+}

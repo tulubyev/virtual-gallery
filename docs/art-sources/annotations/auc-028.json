@@ -1,0 +1,44 @@
+{
+  "id": "auc-028",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.the-saleroom.com/en-gb",
+  "robots_summary": "Проверен 2026-10-26: закрыты /my-account, /login, поиск (*pgSearchTerm*, /search-filter), /archivelot*, версии en-us/it-it/zh-cn и др.; указано много sitemap (лоты, аукционы, категории, аукционисты). Crawl-delay нет.",
+  "terms_summary": "Условия сайта запрещают систематическую загрузку, кэширование и хранение материалов сайта в базе данных («spidering or otherwise»). Сайт принадлежит группе Auction Technology Group (страница about-us ведёт на auctiontechnologygroup.com, недоступный из песочницы).",
+  "terms_url": "https://www.the-saleroom.com/en-gb/about-us/legal/website-terms-and-conditions",
+  "license": "Автоматический сбор запрещён условиями; лицензии на повторное использование нет.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en-gb",
+      "/en-gb/for-sale/fine-art/oil-acrylic-paintings-and-mixed-media",
+      "/en-gb/price-guide",
+      "/en-gb/about-us/legal/website-terms-and-conditions"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверялось",
+    "fields": [
+      "аукцион",
+      "лот",
+      "оценка",
+      "цена продажи",
+      "аукционный дом"
+    ]
+  },
+  "freshness": "Сайт живой (торги идут, календарь аукционов), главная открыта.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Условия прямо запрещают автоматический сбор, поиск закрыт в robots.txt; русской живописи там немного, цены только справка сотрудникам.",
+  "annotation_ru": "The Saleroom — британская платформа онлайн-аукционов и архив цен (реализованные цены, Price Guide). Автоматический сбор запрещён условиями, поэтому для помощника допустима только ссылка. Цены нельзя выдавать как оценку стоимости.",
+  "risks": [
+    "Условия запрещают систематическую загрузку",
+    "Поиск закрыт в robots.txt",
+    "Цены нельзя показывать посетителям как оценку"
+  ],
+  "suspicious_pages": []
+}

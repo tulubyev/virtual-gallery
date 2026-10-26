@@ -1,0 +1,42 @@
+{
+  "id": "odt-006",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://ru.wikipedia.org/w/api.php",
+  "robots_summary": "robots.txt открыт 2026-10-26 (общий для ru.wikipedia.org): для * закрыты /w/ (кроме w/load.php, mobileview и sitemap), /api/ (кроме документации), /wiki/Special: и служебные страницы; Crawl-delay 5 задан отдельным ботам (SemrushBot), для * не задан; Sitemap: /w/rest.php/site/v1/sitemap/0. Для ru.wikipedia дополнительно закрыты служебные страницы участников (/wiki/Участник: и др.). /w/api.php подпадает под Disallow: /w/ для общих ботов (исключение только для action=mobileview); API-этикет Wikimedia (mediawiki.org) из облака не открылся, поэтому правила использования API считаю непроверенными.",
+  "terms_summary": "Правила: текст под CC BY-SA 4.0 (и GFDL), требуется указание авторства (ссылка на страницу) и ShareAlike для производных; у файлов своя лицензия. Требования к User-Agent и лимитам Wikimedia не проверены (mediawiki.org и foundation.wikimedia.org недоступны из этой среды).",
+  "terms_url": "https://www.mediawiki.org/wiki/API:Etiquette",
+  "license": "CC BY-SA 4.0 (содержимое); API бесплатный.",
+  "api": {
+    "exists": true,
+    "url": "https://ru.wikipedia.org/w/api.php",
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/w/api.php?action=query&…&format=json",
+      "/w/rest.php/v1/…"
+    ],
+    "rendering": "static_html",
+    "pagination": "continue-токены MediaWiki",
+    "fields": [
+      "текст страницы",
+      "извлечения",
+      "категории",
+      "викиданные-связи",
+      "изменения"
+    ]
+  },
+  "freshness": "API живое. Я его не вызывал, из-за Disallow: /w/ в robots.txt (проверена главная ru.wikipedia, статус 200).",
+  "relevance": "medium",
+  "ingest_mode": "live_search",
+  "ingest_reason": "Единственный разумный машинный путь к Википедии (поиск и извлечения), но robots.txt закрывает /w/ для общих ботов, а правила API я не смог открыть. Включать в белый список только после решения юриста (CC BY-SA/ShareAlike) и проверки правил API.",
+  "annotation_ru": "Публичный API MediaWiki русской Википедии: поиск и получение текста статей в формате JSON. Подходит для запросов в реальном времени по белому списку с обязательной ссылкой на статью. Перед включением нужно проверить правила API и вопрос ShareAlike.",
+  "risks": [
+    "/w/ закрыт в robots.txt для общих ботов; API-этикет не проверен",
+    "CC BY-SA/ShareAlike",
+    "Лимиты и требования к User-Agent не проверены"
+  ],
+  "suspicious_pages": []
+}

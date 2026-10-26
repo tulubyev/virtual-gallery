@@ -1,0 +1,43 @@
+{
+  "id": "auc-021",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.mutualart.com/",
+  "robots_summary": "robots.txt (26.10.2026): Allow /, закрыты CCBot, MauiBot, BLEXBot, Ahrefs и др.; /Signup, /login, /ExternalArticle/, /Independent/, параметры Type=auctions и фильтры лотов.",
+  "terms_summary": "Условия (/Static/TermOfUse): запрещены сбор контента вручную или электронными средствами, автоматизированное использование системы, неразрешённое обрамление и ссылки на сайт.",
+  "terms_url": "https://www.mutualart.com/Static/TermOfUse",
+  "license": "Права у MutualArt; коммерческое использование без договора запрещено.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/Artist/<имя>/<id>",
+      "/Auctions",
+      "/Exhibitions",
+      "/Static/TermOfUse"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "нет (платная база)",
+    "fields": [
+      "художник",
+      "аукционы",
+      "выставки",
+      "аналитика"
+    ]
+  },
+  "freshness": "На главной новости от 23.10.2026; заявлено 983 тысяч художников в базе цен.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Оценки и база цен за регистрацией и платной подпиской; автоматика запрещена. Рекомендация: не брать, при необходимости — ручной просмотр.",
+  "annotation_ru": "Англоязычная база аукционных результатов и аналитики; полный доступ платный. Условия запрещают автоматический сбор, поэтому для помощника — только ссылка для сотрудников. Цены нельзя выдавать как оценку стоимости.",
+  "risks": [
+    "Платный доступ",
+    "Запрет автоматизации",
+    "Формулировка про ссылки требует юриста"
+  ],
+  "suspicious_pages": []
+}

@@ -1,0 +1,42 @@
+{
+  "id": "auc-022",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.artsy.net/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /search, /users/auth и параметры (dns_source, microsite и др.); указано много Sitemap (работы, художники, аукционы и т.д.). Crawl-delay нет.",
+  "terms_summary": "Страница Terms (General Terms and Conditions of Sale, обновлено 17.04.2024) запрещает среди прочего скрейпинг, краулеры, добычу данных и использование систем ИИ и моделей машинного обучения.",
+  "terms_url": "https://www.artsy.net/terms",
+  "license": "права у Artsy и галерей; лицензии нет",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/artist/<slug>",
+      "/collection/<slug>",
+      "/show/<slug>",
+      "/fair/<slug>"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "прокрутка/подгрузка",
+    "fields": [
+      "художник",
+      "подборка",
+      "галерея/выставка"
+    ]
+  },
+  "freshness": "Актуален: главная с подборкой «Paris Art Week 2026».",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Условия прямо запрещают скрейпинг и использование ИИ; ориентирован на современное искусство и коммерческие продажи.",
+  "annotation_ru": "Artsy — онлайн-рынок галерей и аукционов, ориентированный на современное искусство. Условия использования запрещают автоматический сбор и использование ИИ. Сибирской живописи там практически нет; из белого списка исключить.",
+  "risks": [
+    "условия запрещают скрейпинг и ИИ",
+    "коммерческая платформа",
+    "нерелевантна теме"
+  ],
+  "suspicious_pages": []
+}

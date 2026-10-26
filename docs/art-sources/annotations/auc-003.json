@@ -1,0 +1,33 @@
+{
+  "id": "auc-003",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://www.bonhams.com/department/PIC-RUS/russian-paintings-and-works-of-art/",
+  "robots_summary": "Не прочитан: https://www.bonhams.com/robots.txt отвечает 403 с заголовком cf-mitigated: challenge (Cloudflare «Just a moment…»). Остановился, обход не пробовал.",
+  "terms_summary": "Страница условий не открывалась. По результатам поиска (не открывал): раздел «Conditions of Website use» (bonhams.com/legals/9944/) ограничивает использование механизмов, влияющих на работу сайта; явного запрета парсинга поиск не показал — требуется ручная проверка.",
+  "terms_url": "https://www.bonhams.com/legals/9944/",
+  "license": "",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": "",
+    "pagination": "",
+    "fields": []
+  },
+  "freshness": "Не проверено.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Сайт защищён проверкой Cloudflare и недоступен автоматике; сбор не рекомендуется, оставить как ссылку.",
+  "annotation_ru": "Отдел русской живописи и предметов искусства аукционного дома Bonhams (лондонская площадка). Из облака закрыт проверкой Cloudflare, поэтому содержимое не проверено; использовать как внешнюю ссылку, результаты торгов — только справка для сотрудников.",
+  "risks": [
+    "Cloudflare challenge (403)",
+    "Условия не прочитаны",
+    "Результаты торгов — не оценка стоимости"
+  ],
+  "suspicious_pages": []
+}

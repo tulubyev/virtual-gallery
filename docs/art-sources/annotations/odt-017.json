@@ -1,0 +1,39 @@
+{
+  "id": "odt-017",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://github.com/ClevelandMuseumArt/openaccess",
+  "robots_summary": "robots.txt github.com получить не удалось (прокси сессии, 403). README открыт через raw.githubusercontent.com.",
+  "terms_summary": "README: наборы данных по более чем 61 000 произведений переданы по CC0 для неограниченного коммерческого и некоммерческого использования; изображения для примерно 30 000 работ на тех же условиях (ссылки в записях); данные «как есть».",
+  "terms_url": "https://github.com/ClevelandMuseumArt/openaccess",
+  "license": "CC0 (данные; изображения на тех же условиях по заявлению музея)",
+  "api": {
+    "exists": true,
+    "url": "https://openaccess-api.clevelandart.org/",
+    "key_required": null,
+    "limits": "Лимиты не проверялись"
+  },
+  "structure": {
+    "url_patterns": [
+      "data.json / data.csv (git LFS)",
+      "https://openaccess-api.clevelandart.org/"
+    ],
+    "rendering": "static_html",
+    "pagination": "крупные файлы JSON/CSV через git LFS",
+    "fields": [
+      "метаданные",
+      "ссылки на изображения",
+      "авторы"
+    ]
+  },
+  "freshness": "Репозиторий поддерживается музеем; дату последнего коммита не проверял.",
+  "relevance": "none",
+  "ingest_mode": "facts",
+  "ingest_reason": "CC0 на данные и часть изображений, есть API; русской живописи в коллекции мало, но формат и открытые изображения ценны для проверки конвейера.",
+  "annotation_ru": "Открытые данные Кливлендского музея искусства (CC0, JSON/CSV, плюс API и изображения примерно 30 000 работ). К сибирской живописи отношения почти нет, но это удобный образец с чистой лицензией.",
+  "risks": [
+    "Нужен git LFS для полных файлов",
+    "Данные «как есть»"
+  ],
+  "suspicious_pages": []
+}

@@ -1,0 +1,42 @@
+{
+  "id": "odt-043",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://id.loc.gov/",
+  "robots_summary": "robots.txt (26.10.2026): для всех Crawl-delay 3, Allow /, закрыт /ml38281/; Yeti закрыт полностью, Applebot — задержка 30; указан sitemapindex.xml.",
+  "terms_summary": "Страница About: Библиотека Конгресса публикует данные как общественное достояние, «как есть», без гарантий; внешние ссылки могут не работать. Rate limits на прочитанных страницах не названы.",
+  "terms_url": "https://id.loc.gov/about/",
+  "license": "Общественное достояние (public domain) по заявлению Библиотеки Конгресса",
+  "api": {
+    "exists": true,
+    "url": "https://id.loc.gov/authorities/names/suggest2?q=<имя>",
+    "key_required": false,
+    "limits": "Crawl-delay 3 с; других лимитов не найдено"
+  },
+  "structure": {
+    "url_patterns": [
+      "/authorities/names/<id>",
+      "/authorities/names/suggest2?q=…&count=N (JSON)",
+      "/techcenter/ (загрузки, сериализации)",
+      "/download/ (полные выгрузки)"
+    ],
+    "rendering": "static_html",
+    "pagination": "параметры count и start у suggest2",
+    "fields": [
+      "предпочтительная форма имени",
+      "варианты в оригинальном написании (кириллица)",
+      "тип записи",
+      "URI"
+    ]
+  },
+  "freshness": "Служба действующая; в примере запроса «Repin» получена запись n79075231 с кириллической формой «Репин, И. Е. (Илья Ефимович), 1844-1930».",
+  "relevance": "medium",
+  "ingest_mode": "facts",
+  "ingest_reason": "Бесплатный API без ключа, открытые данные, есть кириллические варианты имён — подходит для нормализации и сверки ФИО. Не как поиск «сегодняшних» новостей.",
+  "annotation_ru": "Linked Data Service Библиотеки Конгресса: авторитетные записи имён с ALA-LC транслитерацией и нередко с кириллическими вариантами (проверено на Репине). Подходит для нормализации написания имён художников; использовать с паузой 3 секунды между запросами.",
+  "risks": [
+    "Покрытие сибирских художников не проверено",
+    "Лимиты запросов не названы, действует Crawl-delay 3"
+  ],
+  "suspicious_pages": []
+}

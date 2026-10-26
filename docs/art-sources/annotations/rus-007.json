@@ -1,0 +1,32 @@
+{
+  "id": "rus-007",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": null,
+  "robots_summary": "robots.txt: 404 (docs.kudago.com), но главная отвечает 403 с «Проверка безопасности» (нужен JavaScript).",
+  "terms_summary": "Документация API и условия не прочитаны: страница закрыта проверкой от ботов (403). Обходить нельзя. Поиск в сети подтверждений не дал.",
+  "terms_url": null,
+  "license": "не определена",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": null,
+    "fields": []
+  },
+  "freshness": "Не определена.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Доступа к документации нет; афиши выставок в Москве и Санкт-Петербурге для нашей темы малополезны. Перепроверить вручную.",
+  "annotation_ru": "KudaGo — афиша событий (в реестре — документация API). Из облачной среды закрыта проверкой безопасности, поэтому условия, ключи и лимиты не подтверждены. Для сибирской живописи пользы немного.",
+  "risks": [
+    "Условия и лимиты API неизвестны",
+    "Защита от ботов"
+  ],
+  "suspicious_pages": []
+}

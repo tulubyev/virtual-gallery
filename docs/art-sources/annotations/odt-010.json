@@ -1,0 +1,45 @@
+{
+  "checked_at": "2026-10-26",
+  "suspicious_pages": [],
+  "id": "odt-010",
+  "available": true,
+  "final_url": "https://www.getty.edu/research-conservation/tools-databases/vocabularies/data-services/",
+  "robots_summary": "robots.txt www.getty.edu: закрыты /cgi-bin, /slampoets, /research/collections/mirador/; для бота Yeti закрыт /art/collection/; для AhrefsBot всё. Страницы словарей не закрыты. robots.txt узла vocab.getty.edu не удалось прочитать (прокси окружения отвечает 403 на CONNECT).",
+  "terms_summary": "Страница служб данных: все данные Getty Vocabularies бесплатны по ODC-By 1.0; для ULAN рекомендован шаблон атрибуции «Contains information from the J. Paul Getty Trust, Getty Research Institute, Union List of Artist Names, which is made available under the ODC Attribution License»; доступны SPARQL, OpenRefine, JSON/RDF/N3/N-Triples; полные выгрузки N-Triples ежемесячно.",
+  "terms_url": "https://www.getty.edu/research-conservation/tools-databases/vocabularies/data-services/",
+  "license": "ODC-By 1.0 (обязательна атрибуция)",
+  "api": {
+    "exists": true,
+    "url": "https://vocab.getty.edu/sparql",
+    "key_required": null,
+    "limits": "заявлено на странице служб данных; сам узел vocab.getty.edu из окружения недоступен (403 CONNECT), ключ и лимиты не проверены"
+  },
+  "structure": {
+    "url_patterns": [
+      "http://vocab.getty.edu/ulan/<id> (запись, .json/.rdf/.nt)",
+      "http://vocab.getty.edu/page/ulan/<id>",
+      "http://vocab.getty.edu/hier/ulan/<id>"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет (RDF-запросы и выгрузки)",
+    "fields": [
+      "предпочтительное имя",
+      "варианты имён",
+      "даты жизни",
+      "страна",
+      "роль",
+      "биография (кратко)"
+    ]
+  },
+  "freshness": "Страница обновлена 30.01.2026 (по тексту), выгрузки N-Triples ежемесячно; XML/реляционные форматы заморожены на 30.01.2026.",
+  "relevance": "low",
+  "ingest_mode": "facts",
+  "ingest_reason": "Лицензия открытая (ODC-By): можно брать структурные данные о художниках (имена, варианты, даты) с атрибуцией. Для русских и сибирских мастеров покрытие ULAN слабое. Узел vocab.getty.edu не проверен из-за блокировки, рекомендовать после проверки с обычного доступа.",
+  "annotation_ru": "Тезаурус имён художников Getty (ULAN) с открытыми данными: SPARQL, JSON-LD/RDF и ежемесячные выгрузки. Полезен для нормализации написания имён и дат жизни, но для сибирских авторов записей мало. Обязательна атрибуция по шаблону ODC-By.",
+  "risks": [
+    "Обязательная атрибуция ODC-By",
+    "vocab.getty.edu не проверен (блокировка прокси)",
+    "Слабое покрытие русских региональных художников",
+    "Старый адрес из реестра теперь перенаправляет на новый раздел сайта"
+  ]
+}

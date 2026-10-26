@@ -1,0 +1,36 @@
+{
+  "id": "odt-018",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://github.com/Smithsonian/OpenAccess",
+  "robots_summary": "github.com/robots.txt: прокси окружения ответил 403 (не прочитан). README прочитан через raw.githubusercontent.com (сам репозиторий на github.com напрямую не открывался).",
+  "terms_summary": "Условий использования в README нет; ссылки на si.edu/openaccess и edan.si.edu/openaccess/docs, но эти хосты из облака недоступны (прокси), условия не проверены.",
+  "terms_url": null,
+  "license": "В README лицензия не указана; CC0 из предыдущей проверки (по поиску) в этом прогоне не подтверждена.",
+  "api": {
+    "exists": true,
+    "url": "https://edan.si.edu/openaccess/docs/",
+    "key_required": null,
+    "limits": "не проверено (хост недоступен из среды)"
+  },
+  "structure": {
+    "url_patterns": [
+      "Архив в AWS S3 по подразделениям (коды вроде SAAM, NPG, HMSG); файлы разложены по первым двум символам хэша"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет (построчные JSON-файлы)",
+    "fields": [
+      "метаданные объектов Смитсоновского института"
+    ]
+  },
+  "freshness": "Автор README отмечает перенос архива с GitHub в Registry of Open Data on AWS (запись от 21.12.2021); более 11 млн записей.",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Американские музеи; русской и сибирской живописи нет. Лицензия в первоисточнике, доступном из среды, не названа.",
+  "annotation_ru": "Репозиторий Смитсоновского института с описанием открытого архива метаданных (более 11 млн записей, построчный JSON на AWS). К русской и сибирской живописи отношения не имеет; помощнику не нужен.",
+  "risks": [
+    "Лицензия не подтверждена первоисточником",
+    "Данные на GitHub больше не лежат: репозиторий — только описание"
+  ],
+  "suspicious_pages": []
+}
