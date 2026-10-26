@@ -1,0 +1,46 @@
+{
+  "id": "odt-023",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://archive.org/",
+  "robots_summary": "Читал 2026-10-26: закрыты только /control/ и /report/; Sitemap: /sitemap/sitemap.xml. Раздел для разработчиков «Bots, LLMs, and Automated Access» требует описательный User-Agent и пауз при пакетной работе.",
+  "terms_summary": "Страница условий (archive.org/about/terms) — JS-приложение, текст через curl не получен; по поиску и справке: правила доступа в Access Policy, у каждого объекта свои права. Условия целиком не читал.",
+  "terms_url": "https://archive.org/about/terms",
+  "license": "По каждому объекту (поля licenseurl/rights в метаданных); общий статус — не единая лицензия.",
+  "api": {
+    "exists": true,
+    "url": "https://archive.org/advancedsearch.php; https://archive.org/metadata/<id>",
+    "key_required": false,
+    "limits": "Проверен один запрос advancedsearch.php (200 JSON). Лимиты и 429 описаны в справке для ботов; конкретные числа не проверял."
+  },
+  "structure": {
+    "url_patterns": [
+      "/details/<identifier>",
+      "/advancedsearch.php?q=...&fl[]=identifier&output=json",
+      "/metadata/<identifier>",
+      "/download/<identifier>/<file>"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "rows/page в advancedsearch",
+    "fields": [
+      "identifier",
+      "title",
+      "creator",
+      "year",
+      "licenseurl",
+      "mediatype",
+      "полный текст (OCR) у книг"
+    ]
+  },
+  "freshness": "Живая; тестовый запрос по русским словам вернул 0 результатов (проверить синтаксис поиска по полям).",
+  "relevance": "medium",
+  "ingest_mode": "corpus",
+  "ingest_reason": "Полезны старые каталоги и журналы в общественном достоянии, но брать только объекты с явно подтверждённым статусом (licenseurl / срок охраны); массовые загрузки не делать.",
+  "annotation_ru": "Интернет-архив: отсканированные книги, каталоги выставок и журналы XIX–XX веков с открытым API поиска и метаданных. Для помощника — источник старых текстов для корпуса, но права проверяются по каждому объекту, а русскоязычного покрытия может быть мало.",
+  "risks": [
+    "Права на каждый объект свои",
+    "Нужен честный User-Agent и паузы",
+    "Условия не прочитаны полностью"
+  ],
+  "suspicious_pages": []
+}

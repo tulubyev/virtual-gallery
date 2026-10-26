@@ -1,0 +1,43 @@
+{
+  "id": "odt-011",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.getty.edu/research-conservation/tools-databases/vocabularies/data-services/",
+  "robots_summary": "robots.txt открыт 2026-10-26: для * закрыты /cgi-bin, /slampoets, /research/collections/mirador/; AhrefsBot закрыт целиком; Yeti закрыт на /art/collection/. Страница vocabularies/data-services не закрыта. Поддомен vocab.getty.edu не проверялся.",
+  "terms_summary": "Страница Data Services: данные AAT, TGN, ULAN свободны по Open Data Commons Attribution License (ODC-By) 1.0; нужна строка указания авторства «Contains information from the J. Paul Getty Trust, Getty Research Institute, … made available under the ODC Attribution License».",
+  "terms_url": "https://www.getty.edu/research-conservation/tools-databases/vocabularies/data-services/",
+  "license": "ODC-By 1.0 (обязательная атрибуция).",
+  "api": {
+    "exists": true,
+    "url": "http://vocab.getty.edu/",
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "http://vocab.getty.edu/page/ulan/{id}",
+      "http://vocab.getty.edu/ulan/{id}",
+      "http://vocab.getty.edu/aat/{id}",
+      "http://vocab.getty.edu/tgn/{id}"
+    ],
+    "rendering": "static_html",
+    "pagination": "не применимо (API/дампы)",
+    "fields": [
+      "имена художников (ULAN)",
+      "термины (AAT)",
+      "места (TGN)",
+      "связи и даты"
+    ]
+  },
+  "freshness": "Полные выгрузки AAT/TGN/ULAN в N-Triples обновляются ежемесячно; XML и реляционные выгрузки прекращены, последние даны от 2026-01-30; веб-сервисы XML отключены.",
+  "relevance": "low",
+  "ingest_mode": "facts",
+  "ingest_reason": "Брать как структурные данные (SPARQL/LOD, ежемесячные дампы) для нормализации имён и терминов, с атрибуцией ODC-By. Для сибирских художников покрытие в ULAN, вероятно, ограничено (не проверялось).",
+  "annotation_ru": "Страница о сервисах данных Getty Vocabularies: SPARQL, OpenRefine, Linked Open Data и ежемесячные дампы AAT, TGN, ULAN под лицензией ODC-By. Помощнику полезно для единых написаний имён и терминов искусства. Нужна строка атрибуции; полноту по сибирским авторам проверять отдельно.",
+  "risks": [
+    "Обязательная атрибуция ODC-By",
+    "Параметры и лимиты SPARQL-эндпоинта не проверялись",
+    "Полнота по сибирским художникам не проверялась"
+  ],
+  "suspicious_pages": []
+}

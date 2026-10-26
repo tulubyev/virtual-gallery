@@ -1,0 +1,32 @@
+{
+  "id": "auc-006",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://www.roseberys.co.uk/",
+  "robots_summary": "Проверен 2026-10-26: для всех закрыты служебные каталоги Joomla (/administrator/, /cache/, /libraries/ и др.); отдельно запрещены боты GPTBot, ClaudeBot, PerplexityBot, Amazonbot, Bytespider и др. Мы идём под своим User-Agent (правило *), но намерение сайта ограничить ИИ-ботов явное. Sitemap: /sitemap.xml (два файла).",
+  "terms_summary": "Не прочитаны: страницы сайта отдают пустой ответ HTTP 202 с заголовком x-amzn-waf-action: challenge (проверка AWS WAF), обход не применялся.",
+  "terms_url": null,
+  "license": "Не проверено.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": "static_html",
+    "pagination": "",
+    "fields": []
+  },
+  "freshness": "Sitemap обновлён 2026-10-23; страницы не открывались.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "HTML закрыт защитой от ботов, robots.txt прямо запрещает ИИ-ботов, дом британский, русского искусства в профиле мало.",
+  "annotation_ru": "Лондонский аукционный дом Roseberys (антиквариат, живопись, коллекционные предметы). Сайт защищён проверкой бота, а его robots.txt запрещает ИИ-краулеры; для помощника не нужен. Цены торгов допустимы только как справка сотрудникам.",
+  "risks": [
+    "Защита AWS WAF (challenge)",
+    "Явный запрет ИИ-ботов в robots.txt"
+  ],
+  "suspicious_pages": []
+}

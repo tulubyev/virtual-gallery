@@ -1,0 +1,38 @@
+{
+  "id": "rus-032",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://runivers.ru/",
+  "robots_summary": "Проверен 2026-10-26: Crawl-delay: 20 (соблюдал паузы 20 с); закрыты /bitrix/, все адреса с параметрами (/*?*), PAGEN, print, ORDER_BY и др.; Sitemap: /sitemap_index.xml.",
+  "terms_summary": "Не прочитаны: HTML-страницы (главная и /about/agreements/) отвечают HTTP 200 с пустым телом на наш User-Agent. Причину не выясняли.",
+  "terms_url": "https://runivers.ru/about/agreements/",
+  "license": "Не проверено.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/books/{id}/author.html",
+      "/books/{id}/base.html",
+      "/about/agreements/",
+      "/about/contacts/"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверялось",
+    "fields": []
+  },
+  "freshness": "Sitemap обновлён 2026-08-13, у основных страниц даты 2025–2026, у старых книг 2010.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Содержимое прочитать не удалось, условия неизвестны; факсимиле старых изданий, авторское право на них не изучено.",
+  "annotation_ru": "Руниверс: электронная библиотека и энциклопедия с факсимиле старых книг и журналов. Может пригодиться как ссылка на старые издания по искусству, но условия использования не прочитаны, а страницы отдают пустой ответ автоматическим клиентам. Использовать только как ссылку.",
+  "risks": [
+    "Crawl-delay 20 секунд",
+    "Пустой ответ на HTML для нашего клиента",
+    "Авторские права на факсимиле не выяснены"
+  ],
+  "suspicious_pages": []
+}

@@ -1,0 +1,41 @@
+{
+  "id": "odt-012",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.getty.edu/research-conservation/tools-databases/vocabularies/data-services/",
+  "robots_summary": "robots.txt www.getty.edu (открыт): для * закрыты /cgi-bin, /slampoets, /research/collections/mirador/; AhrefsBot закрыт; для Yeti закрыт /art/collection/. Страница данных словарей не закрыта.",
+  "terms_summary": "Все данные Getty Vocabularies бесплатны по лицензии ODC-By 1.0; нужна ссылка на источник по предписанной формуле («Contains information from the J. Paul Getty Trust, Getty Research Institute, …») и упоминание вкладчиков. Общие условия сайта открываются (/legal/terms-of-use/), запретов на автоматический доступ в тексте не найдено.",
+  "terms_url": "https://www.getty.edu/legal/terms-of-use/",
+  "license": "ODC-By 1.0 (нужна атрибуция)",
+  "api": {
+    "exists": true,
+    "url": "https://vocab.getty.edu/",
+    "key_required": false,
+    "limits": "SPARQL endpoint и OpenRefine; ключ не нужен; лимиты не уточнялись"
+  },
+  "structure": {
+    "url_patterns": [
+      "http://vocab.getty.edu/page/ulan/<id>",
+      "http://vocab.getty.edu/ulan/<id>",
+      "http://vocab.getty.edu/page/aat/<id>",
+      "http://vocab.getty.edu/page/tgn/<id>"
+    ],
+    "rendering": "static_html",
+    "pagination": "через SPARQL и выгрузки",
+    "fields": [
+      "имена художников (ULAN)",
+      "термины (AAT)",
+      "географические названия (TGN)"
+    ]
+  },
+  "freshness": "Данные обновляются ежемесячно; выгрузки XML и таблиц заморожены 2026-01-30, актуальны N-Triples.",
+  "relevance": "low",
+  "ingest_mode": "facts",
+  "ingest_reason": "Свободная лицензия ODC-By, SPARQL и ежемесячные выгрузки; полезно для нормализации имён и терминов (ULAN, AAT), для сибирских художников покрытие скромное.",
+  "annotation_ru": "Getty Vocabularies (ULAN, AAT, TGN) — справочные словари имён, терминов и мест под лицензией ODC-By, с SPARQL и выгрузками N-Triples. Для помощника — нормализация написания имён и терминов; при использовании нужна атрибуция Getty.",
+  "risks": [
+    "Обязательная атрибуция по формуле Getty",
+    "Покрытие российских художников неполное"
+  ],
+  "suspicious_pages": []
+}

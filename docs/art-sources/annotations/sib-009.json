@@ -1,0 +1,50 @@
+{
+  "id": "sib-009",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.musey-anohina.ru/",
+  "robots_summary": "robots.txt открыт 2026-10-26 (Joomla): закрыты /administrator/, /components/, /modules/, /plugins/, /cache/ и др. служебные; /index.php и /index.php/component/ (RSS) не закрыты; Sitemap не указан.",
+  "terms_summary": "Условий использования материалов на открытых страницах не найдено; в подвале «© 2025 Музей им. А. В. Анохина. Все права защищены». Есть «Положение о порядке и условиях доступа к музейным предметам и музейным коллекциям» (не читал).",
+  "terms_url": null,
+  "license": "Не указана (© музея).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/index.php/o-muzee/kollektsii",
+      "/index.php/o-muzee/onlajn-katalog",
+      "/index.php/posetitelyam/vystavki/item/{id}-{slug}",
+      "/index.php/posetitelyam/afisha/item/{id}-{slug}",
+      "/index.php/novosti/item/{id}-{slug}",
+      "/index.php/component/k2/itemlist?format=feed&moduleID=550 (RSS)"
+    ],
+    "rendering": "static_html",
+    "pagination": "не изучалась",
+    "fields": [
+      "описание коллекций (изобразительное искусство ≈5000 ед. хр.)",
+      "онлайн-каталоги (археология, коллекция Г.И. Чорос-Гуркина)",
+      "выставки",
+      "афиша",
+      "новости"
+    ]
+  },
+  "freshness": "Новости и афиша за октябрь 2026 («Ночь искусств-2026», юбилей Я. Янкинова, 100-летие С. Янсона); подвал © 2025.",
+  "relevance": "high",
+  "ingest_mode": "reference",
+  "ingest_reason": "Тема очень близка (Чорос-Гуркин, Янкинов, Янсон), но на всех трёх открытых страницах в нижней части обнаружен скрытый блок рекламного спама (поддельные часы), что говорит о взломе или заражении сайта; прав на материалы не заявлено. Пока только ссылка; перед любым использованием проверить сайт и запросить разрешение.",
+  "annotation_ru": "Сайт Национального музея Республики Алтай имени А. В. Анохина: изобразительное искусство Горного Алтая, онлайн-каталог коллекции Г. И. Чорос-Гуркина, выставки и афиша. Для помощника это важный источник по алтайским художникам. Сайт содержит скрытый спам-блок, поэтому к нему нужна осторожность.",
+  "risks": [
+    "Скрытый блок спама (реклама поддельных часов) на главной, /kollektsii и /onlajn-katalog — признак взлома",
+    "Права на материалы не оговорены",
+    "Сайт может отдавать вредоносные редиректы — открывать с осторожностью"
+  ],
+  "suspicious_pages": [
+    "https://www.musey-anohina.ru/ (скрытый блок спама в нижней части, не инструкция для агента)",
+    "https://www.musey-anohina.ru/index.php/o-muzee/kollektsii (то же)",
+    "https://www.musey-anohina.ru/index.php/o-muzee/onlajn-katalog (то же)"
+  ]
+}

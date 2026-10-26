@@ -1,0 +1,42 @@
+{
+  "id": "auc-029",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://alvr.com/",
+  "robots_summary": "Читал 2026-10-26: закрыты /wp-admin/, служебные каталоги WooCommerce и add-to-cart; остальное открыто; sitemap /wp-sitemap.xml. Crawl-delay нет.",
+  "terms_summary": "Условия (Terms of Use): запрещено использовать «robot, spider, other automatic device» для мониторинга или копирования сайта и контента без письменного разрешения; изображения — только для использования в рамках сайта; один личный экземпляр контента.",
+  "terms_url": "https://alvr.com/terms-of-use/",
+  "license": "Все права защищены; автоматический сбор запрещён.",
+  "api": {
+    "exists": true,
+    "url": "https://alvr.com/wp-json/",
+    "key_required": null,
+    "limits": "Только факт наличия WordPress REST по ссылке на главной; не использовался, т. к. условия запрещают автоматический доступ."
+  },
+  "structure": {
+    "url_patterns": [
+      "/category/our-gallery/{faberge|jewelry|works-of-art}/",
+      "/category/news/exhibitions/",
+      "/category/publications/",
+      "/shop/"
+    ],
+    "rendering": "static_html",
+    "pagination": "WordPress-категории",
+    "fields": [
+      "название",
+      "описание",
+      "цена/наличие (магазин)"
+    ]
+  },
+  "freshness": "Живой магазин; на главной ссылки на каталог 2022 и часы работы.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Нью-йоркский дилер Фаберже, ювелирных изделий и предметов русского декоративного искусства: живописи Сибири нет, а условия прямо запрещают ботов.",
+  "annotation_ru": "Нью-йоркская галерея A La Vieille Russie: Фаберже, ювелирные изделия и предметы русского искусства, магазин и издания. Для нашей темы (живопись, Сибирь) почти бесполезна, а условия запрещают автоматический сбор, поэтому использовать не стоит.",
+  "risks": [
+    "Условия запрещают роботов",
+    "Нет живописи Сибири",
+    "Цены дилера — не оценка стоимости"
+  ],
+  "suspicious_pages": []
+}

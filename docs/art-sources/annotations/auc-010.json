@@ -1,0 +1,43 @@
+{
+  "id": "auc-010",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.hagelstam.fi/fi",
+  "robots_summary": "robots.txt (26.10.2026): User-Agent *, Allow: /; указан sitemap.xml.",
+  "terms_summary": "Отдельных условий пользования сайтом не найдено; на странице «Näin ostat» есть ссылка на правила аукциона 2026 (не читались). Запрета автоматического сбора на прочитанных страницах нет.",
+  "terms_url": "https://www.hagelstam.fi/fi/nain-ostat",
+  "license": "Лицензии на повторное использование нет; © Oy Hagelstams Auktioner Ab 2011–2026.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/fi/huutokaupat",
+      "/fi/huutokaupat/<название-аукциона>",
+      "/fi/esineet",
+      "/fi/haku?q=… (результаты подгружаются скриптом)",
+      "/fi/ajankohtaista/uutiset/<slug>"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "список аукционов на одной странице (11 записей); каталоги лотов — по аукционам",
+    "fields": [
+      "название и дата аукциона",
+      "лоты",
+      "новости"
+    ]
+  },
+  "freshness": "Список показывает ближайшие аукционы 27–28.10.2026 (A354, A355) и Modern T164 от 6.10.2026 — сайт живой.",
+  "relevance": "low",
+  "ingest_mode": "calendar",
+  "ingest_reason": "Живой финский дом с календарём торгов. Русские лоты на открытых страницах не подтверждены (поиск «venäläinen» результатов в HTML не дал, он грузится скриптом).",
+  "annotation_ru": "Хельсинкский аукционный дом Hagelstam: ежемесячные торги и специальные Modern/Classic. Годится как календарь для сотрудников; русскую живопись на прочитанных страницах не нашли. Цены и оценки нельзя выдавать посетителям как оценку стоимости.",
+  "risks": [
+    "Русское искусство в каталогах не подтверждено",
+    "Поиск через JavaScript",
+    "Правила аукциона не читались"
+  ],
+  "suspicious_pages": []
+}

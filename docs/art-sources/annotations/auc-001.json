@@ -1,0 +1,41 @@
+{
+  "id": "auc-001",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.sothebys.com/en/departments/russian-art",
+  "robots_summary": "Читал 2026-10-26: Crawl-delay 15 с для * (выдержал паузы 15 с); закрыты /pdf/, PDF каталогов и результатов, /bsp-api/*, /en/docs/*. Sitemap: /sitemap.xml.",
+  "terms_summary": "Условия сайта (Terms & Conditions of Use) прямо запрещают data mining, spidering, «screen scraping», «database scraping» и сбор информации каталога любыми автоматическими средствами; коммерческое использование контента — только с письменного разрешения. Прочитано: страница terms-conditions (цитата ≤25 слов: «engage in data mining, spidering, \"screen scraping,\" \"database scraping,\" harvesting of catalogue information»).",
+  "terms_url": "https://www.sothebys.com/en/terms-conditions",
+  "license": "Все права защищены; автоматический сбор запрещён условиями.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en/departments/russian-art",
+      "/en/slideshows/<slug>",
+      "/en/videos/<slug>"
+    ],
+    "rendering": "static_html",
+    "pagination": "блоки ближайших аукционов на странице отдела; архив — через отдельные страницы аукционов",
+    "fields": [
+      "название аукциона",
+      "дата и город",
+      "ссылка на каталог"
+    ]
+  },
+  "freshness": "Живая: на 2026-10-26 в списке ближайших торгов Modern Discoveries (22–29.10.2026, Лондон) и другие.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Автоматический сбор запрещён условиями. Рекомендация: НЕ брать данные; максимум ссылка на страницу отдела русского искусства и ручное использование куратором.",
+  "annotation_ru": "Страница отдела русского искусства Sotheby's со списком ближайших торгов и подборками. Для помощника годится только как внешняя ссылка: условия сайта запрещают автоматический сбор каталогов, а цены и результаты торгов в любом случае нельзя выдавать как оценку стоимости.",
+  "risks": [
+    "Условия запрещают scraping и сбор каталога",
+    "Crawl-delay 15 с",
+    "Цены/результаты — только справка для сотрудников"
+  ],
+  "suspicious_pages": []
+}

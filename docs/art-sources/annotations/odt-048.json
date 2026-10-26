@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-10-26",
+  "suspicious_pages": [],
+  "id": "odt-048",
+  "available": true,
+  "final_url": "https://iiif.io/",
+  "robots_summary": "robots.txt: только строка Sitemap: /sitemap.xml, запретов нет.",
+  "terms_summary": "Сайт описывает открытые стандарты IIIF (Image, Presentation, Auth, Search, Discovery, Content State); на странице спецификации Image API 3.0 дана ссылка на лицензию CC BY 4.0. Отдельных условий использования сайта не искал.",
+  "terms_url": "https://iiif.io/api/image/3.0/",
+  "license": "спецификации — CC BY 4.0 (ссылка на странице Image API 3.0)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/api/image/<версия>/",
+      "/api/presentation/<версия>/",
+      "/get-started/",
+      "/community/consortium/members/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "спецификации",
+      "руководства",
+      "каталог демо"
+    ]
+  },
+  "freshness": "sitemap.xml содержит даты от октября 2026 (lastmod 2026-10-07); консорциум активен (стратплан 2026–28).",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Это не источник сведений об искусстве, а стандарт доставки изображений. Полезен технически: музейные коллекции (Госкаталог, зарубежные музеи) часто отдают изображения по IIIF. Данные не собирать.",
+  "annotation_ru": "Сайт консорциума IIIF — международного стандарта доставки изображений и мультимедиа. Для помощника это техническая справка, а не источник фактов о живописи. Пригодится при подключении музейных коллекций, поддерживающих IIIF.",
+  "risks": [
+    "Не содержит сведений об искусстве",
+    "Лицензию проверял только по ссылке на спецификацию Image API 3.0"
+  ]
+}

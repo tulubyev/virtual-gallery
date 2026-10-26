@@ -1,0 +1,33 @@
+{
+  "id": "auc-030",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://www.antiquestradegazette.com/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты только служебные пути (/app_data, /app_plugins/, /install, /bin, /umbraco/). Главная и /sitemap.xml отвечают 403 со страницей Cloudflare «Just a moment...».",
+  "terms_summary": "Не прочитаны: доступ закрыт проверкой Cloudflare. Платные материалы (по общим знаниям, не подтверждено).",
+  "terms_url": null,
+  "license": "не проверено",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": "не проверялась",
+    "fields": []
+  },
+  "freshness": "не проверено",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Домен недоступен из среды (403 Cloudflare), издание про британский антикварный рынок, русской и сибирской живописи не касается.",
+  "annotation_ru": "Antiques Trade Gazette — британская отраслевая газета об антиквариате и торгах. К сибирской живописи прямого отношения не имеет; из облачной среды сайт закрыт проверкой Cloudflare. Для проекта лучше не использовать.",
+  "risks": [
+    "Cloudflare 403",
+    "возможная подписка",
+    "нерелевантна теме"
+  ],
+  "suspicious_pages": []
+}

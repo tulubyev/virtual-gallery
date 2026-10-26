@@ -1,0 +1,42 @@
+{
+  "id": "odt-037",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.tretyakovgallery.ru/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /collection/*, /search/, /info/*, /about/dlya-smi/, /personal/, /upload/, параметры PAGEN/print и главная с параметрами; Sitemap указан, но /sitemap.xml отдаёт HTML-оболочку приложения, а не XML.",
+  "terms_summary": "На главной есть ссылка на пользовательское соглашение, ведущая на PDF политики конфиденциальности (privacy_policy_gtg_museum.pdf; не открывался). Условия использования изображений и текстов не найдены. Онлайн-коллекция вынесена на другой домен (my.tretyakov.ru), его robots и условия не проверялись.",
+  "terms_url": "https://www.tretyakovgallery.ru/upload/privacy_policy_gtg_museum.pdf",
+  "license": "не найдено",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/exhibitions/o/<slug>/",
+      "/about/contacts/",
+      "my.tretyakov.ru/app/gallery (онлайн-коллекция, другой домен)"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверялась",
+    "fields": [
+      "название выставки",
+      "даты",
+      "площадка",
+      "ссылка на билет"
+    ]
+  },
+  "freshness": "Актуален: выставки с датами 2026–2027 (например, до 14.03.2027).",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Раздел коллекции закрыт robots.txt, условия на изображения не найдены, юридическая проверка нужна. Допустимы ссылки на страницы выставок; для афиши — только после согласования.",
+  "annotation_ru": "Основной сайт Государственной Третьяковской галереи: афиша выставок, музеи-филиалы, билеты; коллекция вынесена на my.tretyakov.ru. Помощнику нужен для ссылок на актуальные выставки русского искусства. Автоматический сбор не рекомендуется: коллекция закрыта в robots.txt, права на изображения не определены.",
+  "risks": [
+    "/collection/ и /search/ закрыты robots.txt",
+    "права на изображения и тексты не определены",
+    "sitemap.xml не отдаёт XML"
+  ],
+  "suspicious_pages": []
+}

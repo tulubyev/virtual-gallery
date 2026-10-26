@@ -1,0 +1,45 @@
+{
+  "id": "odt-001",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.wikidata.org/",
+  "robots_summary": "Читал 2026-10-26: для * закрыты /w/ (в т. ч. api.php), /api/, /wiki/Special: (включая Special:EntityData), много служебных страниц; Crawl-delay 5 стоит для отдельных ботов. Для автоматического доступа Wikimedia рекомендует API/SPARQL/дампы с User-Agent с контактом.",
+  "terms_summary": "Wikidata:Licensing: все структурированные данные (основное пространство, Property, Lexeme, EntitySchema) выпущены в общественное достояние по CC0; тексты в других пространствах — CC BY-SA 4.0.",
+  "terms_url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+  "license": "CC0 (структурированные данные); CC BY-SA 4.0 (текстовые страницы обсуждений и пр.)",
+  "api": {
+    "exists": true,
+    "url": "https://query.wikidata.org/sparql; https://www.wikidata.org/w/api.php; дампы",
+    "key_required": false,
+    "limits": "Не проверено: query.wikidata.org недоступен из облака (прокси 403), api.php закрыт для краулеров в robots — один тестовый запрос с некодированной кириллицей дал 400. Лимиты и UA-политику смотреть в документации Wikimedia."
+  },
+  "structure": {
+    "url_patterns": [
+      "/wiki/Q<id>",
+      "/wiki/Property:P<id>",
+      "SPARQL: https://query.wikidata.org/sparql",
+      "Дампы JSON"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "LIMIT/OFFSET в SPARQL",
+    "fields": [
+      "метки и описания (ru)",
+      "даты жизни (P569/P570)",
+      "профессия (P106)",
+      "коллекция (P195)",
+      "инвентарный номер (P217)",
+      "идентификаторы внешних баз"
+    ]
+  },
+  "freshness": "Живая база, постоянные правки.",
+  "relevance": "high",
+  "ingest_mode": "facts",
+  "ingest_reason": "Лицензия CC0 снимает юридические вопросы по структурным данным; использовать SPARQL/дампы для нормализации имён, дат и ссылок на ULAN/VIAF, помечая происхождение факта. Для живого поиска не нужен.",
+  "annotation_ru": "Открытая база знаний с лицензией CC0: люди, произведения, коллекции, даты и перекрёстные идентификаторы. Помощнику нужна для нормализации имён художников и проверки дат с пометкой «из справочника»; сведения неполны и могут быть ошибочны, особенно по малым сибирским мастерам.",
+  "risks": [
+    "Неполнота и ошибки по региональным художникам",
+    "query.wikidata.org не открылся из облачной среды",
+    "Нужен честный User-Agent и разумная частота запросов"
+  ],
+  "suspicious_pages": []
+}

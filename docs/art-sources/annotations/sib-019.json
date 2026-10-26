@@ -1,0 +1,44 @@
+{
+  "id": "sib-019",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://artmuseum27.ru/",
+  "robots_summary": "Читал 2026-10-26: правила заданы только для агентов Google и Yandex (закрыты wp-admin, /tag, feed и любые URL с «?»), группы «*» нет, поэтому для нашего агента запретов нет; в файле указан устаревший Host: dvhm.net и sitemap на dvhm.net; /sitemap.xml на текущем домене — 404.",
+  "terms_summary": "В подвале: «При использовании материалов, взятых с данного сайта, ссылка на первоисточник обязательна»; отдельной лицензии нет.",
+  "terms_url": "https://artmuseum27.ru/politika/",
+  "license": "Не указана; требуется ссылка на первоисточник.",
+  "api": {
+    "exists": true,
+    "url": "https://artmuseum27.ru/wp-json/",
+    "key_required": null,
+    "limits": "Только заголовок Link на главной (WordPress REST); не использовался."
+  },
+  "structure": {
+    "url_patterns": [
+      "/events/exhibitions-now/",
+      "/events/future-exhibitions/",
+      "/exhibitions/exhibitions-archive/",
+      "/vystavka-<slug>/",
+      "/collections/collections/ (3 коллекции)",
+      "/?s=<запрос> (поиск WordPress, ответ 200)"
+    ],
+    "rendering": "static_html",
+    "pagination": "стандартная WordPress",
+    "fields": [
+      "название выставки",
+      "даты",
+      "описание"
+    ]
+  },
+  "freshness": "Живой: выставки на 2026 год («Клумба» 25.09–25.10.2026, «Движение по воде» 17.10–20.12.2026), © 2025.",
+  "relevance": "medium",
+  "ingest_mode": "calendar",
+  "ingest_reason": "Онлайн-каталога произведений нет (страница коллекций — три описательных раздела и 3D-тур), но афиша выставок актуальна и открыта; для живого поиска годится только афиша.",
+  "annotation_ru": "Сайт Дальневосточного художественного музея в Хабаровске: афиша и архив выставок, описания коллекций (русское, народное, зарубежное искусство), 3D-тур. Для помощника — источник актуальных выставок Дальнего Востока; каталога произведений нет, при использовании нужна ссылка на источник.",
+  "risks": [
+    "Нет каталога произведений",
+    "Старые Host/sitemap в robots.txt",
+    "Страница коллекций с meta robots noindex"
+  ],
+  "suspicious_pages": []
+}

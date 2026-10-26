@@ -1,0 +1,33 @@
+{
+  "id": "odt-042",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": "https://viaf.org/",
+  "robots_summary": "Не получен: запрос robots.txt вернул 403 со страницей Cloudflare «Sorry, you have been blocked». Остановились на домене, повторных попыток нет.",
+  "terms_summary": "Не прочитаны (доступ закрыт). Лицензия ODC-By указана в исходной таблице по сторонним источникам, в этой проверке не подтверждена.",
+  "terms_url": null,
+  "license": "не проверено (по входным данным — ODC-By)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": "не проверялась",
+    "fields": []
+  },
+  "freshness": "не проверено",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Домен блокирует облачную среду (Cloudflare 403); проверить вручную и, если нужно, использовать официальные выгрузки OCLC после юридической проверки.",
+  "annotation_ru": "VIAF — единый файл авторитетных записей национальных библиотек, объединяющий варианты написания имён. Помощнику мог бы помогать унифицировать имена художников. В этой проверке сайт недоступен (Cloudflare), условия и API не подтверждены.",
+  "risks": [
+    "Cloudflare блокирует облачную среду",
+    "условия ODC-By требуют атрибуции",
+    "условия и API не проверены"
+  ],
+  "suspicious_pages": []
+}

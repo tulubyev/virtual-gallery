@@ -1,0 +1,40 @@
+{
+  "id": "auc-020",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.liveauctioneers.com/",
+  "robots_summary": "robots.txt (26.10.2026): закрыты /search?, /v1/lot, /item-api/, /statistics/, /sothebys/item/, /bonhams/item/, многие параметры (keyword=, sort=, pagenum= и др.); sitemap-индексы, включая price-result; /auction-results открыт.",
+  "terms_summary": "Условия (/termsandconditions): на сайтах есть robot exclusion headers; запрещено использовать робота, паука, скрейпер и иные автоматические средства без письменного разрешения; обход запретов robots тоже запрещён.",
+  "terms_url": "https://www.liveauctioneers.com/termsandconditions",
+  "license": "Лицензии нет; данные принадлежат площадке и домам.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/auction-results",
+      "/item/<id>_<slug>",
+      "/auctioneer/…"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "параметры pagenum закрыты robots",
+    "fields": [
+      "лот",
+      "результаты (hammer price)",
+      "дом"
+    ]
+  },
+  "freshness": "Страница Price Results доступна публично; даты обновления не проверялись.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Автоматический сбор запрещён условиями; рекомендация — не брать, только ручные ссылки.",
+  "annotation_ru": "Американская платформа онлайн-аукционов с открытыми страницами Price Results. Условия прямо запрещают роботов и скрейперы, поэтому только ручной поиск. Результаты нельзя выдавать посетителям как оценку стоимости.",
+  "risks": [
+    "Запрет автоматических средств в условиях",
+    "Поисковые параметры закрыты в robots.txt"
+  ],
+  "suspicious_pages": []
+}

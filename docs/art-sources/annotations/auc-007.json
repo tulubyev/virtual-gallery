@@ -1,0 +1,33 @@
+{
+  "id": "auc-007",
+  "checked_at": "2026-10-26",
+  "available": false,
+  "final_url": null,
+  "robots_summary": "robots.txt (открыт): User-agent * Allow *; закрыт только PetalBot; указан sitemap.xml.",
+  "terms_summary": "Главная возвращает 403 «Attention Required! | Cloudflare» (заблокирован доступ); условия не прочитаны. Обходить блокировку нельзя.",
+  "terms_url": null,
+  "license": "не определена",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": null,
+    "fields": []
+  },
+  "freshness": "Не определена.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Автоматический доступ заблокирован Cloudflare (403); русское искусство у Dorotheum возможно, но проверить нельзя.",
+  "annotation_ru": "Dorotheum — венский аукционный дом. Сайт блокирует автоматический доступ (403, Cloudflare), поэтому условия, структура и наличие русской живописи не проверены. Цены и оценки нельзя выдавать как стоимость.",
+  "risks": [
+    "Блокировка Cloudflare",
+    "Условия не прочитаны",
+    "Цены не оценка стоимости"
+  ],
+  "suspicious_pages": []
+}

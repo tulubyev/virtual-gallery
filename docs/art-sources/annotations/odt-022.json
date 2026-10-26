@@ -1,0 +1,40 @@
+{
+  "id": "odt-022",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://huggingface.co/datasets/huggan/wikiart",
+  "robots_summary": "robots.txt (26.10.2026): User-agent *, Allow: /; указан sitemap.xml.",
+  "terms_summary": "Карточка: лицензия unknown, файлы данных © прежних авторов; текст карточки разрешает только некоммерческое исследовательское использование. Условия Hugging Face (terms-of-service) открыты.",
+  "terms_url": "https://huggingface.co/terms-of-service",
+  "license": "unknown; «non-commercial research purpose»; действуют условия WikiArt",
+  "api": {
+    "exists": true,
+    "url": "https://huggingface.co/api/datasets/huggan/wikiart",
+    "key_required": false,
+    "limits": "не проверялись; открытый метод без ключа ответил 200"
+  },
+  "structure": {
+    "url_patterns": [
+      "/datasets/huggan/wikiart",
+      "/api/datasets/huggan/wikiart"
+    ],
+    "rendering": "js_heavy",
+    "pagination": "нет (parquet-файлы)",
+    "fields": [
+      "изображение",
+      "художник (129 классов)",
+      "жанр (11)",
+      "стиль (27)"
+    ]
+  },
+  "freshness": "lastModified карточки по API: 2023-03-22; загрузок около 10 тысяч.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Некоммерческая лицензия, проект коммерческий; файлы не скачивались. Использовать нельзя.",
+  "annotation_ru": "Датасет WikiArt на Hugging Face (около 81 тысячи изображений с метками художника, жанра и стиля). Лицензия «unknown» и некоммерческие ограничения исключают использование; можно лишь сослаться как на пример набора стилей.",
+  "risks": [
+    "Некоммерческая лицензия",
+    "Права на изображения принадлежат авторам и WikiArt"
+  ],
+  "suspicious_pages": []
+}

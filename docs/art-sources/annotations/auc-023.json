@@ -1,0 +1,33 @@
+{
+  "id": "auc-023",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.artprice.com/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: для ClaudeBot, anthropic-ai, GPTBot, CCBot, PerplexityBot, Google-Extended и других ИИ-ботов — Disallow: /; для остальных закрыт только /store2/.",
+  "terms_summary": "Все страницы (в т.ч. /terms) отдают проверку браузера «Checking your browser»; в меню есть «General Conditions of Sale & Use», текст не прочитан. Обход проверки не предпринимался.",
+  "terms_url": "https://www.artprice.com/",
+  "license": "платная лицензия (по входным данным); условия не прочитаны",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [],
+    "rendering": null,
+    "pagination": "не проверялась",
+    "fields": []
+  },
+  "freshness": "не проверено",
+  "relevance": "none",
+  "ingest_mode": "skip",
+  "ingest_reason": "Платный индекс цен, robots.txt прямо запрещает ИИ-ботов, доступ закрыт проверкой браузера.",
+  "annotation_ru": "Artprice — платный индекс цен на искусство. Файл robots.txt прямо запрещает ИИ-ботов, содержимое закрыто проверкой браузера. Для помощника не использовать; цены в любом случае не должны называться как оценка стоимости.",
+  "risks": [
+    "robots.txt запрещает ИИ-ботов",
+    "проверка браузера",
+    "платная лицензия"
+  ],
+  "suspicious_pages": []
+}

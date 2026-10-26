@@ -1,0 +1,44 @@
+{
+  "id": "sib-005",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.nsartmuseum.ru/",
+  "robots_summary": "robots.txt открыт 2026-10-26: «User-agent: * Crawl-delay: 5»; запретов нет; Host и Sitemap: https://www.nsartmuseum.ru/sitemap.xml (в этой проверке не открывал).",
+  "terms_summary": "Отдельных условий использования материалов не найдено на трёх открытых страницах; в подвале «© НГХМ 2008-2026». Есть ссылка на Госкаталог музея.",
+  "terms_url": null,
+  "license": "Не указана (© НГХМ).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/collection/{slug} (art-siberia, russian-art-eighteenth-early-twentieth-centuries, domestic-art-twentieth-beginning-twenty-first-century, gritsyuk-paintings, rerih-paintings, chebanov-paintings, icons, foreign-art)",
+      "/collection/art-siberia/{n} и /collection/art-siberia/carousel/{n}",
+      "/exhibitions/id/{n}",
+      "/rss.xml (текущие выставки)",
+      "/search (POST)"
+    ],
+    "rendering": "static_html",
+    "pagination": "подстраницы /collection/art-siberia/{n}",
+    "fields": [
+      "автор",
+      "название",
+      "год",
+      "описание раздела (обзорный текст)"
+    ]
+  },
+  "freshness": "RSS /rss.xml с датами публикации 07.10.2026 и 01.10.2026; подвал © 2008–2026.",
+  "relevance": "high",
+  "ingest_mode": "calendar",
+  "ingest_reason": "Есть открытый RSS текущих выставок и список выставок — для афиши достаточно (Crawl-delay 5 обязателен). Раздел «Искусство Сибири» — обзорный текст с примерами работ; права на тексты не оговорены, поэтому для корпуса нужно согласие музея, пока ссылка.",
+  "annotation_ru": "Новосибирский государственный художественный музей: коллекции «Искусство Сибири», русское искусство XVIII – начала XX века, Рерих, Грицюк, а также RSS и страницы выставок. Для помощника это важнейший новосибирский источник и афиша. Тексты о коллекции пока брать только как ссылки.",
+  "risks": [
+    "Права на тексты и изображения не оговорены",
+    "Crawl-delay 5 секунд",
+    "Внутренний поиск работает через POST"
+  ],
+  "suspicious_pages": []
+}

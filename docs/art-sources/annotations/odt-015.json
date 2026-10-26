@@ -1,0 +1,40 @@
+{
+  "id": "odt-015",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://github.com/art-institute-of-chicago/api-data",
+  "robots_summary": "robots.txt github.com получить не удалось (прокси сессии, 403). README открыт через raw.githubusercontent.com.",
+  "terms_summary": "README: единый публичный API (api.artic.edu/docs) и полный дамп (около 75 МБ в архиве, ~1,75 ГБ после распаковки) на S3; в репозитории по 10 примеров на каждый endpoint; лицензия указана в полях info.license_text и info.license_links каждого файла, на изображения и медиа может быть иная лицензия.",
+  "terms_url": "https://github.com/art-institute-of-chicago/api-data",
+  "license": "Указана в каждой записи (info.license_text); общее заявление в README не найдено",
+  "api": {
+    "exists": true,
+    "url": "https://api.artic.edu/docs",
+    "key_required": null,
+    "limits": "Лимиты не проверялись"
+  },
+  "structure": {
+    "url_patterns": [
+      "json/<endpoint>/<id>.json",
+      "getting-started/allArtworks.jsonl"
+    ],
+    "rendering": "static_html",
+    "pagination": "файлы JSON и дамп по ссылке",
+    "fields": [
+      "произведения",
+      "авторы",
+      "выставки",
+      "события"
+    ]
+  },
+  "freshness": "Дамп обновляется по тому же графику, что репозиторий (по README).",
+  "relevance": "none",
+  "ingest_mode": "facts",
+  "ingest_reason": "Полный дамп и API с лицензией в записях; чикагская коллекция, русской живописи мало — пригодно как справочный источник.",
+  "annotation_ru": "Дамп и примеры данных публичного API Чикагского института искусств. Для сибирской живописи малополезен; можно использовать как справочник при проверке лицензии в каждой записи.",
+  "risks": [
+    "Лицензия записи может отличаться",
+    "Изображения могут иметь иные права"
+  ],
+  "suspicious_pages": []
+}

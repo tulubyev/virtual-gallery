@@ -1,0 +1,42 @@
+{
+  "id": "odt-047",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://cidoc-crm.org/",
+  "robots_summary": "robots.txt (открыт): User-agent * — закрыты служебные каталоги Drupal (/admin/, /search/, /user/, /core/ и т.п.); содержимое страниц и файлы онтологии не закрыты. Sitemap в robots не указан, /sitemap.xml отвечает 404.",
+  "terms_summary": "Отдельной страницы условий и явной лицензии на проверенных страницах (главная, Versions) не найдено. Версии модели доступны как RDFS, OWL и JSON-LD (файлы /rdfs/7.1.3/…, /owl/7.1.3/…).",
+  "terms_url": null,
+  "license": "не найдена на проверенных страницах (уточнить на сайте)",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/versions-of-the-cidoc-crm",
+      "/rdfs/<версия>/CIDOC_CRM_v<версия>.rdfs",
+      "/owl/<версия>/CIDOC_CRM_v<версия>.owl",
+      "/rss.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет (небольшой сайт Drupal)",
+    "fields": [
+      "версии онтологии",
+      "диаграммы",
+      "публикации",
+      "новости SIG"
+    ]
+  },
+  "freshness": "Живой сайт: RSS (rss.xml) с записями от 2026-10-20; текущая версия 7.1.3, стандарт ISO 21127:2023.",
+  "relevance": "none",
+  "ingest_mode": "reference",
+  "ingest_reason": "Это онтология-справочник модели данных, а не источник сведений о живописи; полезна как схема обмена данными, текстов для индекса нет.",
+  "annotation_ru": "CIDOC CRM — стандарт (ISO 21127) для описания данных культурного наследия. Для помощника это справочник для схем метаданных и выгрузок, а не источник сведений о сибирской живописи.",
+  "risks": [
+    "Лицензия на онтологию на сайте не найдена",
+    "Возможны изменения версий"
+  ],
+  "suspicious_pages": []
+}
