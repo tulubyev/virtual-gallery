@@ -1,0 +1,38 @@
+{
+  "id": "new-018",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://sibmuseum.ru/",
+  "robots_summary": "robots.txt получен (200): закрыт только /wp-admin/ (кроме admin-ajax.php), указан wp-sitemap.xml; главная разрешена, Crawl-delay и правил для ИИ-ботов нет.",
+  "terms_summary": "Прочитана страница «Правила посещения музея группами»: полезного про материалы сайта в фрагменте нет (только навигация); условия использования материалов не проверено.",
+  "terms_url": "https://sibmuseum.ru/pravila-poseshheniya-muzeya-gruppami/",
+  "license": "Лицензионные подсказки и строка © не найдено в проверенных страницах.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "https://sibmuseum.ru/ (главная)",
+      "https://sibmuseum.ru/?s=<запрос> (поиск WordPress, GET)",
+      "https://sibmuseum.ru/wp-sitemap.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "не проверено"
+    ]
+  },
+  "freshness": "не проверено.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Форма поиска GET есть и не закрыта, но живописи у музея мало (relevance low), прав не оговорено, лент RSS нет. Оставляем ссылкой без сбора.",
+  "annotation_ru": "Сайт Омского государственного историко-краеведческого музея на WordPress с разделами для посетителей и о музее. Для помощника это ссылка на городскую афишу и справку; главные художественные собрания Омска в других музеях реестра. Права на материалы не оговорены.",
+  "risks": [
+    "права на материалы не оговорены",
+    "условия использования не найдены"
+  ],
+  "suspicious_pages": []
+}

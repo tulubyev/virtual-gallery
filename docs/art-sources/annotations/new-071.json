@@ -1,0 +1,41 @@
+{
+  "id": "new-071",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://peterburg-auction.ru/galereya/",
+  "robots_summary": "robots.txt открыт (200), страница /galereya/ разрешена, Crawl-delay нет; закрыты постраничность (*/page/ и *?p=), поиск (*/search/, *?q=), ленты (*/feed, */rss), фильтры, личный кабинет; в sitemap указан и другой домен (peterburg-auckland.ru).",
+  "terms_summary": "Страницы условий и строки © в улике не найдены.",
+  "terms_url": null,
+  "license": "не найдено в проверенных страницах.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/galereya/",
+      "/search/?q= (форма, GET; закрыта в robots.txt)",
+      "sitemap.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "постраничность (*/page/, *?p=) закрыта в robots.txt",
+    "fields": [
+      "заголовок и описание страницы",
+      "по реестру, не проверено: лоты, архив аукционов"
+    ]
+  },
+  "freshness": "не проверено",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Поиск, постраничность и ленты закрыты в robots.txt, так что живой поиск и календарь по ленте исключены; права на галерею не выяснены. Только ссылка.",
+  "annotation_ru": "Галерея Петербургского аукционного дома (картины и предметы искусства; в описании — этюд Ефима Волкова). Помощнику может пригодиться как справка о предметах для сотрудников. Условия не найдены, цены не выдавать как оценку.",
+  "risks": [
+    "условия не найдены",
+    "поиск и постраничность закрыты в robots.txt",
+    "в sitemap указан другой домен",
+    "связь с Московским Аукционным Домом (из реестра) для юриста"
+  ],
+  "suspicious_pages": []
+}

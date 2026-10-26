@@ -1,0 +1,40 @@
+{
+  "id": "new-079",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.lempertz.com/en/auctions/sale-results.html",
+  "robots_summary": "robots.txt открыт (200), страница разрешена, Crawl-delay нет; закрыты только /typo3/ и /typo3_src/; есть sitemapindex.xml; ИИ-боты не упомянуты.",
+  "terms_summary": "Страницы условий и строки © в улике не найдены.",
+  "terms_url": null,
+  "license": "не найдено в проверенных страницах.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en/auctions/sale-results.html",
+      "/en/search.html (форма, GET)",
+      "sitemapindex.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "по реестру, не проверено: результаты торгов, каталоги"
+    ]
+  },
+  "freshness": "не проверено",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Условия и права не найдены, оператор зарубежный (по реестру Германия); robots.txt почти ничего не закрывает, но отсутствие запрета не равно разрешению. Только ссылка.",
+  "annotation_ru": "Страница результатов торгов немецкого дома Lempertz (Кёльн, Берлин): старые мастера и русское искусство. Помощнику пригодна как справка о торгах для сотрудников. Условия не найдены, цены не выдавать как оценку.",
+  "risks": [
+    "условия не найдены",
+    "зарубежный оператор",
+    "цены только справочно для сотрудников",
+    "форма поиска без распознанного параметра"
+  ],
+  "suspicious_pages": []
+}

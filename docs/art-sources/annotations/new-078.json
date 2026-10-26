@@ -1,0 +1,39 @@
+{
+  "id": "new-078",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://hermitagefineart.com/en/auctions-results/",
+  "robots_summary": "robots.txt открыт (200), страница разрешена, Crawl-delay нет; закрыты /api/ и /*/search/; есть sitemap.xml; ИИ-боты не упомянуты.",
+  "terms_summary": "Страницы условий и строки © в улике не найдены.",
+  "terms_url": null,
+  "license": "не найдено в проверенных страницах.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en/auctions-results/",
+      "sitemap.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "по реестру, не проверено: результаты, архив, пресс-релизы"
+    ]
+  },
+  "freshness": "не проверено",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Условия и права не найдены, оператор зарубежный (Монако); страница результатов торгов открыта и robots.txt её не закрывает. Только ссылка.",
+  "annotation_ru": "Результаты торгов Hermitage Fine Art (Монако): аукционы и частные продажи, в реестре — русская и восточноевропейская живопись. Для помощника это справка для сотрудников. Условия не найдены, цены не выдавать как оценку.",
+  "risks": [
+    "условия не найдены",
+    "зарубежный оператор (Монако)",
+    "цены только справочно для сотрудников",
+    "/api/ закрыт в robots.txt"
+  ],
+  "suspicious_pages": []
+}
