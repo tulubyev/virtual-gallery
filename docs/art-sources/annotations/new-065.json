@@ -1,0 +1,41 @@
+{
+  "id": "new-065",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://adalex.ru/",
+  "robots_summary": "Читал 2026-10-26: закрыты /print, /password, /registration, /profile, /ajax/*, /api/*, /online_auction/*, /live_auction/*, параметры фильтров (Clean-param); sitemap.xml указан; правил для ИИ-ботов нет.",
+  "terms_summary": "Раздел «Информация»: участие после бесплатной регистрации, комиссия устроителя 19% плюс НДС 5% на услуги, съёмка и запись в зале запрещены. Запрета автоматического сбора не найдено.",
+  "terms_url": "https://adalex.ru/information",
+  "license": "Не найдена.",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/archive",
+      "/auction-<номер>",
+      "/articles",
+      "/information"
+    ],
+    "rendering": "static_html",
+    "pagination": "список аукционов в /archive",
+    "fields": [
+      "номер аукциона",
+      "даты",
+      "число лотов"
+    ]
+  },
+  "freshness": "Нумизматический аукцион №171 заканчивался 29.10.2026; архив содержит торги по сентябрь 2026.",
+  "relevance": "low",
+  "ingest_mode": "skip",
+  "ingest_reason": "Основной профиль — нумизматика и награды; живописи сибирских авторов нет, онлайн-торги закрыты в robots.txt.",
+  "annotation_ru": "Московский дом «Александр» ведёт ежемесячные нумизматические онлайн-торги, предметы искусства выходят дважды в год. Для сибирской живописи почти бесполезен. Оставлен как справочная строка о российском рынке.",
+  "risks": [
+    "Онлайн-торги закрыты в robots.txt и идут после регистрации",
+    "Профиль — нумизматика"
+  ],
+  "suspicious_pages": []
+}

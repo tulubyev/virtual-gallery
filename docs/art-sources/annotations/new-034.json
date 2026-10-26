@@ -1,0 +1,38 @@
+{
+  "id": "new-034",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/70/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/regions/regionaltie-otdeleniya/<id>/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "название",
+      "история",
+      "ссылка на сайт отделения"
+    ]
+  },
+  "freshness": "Историческая справка.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Справка; сайт shr-amur.ru проверить отдельно.",
+  "annotation_ru": "Страница Амурской организации СХР с краткой историей искусства Приамурья: выпускники Академии художеств в Благовещенске 1920-х, училище, мастерские Худфонда. На странице есть единственная внешняя ссылка на shr-amur.ru (сайт отделения), из облака он не открылся. Для нашей темы второстепенный источник (Дальний Восток).",
+  "risks": [
+    "Условия: только с согласия",
+    "Сайт отделения не проверен"
+  ],
+  "suspicious_pages": []
+}

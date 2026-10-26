@@ -1,0 +1,40 @@
+{
+  "id": "new-030",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/140/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/regions/regionaltie-otdeleniya/<id>/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "название",
+      "адрес",
+      "e-mail",
+      "телефон",
+      "история"
+    ]
+  },
+  "freshness": "Упомянут юбилей 80 лет (2021); свежих дат на странице нет.",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Справка и ссылка на отделение.",
+  "annotation_ru": "Страница Союза художников Якутии: история организации с 1941 года, имена первых якутских художников (Попов, Носов, Романов) и контакты. Собственного сайта у отделения нет, только Instagram (не проверялся). Для нашей темы пограничный источник: Якутия считается Дальним Востоком, но связь с сибирской живописью XIX–XX веков прямая.",
+  "risks": [
+    "Условия: только с согласия",
+    "Контакты — публичные данные организации, но персональные e-mail возможны"
+  ],
+  "suspicious_pages": []
+}

@@ -1,0 +1,42 @@
+{
+  "id": "new-035",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/167/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/regions/regionaltie-otdeleniya/<id>/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "название",
+      "адрес",
+      "сайт",
+      "e-mail",
+      "телефон",
+      "история",
+      "имена"
+    ]
+  },
+  "freshness": "Историческая справка, число членов без даты.",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Справка и ссылка; shr-khv.ru проверить отдельно.",
+  "annotation_ru": "Страница Хабаровского краевого отделения СХР: история с 1941 года, первый состав правления, численность и звания членов. Указан адрес отдельного сайта shr-khv.ru, но из облака он не открылся. Рядом на shr.su есть издательский проект «Газета Хабаровского краевого отделения».",
+  "risks": [
+    "Условия: только с согласия",
+    "Сайт shr-khv.ru не проверен"
+  ],
+  "suspicious_pages": []
+}

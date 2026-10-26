@@ -1,0 +1,38 @@
+{
+  "id": "new-029",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/134/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/regions/regionaltie-otdeleniya/<id>/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "название",
+      "город",
+      "история отделения"
+    ]
+  },
+  "freshness": "Статичная историческая справка, даты не указаны.",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Справка по истории дальневосточной организации; ссылка, без копирования текста.",
+  "annotation_ru": "Страница Приморской краевой организации СХР с историей союза с 1938 года: основатели, создание училища во Владивостоке, этапы развития. Полезна как справка по художественной жизни Дальнего Востока; официального сайта отделения в списке нет. Тексты защищены, брать только факты со ссылкой.",
+  "risks": [
+    "Условия: только с согласия",
+    "Нет контактов на странице"
+  ],
+  "suspicious_pages": []
+}
