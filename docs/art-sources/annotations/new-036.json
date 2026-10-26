@@ -1,0 +1,41 @@
+{
+  "id": "new-036",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/izdatelskie-proekty/arkhiv-zhurnala-khudozhnik/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/izdatelskie-proekty/arkhiv-zhurnala-khudozhnik/",
+      "/upload/iblock/<xxx>/<hash>.pdf"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет, один список",
+    "fields": [
+      "год",
+      "номер",
+      "PDF"
+    ]
+  },
+  "freshness": "Архив до 2018 г.; новых номеров нет.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Только ссылка; корпус — после согласия СХР.",
+  "annotation_ru": "Страница со ссылками на PDF-номера журнала «Художник» Союза художников России за 2005–2018 годы. Тексты могут давать фон о художественной жизни регионов, но по условиям сайта использование материалов — только с согласия СХР, поэтому годится как справка и ссылка. Содержание PDF не проверялось.",
+  "risks": [
+    "PDF под правами СХР, нужна письменная лицензия",
+    "Качество OCR неизвестно"
+  ],
+  "suspicious_pages": [
+    "Скрытый блок в подвале (div 2x2 px, overflow hidden) с текстом-ссылкой на стороннее коммерческое зеркало часов («high-endrolex.com/12»): похоже на SEO-спам после взлома. Не открывалась и не выполнялась; по ссылке не переходить."
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "new-032",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://shr.su/about/regions/regionaltie-otdeleniya/86/",
+  "robots_summary": "robots.txt прочитан 2026-10-26: закрыты /bitrix/, /search, служебные параметры (PAGEN, ORDER_BY, print, utm, login); Crawl-delay нет; Sitemap https://shr.su/sitemap.xml.",
+  "terms_summary": "Подвал сайта (прочитан 2026-10-26): «Использование материалов сайта разрешено только с предварительного согласия правообладателей»; отдельной лицензии нет.",
+  "terms_url": "https://shr.su/",
+  "license": "Все права защищены; использование материалов — только с предварительного согласия правообладателей (подвал shr.su).",
+  "api": {
+    "exists": false,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/about/regions/regionaltie-otdeleniya/<id>/"
+    ],
+    "rendering": "static_html",
+    "pagination": "нет",
+    "fields": [
+      "название",
+      "адрес",
+      "e-mail",
+      "телефон",
+      "история",
+      "имена"
+    ]
+  },
+  "freshness": "Историческая справка.",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Справка и ссылка.",
+  "annotation_ru": "Страница Иркутского отделения СХР: основано в 1933 году, названы классики и современные члены. Хорошая опора для написания имён иркутских художников XX века; у нас в реестре есть сайт другого иркутского отделения (irk-profart.ru), оба стоит сверять.",
+  "risks": [
+    "Условия: только с согласия",
+    "Утверждение «старейшая в России» не проверено"
+  ],
+  "suspicious_pages": []
+}
