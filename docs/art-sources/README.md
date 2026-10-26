@@ -95,3 +95,16 @@ NODE_EXTRA_CA_CERTS=/путь/russian-ca.pem node scripts/check-art-sources.mjs 
 
 Строки с пометкой `[повтор на VPS]` в `notes` (ошибки сертификата, таймауты, сброс соединения) подбираются режимом `--unreachable` повторно.
 
+**Улики для аннотаций.** Кроме TSV скрипт пишет `art-sources-evidence-<дата-время>.json`: для каждой строки правила `robots.txt` для нашего агента, отношение к ИИ-ботам (`GPTBot`, `ClaudeBot` и др.), `Crawl-delay`, `sitemap`, подсказку про `llms.txt`, заголовок и описание страницы, ленты RSS, формы поиска, ссылки на условия и лицензии, строку `©`, признак «страница на JavaScript», найденный в тексте адресованный ИИ текст, а также (для открывшихся страниц) до двух страниц условий с того же домена с короткими фрагментами про права и автоматический доступ (до 12 фрагментов по 220 знаков; сами тексты не сохраняются). Страницы условий читаются только если `robots.txt` их разрешает, с теми же паузами. `--no-terms` отключает чтение страниц условий, `--evidence файл.json` задаёт имя файла.
+
+Файл улик можно передать в сессию через репозиторий (в нём нет секретов, только публичные адреса и фрагменты):
+
+```bash
+git checkout -b data/art-sources-evidence
+mkdir -p docs/art-sources/evidence && mv art-sources-evidence-*.json docs/art-sources/evidence/
+git add docs/art-sources/evidence && git commit -m "data: улики проверки реестра" && git push -u origin data/art-sources-evidence
+git checkout main
+```
+
+Тесты разбора страниц и `robots.txt`: `node --test scripts/art-sources-evidence.test.mjs`.
+

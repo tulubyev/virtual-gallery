@@ -10,11 +10,14 @@
 // и только если robots.txt её не запрещает. Пауза между запросами к одному домену не короче 3 секунд
 // (или Crawl-delay, если он больше), до 3 доменов одновременно. На 403/429/5xx домен останавливается.
 // Капчи, защиту и запреты не обходит. Реестр не изменяет: результат пишет в отдельный TSV.
+// Дополнительно сохраняет «улики» для аннотаций (art-sources-evidence-*.json): правила robots.txt для нашего агента и ИИ-ботов,
+// ссылки на условия и лицензии, ленты, формы поиска и короткие фрагменты условий. --no-terms отключает чтение страниц условий.
 // Зависимостей нет (Node 18+).
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { pageEvidence, robotsEvidence, termsSnippets } from './art-sources-evidence.mjs';
 
 const UA = 'VirtualGalleryResearchBot/1.0 (+https://virtgal.ru; research of public art sources)';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -86,6 +89,8 @@ export function parseRobots(text) {
   return {
     crawlDelay: delay,
     sitemaps,
+    groups,
+    rulesForUs: rules.map((r) => `${r.allow ? 'Allow' : 'Disallow'}: ${r.pattern}`),
     allows(pathAndQuery) {
       let best = null;
       for (const r of compiled) {
@@ -149,13 +154,15 @@ function pageInfo(body) {
 // ---------- запуск ----------
 
 function parseArgs(argv) {
-  const a = { mode: 'unreachable', ids: null, out: null, delay: MIN_DELAY_S };
+  const a = { mode: 'unreachable', ids: null, out: null, delay: MIN_DELAY_S, terms: true, evidence: null };
   for (let i = 0; i < argv.length; i++) {
     const x = argv[i];
     if (x === '--all') a.mode = 'all';
     else if (x === '--unreachable') a.mode = 'unreachable';
     else if (x === '--ids') { a.mode = 'ids'; a.ids = new Set(argv[++i].split(',').map((s) => s.trim())); }
     else if (x === '--out') a.out = argv[++i];
+    else if (x === '--evidence') a.evidence = argv[++i];
+    else if (x === '--no-terms') a.terms = false;
     else if (x === '--delay') a.delay = Math.max(MIN_DELAY_S, Number(argv[++i]) || MIN_DELAY_S);
     else if (x === '-h' || x === '--help') { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 14).join('\n').replace(/^\/\/ ?/gm, '')); process.exit(0); }
     else { console.error('неизвестный аргумент: ' + x); process.exit(2); }
@@ -163,8 +170,10 @@ function parseArgs(argv) {
   return a;
 }
 
-async function checkDomain(host, rows, delayS, log) {
+async function checkDomain(host, rows, delayS, log, opts = {}) {
   const out = [];
+  const evidence = [];
+  const termsCache = new Map();
   let robots = null;
   let robotsStatus = '';
   const wait = async (extra) => sleep(Math.max(delayS, extra ?? 0) * 1000);
@@ -178,6 +187,7 @@ async function checkDomain(host, rows, delayS, log) {
   else if (rr.status === 0) stop = `robots.txt: ${rr.error}`;
   else robots = parseRobots('');
   const eff = Math.max(delayS, robots?.crawlDelay ?? 0);
+  const robotsEv = robots ? robotsEvidence(robots, rr.status === 200 ? rr.body : '') : null;
 
   for (const r of rows) {
     const rec = {
@@ -185,11 +195,11 @@ async function checkDomain(host, rows, delayS, log) {
       crawl_delay: robots?.crawlDelay ?? '', sitemap: robots?.sitemaps?.[0] ?? '',
       robots_allows: '', http_status: '', final_url: '', redirected: '', content_type: '', bytes: '', ms: '', title: '', flags: '', verdict: '', error: '',
     };
-    if (stop) { rec.verdict = 'stopped'; rec.error = stop; out.push(rec); continue; }
+    if (stop) { rec.verdict = 'stopped'; rec.error = stop; out.push(rec); evidence.push({ id: r.id, domain: host, url: r.url, error: stop, robots: { status: robotsStatus } }); continue; }
     const u = new URL(r.url);
     const allowed = robots ? robots.allows(u.pathname + u.search) : true;
     rec.robots_allows = allowed ? 'yes' : 'no';
-    if (!allowed) { rec.verdict = 'robots_disallow'; out.push(rec); continue; }
+    if (!allowed) { rec.verdict = 'robots_disallow'; out.push(rec); evidence.push({ id: r.id, domain: host, url: r.url, robots: { status: robotsStatus, allows_page: false, ...robotsEv } }); continue; }
 
     await wait(eff);
     const g = await get(r.url);
@@ -203,16 +213,43 @@ async function checkDomain(host, rows, delayS, log) {
     const info = pageInfo(g.body);
     rec.title = info.title;
     rec.flags = info.flags.join('; ');
+    const ev = {
+      id: r.id, domain: host, url: r.url, checked_at: new Date().toISOString().slice(0, 10),
+      http_status: g.status, final_url: g.finalUrl, content_type: rec.content_type, error: g.error,
+      robots: { status: robotsStatus, allows_page: allowed, ...robotsEv },
+      page: null, terms: [],
+    };
+    if (g.status === 200 && /html/i.test(g.type || 'html')) ev.page = pageEvidence(g.body, g.finalUrl || r.url);
     if (g.status === 0) rec.verdict = 'unreachable';
     else if (g.status === 403 || g.status === 429 || g.status >= 500) { rec.verdict = `blocked_${g.status}`; stop = `${g.status} на ${r.id}`; }
     else if (g.status >= 400) rec.verdict = `error_${g.status}`;
     else if (info.flags.length) rec.verdict = 'protected';
     else if (g.bytes < 200) rec.verdict = 'empty';
     else rec.verdict = 'ok';
+    // Условия использования: до двух страниц с того же домена, только если robots.txt их разрешает; сохраняются короткие фрагменты.
+    if (opts.terms && ev.page && rec.verdict === 'ok') {
+      const cands = ev.page.terms_candidates.filter((c) => c.same_host && c.kind === 'terms').slice(0, 2);
+      for (const c of cands) {
+        if (termsCache.has(c.href)) { ev.terms.push(termsCache.get(c.href)); continue; }
+        const tu = new URL(c.href);
+        let t;
+        if (robots && !robots.allows(tu.pathname + tu.search)) t = { url: c.href, status: 0, skipped: 'robots.txt запрещает' };
+        else {
+          await wait(eff);
+          const tg = await get(c.href);
+          t = { url: c.href, status: tg.status, error: tg.error, title: pageInfo(tg.body).title, snippets: tg.status === 200 ? termsSnippets(tg.body) : [] };
+          if (tg.status === 403 || tg.status === 429 || tg.status >= 500) stop = `${tg.status} на условиях ${r.id}`;
+        }
+        termsCache.set(c.href, t);
+        ev.terms.push(t);
+        if (stop) break;
+      }
+    }
+    evidence.push(ev);
     log(`${rec.verdict.padEnd(15)} ${r.id}  ${r.url}`);
     out.push(rec);
   }
-  return out;
+  return { out, evidence };
 }
 
 async function main() {
@@ -233,9 +270,14 @@ async function main() {
 
   const queue = [...byHost.entries()];
   const results = [];
+  const evidenceAll = [];
   const log = (s) => console.log(s);
   await Promise.all(Array.from({ length: DOMAIN_PARALLEL }, async () => {
-    for (let item; (item = queue.shift());) results.push(...(await checkDomain(item[0], item[1], args.delay, log)));
+    for (let item; (item = queue.shift());) {
+      const r = await checkDomain(item[0], item[1], args.delay, log, { terms: args.terms });
+      results.push(...r.out);
+      evidenceAll.push(...r.evidence);
+    }
   }));
 
   const order = new Map(pick.map((r, i) => [r.id, i]));
@@ -244,6 +286,11 @@ async function main() {
   const stamp = new Date().toISOString().slice(0, 10);
   const outFile = args.out ?? `art-sources-check-${stamp}.tsv`;
   writeFileSync(outFile, [cols.join('\t'), ...results.map((r) => cols.map((c) => tsvCell(r[c])).join('\t'))].join('\n') + '\n');
+
+  evidenceAll.sort((a, b) => order.get(a.id) - order.get(b.id));
+  const evFile = args.evidence ?? `art-sources-evidence-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`;
+  writeFileSync(evFile, JSON.stringify({ tool: 'check-art-sources', user_agent: UA, created_at: new Date().toISOString(), rows: evidenceAll }, null, 1) + '\n');
+  console.log('Улики (robots, ссылки на условия, фрагменты):', evFile);
 
   const sum = {};
   for (const r of results) sum[r.verdict] = (sum[r.verdict] ?? 0) + 1;
