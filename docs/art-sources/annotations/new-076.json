@@ -1,0 +1,40 @@
+{
+  "id": "new-076",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.millon.com/en/our-specialities/russian-art",
+  "robots_summary": "robots.txt открыт (200), страница разрешена, Crawl-delay нет; закрыты служебные пути Drupal, фасеты (?f[), параметр page_ak и часть поиска (/en/buy/search/*?); есть sitemap.xml; ИИ-боты не упомянуты.",
+  "terms_summary": "Ссылки на CGU, конфиденциальность и юридические уведомления есть в подвале, но не читались; строка ©: «All rights reserved».",
+  "terms_url": null,
+  "license": "Открытой лицензии нет; в подвале «© MILLON & Associés - All rights reserved - Approval n°2002-379».",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/en/our-specialities/russian-art",
+      "/en/search/auction-items?s= (поиск, GET)",
+      "sitemap.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "по реестру, не проверено: каталоги, лоты"
+    ]
+  },
+  "freshness": "описание: отдел основан в 2018 году, 4 торга в год; даты не проверены",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "«All rights reserved», условия не читались, оператор зарубежный; форма поиска лотов (GET s) формально не закрыта, но при нулевой читаемости условий и низкой релевантности использовать её не стоит. Только ссылка.",
+  "annotation_ru": "Страница отдела русского искусства французского аукционного дома Millon (каталожные торги и онлайн-продажи, по описанию отдел создан в 2018 году). Помощнику может помочь справкой о торгах для сотрудников. Права защищены, условия не читались.",
+  "risks": [
+    "all rights reserved",
+    "зарубежный оператор (Франция)",
+    "условия CGU не читались",
+    "цены только справочно для сотрудников"
+  ],
+  "suspicious_pages": []
+}

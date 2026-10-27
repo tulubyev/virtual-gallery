@@ -1,0 +1,41 @@
+{
+  "id": "new-049",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://vital.lib.tsu.ru/vital/access/manager/Index",
+  "robots_summary": "robots.txt открыт (200), страница разрешена, Crawl-delay 10 с; закрыты /cgi-bin/, /assets/, /solr/, /fedora/ и поиск /manager/Repository*query=*; правил для ИИ-ботов нет.",
+  "terms_summary": "Прочитана страница Copyright: полный текст открыт, если срок прав истёк или есть договор, а воспроизведение разрешено только для личного некоммерческого использования.",
+  "terms_url": "https://vital.lib.tsu.ru/vital/access/manager/Copyright",
+  "license": "Открытой лицензии не найдено; цитата: «Users of open access resources can reproduce them for your personal non-commercial use.»",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "/vital/access/manager/Index (после редиректа с /)",
+      "/vital/access/manager/Repository (форма поиска, GET query=)",
+      "/vital/access/manager/Copyright",
+      "sitemap_1.xml, sitemap_2.xml, sitemap_3.xml"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "по реестру, не проверено: метаданные записей, полные тексты изданий"
+    ]
+  },
+  "freshness": "не проверено: дат на странице в улике нет",
+  "relevance": "medium",
+  "ingest_mode": "reference",
+  "ingest_reason": "Условия разрешают воспроизведение только для личного некоммерческого использования, а галерея коммерческая; форма поиска (GET, параметр query) закрыта в robots.txt, значит и живой поиск невозможен. Можно только давать ссылку.",
+  "annotation_ru": "Репозиторий Научной библиотеки ТГУ (в реестре описан как собрание изданий ТГУ и книг о Сибири и Томске; содержимое улики не подтверждает). Помощнику пригоден как ссылка для поиска литературы о томских художниках. Копировать и индексировать тексты нельзя: условия допускают лишь личное некоммерческое воспроизведение.",
+  "risks": [
+    "воспроизведение только для личного некоммерческого использования",
+    "поиск /manager/Repository*query=* закрыт в robots.txt",
+    "Crawl-delay 10 с",
+    "режим доступа к отдельным полным текстам не проверен"
+  ],
+  "suspicious_pages": []
+}

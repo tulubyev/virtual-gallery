@@ -1,0 +1,40 @@
+{
+  "id": "new-040",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://www.sgiiart.ru/jour/",
+  "robots_summary": "robots.txt получен (200): закрыты /cache/*, */search/search* (поиск) и */index.php/*, указан sitemap; журнал разрешён, Crawl-delay и правил для ИИ-ботов нет.",
+  "terms_summary": "Страница условий не прочитана (в улике нет); найдена политика обработки персональных данных платформы журнала.",
+  "terms_url": "https://www.sgiiart.ru/jour/about/privacyPolicyCommon",
+  "license": "На странице журнала указана лицензия Creative Commons Attribution 4.0 (CC BY 4.0, ссылка на creativecommons.org/licenses/by/4.0/); распространяется ли она на каждую статью, не проверено.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "https://www.sgiiart.ru/jour/ (главная журнала, платформа OJS)",
+      "https://www.sgiiart.ru/jour/gateway/plugin/WebFeedGatewayPlugin/rss (ленты atom, rss, rss2)",
+      "https://www.sgiiart.ru/sitemap"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "по реестру: статьи в PDF и JATS; в улике не проверено"
+    ]
+  },
+  "freshness": "Ленты atom и rss есть; даты выпусков не проверено.",
+  "relevance": "high",
+  "ingest_mode": "corpus",
+  "ingest_reason": "Единственный в этой выдаче источник с понятной открытой лицензией (CC BY 4.0, нужна атрибуция), тема по реестру прямая. Корпус допустим при условии проверки лицензии на странице каждой статьи и атрибуции; поиск сайта закрыт в robots.txt, живой поиск не включать, обход идёт по лентам и sitemap.",
+  "annotation_ru": "Электронный научный журнал «ARTE» Сибирского государственного института искусств (Красноярск, платформа OJS) с лентами atom/rss и лицензией CC BY 4.0. Для помощника прямой источник искусствоведческих текстов о Сибири, с обязательной атрибуцией. Область действия лицензии надо проверять по каждой статье, поиск сайта закрыт в robots.txt.",
+  "risks": [
+    "распространение лицензии CC BY 4.0 на каждую статью не подтверждено",
+    "нужна атрибуция автора и источника",
+    "авторы статей живые люди",
+    "поиск сайта закрыт в robots.txt"
+  ],
+  "suspicious_pages": []
+}

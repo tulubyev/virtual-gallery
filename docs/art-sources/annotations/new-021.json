@@ -1,0 +1,37 @@
+{
+  "id": "new-021",
+  "checked_at": "2026-10-26",
+  "available": true,
+  "final_url": "https://kuzbasskray.ru/",
+  "robots_summary": "robots.txt получен (200): единственное правило Allow: /; два sitemap с нестандартными адресами (css/buy.php?sitemap.xml); Crawl-delay и правил для ИИ-ботов нет.",
+  "terms_summary": "Прочитана страница «Правила посещения музея»: фрагмент содержит лишь навигацию, условий использования материалов сайта не проверено.",
+  "terms_url": "https://kuzbasskray.ru/posetitelyam/pravila-poseshcheniya-muzeya.php",
+  "license": "Лицензионные подсказки и строка © не найдено в проверенных страницах.",
+  "api": {
+    "exists": null,
+    "url": null,
+    "key_required": null,
+    "limits": null
+  },
+  "structure": {
+    "url_patterns": [
+      "https://kuzbasskray.ru/ (главная)",
+      "https://kuzbasskray.ru/search/index.php?q=<запрос> (поиск, GET)"
+    ],
+    "rendering": "static_html",
+    "pagination": "не проверено",
+    "fields": [
+      "не проверено"
+    ]
+  },
+  "freshness": "не проверено.",
+  "relevance": "low",
+  "ingest_mode": "reference",
+  "ingest_reason": "Форма поиска GET есть и не закрыта, но художественная часть минимальна (relevance low), прав не оговорено, RSS нет. Только ссылка.",
+  "annotation_ru": "Сайт Кузбасского государственного краеведческого музея (Кемерово) с поиском и разделом для посетителей. Для помощника это ссылка на афишу и историю региона; живопись Кузбасса в другом музее реестра. Права на материалы не оговорены.",
+  "risks": [
+    "права на материалы не оговорены",
+    "адреса sitemap нестандартные, их надёжность не проверена"
+  ],
+  "suspicious_pages": []
+}
