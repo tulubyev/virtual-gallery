@@ -58,7 +58,7 @@
 
 ### H. Служебное
 
-`status` (см. жизненный цикл), `language`, `generated_at`, `model`, `prompt_version`, `reviewed_by`, `reviewed_at`, `version`.
+`card_status` (см. жизненный цикл), `card_reviewed_by`, `card_reviewed_at`; у фрагментов — `language`, `model`, `prompt_version`, `approved_by`, `approved_at`, `version`.
 
 ## Статус фрагмента текста
 
@@ -106,9 +106,19 @@
 
 `draft` (создан) → `needs_review` (ИИ закончил, есть что проверить) → `approved` (куратор принял все публикуемые фрагменты) → `published` (виден посетителям) → `archived`. Любое изменение утверждённых фрагментов возвращает в `needs_review`. Права: создавать черновик и просить генерацию — сотрудники; утверждать и публиковать — куратор и администратор. Новые маршруты **обязательно вносятся в `accessPolicy.ts`**, иначе чтение откроется любому вошедшему, а изменение останется только у администратора (см. `CLAUDE.md`).
 
-## Данные (предложение)
+## Данные (реализовано миграцией `006_artwork_card.sql`)
 
-Паспортные поля A, B, E, F — колонки `artworks` (на проде уже есть `status`, `country`, `epoch`, `collection`; `src/database/schema.sql` отстаёт от боевой БД). Новые колонки: `title_en`, `medium_en`, `attribution_note_en` (английские варианты паспортных полей), `inventory_number`, `dating_text`, `year_from`, `year_to`, `dating_certainty`, `attribution_note`, `provenance`, `inscriptions`. Текстовые блоки — отдельная таблица `artwork_card_fragments (artwork_id, block, position, language, text, status, confidence, sources jsonb, translated_from, approved_by, approved_at, version, created_at)` с историей версий. Миграции — в `src/database/migrations/` (применяются вручную: `npm run migrate`, `docs/DEPLOY.md`).
+Применяется вручную: `npm run migrate` (на сервере — `docker exec virtual-gallery npm run migrate`, `docs/DEPLOY.md`). Существующие колонки `artworks` (на проде есть `status`, `country`, `epoch`, `collection`; `src/database/schema.sql` отстаёт от боевой БД) не меняются: показ уже опубликованных произведений остаётся прежним, а жизненный цикл карточки хранится отдельно.
+
+**Колонки `artworks`:** `title_en`, `medium_en`, `attribution_note`, `attribution_note_en`, `inventory_number`, `dating_text`, `year_from`, `year_to` (проверка `year_from <= year_to`), `dating_certainty` (`exact`/`approx`/`unknown`), `provenance`, `inscriptions`, `image_rights_holder`, `image_rights_note`, `card_status` (`draft` по умолчанию → `needs_review` → `approved` → `published` → `archived`), `card_reviewed_by`, `card_reviewed_at`. Поле `status` самой карточки в блоке H — это `card_status`, чтобы не пересекаться с существующим `status`.
+
+**`artwork_card_fragments`:** `fragment_id`, `artwork_id` (удаляется вместе с произведением), `block` (`about_work`, `about_artist`, `provenance`, `exhibitions`, `acquisition`, `inscriptions`), `position`, `language` (`ru`/`en`), `text`, `status` (`catalogued`/`from_document`/`visible`/`ai_inferred`), `confidence`, `sources` (JSON-массив), `translated_from`, `model`, `prompt_version`, `created_by`, `approved_by`, `approved_at`, `version`, времена. Ограничения в самой БД: у `from_document` в `sources` есть документный источник с непустой цитатой; `ai_inferred` нельзя утвердить.
+
+**Триггеры:** содержательная правка фрагмента (текст, статус, уверенность, источники, блок, язык) пишет прежнюю версию в `artwork_card_fragment_history`, увеличивает `version` и снимает утверждение, если оно не подтверждено в той же правке; утверждённая или опубликованная карточка при этом уходит в `needs_review`. Новый неутверждённый фрагмент тоже возвращает карточку на проверку.
+
+**Представление `artwork_card_public_fragments`:** то, что можно показывать посетителям: карточка в статусе `published`, фрагмент утверждён, не `ai_inferred`, все документные источники помечены `access: "public"` (документ `staff` или без отметки не показывается). API для посетителей должен читать только его.
+
+Что остаётся за сервисом (в БД не проверяется): проверка цитат по тексту документа, фильтр суждений о подлинности и цене, права ролей (`accessPolicy.ts`), перевод и правила генерации. Таблицы туров (`tour`, `tour_stops`) — отдельной миграцией.
 
 ## Пример (вымышленные данные)
 
