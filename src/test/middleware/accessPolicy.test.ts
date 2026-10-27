@@ -68,6 +68,18 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['GET', '/api/bidding/auctions', { anon: 200 }],
   ['GET', '/api/bidding/auctions/spring-2026', { anon: 200 }],
   ['GET', '/api/bidding/lots/5', { anon: 200 }],
+  // карточка произведения
+  ['GET', '/api/artwork-cards/public/5', { anon: 200 }],
+  ['GET', '/api/artwork-cards/public/abc', { anon: 401, user: 403, staff: 200 }],       // не id: общее правило для сотрудников
+  ['GET', '/api/artwork-cards/public/5/extra', { anon: 401, user: 403, staff: 200 }],
+  ['GET', '/api/artwork-cards', { anon: 401, user: 403, staff: 200, curator: 200 }],
+  ['GET', '/api/artwork-cards/5', { anon: 401, user: 403, staff: 200, curator: 200, admin: 200 }],
+  ['PUT', '/api/artwork-cards/5/passport', { anon: 401, user: 403, staff: 200, curator: 200 }],
+  ['POST', '/api/artwork-cards/5/fragments', { anon: 401, user: 403, staff: 200, curator: 200 }],
+  ['PATCH', '/api/artwork-cards/5/fragments/9', { anon: 401, user: 403, staff: 200 }],
+  ['DELETE', '/api/artwork-cards/5/fragments/9', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
+  ['POST', '/api/artwork-cards/5/fragments/9/approve', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
+  ['POST', '/api/artwork-cards/5/status', { anon: 401, user: 403, bidder: 403, staff: 200, curator: 200 }],
   ['GET', '/api/bidding/lots/5/state', { anon: 200 }],
   ['POST', '/api/bidding/lots/5/bids', { anon: 401, user: 200, bidder: 200 }],
   ['POST', '/api/bidding/auctions/spring-2026/apply', { anon: 401, user: 200 }],
