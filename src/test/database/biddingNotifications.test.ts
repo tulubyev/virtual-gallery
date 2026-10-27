@@ -136,7 +136,8 @@ describeDb('уведомления участникам торгов (PostgreSQL
 
   describe('тексты', () => {
     it('на каждый вид есть текст; виды в коде и в ограничении таблицы совпадают', async () => {
-      const [{ def }] = await h.q(`SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE conname = 'bidding_notifications_kind_check'`);
+      // Только таблица своей схемы: тесты других наборов создают и удаляют схемы параллельно, ограничение с тем же именем есть и у них
+      const [{ def }] = await h.q(`SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint WHERE conname = 'bidding_notifications_kind_check' AND conrelid = 'bidding_notifications'::regclass`);
       const inDb = [...def.matchAll(/'([a-z_]+)'::text/g)].map((m: RegExpMatchArray) => m[1]).sort();
       expect(inDb).toEqual([...NOTIFICATION_KINDS].sort());
       for (const kind of NOTIFICATION_KINDS) {
