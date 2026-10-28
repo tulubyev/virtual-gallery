@@ -15,11 +15,12 @@ export async function callAiCore(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   body?: object,
   headers: Record<string, string> = {},
+  timeoutMs: number = TIMEOUT_MS,           // генерация с проверкой цитат идёт дольше обычного запроса
 ): Promise<CoreResponse> {
   const base = process.env.AI_CORE_URL || 'http://localhost:8001';
   const token = process.env.INTERNAL_API_TOKEN || '';
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${base}${path}`, {
       method,

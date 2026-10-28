@@ -5,6 +5,7 @@
 ## Как это работает
 
 - Задачи: `vision_front` (лицо работы), `vision_back` (оборот, OCR), `rag_answer`, `chat`, `judge`, `bulk` (`services/model_registry.py`).
+- Карточка произведения отдельных задач не имеет: черновик по документам идёт на модель `rag_answer`, перевод ru→en — на `bulk` (`docs/ARTWORK-CARD.md`).
 - Выбор администратора важнее `MODEL_*` из окружения. Хранится в таблице `ai_model_settings` БД ядра
   (`ai-ml-service/migrations/005_create_ai_model_settings.sql`), каждое изменение пишется в `ai_model_settings_log`
   (кто, когда, с какой модели на какую). «По умолчанию» удаляет строку — снова действует значение из окружения.

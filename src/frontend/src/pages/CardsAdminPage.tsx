@@ -242,6 +242,7 @@ const Editor: React.FC<{ id: number; isCurator: boolean }> = ({ id, isCurator })
   const [lang, setLang] = useState<Language>('ru');
   const [busy, setBusy] = useState(false);
   const [approveAll, setApproveAll] = useState(true);
+  const [report, setReport] = useState<{ draft?: cards.DraftResult; translate?: cards.TranslateResult } | null>(null);
 
   const load = useCallback(async () => {
     try { const r = await cards.getCard(id); setCard(r.card); setProblems(r.card.problems); setError(''); }
@@ -261,6 +262,16 @@ const Editor: React.FC<{ id: number; isCurator: boolean }> = ({ id, isCurator })
       if (e instanceof CardApiError && e.problems.length) setProblems(e.problems);
     } finally { setBusy(false); }
   }, [load]);
+
+  /** Помощник: результат показываем подробно (что отклонено и почему), а не одной строкой. */
+  async function assist(kind: 'draft' | 'translate') {
+    setBusy(true); setFlash(null);
+    try {
+      if (kind === 'draft') { const r = await cards.generateDraft(id); setReport({ draft: r }); setFlash({ tone: r.added.length ? 'good' : 'warn', text: cards.draftSummary(r) }); }
+      else { const r = await cards.translateCard(id); setReport({ translate: r }); setFlash({ tone: r.added.length ? 'good' : 'warn', text: cards.translateSummary(r) }); }
+      await load();
+    } catch (e) { setFlash({ tone: 'error', text: errorText(e) }); } finally { setBusy(false); }
+  }
 
   if (error) return <Shell title={`Карточка № ${id}`} back={<Link to="/cards" className="text-indigo-600 hover:underline">← К очереди</Link>}><Notice tone="error">{error}</Notice></Shell>;
   if (!card) return <Shell title={`Карточка № ${id}`}><p className="text-gray-500">Загружаю…</p></Shell>;
@@ -315,6 +326,32 @@ const Editor: React.FC<{ id: number; isCurator: boolean }> = ({ id, isCurator })
         </section>
 
         <Passport artwork={a} setFlash={setFlash} onSaved={(art, note) => { setFlash({ tone: 'good', text: note }); setCard({ ...card, artwork: art }); load(); }} />
+
+        {!readonly && (
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <h2 className="text-lg font-semibold">Помощник</h2>
+            <p className="text-sm text-gray-600">Ищет в документах базы знаний места об этом произведении и предлагает фрагменты с дословными цитатами. Всё, что не подтверждается текстом документа, отбрасывается; где данных нет, блок остаётся пустым. Предложенное ждёт вашей проверки: помощник ничего не публикует и не утверждает.</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" disabled={busy} className={primary} onClick={() => assist('draft')}>{busy ? 'Работаю…' : 'Подготовить черновик по документам'}</button>
+              <button type="button" disabled={busy} className={ghost} onClick={() => { setLang('en'); assist('translate'); }}>Перевести утверждённое на английский</button>
+            </div>
+            {report?.draft && (
+              <div className="text-sm space-y-2">
+                {report.draft.missing.length > 0 && <p><span className="text-gray-500">Нет данных для блоков:</span> {report.draft.missing.map(b => BLOCK_LABEL[b] ?? b).join(', ')}.</p>}
+                {report.draft.warnings.length > 0 && <ul className="list-disc pl-5 text-amber-800">{report.draft.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>}
+                {report.draft.rejected.length > 0 && (
+                  <details><summary className="cursor-pointer text-indigo-600">Не прошли проверку ({report.draft.rejected.length})</summary>
+                    <ul className="mt-2 space-y-2">{report.draft.rejected.map((r, i) => (
+                      <li key={i} className="rounded-lg bg-gray-50 p-2">{r.text && <p className="text-gray-700">{r.text}</p>}<p className="text-xs text-red-700">{r.reasons.join('; ')}</p></li>))}</ul></details>
+                )}
+              </div>
+            )}
+            {report?.translate && report.translate.rejected.length > 0 && (
+              <details className="text-sm"><summary className="cursor-pointer text-indigo-600">Переводы не прошли проверку ({report.translate.rejected.length})</summary>
+                <ul className="mt-2 space-y-1">{report.translate.rejected.map(r => <li key={r.fragment_id} className="text-xs text-red-700">Фрагмент № {r.fragment_id}: {r.reasons.join('; ')}</li>)}</ul></details>
+            )}
+          </section>
+        )}
 
         <section className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">

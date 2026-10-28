@@ -11,7 +11,7 @@ import time
 from contextlib import asynccontextmanager
 
 from .config import settings
-from .routes import health, images, pdfs, rag, digitization, external_sources, chat, model_settings as model_settings_routes
+from .routes import health, images, pdfs, rag, digitization, external_sources, chat, cards, model_settings as model_settings_routes
 from .security import require_internal_token
 from .services.database import close_db, init_db
 from .services.model_settings import model_settings
@@ -112,6 +112,7 @@ app.include_router(images.router, prefix="/api/v1/images", tags=["images"], depe
 app.include_router(pdfs.router, prefix="/api/v1/pdfs", tags=["pdfs"], dependencies=protected)
 app.include_router(rag.router, prefix="/api/v1/rag", tags=["rag"], dependencies=protected)
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"], dependencies=protected)
+app.include_router(cards.router, prefix="/api/v1/cards", tags=["cards"], dependencies=protected)
 app.include_router(model_settings_routes.router, prefix="/api/v1/model-settings", tags=["model-settings"], dependencies=protected)
 # маршруты оцифровки сами содержат /digitize и /artworks, поэтому префикс общий
 app.include_router(digitization.router, prefix="/api/v1", tags=["digitization"], dependencies=protected)
