@@ -79,9 +79,11 @@ const Header: React.FC<HeaderProps> = ({ currentUser, onLogout }) => {
     ? roleNav[currentUser.role] ?? publicNav
     : publicNav;
   const isCurator = currentUser?.role === 'curator' || currentUser?.role === 'admin';
+  const isStaff = isCurator || currentUser?.role === 'staff';
+  const withCards = isStaff ? [...baseLinks, { title: 'Карточки', path: '/cards' }] : baseLinks;
   const navLinks = biddingOn
-    ? [...baseLinks, { title: 'Торги', path: '/torgi' }, ...(isCurator ? [{ title: 'Кабинет торгов', path: '/torgi/admin' }] : [])]
-    : baseLinks;
+    ? [...withCards, { title: 'Торги', path: '/torgi' }, ...(isCurator ? [{ title: 'Кабинет торгов', path: '/torgi/admin' }] : [])]
+    : withCards;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">

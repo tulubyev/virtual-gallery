@@ -34,6 +34,7 @@ const TorgiListPage = lazy(() => import('./pages/TorgiListPage'));
 const TorgiAuctionPage = lazy(() => import('./pages/TorgiAuctionPage'));
 const TorgiLotPage = lazy(() => import('./pages/TorgiLotPage'));
 const TorgiAdminPage = lazy(() => import('./pages/TorgiAdminPage'));
+const CardsAdminPage = lazy(() => import('./pages/CardsAdminPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
@@ -274,6 +275,8 @@ const App: React.FC = () => {
                 <Route path="/auction" element={<AuctionPage />} />
                 <Route path="/torgi" element={<TorgiListPage />} />
                 <Route path="/torgi/admin" element={guard(['curator', 'admin'], <TorgiAdminPage />)} />
+                <Route path="/cards" element={guard(['staff', 'curator', 'admin'], <CardsAdminPage role={currentUser?.role ?? ''} />)} />
+                <Route path="/cards/:id" element={guard(['staff', 'curator', 'admin'], <CardsAdminPage role={currentUser?.role ?? ''} />)} />
                 <Route path="/torgi/lot/:id" element={<TorgiLotPage />} />
                 <Route path="/torgi/:slug" element={<TorgiAuctionPage />} />
                 <Route path="/legal/:slug" element={<LegalPage />} />
