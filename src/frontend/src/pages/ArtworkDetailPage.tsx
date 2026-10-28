@@ -150,6 +150,7 @@ const ArtworkDetailPage: React.FC = () => {
   const [similarArtworks, setSimilarArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [hasCard, setHasCard] = useState(false);
 
   useEffect(() => {
     const fetchArtwork = async () => {
@@ -170,6 +171,9 @@ const ArtworkDetailPage: React.FC = () => {
     };
 
     fetchArtwork();
+    // Ссылка на карточку нужна, только если она опубликована (публичное чтение отвечает 404 иначе)
+    setHasCard(false);
+    if (id) fetch(`/api/artwork-cards/public/${encodeURIComponent(id)}`).then(r => setHasCard(r.ok)).catch(() => setHasCard(false));
   }, [id]);
 
   const handleGoBack = () => {
@@ -227,6 +231,7 @@ const ArtworkDetailPage: React.FC = () => {
           <Artist>{artwork.artist_name}</Artist>
           
           <Description>{artwork.description}</Description>
+          {hasCard && <p><a href={`/artworks/${id}/card`} style={{ color: '#6200ee' }}>Карточка произведения →</a></p>}
           
           <MetaInfo>
             <MetaItem>
