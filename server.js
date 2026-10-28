@@ -58,6 +58,7 @@ if (process.env.BIDDING_ENABLED === 'true') {
 }
 app.use('/api/gallery', noCacheMiddleware, require('./src/routes/gallery'));
 app.use('/api/artworks', noCacheMiddleware, require('./src/routes/artworks'));
+app.use('/api/artwork-cards', noCacheMiddleware, require('./src/routes/artworkCards'));
 app.use('/api/collections', noCacheMiddleware, require('./src/routes/collections'));
 app.use('/api/admin', noCacheMiddleware, require('./src/routes/admin'));
 app.use('/api/admin/users', noCacheMiddleware, require('./src/routes/users'));

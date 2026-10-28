@@ -55,6 +55,13 @@ export const RULES: readonly Rule[] = [
   { methods: ['POST'], path: /^\/artworks\/upload$/, access: STAFF },
   { methods: ALL, path: /^\/artworks(\/.*)?$/, access: CURATORS },
 
+  // ── карточка произведения: опубликованную читают все; черновики и правки — сотрудники; утверждение фрагментов и удаление — куратор;
+  //    переходы по жизненному циклу проверяют роль по каждому переходу в сервисе (сотрудник — на проверку, куратор — утверждение и публикация) ──
+  { methods: GET, path: /^\/artwork-cards\/public\/\d+$/, access: 'public' },
+  { methods: ['POST'], path: /^\/artwork-cards\/\d+\/fragments\/\d+\/approve$/, access: CURATORS },
+  { methods: ['DELETE'], path: /^\/artwork-cards\/\d+\/fragments\/\d+$/, access: CURATORS },
+  { methods: ALL, path: /^\/artwork-cards(\/.*)?$/, access: STAFF },
+
   // ── коллекции, архив, настройки, статистика ─────────────────────────
   { methods: GET, path: /^\/collections(\/[^/]+)?$/, access: 'public' },
   { methods: ALL, path: /^\/collections(\/.*)?$/, access: CURATORS },
