@@ -6,6 +6,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import pool from '../config/database';
+import { validateEmail, validateUsername } from '../services/userAdmin';
+import { issuedBeforePasswordChange, queryWithFallback } from '../services/userSession';
 
 const { uploadWithKey, StorageUnavailableError } = require('../services/s3-upload');
 
@@ -19,7 +21,14 @@ interface UserRow {
   role: string;
   password_hash?: string;
   avatar_url?: string;
+  must_change_password?: boolean;
+  temp_password_expires_at?: Date | null;
+  password_changed_at?: Date | null;
 }
+
+const MIN_PASSWORD = 6;
+const MIN_PASSWORD_AFTER_RESET = 8;              // новый пароль после временного — не короче, чем может выдать администратор
+
 
 // How far past expiry we still allow a refresh (7 days)
 const REFRESH_GRACE_SECONDS = 7 * 24 * 60 * 60;
@@ -71,15 +80,18 @@ router.post('/register', async (req: Request, res: Response) => {
     // (PUT /api/users/:id/role) — иначе любой стал бы участником аукциона без проверки.
     const userRole = 'user';
 
-    const exists = await pool.query('SELECT user_id FROM users WHERE email = $1', [email]);
+    const invalid = validateUsername(username, 1) ?? validateEmail(email);
+    if (invalid) return res.status(400).json({ error: invalid });
+
+    const exists = await pool.query('SELECT user_id FROM users WHERE lower(email) = lower($1) OR lower(username) = lower($2)', [email.trim(), username.trim()]);
     if (exists.rows.length > 0) {
-      return res.status(409).json({ error: 'User with this email already exists' });
+      return res.status(409).json({ error: 'User with this email or username already exists' });
     }
 
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const result = await pool.query(
       'INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING user_id, username, email, role',
-      [username, email, hash, userRole]
+      [username.trim(), email.trim(), hash, userRole]
     );
     const user: UserRow = result.rows[0];
     const token = makeToken(user);
@@ -98,7 +110,8 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const result = await pool.query(
+    const result = await queryWithFallback(
+      'SELECT user_id, username, email, role, password_hash, avatar_url, must_change_password, temp_password_expires_at FROM users WHERE email = $1',
       'SELECT user_id, username, email, role, password_hash, avatar_url FROM users WHERE email = $1',
       [email]
     );
@@ -111,11 +124,15 @@ router.post('/login', async (req: Request, res: Response) => {
     if (!match) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+    // Пароль верный, но выданный администратором временный пароль уже просрочен: нужен новый
+    if (user.must_change_password && user.temp_password_expires_at && user.temp_password_expires_at.getTime() < Date.now()) {
+      return res.status(401).json({ error: 'Срок временного пароля истёк. Попросите администратора выдать новый.', code: 'temp_password_expired' });
+    }
 
     const days = Number(rememberMe);
     const rememberDays: 0 | 7 | 30 = days === 30 ? 30 : days === 7 ? 7 : 0;
     const token = makeToken(user, rememberDays);
-    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, token });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, must_change_password: !!user.must_change_password, token });
   } catch (err: any) {
     console.error('[auth/login]', err.message);
     res.status(500).json({ error: 'Login failed' });
@@ -141,13 +158,14 @@ router.get('/me', async (req: Request, res: Response) => {
     const decoded = await decodeUser(token);
     if (!decoded) return res.status(401).json({ error: 'Invalid token' });
 
-    const result = await pool.query(
+    const result = await queryWithFallback(
+      'SELECT user_id, username, email, role, created_at, avatar_url, must_change_password FROM users WHERE user_id = $1',
       'SELECT user_id, username, email, role, created_at, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
     const user = result.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, created_at: user.created_at, avatar_url: user.avatar_url || null });
+    res.json({ user_id: user.user_id, username: user.username, email: user.email, role: user.role, created_at: user.created_at, avatar_url: user.avatar_url || null, must_change_password: !!user.must_change_password });
   } catch (err: any) {
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
@@ -162,6 +180,8 @@ router.put('/me', async (req: Request, res: Response) => {
 
     const { username, email } = req.body;
     if (!username && !email) return res.status(400).json({ error: 'Nothing to update' });
+    const invalid = (username ? validateUsername(username, 1) : null) ?? (email ? validateEmail(email) : null);
+    if (invalid) return res.status(400).json({ error: invalid });
 
     if (email) {
       const conflict = await pool.query('SELECT user_id FROM users WHERE email = $1 AND user_id != $2', [email, decoded.userId]);
@@ -222,18 +242,35 @@ router.put('/me/password', async (req: Request, res: Response) => {
 
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) return res.status(400).json({ error: 'currentPassword and newPassword are required' });
-    if (newPassword.length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    if (typeof newPassword !== 'string' || typeof currentPassword !== 'string') return res.status(400).json({ error: 'Passwords must be strings' });
+    if (Buffer.byteLength(newPassword, 'utf8') > 72) return res.status(400).json({ error: 'Пароль — не длиннее 72 байт' });
 
-    const result = await pool.query('SELECT password_hash FROM users WHERE user_id = $1', [decoded.userId]);
-    const user = result.rows[0];
+    const result = await queryWithFallback(
+      'SELECT user_id, username, email, role, avatar_url, password_hash, must_change_password FROM users WHERE user_id = $1',
+      'SELECT user_id, username, email, role, avatar_url, password_hash FROM users WHERE user_id = $1',
+      [decoded.userId]
+    );
+    const user: UserRow = result.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    // После временного пароля требования строже и новый пароль должен отличаться от выданного
+    const min = user.must_change_password ? MIN_PASSWORD_AFTER_RESET : MIN_PASSWORD;
+    if (newPassword.length < min) return res.status(400).json({ error: user.must_change_password ? `Новый пароль — не короче ${min} знаков` : `New password must be at least ${min} characters` });
+
+    const match = await bcrypt.compare(currentPassword, user.password_hash!);
     if (!match) return res.status(401).json({ error: 'Current password is incorrect' });
+    if (user.must_change_password && newPassword === currentPassword) return res.status(400).json({ error: 'Новый пароль должен отличаться от временного' });
 
     const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    await pool.query('UPDATE users SET password_hash = $1 WHERE user_id = $2', [newHash, decoded.userId]);
-    res.json({ success: true });
+    try {
+      await pool.query(
+        'UPDATE users SET password_hash = $1, must_change_password = false, temp_password_expires_at = NULL, password_changed_at = now() WHERE user_id = $2', [newHash, decoded.userId]);
+    } catch (e: any) {
+      if (e?.code !== '42703') throw e;                       // миграция 007 ещё не применена
+      await pool.query('UPDATE users SET password_hash = $1 WHERE user_id = $2', [newHash, decoded.userId]);
+    }
+    // Токены, выданные до смены, перестают действовать: возвращаем новый, чтобы эта сессия продолжилась
+    res.json({ success: true, must_change_password: false, token: makeToken(user) });
   } catch (err: any) {
     console.error('[auth/me/password]', err.message);
     res.status(500).json({ error: 'Failed to change password' });
@@ -257,12 +294,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Token too old to refresh' });
     }
 
-    const result = await pool.query(
+    const result = await queryWithFallback(
+      'SELECT user_id, username, email, role, avatar_url, must_change_password, password_changed_at FROM users WHERE user_id = $1',
       'SELECT user_id, username, email, role, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
     const user: UserRow = result.rows[0];
     if (!user) return res.status(401).json({ error: 'User not found' });
+    if (issuedBeforePasswordChange(decoded.iat, user.password_changed_at)) return res.status(401).json({ error: 'Password was changed, sign in again' });
 
     const originalTTLSeconds = decoded.exp && decoded.iat ? decoded.exp - decoded.iat : 24 * 60 * 60;
     const rememberDays: 0 | 7 | 30 =
@@ -270,7 +309,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
       originalTTLSeconds >= 7 * 24 * 60 * 60 ? 7 : 0;
 
     const newToken = makeToken(user, rememberDays);
-    res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null } });
+    res.json({ token: newToken, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, must_change_password: !!user.must_change_password } });
   } catch (err: any) {
     console.error('[auth/refresh]', err.message);
     res.status(500).json({ error: 'Token refresh failed' });
@@ -282,15 +321,17 @@ router.get('/verify', async (req: Request, res: Response) => {
     const token = (req.headers['authorization'] || '').replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
-    const decoded = jwt.verify(token, getJwtSecret()) as { userId: number };
-    const result = await pool.query(
+    const decoded = jwt.verify(token, getJwtSecret()) as { userId: number; iat?: number };
+    const result = await queryWithFallback(
+      'SELECT user_id, username, email, role, avatar_url, must_change_password, password_changed_at FROM users WHERE user_id = $1',
       'SELECT user_id, username, email, role, avatar_url FROM users WHERE user_id = $1',
       [decoded.userId]
     );
-    const user = result.rows[0];
+    const user: UserRow = result.rows[0];
     if (!user) return res.status(404).json({ error: 'User not found' });
+    if (issuedBeforePasswordChange(decoded.iat, user.password_changed_at)) return res.status(401).json({ valid: false, error: 'Password was changed, sign in again' });
 
-    res.json({ valid: true, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null } });
+    res.json({ valid: true, user: { user_id: user.user_id, username: user.username, email: user.email, role: user.role, avatar_url: user.avatar_url || null, must_change_password: !!user.must_change_password } });
   } catch {
     res.status(401).json({ valid: false, error: 'Invalid or expired token' });
   }

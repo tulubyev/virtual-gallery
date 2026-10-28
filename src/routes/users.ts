@@ -1,10 +1,11 @@
 import express, { Request, Response } from 'express';
 import pool from '../config/database';
+import * as admin from '../services/userAdmin';
+import { parseId } from '../services/biddingInput';
 
 const router = express.Router();
 
 const VALID_SORT_COLUMNS = ['user_id', 'username', 'email', 'role', 'created_at'];
-const VALID_ROLES = ['admin', 'curator', 'staff', 'tour_guide', 'auction_participant', 'user'];
 
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -35,8 +36,10 @@ router.get('/', async (req: Request, res: Response) => {
     const total = countResult.rows[0].total;
 
     const dataParams = [...params, pageLimit, pageOffset];
-    const result = await pool.query(
-      `SELECT user_id, username, email, role, created_at FROM users ${whereClause} ORDER BY ${sortColumn} ${sortOrder} LIMIT $${idx} OFFSET $${idx + 1}`,
+    const tail = `FROM users ${whereClause} ORDER BY ${sortColumn} ${sortOrder} LIMIT $${idx} OFFSET $${idx + 1}`;
+    const result = await admin.queryWithFallback(
+      `SELECT user_id, username, email, role, created_at, must_change_password, temp_password_expires_at ${tail}`,
+      `SELECT user_id, username, email, role, created_at ${tail}`,
       dataParams
     );
 
@@ -64,84 +67,70 @@ router.get('/stats', async (_req: Request, res: Response) => {
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+const respond = (res: Response, r: admin.Result<any>, okStatus = 200) => {
+  if (r.ok) { const { ok, ...rest } = r; return res.status(okStatus).json({ success: true, ...rest }); }
+  const { ok, status, ...rest } = r;
+  return res.status(status).json(rest);
+};
+const actorOf = (req: Request) => (req as any).user as admin.Actor;
+const fault = (res: Response, scope: string, error: any) => {
+  console.error(`[admin/users] ${scope}:`, error?.message);
+  return res.status(500).json({ error: 'Не удалось выполнить запрос' });
+};
+
+/** Создать пользователя: { username, email, role, password? }. Без пароля выдаётся временный; в ответе он показывается один раз. */
+router.post('/', async (req: Request, res: Response) => {
+  try { respond(res, await admin.createUser(actorOf(req), req.body ?? {}), 201); } catch (e) { fault(res, 'create', e); }
+});
+
+/** Новый временный пароль: { password? }. Закрывает прежние сессии пользователя и требует смены пароля при входе. */
+router.post('/:id/reset-password', async (req: Request, res: Response) => {
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
+  try { respond(res, await admin.resetPassword(actorOf(req), id, req.body?.password)); } catch (e) { fault(res, 'reset-password', e); }
+});
+
+/** Журнал действий администраторов по пользователю (без паролей). */
+router.get('/:id/log', async (req: Request, res: Response) => {
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
   try {
-    const result = await pool.query(
-      'SELECT user_id, username, email, role, created_at FROM users WHERE user_id = $1',
-      [req.params.id]
-    );
+    const { rows } = await pool.query(
+      'SELECT log_id, actor_id, action, details, created_at FROM user_admin_log WHERE target_id = $1 ORDER BY created_at DESC, log_id DESC LIMIT 50', [id]);
+    res.json({ log: rows });
+  } catch (e) { fault(res, 'log', e); }
+});
+
+router.get('/:id', async (req: Request, res: Response) => {
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
+  try {
+    const result = await admin.queryWithFallback(
+      'SELECT user_id, username, email, role, created_at, must_change_password, temp_password_expires_at FROM users WHERE user_id = $1',
+      'SELECT user_id, username, email, role, created_at FROM users WHERE user_id = $1', [id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Пользователь не найден' });
     res.json(result.rows[0]);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  } catch (e) { fault(res, 'get', e); }
 });
 
 router.put('/:id', async (req: Request, res: Response) => {
-  try {
-    const { username, email, role } = req.body;
-    const userId = req.params.id;
-
-    if (!username && !email && !role) {
-      return res.status(400).json({ error: 'Нужно указать хотя бы одно поле для обновления' });
-    }
-    if (role && !VALID_ROLES.includes(role)) {
-      return res.status(400).json({ error: `Недопустимая роль. Допустимые: ${VALID_ROLES.join(', ')}` });
-    }
-    if (email) {
-      const existing = await pool.query(
-        'SELECT user_id FROM users WHERE email = $1 AND user_id != $2',
-        [email, userId]
-      );
-      if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Пользователь с таким email уже существует' });
-      }
-    }
-
-    const result = await pool.query(
-      `UPDATE users SET
-        username = COALESCE($1, username),
-        email = COALESCE($2, email),
-        role = COALESCE($3, role)
-       WHERE user_id = $4
-       RETURNING user_id, username, email, role, created_at`,
-      [username || null, email || null, role || null, userId]
-    );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Пользователь не найден' });
-    res.json({ success: true, user: result.rows[0] });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
+  const { username, email, role } = req.body ?? {};
+  try { respond(res, await admin.updateUser(actorOf(req), id, { username, email, role })); } catch (e) { fault(res, 'update', e); }
 });
 
 router.put('/:id/role', async (req: Request, res: Response) => {
-  try {
-    const { role } = req.body;
-    if (!role || !VALID_ROLES.includes(role)) {
-      return res.status(400).json({ error: `Недопустимая роль. Допустимые: ${VALID_ROLES.join(', ')}` });
-    }
-    const result = await pool.query(
-      'UPDATE users SET role = $1 WHERE user_id = $2 RETURNING user_id, username, email, role, created_at',
-      [role, req.params.id]
-    );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Пользователь не найден' });
-    res.json({ success: true, user: result.rows[0] });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
+  if (!admin.isRole(req.body?.role)) return res.status(400).json({ error: `Недопустимая роль. Допустимые: ${admin.ROLES.join(', ')}` });
+  try { respond(res, await admin.updateUser(actorOf(req), id, { role: req.body.role })); } catch (e) { fault(res, 'role', e); }
 });
 
 router.delete('/:id', async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query(
-      'DELETE FROM users WHERE user_id = $1 RETURNING user_id',
-      [req.params.id]
-    );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Пользователь не найден' });
-    res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
+  const id = parseId(req.params.id);
+  if (!id) return res.status(404).json({ error: 'Пользователь не найден' });
+  try { respond(res, await admin.deleteUser(actorOf(req), id)); } catch (e) { fault(res, 'delete', e); }
 });
 
 export = router;

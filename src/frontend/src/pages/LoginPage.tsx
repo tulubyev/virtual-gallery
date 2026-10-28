@@ -25,7 +25,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         rememberMe: Number(rememberDays)
       });
 
-      const { token, user_id, username, email: uemail, role } = response.data;
+      const { token, user_id, username, email: uemail, role, must_change_password } = response.data;
 
       localStorage.setItem('authToken', token);
 
@@ -34,10 +34,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         username,
         email: uemail,
         role,
+        must_change_password: !!must_change_password,
       };
 
       onLogin(user);
-      navigate('/');
+      navigate(must_change_password ? '/change-password' : '/');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Invalid email or password');
     }
