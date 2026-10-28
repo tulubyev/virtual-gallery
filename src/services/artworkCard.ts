@@ -15,12 +15,12 @@ const PASSPORT_COLUMNS = `artwork_id, title, artist_name, year_created, medium, 
   title_en, medium_en, attribution_note, attribution_note_en, inventory_number, dating_text, year_from, year_to, dating_certainty,
   provenance, inscriptions, image_rights_holder, image_rights_note, card_status, card_reviewed_by, card_reviewed_at`;
 
-async function loadArtwork(client: Pick<PoolClient, 'query'>, id: number, lock = false) {
+export async function loadArtwork(client: Pick<PoolClient, 'query'>, id: number, lock = false) {
   const { rows } = await client.query(`SELECT ${PASSPORT_COLUMNS} FROM artworks WHERE artwork_id = $1${lock ? ' FOR UPDATE' : ''}`, [id]);
   return rows[0] as Record<string, any> | undefined;
 }
 
-async function loadFragments(client: Pick<PoolClient, 'query'>, id: number) {
+export async function loadFragments(client: Pick<PoolClient, 'query'>, id: number) {
   const { rows } = await client.query(
     `SELECT fragment_id, artwork_id, block, position, language, text, status, confidence, sources, translated_from, model, prompt_version,
             created_by, approved_by, approved_at, version, created_at, updated_at
