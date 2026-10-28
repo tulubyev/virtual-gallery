@@ -276,7 +276,8 @@ const Editor: React.FC<{ id: number; isCurator: boolean }> = ({ id, isCurator })
       title={a.title}
       back={<Link to="/cards" className="text-indigo-600 hover:underline">← К очереди карточек</Link>}
       subtitle={<span className="flex flex-wrap items-center gap-3">{a.artist_name}<Badge tone={STATUS_TONE[a.card_status]}>{STATUS_LABEL[a.card_status]}</Badge>
-        <Link to={`/artworks/${a.artwork_id}`} className="text-sm text-indigo-600 hover:underline">Страница произведения</Link></span>}
+        <Link to={`/artworks/${a.artwork_id}`} className="text-sm text-indigo-600 hover:underline">Страница произведения</Link>
+        {a.card_status === 'published' && <Link to={`/artworks/${a.artwork_id}/card`} className="text-sm text-indigo-600 hover:underline">Карточка для посетителей</Link>}</span>}
     >
       <div className="space-y-6">
         {flash && <Notice tone={flash.tone === 'warn' ? 'warn' : flash.tone}>{flash.text}</Notice>}
