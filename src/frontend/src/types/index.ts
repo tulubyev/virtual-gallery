@@ -7,6 +7,8 @@ export interface User {
   role: 'user' | 'admin' | 'curator' | 'staff' | 'tour_guide' | 'auction_participant';
   preferences?: UserPreferences;
   avatar_url?: string;
+  /** Выдан временный пароль: до его смены доступны только профиль и смена пароля */
+  must_change_password?: boolean;
 }
 
 export interface UserPreferences {

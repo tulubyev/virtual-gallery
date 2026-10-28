@@ -100,6 +100,9 @@ const CASES: Array<[string, string, Partial<Record<Who, number>>]> = [
   ['DELETE', '/api/ai/rag/documents/doc_1', { anon: 401, user: 403, staff: 403, curator: 200, admin: 200 }],
   // админка: только admin
   ['GET', '/api/admin/users', { anon: 401, user: 403, curator: 403, staff: 403, admin: 200 }],
+  ['POST', '/api/admin/users', { anon: 401, user: 403, curator: 403, staff: 403, admin: 200 }],
+  ['POST', '/api/admin/users/4/reset-password', { anon: 401, user: 403, curator: 403, staff: 403, admin: 200 }],
+  ['GET', '/api/admin/users/4/log', { anon: 401, user: 403, curator: 403, staff: 403, admin: 200 }],
   ['PUT', '/api/admin/users/4/role', { anon: 401, user: 403, curator: 403, admin: 200 }],
   ['DELETE', '/api/admin/users/4', { anon: 401, user: 403, admin: 200 }],
   ['POST', '/api/admin/clear-uploads', { anon: 401, user: 403, staff: 403, curator: 403, admin: 200 }],

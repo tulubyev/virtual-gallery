@@ -23,6 +23,11 @@ function isAuthOnlyPath(url: string): boolean {
   return AUTH_ONLY_PATHS.some(p => url.includes(p));
 }
 
+/** Сервер требует сменить временный пароль: уводим на страницу смены (один раз). */
+function redirectToPasswordChange(): void {
+  if (window.location.pathname !== '/change-password') window.location.assign('/change-password');
+}
+
 function handleSessionExpired(): void {
   if (sessionExpiredHandled) return;
   sessionExpiredHandled = true;
@@ -116,6 +121,10 @@ export async function fetchWithAuth(
     }
   }
 
+  if (response.status === 403) {
+    try { if ((await response.clone().json())?.code === 'password_change_required') redirectToPasswordChange(); } catch { /* тело не JSON */ }
+  }
+
   return response;
 }
 
@@ -184,6 +193,8 @@ api.interceptors.response.use(
         }
       }
     }
+
+    if (error.response?.status === 403 && error.response?.data?.code === 'password_change_required') redirectToPasswordChange();
 
     return Promise.reject(error);
   }

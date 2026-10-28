@@ -5,12 +5,15 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { getJwtSecret } from '../config/jwt';
+import { issuedBeforePasswordChange, queryWithFallback } from '../services/userSession';
 
 export interface SessionUser {
   user_id: number;
   role: string;
   email: string;
   username: string;
+  /** Администратор выдал временный пароль: пока он не сменён, доступны только профиль и смена пароля */
+  must_change_password?: boolean;
 }
 
 // 'public' — без входа; 'auth' — любой вошедший; массив — перечень допустимых ролей
@@ -109,6 +112,13 @@ export function defaultAccess(method: string): Access {
   return GET.includes(method.toUpperCase() as 'GET') ? 'auth' : ADMIN;
 }
 
+/** Что доступно с неснятым временным паролем: свой профиль (чтение) и смена пароля. */
+export function allowedWhileChangingPassword(method: string, path: string): boolean {
+  const p = path.length > 1 ? path.replace(/\/+$/, '') : path;
+  const m = method.toUpperCase();
+  return (m === 'GET' && p === '/auth/me') || (m === 'PUT' && p === '/auth/me/password');
+}
+
 async function authenticate(req: Request): Promise<SessionUser | { error: string }> {
   const header = req.headers['authorization'];
   const token = typeof header === 'string' ? header.split(' ')[1] : undefined;
@@ -121,11 +131,16 @@ async function authenticate(req: Request): Promise<SessionUser | { error: string
     return { error: 'Invalid or expired token' };
   }
 
-  // Роль берём из БД, а не из токена: смена роли и удаление пользователя действуют сразу
-  const result = await pool.query('SELECT user_id, email, username, role FROM users WHERE user_id = $1', [payload.userId]);
+  // Роль берём из БД, а не из токена: смена роли и удаление пользователя действуют сразу.
+  // До применения миграции 007 столбцов смены пароля нет — тогда запрос идёт без них.
+  const result = await queryWithFallback(
+    'SELECT user_id, email, username, role, must_change_password, password_changed_at FROM users WHERE user_id = $1',
+    'SELECT user_id, email, username, role FROM users WHERE user_id = $1', [payload.userId]);
   const row = result.rows[0];
   if (!row) return { error: 'User not found' };
-  return { user_id: row.user_id, email: row.email, username: row.username, role: row.role };
+  // Пароль менялся (или сброшен администратором) после выдачи токена: войти нужно заново
+  if (issuedBeforePasswordChange(payload.iat, row.password_changed_at)) return { error: 'Password was changed, sign in again' };
+  return { user_id: row.user_id, email: row.email, username: row.username, role: row.role, must_change_password: !!row.must_change_password };
 }
 
 export async function accessControl(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -137,7 +152,8 @@ export async function accessControl(req: Request, res: Response, next: NextFunct
     if (rule?.identify) {
       try {
         const session = await authenticate(req);
-        if (!('error' in session)) (req as any).user = session;
+        // С неснятым временным паролем пользователь для публичных страниц остаётся гостем
+        if (!('error' in session) && !session.must_change_password) (req as any).user = session;
       } catch (error) {
         console.error('[access] optional auth failed:', (error as Error).message);   // остаёмся гостем
       }
@@ -149,6 +165,11 @@ export async function accessControl(req: Request, res: Response, next: NextFunct
     const session = await authenticate(req);
     if ('error' in session) {
       res.status(401).json({ error: session.error });
+      return;
+    }
+
+    if (session.must_change_password && !allowedWhileChangingPassword(req.method, req.path)) {
+      res.status(403).json({ error: 'Сначала смените временный пароль', code: 'password_change_required' });
       return;
     }
 

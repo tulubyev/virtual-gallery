@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import {
   Users, Eye, Heart, TrendingUp, GalleryVerticalEnd, Image, Activity, BarChart3, Sparkles, Gavel, LayoutGrid,
 } from 'lucide-react';
 import AiModelsTable from '../components/AiModelsTable';
-import { fetchWithAuth } from '../services/api';
+import UsersPanel from '../components/admin/UsersPanel';
+import { ROLE_LABELS } from '../lib/userAdmin';
 import { useOverview, fmt, changeText, ago, DASH, type Trend } from '../lib/dashboardStats';
 
 interface StatCardProps { title: string; value: string; change: string; icon: React.ReactNode; trend: 'up' | 'down' | 'flat' }
@@ -28,13 +29,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, trend }
   </Card>
 );
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Администратор', curator: 'Куратор', staff: 'Сотрудник',
-  tour_guide: 'Гид', auction_participant: 'Участник аукциона', user: 'Посетитель',
-};
-const ROLES = Object.keys(ROLE_LABELS);
-
-interface UserRow { user_id: number; username: string; email: string; role: string; created_at: string }
 interface ArtworkRow { id: number; title: string; artist: string; style?: string | null; image_url?: string | null; status?: string | null }
 
 const Bar: React.FC<{ label: string; value: number; max: number }> = ({ label, value, max }) => (
@@ -58,39 +52,10 @@ const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { data, loading, error, reload } = useOverview();
 
-  // ── Пользователи ─────────────────────────────────────────────────────────
-  const [users, setUsers] = useState<UserRow[] | null>(null);
-  const [usersTotal, setUsersTotal] = useState(0);
-  const [userSearch, setUserSearch] = useState('');
-  const [usersError, setUsersError] = useState<string | null>(null);
-
-  const loadUsers = useCallback(async () => {
-    try {
-      const res = await fetchWithAuth(`/api/admin/users?limit=50${userSearch ? `&search=${encodeURIComponent(userSearch)}` : ''}`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const j = await res.json();
-      setUsers(j.users); setUsersTotal(j.total); setUsersError(null);
-    } catch (e) { setUsersError(e instanceof Error ? e.message : 'Ошибка'); }
-  }, [userSearch]);
-
-  const changeRole = async (u: UserRow, role: string) => {
-    if (role === u.role) return;
-    if (!window.confirm(`Сменить роль «${u.username}» на «${ROLE_LABELS[role] ?? role}»?`)) return;
-    const res = await fetchWithAuth(`/api/admin/users/${u.user_id}/role`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }),
-    });
-    if (res.ok) { setUsers(list => list && list.map(x => x.user_id === u.user_id ? { ...x, role } : x)); reload(); }
-    else setUsersError('Не удалось сменить роль');
-  };
-
   // ── Экспонаты ────────────────────────────────────────────────────────────
   const [artworks, setArtworks] = useState<ArtworkRow[] | null>(null);
   const [artworksTotal, setArtworksTotal] = useState(0);
   const [artworksError, setArtworksError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (activeTab === 'users') loadUsers();
-  }, [activeTab, loadUsers]);
 
   useEffect(() => {
     if (activeTab !== 'artworks' || artworks) return;
@@ -206,45 +171,7 @@ const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'users' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Пользователи</CardTitle>
-            <CardDescription>Всего: {fmt(usersTotal || data?.users?.total)}. Роль можно сменить прямо в таблице.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="flex gap-2 mb-4" onSubmit={e => { e.preventDefault(); loadUsers(); }}>
-              <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Имя или e-mail"
-                className="flex-1 px-3 py-2 border rounded-lg bg-background text-sm" />
-              <Button type="submit" variant="outline">Найти</Button>
-            </form>
-            {usersError && <p className="text-sm text-red-600 mb-3">{usersError}</p>}
-            <div className="border rounded-lg overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b">
-                  <tr><th className="text-left p-3">Пользователь</th><th className="text-left p-3">Роль</th><th className="text-left p-3">Регистрация</th></tr>
-                </thead>
-                <tbody>
-                  {(users ?? []).map(u => (
-                    <tr key={u.user_id} className="border-b hover:bg-muted/50">
-                      <td className="p-3"><p className="font-medium">{u.username}</p><p className="text-xs text-muted-foreground">{u.email}</p></td>
-                      <td className="p-3">
-                        <select value={u.role} onChange={e => changeRole(u, e.target.value)} className="border rounded-md bg-background px-2 py-1 text-sm">
-                          {ROLES.includes(u.role) ? null : <option value={u.role}>{u.role}</option>}
-                          {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
-                        </select>
-                      </td>
-                      <td className="p-3">{u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : DASH}</td>
-                    </tr>
-                  ))}
-                  {users && users.length === 0 && <tr><td colSpan={3} className="p-4 text-muted-foreground">Никого не найдено</td></tr>}
-                  {!users && !usersError && <tr><td colSpan={3} className="p-4 text-muted-foreground">Загрузка…</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {activeTab === 'users' && <UsersPanel total={data?.users?.total ?? undefined} onChanged={reload} />}
 
       {activeTab === 'artworks' && (
         <Card>

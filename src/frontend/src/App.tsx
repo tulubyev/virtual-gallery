@@ -1,6 +1,6 @@
 // src/frontend/src/App.tsx
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { tryRefreshToken } from './services/api';
 
 // Страницы — динамический импорт для code splitting
@@ -35,6 +35,7 @@ const TorgiAuctionPage = lazy(() => import('./pages/TorgiAuctionPage'));
 const TorgiLotPage = lazy(() => import('./pages/TorgiLotPage'));
 const TorgiAdminPage = lazy(() => import('./pages/TorgiAdminPage'));
 const CardsAdminPage = lazy(() => import('./pages/CardsAdminPage'));
+const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
@@ -84,6 +85,12 @@ const PageLoader: React.FC = () => (
     <div className="text-muted-foreground text-sm animate-pulse">Loading…</div>
   </div>
 );
+
+/** Пока не сменён временный пароль, всё, кроме страницы смены пароля, недоступно. */
+const RequirePasswordChange: React.FC<{ active: boolean }> = ({ active }) => {
+  const { pathname } = useLocation();
+  return active && pathname !== '/change-password' ? <Navigate to="/change-password" replace /> : null;
+};
 
 const App: React.FC = () => {
   // Seed optimistic user state from localStorage so the UI is instant on reload
@@ -170,6 +177,7 @@ const App: React.FC = () => {
           email: raw.email,
           role: raw.role,
           avatar_url: raw.avatar_url || undefined,
+          must_change_password: !!raw.must_change_password,
         };
         setCurrentUser(verified);
         localStorage.setItem('currentUser', JSON.stringify(verified));
@@ -194,6 +202,7 @@ const App: React.FC = () => {
               email: raw.email,
               role: raw.role,
               avatar_url: raw.avatar_url || undefined,
+              must_change_password: !!raw.must_change_password,
             };
             setCurrentUser(restored);
             localStorage.setItem('currentUser', JSON.stringify(restored));
@@ -246,6 +255,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-background">
+        <RequirePasswordChange active={!!currentUser?.must_change_password} />
         <Header currentUser={currentUser} onLogout={logout} />
 
         <div className="flex flex-1">
@@ -275,6 +285,10 @@ const App: React.FC = () => {
                 <Route path="/auction" element={<AuctionPage />} />
                 <Route path="/torgi" element={<TorgiListPage />} />
                 <Route path="/torgi/admin" element={guard(['curator', 'admin'], <TorgiAdminPage />)} />
+                <Route path="/change-password" element={currentUser
+                  ? <ChangePasswordPage currentUser={currentUser} onLogout={logout}
+                      onDone={() => login({ ...currentUser, must_change_password: false })} />
+                  : <Navigate to="/login" />} />
                 <Route path="/cards" element={guard(['staff', 'curator', 'admin'], <CardsAdminPage role={currentUser?.role ?? ''} />)} />
                 <Route path="/cards/:id" element={guard(['staff', 'curator', 'admin'], <CardsAdminPage role={currentUser?.role ?? ''} />)} />
                 <Route path="/torgi/lot/:id" element={<TorgiLotPage />} />
