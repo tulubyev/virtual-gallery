@@ -36,6 +36,7 @@ const TorgiLotPage = lazy(() => import('./pages/TorgiLotPage'));
 const TorgiAdminPage = lazy(() => import('./pages/TorgiAdminPage'));
 const CardsAdminPage = lazy(() => import('./pages/CardsAdminPage'));
 const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
+const ArtworkCardPage = lazy(() => import('./pages/ArtworkCardPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
@@ -267,6 +268,7 @@ const App: React.FC = () => {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/artworks" element={<ArtworksPage />} />
                 <Route path="/artworks/:id" element={<ArtworkDetailPage />} />
+                <Route path="/artworks/:id/card" element={<ArtworkCardPage />} />
                 <Route path="/vr-gallery" element={<VrGalleryPage />} />
                 <Route path="/tours" element={<ToursPage />} />
                 <Route path="/collections" element={<CollectionsPage />} />

@@ -2,7 +2,7 @@ jest.mock('../../frontend/src/services/api', () => ({ fetchWithAuth: jest.fn() }
 import { fetchWithAuth } from '../../frontend/src/services/api';
 import {
   CardApiError, Fragment, changeStatus, emptySourceForm, errorText, getCard, groupFragments, hiddenFromVisitors, passportChanges, passportToForm,
-  sourceFromForm, sourceLine, transitionLabel,
+  sourceFromForm, sourceLine, transitionLabel, draftSummary, generateDraft, translateCard, translateSummary,
 } from '../../frontend/src/lib/artworkCards';
 
 const mockFetch = fetchWithAuth as jest.Mock;
@@ -106,5 +106,43 @@ describe('подготовка данных', () => {
     expect(transitionLabel('approved', 'published')).toBe('Опубликовать');
     expect(transitionLabel('published', 'needs_review')).toBe('Снять с публикации (на проверку)');
     expect(transitionLabel('archived', 'draft')).toBe('Вернуть из архива');
+  });
+});
+
+describe('помощник: черновик и перевод', () => {
+  const draft = (over: object = {}) => ({ outcome: 'drafted', added: [frag(), frag({ fragment_id: 2 })], skipped_duplicates: 0, rejected: [], missing: [], warnings: [], sources_considered: 3, model: 'm', ...over }) as any;
+
+  it('запросы идут на нужные адреса; список документов передаётся только если он есть', async () => {
+    reply(200, draft());
+    await generateDraft(5);
+    expect(mockFetch).toHaveBeenLastCalledWith('/api/artwork-cards/5/generate', expect.objectContaining({ method: 'POST', body: '{}' }));
+    reply(200, draft());
+    await generateDraft(5, ['d1', 'd2']);
+    expect(JSON.parse(mockFetch.mock.calls[1][1].body)).toEqual({ document_ids: ['d1', 'd2'] });
+    reply(200, { added: [], rejected: [], nothing_to_translate: true, model: null });
+    await translateCard(5);
+    expect(mockFetch).toHaveBeenLastCalledWith('/api/artwork-cards/5/translate', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('недоступность ИИ и конфликт показываются сообщением сервера', async () => {
+    reply(503, { error: 'Сервис ИИ недоступен' });
+    await expect(generateDraft(5)).rejects.toThrow('Сервис ИИ недоступен');
+    reply(409, { error: 'Для этого произведения уже идёт генерация или перевод' });
+    await expect(translateCard(5)).rejects.toThrow(/уже идёт/);
+  });
+
+  it('итог генерации: добавлено, отклонено, повторы; отказ без выдумок', () => {
+    expect(draftSummary(draft())).toBe('Добавлено 2 фрагмента из документов — все ждут проверки куратора.');
+    expect(draftSummary(draft({ added: [frag()], rejected: [{ reasons: ['x'] }], skipped_duplicates: 3 })))
+      .toBe('Добавлено 1 фрагмент из документов — все ждут проверки куратора; отклонено при проверке: 1; уже были в карточке: 3.');
+    expect(draftSummary(draft({ outcome: 'no_sources', added: [] }))).toMatch(/не нашлось/);
+    expect(draftSummary(draft({ outcome: 'insufficient_evidence', added: [], rejected: [{ reasons: ['x'] }] }))).toMatch(/Ни один фрагмент не прошёл проверку цитат \(отклонено: 1\)/);
+  });
+
+  it('итог перевода', () => {
+    expect(translateSummary({ added: [], rejected: [], nothing_to_translate: true, model: null })).toMatch(/Переводить нечего/);
+    expect(translateSummary({ added: [frag()], rejected: [{ fragment_id: 2, reasons: ['x'] }], nothing_to_translate: false, model: 'm' }))
+      .toBe('Переведено 1 фрагмент — переводы ждут утверждения; отклонено при проверке: 1.');
+    expect(translateSummary({ added: [], rejected: [{ fragment_id: 2, reasons: ['x'] }], nothing_to_translate: false, model: 'm' })).toMatch(/Ни один перевод/);
   });
 });

@@ -3,12 +3,14 @@
 // утверждение фрагментов и удаление — куратору и администратору. Переходы по жизненному циклу дополнительно проверяют роль в сервисе.
 import express, { Request, Response } from 'express';
 import * as card from '../services/artworkCard';
+import * as generation from '../services/artworkCardGeneration';
 import {
   CARD_STATUSES, CardStatus, parseFragmentInput, parsePassportInput, FragmentInput,
 } from '../services/artworkCardRules';
 import { intInRange, parseId } from '../services/biddingInput';
 
 const router = express.Router();
+const DOCUMENT_ID = /^[A-Za-z0-9_.-]{1,100}$/;
 
 const userOf = (req: Request) => (req as any).user as card.Actor;
 const fail = (res: Response, status: number, error: string, extra: object = {}) => res.status(status).json({ error, ...extra });
@@ -51,6 +53,26 @@ router.get('/', async (req, res) => {
     });
     res.json({ cards });
   } catch (e) { serverError(res, 'list', e); }
+});
+
+// ── Генерация по документам и перевод (сотрудники) ─────────────────────────────────────────────────
+
+/** Черновик по документам базы знаний: фрагменты с проверенными цитатами, неутверждённые. Тело: { document_ids?: string[] } */
+router.post('/:id/generate', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return fail(res, 404, 'Произведение не найдено');
+  const ids = req.body?.document_ids;
+  if (ids !== undefined && ids !== null && (!Array.isArray(ids) || ids.length > 50 || ids.some((d: unknown) => typeof d !== 'string' || !DOCUMENT_ID.test(d)))) {
+    return fail(res, 400, 'document_ids: до 50 идентификаторов документов');
+  }
+  try { send(res, await generation.generateDraft(id, userOf(req), ids ?? null)); } catch (e) { serverError(res, 'generate', e); }
+});
+
+/** Перевод утверждённых русских фрагментов на английский: переводы создаются неутверждёнными. */
+router.post('/:id/translate', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (!id) return fail(res, 404, 'Произведение не найдено');
+  try { send(res, await generation.translateApproved(id, userOf(req))); } catch (e) { serverError(res, 'translate', e); }
 });
 
 router.get('/:id', async (req, res) => {

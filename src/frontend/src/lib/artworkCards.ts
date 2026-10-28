@@ -36,6 +36,13 @@ export interface QueueItem {
   fragments: number; pending: number; ai_inferred: number;
 }
 
+export interface Rejected { block?: string; text?: string; reasons: string[] }
+export interface DraftResult {
+  outcome: 'drafted' | 'no_sources' | 'insufficient_evidence' | string; added: Fragment[]; skipped_duplicates: number; rejected: Rejected[];
+  missing: Block[]; warnings: string[]; sources_considered: number; model: string | null;
+}
+export interface TranslateResult { added: Fragment[]; rejected: Array<{ fragment_id: number; reasons: string[] }>; nothing_to_translate: boolean; model: string | null }
+
 /** Ошибка API карточек: сообщение для человека плюс подробности (проблемы готовности, найденные суждения). */
 export class CardApiError extends Error {
   constructor(message: string, readonly status: number, readonly problems: Problem[] = [], readonly violations: Violation[] = []) { super(message); }
@@ -48,6 +55,7 @@ async function call<T>(path: string, method = 'GET', body?: unknown): Promise<T>
     let data: any = null;
     try { data = await res.json(); } catch { /* тела нет */ }
     const message = res.status === 401 ? 'Войдите в аккаунт.' : res.status === 403 ? (data?.error || 'Недостаточно прав.')
+      : (res.status === 502 || res.status === 503) ? (data?.error || 'Сервис ИИ недоступен.')       // тексты Express о сервисе ИИ безопасны и нужны человеку
       : res.status >= 500 ? 'Не удалось выполнить действие.' : (data?.error || 'Не удалось выполнить действие.');
     throw new CardApiError(message, res.status, data?.problems ?? [], data?.violations ?? []);
   }
@@ -61,6 +69,9 @@ export const createFragment = (id: number, fragment: object) => call<{ fragment:
 export const updateFragment = (id: number, fid: number, patch: object) => call<{ fragment: Fragment }>(`/${id}/fragments/${fid}`, 'PATCH', patch);
 export const deleteFragment = (id: number, fid: number) => call<{}>(`/${id}/fragments/${fid}`, 'DELETE');
 export const approveFragment = (id: number, fid: number) => call<{ fragment: Fragment; warnings: string[] }>(`/${id}/fragments/${fid}/approve`, 'POST', {});
+export const generateDraft = (id: number, documentIds?: string[]) =>
+  call<DraftResult>(`/${id}/generate`, 'POST', documentIds && documentIds.length ? { document_ids: documentIds } : {});
+export const translateCard = (id: number) => call<TranslateResult>(`/${id}/translate`, 'POST', {});
 export const changeStatus = (id: number, to: CardStatus, approveFragments = false) =>
   call<{ artwork: CardArtwork; warnings: string[] }>(`/${id}/status`, 'POST', { to, approve_fragments: approveFragments });
 
@@ -176,4 +187,28 @@ export function errorText(e: unknown): string {
     return `${e.message}: ${e.violations.map(v => `«${v.match}»`).join(', ')}. Уберите такие формулировки: помощник не высказывается о подлинности и цене.`;
   }
   return e instanceof Error ? e.message : 'Не удалось выполнить действие.';
+}
+
+// ── Итоги работы помощника ─────────────────────────────────────────────────────────────────────
+
+const plural = (n: number, one: string, few: string, many: string) =>
+  `${n} ${n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? few : many}`;
+
+/** Одна фраза об итоге генерации: что добавлено, что отклонено и почему важно проверить. */
+export function draftSummary(r: DraftResult): string {
+  if (r.outcome === 'no_sources') return 'В документах не нашлось мест, относящихся к этому произведению. Ничего не добавлено.';
+  if (r.added.length === 0) {
+    return `Ни один фрагмент не прошёл проверку цитат${r.rejected.length ? ` (отклонено: ${r.rejected.length})` : ''}. Ничего не добавлено.`;
+  }
+  const parts = [`Добавлено ${plural(r.added.length, 'фрагмент', 'фрагмента', 'фрагментов')} из документов — все ждут проверки куратора`];
+  if (r.rejected.length) parts.push(`отклонено при проверке: ${r.rejected.length}`);
+  if (r.skipped_duplicates) parts.push(`уже были в карточке: ${r.skipped_duplicates}`);
+  return `${parts.join('; ')}.`;
+}
+
+export function translateSummary(r: TranslateResult): string {
+  if (r.nothing_to_translate) return 'Переводить нечего: утверждённых русских фрагментов без перевода нет (внутренние документы не переводятся).';
+  const parts = [r.added.length ? `Переведено ${plural(r.added.length, 'фрагмент', 'фрагмента', 'фрагментов')} — переводы ждут утверждения` : 'Ни один перевод не прошёл проверку'];
+  if (r.rejected.length) parts.push(`отклонено при проверке: ${r.rejected.length}`);
+  return `${parts.join('; ')}.`;
 }
